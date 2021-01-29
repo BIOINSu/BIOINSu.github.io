@@ -3,7 +3,7 @@
   <entry>
     <title>TriNAS 论文阅读</title>
     <url>/2021/01/29/TriNAS/</url>
-    <content><![CDATA[<h2 id="trinas-论文阅读">TriNAS 论文阅读</h2>
+    <content><![CDATA[<p>《Trilevel Neural Architecture Search for Efficient Single Image Super-Resolution》</p>
 <h3 id="背景">背景</h3>
 <p>传统的基于深度学习的超分辨率方法通常会在三层神经结构设计上选择以下变化：网络级优化、单元（cell）级优化以及内核（kernel）级优化。为一个深层SR模型人工执行这些优化需要较高的代价。并且，人工设计的架构往往不是最优的，对于真实超分辨率来说，可能在计算上效率低下。因此，论文提出了一种用于高效单图像超分辨率（SR）的三级神经架构搜索（TriNAS）方法。</p>
 <a id="more"></a>
@@ -64,36 +64,9 @@
       </tags>
   </entry>
   <entry>
-    <title>Hello World</title>
-    <url>/2021/01/28/hello-world/</url>
-    <content><![CDATA[<p>Welcome to <a href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
-<a id="more"></a>
-<h2 id="quick-start">Quick Start</h2>
-<h3 id="create-a-new-post">Create a new post</h3>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/writing.html">Writing</a></p>
-<h3 id="run-server">Run server</h3>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/server.html">Server</a></p>
-<h3 id="generate-static-files">Generate static files</h3>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/generating.html">Generating</a></p>
-<figure>
-<img src="/2021/01/28/hello-world/0.png" alt="hello"><figcaption aria-hidden="true">hello</figcaption>
-</figure>
-<h3 id="deploy-to-remote-sites">Deploy to remote sites</h3>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
-]]></content>
-      <tags>
-        <tag>Testing</tag>
-        <tag>Another Tag</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>BasicVSR 论文阅读</title>
     <url>/2021/01/28/basicvsr/</url>
-    <content><![CDATA[<h2 id="basicvsr-论文阅读">BasicVSR 论文阅读</h2>
+    <content><![CDATA[<p>《BasicVSR：The Search for Essential Components in Video Super-Resolution and Beyond》</p>
 <h3 id="背景">背景</h3>
 <p>相比图像超分任务，视频超分网络会设计更多模块，因为它多了一个时空维度。因此复杂的设计结构在视频超分网络中是常见的。本文重新分析了视频超分网络中的四大模块（对齐、聚合、传播和上采样）的作用，以及它们的优缺点。提出了一个视频超分框架baseline，即BasicVSR，并在Reds和Vimeo数据集上训练，验证了该框架的有效性。</p>
 <p>另外，本文扩展BasicVSR框架，设计了信息重新填充机制和成对传播策略，促进信息聚合，即IconVSR网络。</p>
@@ -160,6 +133,33 @@
       </categories>
       <tags>
         <tag>VSR</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Hello World</title>
+    <url>/2021/01/28/hello-world/</url>
+    <content><![CDATA[<p>Welcome to <a href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
+<a id="more"></a>
+<h2 id="quick-start">Quick Start</h2>
+<h3 id="create-a-new-post">Create a new post</h3>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/writing.html">Writing</a></p>
+<h3 id="run-server">Run server</h3>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/server.html">Server</a></p>
+<h3 id="generate-static-files">Generate static files</h3>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/generating.html">Generating</a></p>
+<figure>
+<img src="/2021/01/28/hello-world/0.png" alt="hello"><figcaption aria-hidden="true">hello</figcaption>
+</figure>
+<h3 id="deploy-to-remote-sites">Deploy to remote sites</h3>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
+]]></content>
+      <tags>
+        <tag>Testing</tag>
+        <tag>Another Tag</tag>
       </tags>
   </entry>
 </search>
