@@ -23,12 +23,12 @@
     var NexT = window.NexT || {};
     var CONFIG = {"hostname":"example.com","root":"/","images":"/images","scheme":"Mist","version":"8.2.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":5,"unescape":false,"preload":false}};
   </script>
-<meta name="description" content="BasicVSR 论文阅读背景相比图像超分任务，视频超分网络会设计更多模块，因为它多了一个时空维度。因此复杂的设计结构在视频超分网络中是常见的。本文重新分析了视频超分网络中的四大模块（对齐、聚合、传播和上采样）的作用，以及它们的优缺点。提出了一个视频超分框架baseline，即BasicVSR，并在Reds和Vimeo数据集上训练，验证了该框架的有效性。 另外，本文扩展BasicVSR框架，设计了">
+<meta name="description" content="BasicVSR 论文阅读 背景 相比图像超分任务，视频超分网络会设计更多模块，因为它多了一个时空维度。因此复杂的设计结构在视频超分网络中是常见的。本文重新分析了视频超分网络中的四大模块（对齐、聚合、传播和上采样）的作用，以及它们的优缺点。提出了一个视频超分框架baseline，即BasicVSR，并在Reds和Vimeo数据集上训练，验证了该框架的有效性。 另外，本文扩展BasicVSR框">
 <meta property="og:type" content="article">
 <meta property="og:title" content="BasicVSR 论文阅读">
 <meta property="og:url" content="http://example.com/2021/01/28/basicvsr/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="BasicVSR 论文阅读背景相比图像超分任务，视频超分网络会设计更多模块，因为它多了一个时空维度。因此复杂的设计结构在视频超分网络中是常见的。本文重新分析了视频超分网络中的四大模块（对齐、聚合、传播和上采样）的作用，以及它们的优缺点。提出了一个视频超分框架baseline，即BasicVSR，并在Reds和Vimeo数据集上训练，验证了该框架的有效性。 另外，本文扩展BasicVSR框架，设计了">
+<meta property="og:description" content="BasicVSR 论文阅读 背景 相比图像超分任务，视频超分网络会设计更多模块，因为它多了一个时空维度。因此复杂的设计结构在视频超分网络中是常见的。本文重新分析了视频超分网络中的四大模块（对齐、聚合、传播和上采样）的作用，以及它们的优缺点。提出了一个视频超分框架baseline，即BasicVSR，并在Reds和Vimeo数据集上训练，验证了该框架的有效性。 另外，本文扩展BasicVSR框">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://example.com/2021/01/28/basicvsr/0.png">
 <meta property="og:image" content="http://example.com/2021/01/28/basicvsr/1.png">
@@ -197,7 +197,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#BasicVSR-%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB"><span class="nav-number">1.</span> <span class="nav-text">BasicVSR 论文阅读</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">1.1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B9%E6%B3%95"><span class="nav-number">1.2.</span> <span class="nav-text">方法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BC%A0%E6%92%AD%E6%A8%A1%E5%9D%97"><span class="nav-number">1.2.1.</span> <span class="nav-text">传播模块</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AF%B9%E9%BD%90%E6%A8%A1%E5%9D%97"><span class="nav-number">1.2.2.</span> <span class="nav-text">对齐模块</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%81%9A%E5%90%88%E4%B8%8E%E4%B8%8A%E9%87%87%E6%A0%B7"><span class="nav-number">1.2.3.</span> <span class="nav-text">聚合与上采样</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#BasicVSR"><span class="nav-number">1.2.4.</span> <span class="nav-text">BasicVSR</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#IconVSR"><span class="nav-number">1.2.5.</span> <span class="nav-text">IconVSR</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C%E7%BB%93%E6%9E%9C"><span class="nav-number">1.3.</span> <span class="nav-text">实验结果</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%8ESOTA%E8%BF%9B%E8%A1%8C%E5%AF%B9%E6%AF%94"><span class="nav-number">1.3.1.</span> <span class="nav-text">与SOTA进行对比</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BF%A1%E6%81%AF%E9%87%8D%E6%96%B0%E5%A1%AB%E5%85%85%E6%9C%BA%E5%88%B6%E5%92%8C%E6%88%90%E5%AF%B9%E4%BC%A0%E6%92%AD%E7%AD%96%E7%95%A5%E6%B6%88%E8%9E%8D%E5%AE%9E%E9%AA%8C"><span class="nav-number">1.3.2.</span> <span class="nav-text">信息重新填充机制和成对传播策略消融实验</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BF%A1%E6%81%AF%E9%87%8D%E6%96%B0%E5%A1%AB%E5%85%85%E6%9C%BA%E5%88%B6%E4%B8%AD%E7%9A%84%E5%85%B3%E9%94%AE%E5%B8%A7%E6%95%B0%E9%87%8F"><span class="nav-number">1.3.3.</span> <span class="nav-text">信息重新填充机制中的关键帧数量</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">1.4.</span> <span class="nav-text">总结</span></a></li></ol></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#basicvsr-%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB"><span class="nav-number">1.</span> <span class="nav-text">BasicVSR 论文阅读</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">1.1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B9%E6%B3%95"><span class="nav-number">1.2.</span> <span class="nav-text">方法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BC%A0%E6%92%AD%E6%A8%A1%E5%9D%97"><span class="nav-number">1.2.1.</span> <span class="nav-text">传播模块</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AF%B9%E9%BD%90%E6%A8%A1%E5%9D%97"><span class="nav-number">1.2.2.</span> <span class="nav-text">对齐模块</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%81%9A%E5%90%88%E4%B8%8E%E4%B8%8A%E9%87%87%E6%A0%B7"><span class="nav-number">1.2.3.</span> <span class="nav-text">聚合与上采样</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#basicvsr"><span class="nav-number">1.2.4.</span> <span class="nav-text">BasicVSR</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#iconvsr"><span class="nav-number">1.2.5.</span> <span class="nav-text">IconVSR</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C%E7%BB%93%E6%9E%9C"><span class="nav-number">1.3.</span> <span class="nav-text">实验结果</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%8Esota%E8%BF%9B%E8%A1%8C%E5%AF%B9%E6%AF%94"><span class="nav-number">1.3.1.</span> <span class="nav-text">与SOTA进行对比</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BF%A1%E6%81%AF%E9%87%8D%E6%96%B0%E5%A1%AB%E5%85%85%E6%9C%BA%E5%88%B6%E5%92%8C%E6%88%90%E5%AF%B9%E4%BC%A0%E6%92%AD%E7%AD%96%E7%95%A5%E6%B6%88%E8%9E%8D%E5%AE%9E%E9%AA%8C"><span class="nav-number">1.3.2.</span> <span class="nav-text">信息重新填充机制和成对传播策略消融实验</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BF%A1%E6%81%AF%E9%87%8D%E6%96%B0%E5%A1%AB%E5%85%85%E6%9C%BA%E5%88%B6%E4%B8%AD%E7%9A%84%E5%85%B3%E9%94%AE%E5%B8%A7%E6%95%B0%E9%87%8F"><span class="nav-number">1.3.3.</span> <span class="nav-text">信息重新填充机制中的关键帧数量</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">1.4.</span> <span class="nav-text">总结</span></a></li></ol></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -211,20 +211,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">2</span>
+          <span class="site-state-item-count">3</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-count">3</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-count">5</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -319,70 +319,65 @@
     
     
     <div class="post-body" itemprop="articleBody">
-        <h2 id="BasicVSR-论文阅读"><a href="#BasicVSR-论文阅读" class="headerlink" title="BasicVSR 论文阅读"></a>BasicVSR 论文阅读</h2><h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h3><p>相比图像超分任务，视频超分网络会设计更多模块，因为它多了一个时空维度。因此复杂的设计结构在视频超分网络中是常见的。本文重新分析了视频超分网络中的四大模块（对齐、聚合、传播和上采样）的作用，以及它们的优缺点。提出了一个视频超分框架baseline，即BasicVSR，并在Reds和Vimeo数据集上训练，验证了该框架的有效性。</p>
+        <h2 id="basicvsr-论文阅读">BasicVSR 论文阅读</h2>
+<h3 id="背景">背景</h3>
+<p>相比图像超分任务，视频超分网络会设计更多模块，因为它多了一个时空维度。因此复杂的设计结构在视频超分网络中是常见的。本文重新分析了视频超分网络中的四大模块（对齐、聚合、传播和上采样）的作用，以及它们的优缺点。提出了一个视频超分框架baseline，即BasicVSR，并在Reds和Vimeo数据集上训练，验证了该框架的有效性。</p>
 <p>另外，本文扩展BasicVSR框架，设计了信息重新填充机制和成对传播策略，促进信息聚合，即IconVSR网络。</p>
 <a id="more"></a>
-
-<h3 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h3><p>该部分首先分析了视频超分网络中四大模块中不同选择的作用，并在每个模块中选择最好的组件构成BasicVSR网络，该网络可以作为设计其他视频超分网络的骨架backbone。然后，作者在backbone的基础上引入了两种新的组件信息重新填充机制和成对传播策略，略微提升了参数量和运行时间，并提高了网络性能。</p>
-<h4 id="传播模块"><a href="#传播模块" class="headerlink" title="传播模块"></a>传播模块</h4><p>本质上，传播模块定义了各个输入帧究竟是如何在网络中进行传播的，当前各个帧的传播方式主要有如下几种：</p>
+<h3 id="方法">方法</h3>
+<p>该部分首先分析了视频超分网络中四大模块中不同选择的作用，并在每个模块中选择最好的组件构成BasicVSR网络，该网络可以作为设计其他视频超分网络的骨架backbone。然后，作者在backbone的基础上引入了两种新的组件信息重新填充机制和成对传播策略，略微提升了参数量和运行时间，并提高了网络性能。</p>
+<h4 id="传播模块">传播模块</h4>
+<p>本质上，传播模块定义了各个输入帧究竟是如何在网络中进行传播的，当前各个帧的传播方式主要有如下几种：</p>
 <ul>
 <li><p>Local</p>
 <p>局部传播使用一个滑动窗口中的LR图像作为输入，然后利用这些局部信息完成重建任务。这是最常见的方式，也是TDAN、EDVR等方法的输入方式，例如一次性输入相邻的7帧，并选择重建第4帧，其他的作为参考帧。因此，网络能够访问的信息限制在这些局部相邻帧中。缺少远距离帧不可避免地限制了网络的表达能力。</p>
-<img src="/2021/01/28/basicvsr/0.png" style="zoom:67%;">
-
+<p><img src="/2021/01/28/basicvsr/0.png" style="zoom:67%;"></p>
 <p>如图所示，作者将测试集分成K个segments在BasicVSR网络中进行测试，可以看到当每个segments内的帧数越多的时候，其恢复的PSNR值越低，说明了帧的数量对网络有影响。</p>
-<p>对于非recurrent形式的网络，滑动窗口内的帧数越多则会导致网络的参数量和占用显存都会大规模增加，这是一个主要的缺陷。</p>
-</li>
+<p>对于非recurrent形式的网络，滑动窗口内的帧数越多则会导致网络的参数量和占用显存都会大规模增加，这是一个主要的缺陷。</p></li>
 <li><p>Unidirectional Propagation</p>
 <p>单向传播形式，即如RLSP、RSDN等普通recurrent网络的形式，每次输入一帧和相邻帧，并利用重建的相邻帧及其中间产物来完成当前参考帧的重建过程。</p>
-<img src="/2021/01/28/basicvsr/1.png" style="zoom:67%;">
-
-<p>然而，单向传播的方式会涉及到隐状态，即前一帧的中间产物的处理问题。本质上隐状态代表了前一帧或前n帧的特征，因此当输入的帧数越靠前时，隐状态含有的信息越少，对参考帧的重建效果越差，如上图所示。</p>
-</li>
+<p><img src="/2021/01/28/basicvsr/1.png" style="zoom:67%;"></p>
+<p>然而，单向传播的方式会涉及到隐状态，即前一帧的中间产物的处理问题。本质上隐状态代表了前一帧或前n帧的特征，因此当输入的帧数越靠前时，隐状态含有的信息越少，对参考帧的重建效果越差，如上图所示。</p></li>
 <li><p>Bidirectional Propagation</p>
-<p>双向传播形式解决上述两种问题，本质上就是网络同时利用前一帧和后一帧的隐状态，来完成当前参考帧的重建。前一帧的隐状态包含当前参考帧之前的所有信息，后一帧的隐状态包含当前参考帧之后的所有信息，这相当于可以利用前后所有帧的信息。</p>
-</li>
+<p>双向传播形式解决上述两种问题，本质上就是网络同时利用前一帧和后一帧的隐状态，来完成当前参考帧的重建。前一帧的隐状态包含当前参考帧之前的所有信息，后一帧的隐状态包含当前参考帧之后的所有信息，这相当于可以利用前后所有帧的信息。</p></li>
 </ul>
-<h4 id="对齐模块"><a href="#对齐模块" class="headerlink" title="对齐模块"></a>对齐模块</h4><ul>
+<h4 id="对齐模块">对齐模块</h4>
+<ul>
 <li><p>无对齐</p>
-<p>不对齐的特征或图像会影响聚合的效果，并最终导致性能降低。直接串联不对齐的特征以进行恢复，相邻帧的特征将不会与输入图像的特征在空间上对齐。由于卷积之类的局部操作具有相对较小的感受野，在相应位置集合信息时无法有效地利用相邻帧的信息，此时会导致较低的效率。</p>
-</li>
+<p>不对齐的特征或图像会影响聚合的效果，并最终导致性能降低。直接串联不对齐的特征以进行恢复，相邻帧的特征将不会与输入图像的特征在空间上对齐。由于卷积之类的局部操作具有相对较小的感受野，在相应位置集合信息时无法有效地利用相邻帧的信息，此时会导致较低的效率。</p></li>
 <li><p>基于图像的对齐</p>
-<p>基于图像的对齐使用光流估计相邻帧到参考帧的光流变化，然后利用光流的信息将相邻帧变形对齐到参考帧上。该过程是直接在图像上进行的，而非特征图上进行的。并且大部分的工作通常需要利用其他预训练的光流估计网络。</p>
-</li>
+<p>基于图像的对齐使用光流估计相邻帧到参考帧的光流变化，然后利用光流的信息将相邻帧变形对齐到参考帧上。该过程是直接在图像上进行的，而非特征图上进行的。并且大部分的工作通常需要利用其他预训练的光流估计网络。</p></li>
 <li><p>基于特征的对齐</p>
-<p>基于特征的对齐最流行的方法是使用可变形卷积。然而本文使用的方式是基于光流的特征对齐，即先估计光流，然后根据光流将中间结果，即隐状态进行对齐，然后将对齐过后的特征和当前参考帧一起输入残差块进行重建。</p>
-</li>
+<p>基于特征的对齐最流行的方法是使用可变形卷积。然而本文使用的方式是基于光流的特征对齐，即先估计光流，然后根据光流将中间结果，即隐状态进行对齐，然后将对齐过后的特征和当前参考帧一起输入残差块进行重建。</p></li>
 </ul>
-<h4 id="聚合与上采样"><a href="#聚合与上采样" class="headerlink" title="聚合与上采样"></a>聚合与上采样</h4><p>文章对聚合方式没有进行过多探讨，只采用最基础的聚合方式，即拼接特征图并输入多个卷积作为聚合模块。</p>
+<h4 id="聚合与上采样">聚合与上采样</h4>
+<p>文章对聚合方式没有进行过多探讨，只采用最基础的聚合方式，即拼接特征图并输入多个卷积作为聚合模块。</p>
 <p>上采样模块采用最经典有效的方式Pixel-shuffle。</p>
-<h4 id="BasicVSR"><a href="#BasicVSR" class="headerlink" title="BasicVSR"></a>BasicVSR</h4><img src="/2021/01/28/basicvsr/2.png" style="zoom: 50%;">
-
+<h4 id="basicvsr">BasicVSR</h4>
+<p><img src="/2021/01/28/basicvsr/2.png" style="zoom: 50%;"></p>
 <p>本文提出的Backbone即BasicVSR，采用了上述探讨的最基础的几个模块。对齐模块采用基于光流的特征对齐，对齐的对象是隐状态和光流图。传播模块采用的是双向传播模式，当前参考帧需要利用前后一帧的隐状态。聚合模块是直接拼接，上采样模块则为Pixel-shuffle。</p>
-<h4 id="IconVSR"><a href="#IconVSR" class="headerlink" title="IconVSR"></a>IconVSR</h4><p>在BasicVSR的基础上引入了两种新的组件信息重新填充机制和成对传播策略来提升网络的性能。</p>
+<h4 id="iconvsr">IconVSR</h4>
+<p>在BasicVSR的基础上引入了两种新的组件信息重新填充机制和成对传播策略来提升网络的性能。</p>
 <ul>
 <li><p>Information-Refill</p>
 <p>信息重新填充机制是为了解决在图像边界和有遮挡区域的不精确对齐的问题。不精确对齐会导致误差的不断积加，特别是在网络中采用长距离传播的时候。为了解决特征不精确对齐带来的不利影响，本文提出了一个信息重新填充机制，以做特征修正。</p>
-<img src="/2021/01/28/basicvsr/3.png" style="zoom:67%;">
-
-<p>如上图所示，E为特征提取模块，C为卷积单元。需要事先设定一些关键帧$I_{key}$，当关键帧作为参考帧进行输入时，对齐的特征需要和前后帧的特征进行拼接，对当前的特征图进行修正，防止错误累加，最后才将对齐后的特征和参考帧一起输入重建模块。</p>
-</li>
+<p><img src="/2021/01/28/basicvsr/3.png" style="zoom:67%;"></p>
+<p>如上图所示，E为特征提取模块，C为卷积单元。需要事先设定一些关键帧<span class="math inline">\(I_{key}\)</span>，当关键帧作为参考帧进行输入时，对齐的特征需要和前后帧的特征进行拼接，对当前的特征图进行修正，防止错误累加，最后才将对齐后的特征和参考帧一起输入重建模块。</p></li>
 <li><p>Coupled Propagation</p>
 <p>成对传播策略将后向传播的特征，即后向传播的隐状态，也作为正向传播模块的输入。而不是像BasicVSR中的那样，直接在U处融合前后两个传播分支的输出。</p>
-<img src="/2021/01/28/basicvsr/4.png" style="zoom:67%;">
-
-<p>通过成对传播，前向传播分支从过去和将来的帧中接收信息，从而导致更高质量的特征，获得更好的输出。</p>
-</li>
+<p><img src="/2021/01/28/basicvsr/4.png" style="zoom:67%;"></p>
+<p>通过成对传播，前向传播分支从过去和将来的帧中接收信息，从而导致更高质量的特征，获得更好的输出。</p></li>
 </ul>
-<h3 id="实验结果"><a href="#实验结果" class="headerlink" title="实验结果"></a>实验结果</h3><h4 id="与SOTA进行对比"><a href="#与SOTA进行对比" class="headerlink" title="与SOTA进行对比"></a>与SOTA进行对比</h4><img src="/2021/01/28/basicvsr/5.png" style="zoom: 50%;">
-
-<img src="/2021/01/28/basicvsr/6.png" style="zoom: 50%;">
-
-<h4 id="信息重新填充机制和成对传播策略消融实验"><a href="#信息重新填充机制和成对传播策略消融实验" class="headerlink" title="信息重新填充机制和成对传播策略消融实验"></a>信息重新填充机制和成对传播策略消融实验</h4><img src="/2021/01/28/basicvsr/7.png" style="zoom: 50%;">
-
-<h4 id="信息重新填充机制中的关键帧数量"><a href="#信息重新填充机制中的关键帧数量" class="headerlink" title="信息重新填充机制中的关键帧数量"></a>信息重新填充机制中的关键帧数量</h4><img src="/2021/01/28/basicvsr/8.png" style="zoom: 50%;">
-
-<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>本文中提出的BasicVSR和IconVSR，利用recurrent的机制进行超分辨率。BasicVSR主要利用了双向传播机制，使得长距离信息能够得到利用，IconVSR在此基础上直接在前向传播分支中利用后向传播的特征，直接在特征维度上利用长距离信息。</p>
+<h3 id="实验结果">实验结果</h3>
+<h4 id="与sota进行对比">与SOTA进行对比</h4>
+<p><img src="/2021/01/28/basicvsr/5.png" style="zoom: 50%;"></p>
+<p><img src="/2021/01/28/basicvsr/6.png" style="zoom: 50%;"></p>
+<h4 id="信息重新填充机制和成对传播策略消融实验">信息重新填充机制和成对传播策略消融实验</h4>
+<p><img src="/2021/01/28/basicvsr/7.png" style="zoom: 50%;"></p>
+<h4 id="信息重新填充机制中的关键帧数量">信息重新填充机制中的关键帧数量</h4>
+<p><img src="/2021/01/28/basicvsr/8.png" style="zoom: 50%;"></p>
+<h3 id="总结">总结</h3>
+<p>本文中提出的BasicVSR和IconVSR，利用recurrent的机制进行超分辨率。BasicVSR主要利用了双向传播机制，使得长距离信息能够得到利用，IconVSR在此基础上直接在前向传播分支中利用后向传播的特征，直接在特征维度上利用长距离信息。</p>
 <p>同时注意到，双向传播机制的短板非常明显，无论是BasicVSR还是IconVSR都需要将所有视频帧全部输入到网络中之后才能够进行超分辨率，这是相比于滑动窗口最大的缺陷，这导致了基于双向传播的方法无法做到实时超分。并且，这需要保存大量的中间结果，即隐状态，这在训练时可能会导致大规模的显存占用情况存在。</p>
 
     </div>
@@ -405,6 +400,9 @@
                 </a>
             </div>
             <div class="post-nav-item">
+                <a href="/2021/01/29/TriNAS/" rel="next" title="TriNAS 论文阅读">
+                  TriNAS 论文阅读 <i class="fa fa-chevron-right"></i>
+                </a>
             </div>
           </div>
     </footer>

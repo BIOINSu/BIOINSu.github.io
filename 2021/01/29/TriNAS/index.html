@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.3.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","images":"/images","scheme":"Mist","version":"8.2.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":5,"unescape":false,"preload":false}};
+  </script>
+<meta name="description" content="TriNAS 论文阅读 背景 传统的基于深度学习的超分辨率方法通常会在三层神经结构设计上选择以下变化：网络级优化、单元（cell）级优化以及内核（kernel）级优化。为一个深层SR模型人工执行这些优化需要较高的代价。并且，人工设计的架构往往不是最优的，对于真实超分辨率来说，可能在计算上效率低下。因此，论文提出了一种用于高效单图像超分辨率（SR）的三级神经架构搜索（TriNAS）方法。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="TriNAS 论文阅读">
+<meta property="og:url" content="http://example.com/2021/01/29/TriNAS/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="TriNAS 论文阅读 背景 传统的基于深度学习的超分辨率方法通常会在三层神经结构设计上选择以下变化：网络级优化、单元（cell）级优化以及内核（kernel）级优化。为一个深层SR模型人工执行这些优化需要较高的代价。并且，人工设计的架构往往不是最优的，对于真实超分辨率来说，可能在计算上效率低下。因此，论文提出了一种用于高效单图像超分辨率（SR）的三级神经架构搜索（TriNAS）方法。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2021/01/29/TriNAS/2.png">
+<meta property="og:image" content="http://example.com/2021/01/29/TriNAS/0.png">
+<meta property="og:image" content="http://example.com/2021/01/29/TriNAS/1.png">
+<meta property="og:image" content="http://example.com/2021/01/29/TriNAS/3.png">
+<meta property="og:image" content="http://example.com/2021/01/29/TriNAS/4.png">
+<meta property="og:image" content="http://example.com/2021/01/29/TriNAS/7.png">
+<meta property="og:image" content="http://example.com/2021/01/29/TriNAS/5.png">
+<meta property="og:image" content="http://example.com/2021/01/29/TriNAS/6.png">
+<meta property="article:published_time" content="2021-01-29T10:12:28.521Z">
+<meta property="article:modified_time" content="2021-01-29T10:23:25.160Z">
+<meta property="article:author" content="BIOINSu">
+<meta property="article:tag" content="SISR">
+<meta property="article:tag" content="NAS">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2021/01/29/TriNAS/2.png">
+
+
+<link rel="canonical" href="http://example.com/2021/01/29/TriNAS/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+<title>TriNAS 论文阅读 | Hexo</title>
+  
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Hexo</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#trinas-%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB"><span class="nav-number">1.</span> <span class="nav-text">TriNAS 论文阅读</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">1.1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B9%E6%B3%95"><span class="nav-number">1.2.</span> <span class="nav-text">方法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%90%9C%E7%B4%A2%E7%A9%BA%E9%97%B4%E5%AE%9A%E4%B9%89"><span class="nav-number">1.2.1.</span> <span class="nav-text">搜索空间定义</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BF%9E%E7%BB%AD%E6%9D%BE%E5%BC%9B%E7%AD%96%E7%95%A5"><span class="nav-number">1.2.2.</span> <span class="nav-text">连续松弛策略</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%A3%E7%90%86%E4%BB%BB%E5%8A%A1%E5%92%8C%E4%BC%98%E5%8C%96"><span class="nav-number">1.2.3.</span> <span class="nav-text">代理任务和优化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AE%97%E6%B3%95%E6%B5%81%E7%A8%8B"><span class="nav-number">1.2.4.</span> <span class="nav-text">算法流程</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C%E7%BB%93%E6%9E%9C"><span class="nav-number">1.3.</span> <span class="nav-text">实验结果</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%8Esota%E8%BF%9B%E8%A1%8C%E5%AF%B9%E6%AF%94"><span class="nav-number">1.3.1.</span> <span class="nav-text">与SOTA进行对比</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#softmax%E4%B8%8Esparsetmax%E5%AF%B9%E6%AF%94"><span class="nav-number">1.3.2.</span> <span class="nav-text">softmax与sparsetmax对比</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%93%E8%AE%BA"><span class="nav-number">1.4.</span> <span class="nav-text">结论</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">BIOINSu</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">3</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/BIOINSu" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;BIOINSu" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/01/29/TriNAS/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BIOINSu">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          TriNAS 论文阅读
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2021-01-29 18:12:28 / 修改时间：18:23:25" itemprop="dateCreated datePublished" datetime="2021-01-29T18:12:28+08:00">2021-01-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%B6%85%E5%88%86%E8%BE%A8%E7%8E%87/" itemprop="url" rel="index"><span itemprop="name">超分辨率</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%B6%85%E5%88%86%E8%BE%A8%E7%8E%87/SISR/" itemprop="url" rel="index"><span itemprop="name">SISR</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h2 id="trinas-论文阅读">TriNAS 论文阅读</h2>
+<h3 id="背景">背景</h3>
+<p>传统的基于深度学习的超分辨率方法通常会在三层神经结构设计上选择以下变化：网络级优化、单元（cell）级优化以及内核（kernel）级优化。为一个深层SR模型人工执行这些优化需要较高的代价。并且，人工设计的架构往往不是最优的，对于真实超分辨率来说，可能在计算上效率低下。因此，论文提出了一种用于高效单图像超分辨率（SR）的三级神经架构搜索（TriNAS）方法。</p>
+<a id="more"></a>
+<p>论文首先在三个级别（即网络级别，单元级别和内核级别（卷积内核））定义离散搜索空间。提出了基于树模型的搜索框架来替代网格型的搜索框架，减少节点之间的依赖性。</p>
+<p>然后，与之前利用softmax进行连续松弛策略的NAS方法不同，论文利用排序的sparsestmax来使得三级搜索架构稀疏地起作用。因此，论文的NAS优化可以逐渐收敛到对超网起主要作用的神经架构。</p>
+<p>此外，论文提出的方法可以在单个阶段中同时进行搜索和训练，与传统的NAS算法相比，这大大减少了搜索和训练时间。</p>
+<p>在基准数据集上进行的实验表明，论文的的NAS算法所提供的SR模型在参数数量和FLOPS方面具有显着减轻的优势，其PSNR值可与当前的SOTA相媲美。</p>
+<h3 id="方法">方法</h3>
+<h4 id="搜索空间定义">搜索空间定义</h4>
+<p><img src="/2021/01/29/TriNAS/2.png" style="zoom: 60%;"></p>
+<p>为了在模型容量和模型大小之间达到适当的平衡，同时保证最小的精度损失，论文提出在内核级、单元级和网络级结构上进行搜索，以得到高效的SR网络结构。</p>
+<ul>
+<li><p>网络级</p>
+<p>论文遵循AGD和SRResNet来定义网络级搜索空间。他们的超网结构使大多数计算都在低分辨率特征空间中进行，从而提高了计算效率。</p>
+<p>网络级架构搜索主要通过搜索五个残差块和两个上采样块。将Residual-in-Residual（RiR）模块中的dense block替换为包含可搜索单元级运算符和内核级运算的五个连续层。</p>
+<p>为了进行高效的上采样模块设计，论文替换了两个最初设计的上采样模块。取代的是一个PixelShuffel块，其中包含一个卷积层以及一个PixelShuffel层，以达到上采样的目的。由于PixelShuffle块固定在网络的尾部，因此在网络级搜索空间中添加了两个常规卷积层。最终，论文仅关注堆叠的五个RiR块和两个用于网络路径搜索的标准卷积层。</p>
+<p><img src="/2021/01/29/TriNAS/0.png" style="zoom:80%;"></p>
+<p>为了对网络级搜索空间建模，采用上图所示的AutoDeep-Lab网格状结构似乎是可行的解决方案。 但是，网格建模旨在遍历网络块的所有顺序路径。 每个节点表示这个位置的feature map，每个路径都从第一个节点开始，并沿着一组箭头到达最终的目标节点。 显然，所有路径共享大多数节点和箭头。 这种冗余共享导致路径，单元和内核之间的极端依赖，因为路径在层次上包括它们。 尽管这样的共享策略可以节省大量训练内存，但它极大地限制了搜索空间。 此外，紧密的结合可能会损害每条路径的贡献以及对某些冗余路径的修剪的学习。</p>
+<p><img src="/2021/01/29/TriNAS/1.png" style="zoom: 67%;"></p>
+<p>论文提出了一种用于网络级路径搜索建模的树结构，来克服冗余共享的缺点。 如上图所示，树建模旨在遍历所有树结构路径。 在这里，每个节点仅连接到其父节点和子节点，因此，依赖性非常宽松。 但是，必须在训练时维护这样的关联，以降低内存消耗。 放宽不同路径的相关性可以实现灵活的网络级搜索空间。 对路径的较低依赖性可能会由于单元和内核之间的分层连接而导致它们之间可靠的关联，从而使它们的搜索空间更为通用。 此外，引入的树模型可以更好地解开路径之间的纠缠关系，从而能够对冗余路径进行修剪。</p></li>
+<li><p>单元级</p>
+<p>在单元级，论文搜索五个RiR块，每个块包含五个个可搜索的单元，即总共25个可搜索的单元。每个单元会选择如下操作符：</p>
+<p>Conv 1×1；Residual Block (2 layers of Conv 3×3 + skip-connection)；Conv 3×3；Depthwise Block (Conv 1×1 + Depthwise Conv3×3 + Conv 1×1).</p></li>
+<li><p>内核级</p>
+<p>对于内核级搜索，论文遵循super-kernel框架对该搜索空间进行建模。 对于每个卷积内核，先设置一个具有完整通道的超级内核。 为了修剪超级内核的通道数，需要一组可搜索的扩展比<span class="math inline">\(\phi=[\frac{1}{3},\frac{1}{2},\frac{4}{5},\frac{5}{6},1]\)</span>。并且设置参数<span class="math inline">\(\gamma_i\)</span>控制选择第<span class="math inline">\(i\)</span>个扩展比的概率。</p></li>
+</ul>
+<h4 id="连续松弛策略">连续松弛策略</h4>
+<p>为了使得NAS是可微的，关键思想是将离散的搜索空间的显式选择放宽为搜索空间中所有相关候选对象的的隐式选择。连续松弛使我们能够以完全可微的方式选择对超网贡献最大的候选者，然后就可以通过反向传播的方式优化整个超网，以实现高效的架构。流行的连续松弛策略之一是应用softmax来实现所有候选网络操作的混合。但是，softmax无法产生稀疏的分布，因此，它无法反映主导操作，这对于有效的结构设计而言至关重要。因此，使用softmax可以防止超级网络收敛到主要的候选架构。</p>
+<p>为了解决这个问题，论文提出了sparsestmax，它在连续松弛过程中产生了良好的稀疏性，并且可以寻求具有优势的候选架构，同时具有诸如softmax之类的凸性和可微性。</p>
+<p>具体来说，为了实现离散网络级搜索空间的连续松弛，论文使用一组连续组合权值来聚合所有的网络路径，构成一个超网络。网络级架构搜索的树模型中每个特征图（即节点）都可以用作其对应路径的输出，然后可以将输出送到上采样层以获得超分结果。 论文根据提出的树模型对来自相关网络路径的所有特征图定义了一组权重<span class="math inline">\(\beta\)</span>，因此，超网的输出是所有中间特征图的加权组合。</p>
+<p>传统的连续松弛做法就是对所有的<span class="math inline">\(\beta\)</span>应用softmax函数来判断每个路径对总的网络的贡献。然而，softmax通常产生非零参数，即平滑变化的参数。因此，候选路径的贡献是相对均匀的，这防止超网络收敛到一个主要的候选结构。因此，利用sparsetmax来产生稀疏的分布，其中<span class="math inline">\(q\)</span>表示具有约束的单纯形：</p>
+<p><img src="/2021/01/29/TriNAS/3.png" style="zoom: 80%;"></p>
+<p>sparsestmax的基本思想是将输入向量<span class="math inline">\(\beta\)</span>的欧几里德投影投射到概率单纯形上。该投射可能会触及单纯形边界，在这种情况下，sparsestmax会产生稀疏分布。为了获得更好的稀疏度，sparsestmax还引入了一个圆环约束，该圆环约束可以通过将单纯形外接圆的半径从零线性增加到某个阈值来逐步产生稀疏性。</p>
+<p>前文提到的树模型搜索架构有助于对路径进行剪枝，然而直接使用sparsestmax可能会在节点上产生无序的非零组合权重（极端情况是它们全部分布在奇/偶数节点上）。 在这种情况下，除非排序稀疏度，否则无法很好地修剪路径。 换句话说，只要非零组合权重沿路径下降，以便所有零权重都出现在路径的尾部，就可以执行网络级修剪，直接删除尾部即可。因此，论文提出利用排序的sparsetmax方法。 对每个路径<span class="math inline">\(p_i\)</span>内的权重<span class="math inline">\(\beta_i\)</span>施加排序约束。 直观上，这有助于使得浅层的输出feature maps对超网趋于相同的贡献度。排序的sparsetmax可以表示为：</p>
+<p><img src="/2021/01/29/TriNAS/4.png" style="zoom: 77%;"></p>
+<p>上述讨论了网络级的连续松弛策略，即使用了排序的sparsetmax方法。对于单元级的连续松弛策略，同样给每个单元的输出定义权重<span class="math inline">\(\alpha\)</span>，并采用非排序的sparsetmax的方式进行连续松弛。对于内核级的连续松弛策略，则采用gumbel-softmax方法。</p>
+<h4 id="代理任务和优化">代理任务和优化</h4>
+<p>对于本文的三级NAS任务，论文不是从头训练模型，而是通过知识蒸馏方法，从而利用预先训练的最先进的图像超分辨率模型的知识。将预训练的ESRGAN模型作为teacher model，搜索阶段的代理任务是通过最小化模型输出与教师模型输出之间的知识精馏距离来搜索模型G。此外，图像SR任务偏向于更有效率的模型，因此在目标函数中加入模型效率项。</p>
+<p>由于架构搜索的参数的数量远远小于网络模型的参数的数量，因此在单个训练集上对它们进行联合优化容易出现过拟合。具体来说，将数据集分为训练集和验证集，分别在这两组数据上优化网络参数和架构搜索参数。</p>
+<h4 id="算法流程">算法流程</h4>
+<p><img src="/2021/01/29/TriNAS/7.png"></p>
+<h3 id="实验结果">实验结果</h3>
+<h4 id="与sota进行对比">与SOTA进行对比</h4>
+<p><img src="/2021/01/29/TriNAS/5.png" style="zoom: 50%;"></p>
+<h4 id="softmax与sparsetmax对比">softmax与sparsetmax对比</h4>
+<p><img src="/2021/01/29/TriNAS/6.png" style="zoom: 67%;"></p>
+<h3 id="结论">结论</h3>
+<p>本文介绍了用于单图像超分辨率任务的Trilevel NAS方法，主要是将排序的sparsetmax激活用于树模型的网络架构搜索中。树模型能够使得节点之间降低依赖性，提供灵活的搜索空间，并能够更好地进行剪枝优化；sparsetmax激活在连续松弛过程中产生了良好的稀疏性，使得超网能够收敛到一个主要的候选结构上；排序的sparsetmax同样能够更好地进行模型剪枝。</p>
+<p>论文中提到的sparsetmax仅使用在了网络级和单元级架构搜索，可以同样利用排序的sparsetmax去进一步地优化内核级的搜索空间，来产生更高效的超分模型，以达到高PSNR和高感知质量的效果。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/SISR/" rel="tag"># SISR</a>
+              <a href="/tags/NAS/" rel="tag"># NAS</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/01/28/basicvsr/" rel="prev" title="BasicVSR 论文阅读">
+                  <i class="fa fa-chevron-left"></i> BasicVSR 论文阅读
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">BIOINSu</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+  <script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'none'
+      },
+      options: {
+        renderActions: {
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              const target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3.1.2/es5/tex-mml-chtml.js';
+    script.defer = true;
+    document.head.appendChild(script);
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.typesetClear();
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+
+
+</body>
+</html>
