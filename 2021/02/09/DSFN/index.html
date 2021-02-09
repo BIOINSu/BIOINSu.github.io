@@ -23,35 +23,34 @@
     var NexT = window.NexT || {};
     var CONFIG = {"hostname":"example.com","root":"/","images":"/images","scheme":"Mist","version":"8.2.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false}};
   </script>
-<meta name="description" content="《DualSR: Zero-Shot Dual Learning for Real-World Super-Resolution》 WACV 2021 背景 许多基于深度学习的SR方法在庞大数据集上学习复杂的LR-HR上采样关系。但是，这些经过预训练的SR方法通常在直接从相机捕获的图像上表现差很多。它们接受了干净，无噪声，合成的LR图像进行训练，而真实LR图像的退化过程与理想条件不同。现实情况">
+<meta name="description" content="《Dual-Stream Fusion Network for Spatiotemporal Video Super-Resolution》 WACV 2021 背景 时空视频超分辨率，即在时间维度上提升帧率，在空间维度上提升分辨率。本文认为，直接级联已有空间和时间超分辨率的方法（没有另外设计）来实现时空上采样，改变它们的顺序能够使得结果具有互补性。 因此，本文提出了一种双流融合网络，以自适应">
 <meta property="og:type" content="article">
-<meta property="og:title" content="DualSR 论文阅读">
-<meta property="og:url" content="http://example.com/2021/02/05/DualSR/index.html">
+<meta property="og:title" content="DSFN 论文阅读">
+<meta property="og:url" content="http://example.com/2021/02/09/DSFN/index.html">
 <meta property="og:site_name" content="BIOINSu">
-<meta property="og:description" content="《DualSR: Zero-Shot Dual Learning for Real-World Super-Resolution》 WACV 2021 背景 许多基于深度学习的SR方法在庞大数据集上学习复杂的LR-HR上采样关系。但是，这些经过预训练的SR方法通常在直接从相机捕获的图像上表现差很多。它们接受了干净，无噪声，合成的LR图像进行训练，而真实LR图像的退化过程与理想条件不同。现实情况">
+<meta property="og:description" content="《Dual-Stream Fusion Network for Spatiotemporal Video Super-Resolution》 WACV 2021 背景 时空视频超分辨率，即在时间维度上提升帧率，在空间维度上提升分辨率。本文认为，直接级联已有空间和时间超分辨率的方法（没有另外设计）来实现时空上采样，改变它们的顺序能够使得结果具有互补性。 因此，本文提出了一种双流融合网络，以自适应">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://example.com/2021/02/05/DualSR/0.png">
-<meta property="og:image" content="http://example.com/2021/02/05/DualSR/1.png">
-<meta property="og:image" content="http://example.com/2021/02/05/DualSR/2.png">
-<meta property="og:image" content="http://example.com/2021/02/05/DualSR/3.png">
-<meta property="og:image" content="http://example.com/2021/02/05/DualSR/4.png">
-<meta property="og:image" content="http://example.com/2021/02/05/DualSR/5.png">
-<meta property="og:image" content="http://example.com/2021/02/05/DualSR/6.png">
-<meta property="og:image" content="http://example.com/2021/02/05/DualSR/7.png">
-<meta property="og:image" content="http://example.com/2021/02/05/DualSR/8.png">
-<meta property="og:image" content="http://example.com/2021/02/05/DualSR/9.png">
-<meta property="og:image" content="http://example.com/2021/02/05/DualSR/10.png">
-<meta property="og:image" content="http://example.com/2021/02/05/DualSR/11.png">
-<meta property="article:published_time" content="2021-02-05T07:41:38.911Z">
-<meta property="article:modified_time" content="2021-02-05T08:45:55.023Z">
+<meta property="og:image" content="http://example.com/2021/02/09/DSFN/0.png">
+<meta property="og:image" content="http://example.com/2021/02/09/DSFN/1.png">
+<meta property="og:image" content="http://example.com/2021/02/09/DSFN/2.png">
+<meta property="og:image" content="http://example.com/2021/02/09/DSFN/3.png">
+<meta property="og:image" content="http://example.com/2021/02/09/DSFN/4.png">
+<meta property="og:image" content="http://example.com/2021/02/09/DSFN/5.png">
+<meta property="og:image" content="http://example.com/2021/02/09/DSFN/6.png">
+<meta property="og:image" content="http://example.com/2021/02/09/DSFN/7.png">
+<meta property="og:image" content="http://example.com/2021/02/09/DSFN/8.png">
+<meta property="og:image" content="http://example.com/2021/02/09/DSFN/9.png">
+<meta property="og:image" content="http://example.com/2021/02/09/DSFN/10.png">
+<meta property="og:image" content="http://example.com/2021/02/09/DSFN/11.png">
+<meta property="article:published_time" content="2021-02-09T07:35:28.622Z">
+<meta property="article:modified_time" content="2021-02-09T07:37:30.463Z">
 <meta property="article:author" content="BIOINSu">
-<meta property="article:tag" content="SISR">
-<meta property="article:tag" content="RealSR">
+<meta property="article:tag" content="STVSR">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://example.com/2021/02/05/DualSR/0.png">
+<meta name="twitter:image" content="http://example.com/2021/02/09/DSFN/0.png">
 
 
-<link rel="canonical" href="http://example.com/2021/02/05/DualSR/">
+<link rel="canonical" href="http://example.com/2021/02/09/DSFN/">
 
 
 <script class="page-configurations">
@@ -63,7 +62,7 @@
     lang   : 'zh-CN'
   };
 </script>
-<title>DualSR 论文阅读 | BIOINSu</title>
+<title>DSFN 论文阅读 | BIOINSu</title>
   
 
 
@@ -201,7 +200,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B9%E6%B3%95"><span class="nav-number">2.</span> <span class="nav-text">方法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A1%86%E6%9E%B6%E7%9A%84%E7%BB%84%E4%BB%B6"><span class="nav-number">2.1.</span> <span class="nav-text">框架的组件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A1%86%E6%9E%B6%E7%9A%84%E6%89%A7%E8%A1%8C"><span class="nav-number">2.2.</span> <span class="nav-text">框架的执行</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0"><span class="nav-number">2.3.</span> <span class="nav-text">损失函数</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C%E7%BB%93%E6%9E%9C"><span class="nav-number">3.</span> <span class="nav-text">实验结果</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%90%88%E6%88%90%E7%9A%84%E7%9C%9F%E5%AE%9Elr%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="nav-number">3.1.</span> <span class="nav-text">合成的真实LR数据集</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#realsr%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="nav-number">3.2.</span> <span class="nav-text">RealSR数据集</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8E%A9%E7%A0%81%E6%8F%92%E5%80%BC%E6%8D%9F%E5%A4%B1"><span class="nav-number">3.3.</span> <span class="nav-text">掩码插值损失</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%93%E8%AE%BA"><span class="nav-number">4.</span> <span class="nav-text">结论</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B9%E6%B3%95"><span class="nav-number">2.</span> <span class="nav-text">方法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A1%86%E6%9E%B6%E7%9A%84%E7%BB%84%E4%BB%B6"><span class="nav-number">2.1.</span> <span class="nav-text">框架的组件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A1%86%E6%9E%B6%E7%9A%84%E6%89%A7%E8%A1%8C"><span class="nav-number">2.2.</span> <span class="nav-text">框架的执行</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0"><span class="nav-number">2.3.</span> <span class="nav-text">损失函数</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C%E7%BB%93%E6%9E%9C"><span class="nav-number">3.</span> <span class="nav-text">实验结果</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%97%B6%E7%A9%BA%E8%B6%85%E5%88%86%E7%9A%84%E4%BA%92%E8%A1%A5%E7%BB%93%E6%9E%9C"><span class="nav-number">3.1.</span> <span class="nav-text">时空超分的互补结果</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%8D%E5%90%8C%E8%9E%8D%E5%90%88%E7%AD%96%E7%95%A5%E7%9A%84%E6%AF%94%E8%BE%83"><span class="nav-number">3.2.</span> <span class="nav-text">不同融合策略的比较</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%80%89%E6%8B%A9%E4%B8%8D%E5%90%8C%E4%B8%8A%E9%87%87%E6%A0%B7%E7%BD%91%E7%BB%9C"><span class="nav-number">3.3.</span> <span class="nav-text">选择不同上采样网络</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%8Esota%E7%BB%93%E6%9E%9C%E7%9B%B8%E6%AF%94"><span class="nav-number">3.4.</span> <span class="nav-text">与SOTA结果相比</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%93%E8%AE%BA"><span class="nav-number">4.</span> <span class="nav-text">结论</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -272,7 +271,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/02/05/DualSR/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/02/09/DSFN/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -285,7 +284,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          DualSR 论文阅读
+          DSFN 论文阅读
         </h1>
 
         <div class="post-meta-container">
@@ -297,7 +296,7 @@
       <span class="post-meta-item-text">发表于</span>
       
 
-      <time title="创建时间：2021-02-05 15:41:38 / 修改时间：16:45:55" itemprop="dateCreated datePublished" datetime="2021-02-05T15:41:38+08:00">2021-02-05</time>
+      <time title="创建时间：2021-02-09 15:35:28 / 修改时间：15:37:30" itemprop="dateCreated datePublished" datetime="2021-02-09T15:35:28+08:00">2021-02-09</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -309,7 +308,7 @@
         </span>
           ，
         <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E8%B6%85%E5%88%86%E8%BE%A8%E7%8E%87/SISR/" itemprop="url" rel="index"><span itemprop="name">SISR</span></a>
+          <a href="/categories/%E8%B6%85%E5%88%86%E8%BE%A8%E7%8E%87/STVSR/" itemprop="url" rel="index"><span itemprop="name">STVSR</span></a>
         </span>
     </span>
 
@@ -323,59 +322,63 @@
     
     
     <div class="post-body" itemprop="articleBody">
-        <p>《DualSR: Zero-Shot Dual Learning for Real-World Super-Resolution》 WACV 2021</p>
+        <p>《Dual-Stream Fusion Network for Spatiotemporal Video Super-Resolution》 WACV 2021</p>
 <h3 id="背景">背景</h3>
-<p>许多基于深度学习的SR方法在庞大数据集上学习复杂的LR-HR上采样关系。但是，这些经过预训练的SR方法通常在直接从相机捕获的图像上表现差很多。它们接受了干净，无噪声，合成的LR图像进行训练，而真实LR图像的退化过程与理想条件不同。现实情况下，每个摄像机的采集参数，例如传感器的点扩展功能（PSF），也不同。即使是同一台摄像机拍摄的图像，也会因光线条件、景深以及抖动而产生的模糊等而有所不同。这些条件使得训练一个在所有不同图像退化条件下都能表现良好的CNN变得很困难。</p>
+<p>时空视频超分辨率，即在时间维度上提升帧率，在空间维度上提升分辨率。本文认为，直接级联已有空间和时间超分辨率的方法（没有另外设计）来实现时空上采样，改变它们的顺序能够使得结果具有互补性。 因此，本文提出了一种双流融合网络，以自适应地融合两个时空上采样流产生的中间结果，其中第一个流应用空间超分辨率，然后是时间超分辨率，而第二个流则先使用空间超分辨率再进行时间超分辨率。</p>
 <a id="more"></a>
-<p>许多盲SR方法在超分之前都会估算退化过程。 盲超分的SOTA使用深度学习来学习图像特定的下采样器（降级模型参数），上采样器使用该下采样器对输入的LR图像进行超分辨。 但是，从单个输入图像估计合适的下采样器很复杂。 尤其是在存在噪声或其他采集伪像的情况下，这些方法通常无法估算出良好的降级参数。 错误的降级会严重降低上采样器的效率，并降低SR性能。</p>
-<p>受诸如CycleGAN 和 DualGAN 等最新无监督方法的启发，论文引入了Zero-Shot DualSR，一种双路径架构，用于在现实世界中的LR图像上实现超分辨率，并且是一种无监督的方案。</p>
 <h3 id="方法">方法</h3>
-<p><img src="/2021/02/05/DualSR/0.png" style="zoom: 50%;"></p>
+<p><img src="/2021/02/09/DSFN/0.png" style="zoom:50%;"></p>
 <h4 id="框架的组件">框架的组件</h4>
 <ul>
-<li><p><span class="math inline">\(G_{UP}\)</span></p>
-<p>上采样器。与ZSSR类似，采用了简单的8层全卷积网络，并采用了ReLU激活。在输入和输出之间存在一个全局的残差连接。将LR图像放大到输出大小，然后才将其送入网络。</p></li>
-<li><p><span class="math inline">\(G_{DN}\)</span> &amp; <span class="math inline">\(D_{DN}\)</span></p>
-<p>下采样器和判别器。使用KernelGAN中的生成器和判别器。</p>
-<p>生成器是一个深层线性网络（没有任何激活）。小的感受野强迫使网络仅使用LR图像的局部特征（例如边缘），而不是依赖于高级全局特征。 因此，生成器<span class="math inline">\(G_{DN}\)</span>学习能够生成图像的kernel，该图像在patch分布上与输入LR图像相似。</p>
-<p><img src="/2021/02/05/DualSR/1.png" style="zoom:55%;"></p>
-<p>判别器是一个全卷积的PatchGAN，其感受野为7x7。</p>
-<p><img src="/2021/02/05/DualSR/2.png" style="zoom:60%;"></p></li>
+<li><p><span class="math inline">\(M_S\)</span></p>
+<p>空间超分辨率网络。本文使用的是单幅图像的超分辨率网络ESPCN、SAN。</p></li>
+<li><p><span class="math inline">\(M_T\)</span></p>
+<p>时间超分辨率网络。即插帧网络，本文使用SuperSloMo、DAIN。</p></li>
+<li><p><span class="math inline">\(F\)</span></p>
+<p>融合网络，负责将不同分支产生的结果进行融合。具体采用采用了U-Net，它包含五个具有跳跃连接的对称下采样和上采样卷积层。</p></li>
+<li><p><span class="math inline">\(R\)</span></p>
+<p>调整网络，增强细节。具体为三个残差块。</p></li>
 </ul>
 <h4 id="框架的执行">框架的执行</h4>
-<p>在前向循环中，首先应用上采样器以生成2x的上采样图像。，然后应用下采样器并将上采样的图像转换回1x。</p>
-<p>同样，在后向循环中，首先由<span class="math inline">\(G_{DN}\)</span>生成1/2x的图像，然后<span class="math inline">\(G_{UP}\)</span>将图像上采样回到原始比例。</p>
+<p>整个网络的流程具体来说就是将时空超分辨率分为两个分支，一个是先超分再插帧，另一个是先插帧再超分，然后通过融合网络融合两个分支的结果，最后通过调整网络进行细节调整。</p>
+<p>空间超分辨率网络接收单个输入帧，并进行超分，输出对应一帧的超分结果；时间超分辨率网络接收前后两帧，并预测中间帧的结果。</p>
+<p>先超分再插帧的过程可以表示为：</p>
+<p><img src="/2021/02/09/DSFN/1.png" style="zoom:67%;"></p>
+<p>先插帧再超分的过程可以表示为：</p>
+<p><img src="/2021/02/09/DSFN/2.png" style="zoom:67%;"></p>
+<p>本文认为，这两个数据流在时空上采样方面表现出互补的结果，其中先超分再插帧在运动较小的区域产生更精细的细节，而先插帧再超分在运动较大的区域提供更好的重建。</p>
+<p>将双分支预测得到的结果进行融合，融合的策略就是给两个分支的结果分别预测一个Mask，并将Mask和预测结果进行element-wise的乘法后相加，整个过程可以表示为：</p>
+<p><img src="/2021/02/09/DSFN/3.png" style="zoom:67%;"></p>
+<p>注意到，两个Mask之间，假如给予约束 Mask1 + Mask2 = 1，则总的预测结果变成了两个分支结果的线性插值，否则总的预测结果是两个分支结果的线性组合。</p>
+<p>最终，通过一个三个残差块的调整网络增强细节信息。</p>
+<p><img src="/2021/02/09/DSFN/4.png" style="zoom:67%;"></p>
 <h4 id="损失函数">损失函数</h4>
-<p>损失函数主要分为三部分：对抗损失、循环一致性损失、掩码插值损失。</p>
-<p><img src="/2021/02/05/DualSR/3.png" style="zoom: 67%;"></p>
+<p>损失函数主要分为两个部分：重建损失、辅助损失。</p>
+<p><img src="/2021/02/09/DSFN/5.png" style="zoom:77%;"></p>
 <ul>
-<li><p>对抗损失</p>
-<p>对于下采样器<span class="math inline">\(G_{DN}\)</span>，希望其能够生成和真实LR相同的图像，判别器尽可能认为它是真实的LR（标签为1），损失如下（正则化项<span class="math inline">\(R\)</span>具体见KernelGAN论文）：</p>
-<p><img src="/2021/02/05/DualSR/4.png" style="zoom:60%;"></p>
-<p>对于判别器<span class="math inline">\(D_{DN}\)</span>,希望其能够判别哪些是真实的LR，即让真实的LR被判别为1，合成的LR被判别为0：</p>
-<p><img src="/2021/02/05/DualSR/5.png" style="zoom:60%;"></p></li>
-<li><p>循环一致性损失</p>
-<p>确保<span class="math inline">\(G_{UP}\)</span>和<span class="math inline">\(G_{DN}\)</span>可以还原由另一个执行的操作。</p>
-<p><img src="/2021/02/05/DualSR/6.png" style="zoom:60%;"></p></li>
-<li><p>掩码插值损失</p>
-<p>Bicubic上采样能够能够正确地对低频部分进行上采样，但是无法重构高频细节。对所有像素使用Bicubic能够产生无伪影但模糊的结果。因此，论文仅对图像低频部分应用插值损失。首先对Bicubic上采样的图像应用Sobel算子，它主要用作边缘检测，是一种离散性差分算子，用来计算图像亮度函数的灰度近似值。应用Sobel算子能够产生mask，该mask在低频区域的像素值较高，在图像的高频区域的像素值较低。</p>
-<p><img src="/2021/02/05/DualSR/7.png" style="zoom:60%;"></p>
-<p>然后应用掩码插值损失使得<span class="math inline">\(G_{UP}\)</span>的结果和Bicubic上采样的结果仅在低频部分是相近的。</p>
-<p><img src="/2021/02/05/DualSR/8.png" style="zoom:60%;"></p></li>
+<li><p>重建损失</p>
+<p>各个中间预测结果和GT的L1距离，作为重建损失。</p>
+<p><img src="/2021/02/09/DSFN/6.png" style="zoom:67%;"></p></li>
+<li><p>辅助损失</p>
+<p>主要是先超分再插帧的超分部分，以及先插帧再超分的插帧部分，对中间结果计算L1损失。</p>
+<p><img src="/2021/02/09/DSFN/7.png" style="zoom: 60%;"></p></li>
 </ul>
 <h3 id="实验结果">实验结果</h3>
-<p>训练使用的 patch size 为 64 x 64 以及 128 x 128。训练和测试时不使用任何数据增强（图像变换）。因为训练时间很少，所以可以用暴力搜索方法来获得<span class="math inline">\(\lambda_{cycle}=5,\lambda_{inter}=2\)</span>。</p>
-<p>在RTX 2080 Ti GPU上，论文的方法平均训练+推理时间为233秒。 对于KernelGAN + ZSSR 的组合，运行时间为281秒，对于BlindSR，则为370秒。 像SAN这样的有监督深度学习SR方法具有很长的训练时间，并且图像大小显着影响其推理时间。对于SAN +，在DIV2KRK基准上测试每张图片平均需要298秒。</p>
-<h4 id="合成的真实lr数据集">合成的真实LR数据集</h4>
-<p><img src="/2021/02/05/DualSR/9.png" style="zoom: 45%;"></p>
-<h4 id="realsr数据集">RealSR数据集</h4>
-<p>该数据集通过调整焦距获得不同尺度图像，但作者认为不同尺度间没有完全对齐，因此只放出视觉效果。</p>
-<p><img src="/2021/02/05/DualSR/10.png" style="zoom:40%;"></p>
-<h4 id="掩码插值损失">掩码插值损失</h4>
-<p><img src="/2021/02/05/DualSR/11.png" style="zoom:50%;"></p>
+<p>batch size设置为24，使用优化器RAdam，学习率开始时设置为<span class="math inline">\(5e-5\)</span>。时间和空间超分辨率均为2x。使用数据集Vimeo-90K、UCF101、FISR dataset。训练过程，首先单独训练超分网络和插帧网络，然后冻结参数把它们和融合网络及调整网络拼接在一起训练，最终联合训练所有模块。</p>
+<h4 id="时空超分的互补结果">时空超分的互补结果</h4>
+<p><img src="/2021/02/09/DSFN/8.png"></p>
+<p>文章认为先超分再插帧在小动作区域有更好的细节，先插帧再超分能够在大动作区域有更好的重建效果。如图所示应该是1、3行表示小动作区域，先超分再插帧的效果更好，Error Map有更少的像素点有值；而2、4行则表示大动作区域，先插帧再超分的Error Map有更少的像素点有值。</p>
+<h4 id="不同融合策略的比较">不同融合策略的比较</h4>
+<p><img src="/2021/02/09/DSFN/9.png" style="zoom:67%;"></p>
+<p>One-mask表示Mask1 + Mask2 = 1，总的预测结果变成了两个分支结果的线性插值，Two-mask则表示总的预测结果是两个分支结果的线性组合，可以看出Two-mask更有优势。</p>
+<h4 id="选择不同上采样网络">选择不同上采样网络</h4>
+<p><img src="/2021/02/09/DSFN/10.png" style="zoom: 67%;"></p>
+<p>越新的方法作为backbone效果则越好。</p>
+<h4 id="与sota结果相比">与SOTA结果相比</h4>
+<p><img src="/2021/02/09/DSFN/11.png" style="zoom:67%;"></p>
+<p>并没有和最新的网络结果相比，例如Zooming Slow-Mo。</p>
 <h3 id="结论">结论</h3>
-<p>本文提出提出了DualSR，一个轻量级的dual架构，它学习每个图像特定的LR-HR关系。它由下采样器和上采样器组成，在训练中使用循环一致性损失来相互改进。此外，论文提出了掩码插值损失，消除了图像低频区域的伪影，而不会导致边缘过于平滑。</p>
-<p>该方法是Zero-Shot的，无需HR图像进行监督，但本质上就是用了Bicubic上采样的低频部分来进行监督。之前的文章DynaVSR是用了元学习的思想，在测试时同样使用了类似循环一致性的方法，但在训练时为了更好的效果仍然使用了HR的图像。因此，可以思考如何将Zero-Shot的思想（目前来看还是想办法在Bicubic上采样的结果做文章），应用到VSR上，来达到完全无监督的效果。</p>
+<p>本文提出了一种融合双分支结果的网络来进行时空超分辨率。然而，该网络并不是end-to-end训练的，借用已有的网络进行多阶段训练，并且正文没有给出参数量和计算量，可能代价也比较高。其次，重建完全由中间和最终输出帧的像素级重建损失来指导，把超分和插帧的过程都看成是独立的过程，各个中间结果之间没有加上时序的联系，这必然导致了性能的降低。因此，在时空超分中如何有效地利用时序信息进行更好的重建值得进行探索。</p>
 
     </div>
 
@@ -385,22 +388,18 @@
 
     <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/SISR/" rel="tag"># SISR</a>
-              <a href="/tags/RealSR/" rel="tag"># RealSR</a>
+              <a href="/tags/STVSR/" rel="tag"># STVSR</a>
           </div>
 
         
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/2021/01/29/TriNAS/" rel="prev" title="TriNAS 论文阅读">
-                  <i class="fa fa-chevron-left"></i> TriNAS 论文阅读
+                <a href="/2021/02/05/DualSR/" rel="prev" title="DualSR 论文阅读">
+                  <i class="fa fa-chevron-left"></i> DualSR 论文阅读
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/2021/02/09/DSFN/" rel="next" title="DSFN 论文阅读">
-                  DSFN 论文阅读 <i class="fa fa-chevron-right"></i>
-                </a>
             </div>
           </div>
     </footer>
