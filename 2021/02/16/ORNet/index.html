@@ -23,34 +23,33 @@
     var NexT = window.NexT || {};
     var CONFIG = {"hostname":"example.com","root":"/","images":"/images","scheme":"Mist","version":"8.2.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false}};
   </script>
-<meta name="description" content="《Dual-Stream Fusion Network for Spatiotemporal Video Super-Resolution》 WACV 2021 背景 时空视频超分辨率，即在时间维度上提升帧率，在空间维度上提升分辨率。本文认为，直接级联已有空间和时间超分辨率的方法（没有另外设计）来实现时空上采样，改变它们的顺序能够使得结果具有互补性。 因此，本文提出了一种双流融合网络，以自适应">
+<meta name="description" content="《Learning Omni-frequency Region-adaptive Representations for Real Image Super-Resolution》 2021 背景 Real World数据包含不同的、复杂的退化方式，例如模糊、噪声和降采样，因此导致传统深度学习方法在真实数据集上表现不好。 RealSR和DRealSR不仅提出了两个真实数据集，还提出了两种真实超">
 <meta property="og:type" content="article">
-<meta property="og:title" content="DSFN 论文阅读">
-<meta property="og:url" content="http://example.com/2021/02/09/DSFN/index.html">
+<meta property="og:title" content="OR-Net 论文阅读">
+<meta property="og:url" content="http://example.com/2021/02/16/ORNet/index.html">
 <meta property="og:site_name" content="BIOINSu">
-<meta property="og:description" content="《Dual-Stream Fusion Network for Spatiotemporal Video Super-Resolution》 WACV 2021 背景 时空视频超分辨率，即在时间维度上提升帧率，在空间维度上提升分辨率。本文认为，直接级联已有空间和时间超分辨率的方法（没有另外设计）来实现时空上采样，改变它们的顺序能够使得结果具有互补性。 因此，本文提出了一种双流融合网络，以自适应">
+<meta property="og:description" content="《Learning Omni-frequency Region-adaptive Representations for Real Image Super-Resolution》 2021 背景 Real World数据包含不同的、复杂的退化方式，例如模糊、噪声和降采样，因此导致传统深度学习方法在真实数据集上表现不好。 RealSR和DRealSR不仅提出了两个真实数据集，还提出了两种真实超">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://example.com/2021/02/09/DSFN/0.png">
-<meta property="og:image" content="http://example.com/2021/02/09/DSFN/1.png">
-<meta property="og:image" content="http://example.com/2021/02/09/DSFN/2.png">
-<meta property="og:image" content="http://example.com/2021/02/09/DSFN/3.png">
-<meta property="og:image" content="http://example.com/2021/02/09/DSFN/4.png">
-<meta property="og:image" content="http://example.com/2021/02/09/DSFN/5.png">
-<meta property="og:image" content="http://example.com/2021/02/09/DSFN/6.png">
-<meta property="og:image" content="http://example.com/2021/02/09/DSFN/7.png">
-<meta property="og:image" content="http://example.com/2021/02/09/DSFN/8.png">
-<meta property="og:image" content="http://example.com/2021/02/09/DSFN/9.png">
-<meta property="og:image" content="http://example.com/2021/02/09/DSFN/10.png">
-<meta property="og:image" content="http://example.com/2021/02/09/DSFN/11.png">
-<meta property="article:published_time" content="2021-02-09T07:35:28.622Z">
-<meta property="article:modified_time" content="2021-02-09T07:37:30.463Z">
+<meta property="og:image" content="http://example.com/2021/02/16/ORNet/0.png">
+<meta property="og:image" content="http://example.com/2021/02/16/ORNet/1.png">
+<meta property="og:image" content="http://example.com/2021/02/16/ORNet/4.png">
+<meta property="og:image" content="http://example.com/2021/02/16/ORNet/2.png">
+<meta property="og:image" content="http://example.com/2021/02/16/ORNet/3.png">
+<meta property="og:image" content="http://example.com/2021/02/16/ORNet/5.png">
+<meta property="og:image" content="http://example.com/2021/02/16/ORNet/6.png">
+<meta property="og:image" content="http://example.com/2021/02/16/ORNet/7.png">
+<meta property="og:image" content="http://example.com/2021/02/16/ORNet/8.png">
+<meta property="og:image" content="http://example.com/2021/02/16/ORNet/9.png">
+<meta property="article:published_time" content="2021-02-16T03:38:15.669Z">
+<meta property="article:modified_time" content="2021-02-16T03:40:14.503Z">
 <meta property="article:author" content="BIOINSu">
-<meta property="article:tag" content="STVSR">
+<meta property="article:tag" content="SISR">
+<meta property="article:tag" content="RealSR">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://example.com/2021/02/09/DSFN/0.png">
+<meta name="twitter:image" content="http://example.com/2021/02/16/ORNet/0.png">
 
 
-<link rel="canonical" href="http://example.com/2021/02/09/DSFN/">
+<link rel="canonical" href="http://example.com/2021/02/16/ORNet/">
 
 
 <script class="page-configurations">
@@ -62,7 +61,7 @@
     lang   : 'zh-CN'
   };
 </script>
-<title>DSFN 论文阅读 | BIOINSu</title>
+<title>OR-Net 论文阅读 | BIOINSu</title>
   
 
 
@@ -200,7 +199,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B9%E6%B3%95"><span class="nav-number">2.</span> <span class="nav-text">方法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A1%86%E6%9E%B6%E7%9A%84%E7%BB%84%E4%BB%B6"><span class="nav-number">2.1.</span> <span class="nav-text">框架的组件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A1%86%E6%9E%B6%E7%9A%84%E6%89%A7%E8%A1%8C"><span class="nav-number">2.2.</span> <span class="nav-text">框架的执行</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0"><span class="nav-number">2.3.</span> <span class="nav-text">损失函数</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C%E7%BB%93%E6%9E%9C"><span class="nav-number">3.</span> <span class="nav-text">实验结果</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%97%B6%E7%A9%BA%E8%B6%85%E5%88%86%E7%9A%84%E4%BA%92%E8%A1%A5%E7%BB%93%E6%9E%9C"><span class="nav-number">3.1.</span> <span class="nav-text">时空超分的互补结果</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%8D%E5%90%8C%E8%9E%8D%E5%90%88%E7%AD%96%E7%95%A5%E7%9A%84%E6%AF%94%E8%BE%83"><span class="nav-number">3.2.</span> <span class="nav-text">不同融合策略的比较</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%80%89%E6%8B%A9%E4%B8%8D%E5%90%8C%E4%B8%8A%E9%87%87%E6%A0%B7%E7%BD%91%E7%BB%9C"><span class="nav-number">3.3.</span> <span class="nav-text">选择不同上采样网络</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%8Esota%E7%BB%93%E6%9E%9C%E7%9B%B8%E6%AF%94"><span class="nav-number">3.4.</span> <span class="nav-text">与SOTA结果相比</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%93%E8%AE%BA"><span class="nav-number">4.</span> <span class="nav-text">结论</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B9%E6%B3%95"><span class="nav-number">2.</span> <span class="nav-text">方法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A1%86%E6%9E%B6%E7%9A%84%E7%BB%84%E4%BB%B6"><span class="nav-number">2.1.</span> <span class="nav-text">框架的组件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A1%86%E6%9E%B6%E7%9A%84%E6%89%A7%E8%A1%8C"><span class="nav-number">2.2.</span> <span class="nav-text">框架的执行</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C%E7%BB%93%E6%9E%9C"><span class="nav-number">3.</span> <span class="nav-text">实验结果</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%8D%E5%90%8C%E9%A2%91%E7%8E%87%E7%9A%84%E5%8F%AF%E8%A7%86%E5%8C%96"><span class="nav-number">3.1.</span> <span class="nav-text">不同频率的可视化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%8D%E5%90%8C%E9%A2%91%E7%8E%87%E6%95%B0%E9%87%8F%E7%9A%84%E6%AF%94%E8%BE%83"><span class="nav-number">3.2.</span> <span class="nav-text">不同频率数量的比较</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B6%88%E8%9E%8D%E5%AE%9E%E9%AA%8C"><span class="nav-number">3.3.</span> <span class="nav-text">消融实验</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%8Esota%E7%9B%B8%E6%AF%94%E8%BE%83"><span class="nav-number">3.4.</span> <span class="nav-text">与SOTA相比较</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%93%E8%AE%BA"><span class="nav-number">4.</span> <span class="nav-text">结论</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -271,7 +270,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/02/09/DSFN/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/02/16/ORNet/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -284,7 +283,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          DSFN 论文阅读
+          OR-Net 论文阅读
         </h1>
 
         <div class="post-meta-container">
@@ -296,7 +295,7 @@
       <span class="post-meta-item-text">发表于</span>
       
 
-      <time title="创建时间：2021-02-09 15:35:28 / 修改时间：15:37:30" itemprop="dateCreated datePublished" datetime="2021-02-09T15:35:28+08:00">2021-02-09</time>
+      <time title="创建时间：2021-02-16 11:38:15 / 修改时间：11:40:14" itemprop="dateCreated datePublished" datetime="2021-02-16T11:38:15+08:00">2021-02-16</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -308,7 +307,7 @@
         </span>
           ，
         <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E8%B6%85%E5%88%86%E8%BE%A8%E7%8E%87/STVSR/" itemprop="url" rel="index"><span itemprop="name">STVSR</span></a>
+          <a href="/categories/%E8%B6%85%E5%88%86%E8%BE%A8%E7%8E%87/SISR/" itemprop="url" rel="index"><span itemprop="name">SISR</span></a>
         </span>
     </span>
 
@@ -322,63 +321,53 @@
     
     
     <div class="post-body" itemprop="articleBody">
-        <p>《Dual-Stream Fusion Network for Spatiotemporal Video Super-Resolution》 WACV 2021</p>
+        <p>《Learning Omni-frequency Region-adaptive Representations for Real Image Super-Resolution》 2021</p>
 <h3 id="背景">背景</h3>
-<p>时空视频超分辨率，即在时间维度上提升帧率，在空间维度上提升分辨率。本文认为，直接级联已有空间和时间超分辨率的方法（没有另外设计）来实现时空上采样，改变它们的顺序能够使得结果具有互补性。 因此，本文提出了一种双流融合网络，以自适应地融合两个时空上采样流产生的中间结果，其中第一个流应用空间超分辨率，然后是时间超分辨率，而第二个流则先使用空间超分辨率再进行时间超分辨率。</p>
+<p>Real World数据包含不同的、复杂的退化方式，例如模糊、噪声和降采样，因此导致传统深度学习方法在真实数据集上表现不好。</p>
+<p>RealSR和DRealSR不仅提出了两个真实数据集，还提出了两种真实超分方法 laplacian pyramid based kernel prediction network (LP-KPN) 和 component divide-and- conquer (CDC)。然而，它们都是在像素水平上进行重建（区域、边缘和角落），没有利用到频率信息。</p>
 <a id="more"></a>
+<p>图像的频率是表征图像中灰度变化剧烈程度的指标，是灰度在平面空间上的梯度。图像的主要成分是低频信息，它形成了图像的基本灰度等级，对图像结构的决定作用较小；中频信息决定了图像的基本结构，形成了图像的主要边缘结构；高频信息形成了图像的边缘和细节，是在中频信息上对图像内容的进一步强化。</p>
+<p><img src="/2021/02/16/ORNet/0.png" style="zoom: 50%;"></p>
+<p>作者观察到，对于图a可以看出，LR的退化在各个频率上都存在。对于图b可以看出，在不同区域中的不同频率组件内，真实LR的退化也是不同的。</p>
+<p>因此，本文作者提出ORNet，在图像的不同频率上增强相应的频率因子，最终通过区域自适应频率聚合模块，结合动态卷积和空间注意力机制，针对HR图像的不同位置，有选择性地重建不同的频率分量。</p>
 <h3 id="方法">方法</h3>
-<p><img src="/2021/02/09/DSFN/0.png" style="zoom:50%;"></p>
+<p><img src="/2021/02/16/ORNet/1.png" style="zoom: 67%;"></p>
 <h4 id="框架的组件">框架的组件</h4>
 <ul>
-<li><p><span class="math inline">\(M_S\)</span></p>
-<p>空间超分辨率网络。本文使用的是单幅图像的超分辨率网络ESPCN、SAN。</p></li>
-<li><p><span class="math inline">\(M_T\)</span></p>
-<p>时间超分辨率网络。即插帧网络，本文使用SuperSloMo、DAIN。</p></li>
-<li><p><span class="math inline">\(F\)</span></p>
-<p>融合网络，负责将不同分支产生的结果进行融合。具体采用采用了U-Net，它包含五个具有跳跃连接的对称下采样和上采样卷积层。</p></li>
-<li><p><span class="math inline">\(R\)</span></p>
-<p>调整网络，增强细节。具体为三个残差块。</p></li>
+<li><p>Frequency Decomposition (FD) Module</p>
+<p>对图像进行频率分离，可以在传统的信号处理方法中采用小波变换或离散余弦变换来实现。然而，由于数学运算的确定性和任务无关性，这种转换不可避免地为low-level恢复任务丢弃了一些关键、详细的信息。为了在模拟小波变换的同时避免关键信息丢失，作者提出通过可学习的隐空间下采样，来分解混合特征表示。类似的操作可以参考OctConv。</p>
+<p>具体来说，作者首先利用步长较大的卷积层(如stride= 2)对特征表示进行下采样，提取粗特征，即低频分量。然后，从原始特征(下采样前)中减去这些相对低频的分量，以获得其余相对高频的特征表示。</p></li>
+<li><p>Frequency Enhancement Unit (FEU)</p>
+<p>该单元对不同频率的信息进行增强。如b种所示结构，将CA的结果和普通卷积的结果相拼接，并加入dense connection。目的是有助于各分支在不同阶段选择性融合相应的频率分量，从而提高各分支在不同频域的表示能力。</p></li>
+<li><p>Region-adaptive Frequency Aggregation (RFA) Module</p>
+<p>该模块对不同频率组件进行自适应聚合。</p>
+<p><img src="/2021/02/16/ORNet/4.png" style="zoom:50%;"></p>
+<p>即预测多个动态卷积核，并设置一个可学习的权重向量，将多个卷积核组合在一起形成动态卷积核，通过它生成attention map并与原来的特征图做乘法。</p></li>
 </ul>
 <h4 id="框架的执行">框架的执行</h4>
-<p>整个网络的流程具体来说就是将时空超分辨率分为两个分支，一个是先超分再插帧，另一个是先插帧再超分，然后通过融合网络融合两个分支的结果，最后通过调整网络进行细节调整。</p>
-<p>空间超分辨率网络接收单个输入帧，并进行超分，输出对应一帧的超分结果；时间超分辨率网络接收前后两帧，并预测中间帧的结果。</p>
-<p>先超分再插帧的过程可以表示为：</p>
-<p><img src="/2021/02/09/DSFN/1.png" style="zoom:67%;"></p>
-<p>先插帧再超分的过程可以表示为：</p>
-<p><img src="/2021/02/09/DSFN/2.png" style="zoom:67%;"></p>
-<p>本文认为，这两个数据流在时空上采样方面表现出互补的结果，其中先超分再插帧在运动较小的区域产生更精细的细节，而先插帧再超分在运动较大的区域提供更好的重建。</p>
-<p>将双分支预测得到的结果进行融合，融合的策略就是给两个分支的结果分别预测一个Mask，并将Mask和预测结果进行element-wise的乘法后相加，整个过程可以表示为：</p>
-<p><img src="/2021/02/09/DSFN/3.png" style="zoom:67%;"></p>
-<p>注意到，两个Mask之间，假如给予约束 Mask1 + Mask2 = 1，则总的预测结果变成了两个分支结果的线性插值，否则总的预测结果是两个分支结果的线性组合。</p>
-<p>最终，通过一个三个残差块的调整网络增强细节信息。</p>
-<p><img src="/2021/02/09/DSFN/4.png" style="zoom:67%;"></p>
-<h4 id="损失函数">损失函数</h4>
-<p>损失函数主要分为两个部分：重建损失、辅助损失。</p>
-<p><img src="/2021/02/09/DSFN/5.png" style="zoom:77%;"></p>
-<ul>
-<li><p>重建损失</p>
-<p>各个中间预测结果和GT的L1距离，作为重建损失。</p>
-<p><img src="/2021/02/09/DSFN/6.png" style="zoom:67%;"></p></li>
-<li><p>辅助损失</p>
-<p>主要是先超分再插帧的超分部分，以及先插帧再超分的插帧部分，对中间结果计算L1损失。</p>
-<p><img src="/2021/02/09/DSFN/7.png" style="zoom: 60%;"></p></li>
-</ul>
+<p>首先将输入图像进行频率分离。用大步长卷积提取低频特征，并不断减去低频特征获得高频特征。</p>
+<p><img src="/2021/02/16/ORNet/2.png" style="zoom: 67%;"></p>
+<p>上箭头表示双线性插值上采样，下箭头表示带步长卷积进行下采样。</p>
+<p>接着，通过FEU来增强不同频率的表示，以弥补低/中/高频信息的丢失，并将低频信息与不同高频信息相结合。</p>
+<p><img src="/2021/02/16/ORNet/3.png" style="zoom: 60%;"></p>
+<p>真实LR图像中不同区域的频率信息丢失是不同的。因此，有必要对不同区域的全频分量进行自适应聚合，以恢复更真实、纹理细节更丰富的HR图像。通过作者提出的RFA模块，使用动态卷积核的方式生成attention map来组合多个频率下的组件，最终通过pixel shuffle提高分辨率。</p>
+<p><img src="/2021/02/16/ORNet/5.png" style="zoom:60%;"></p>
 <h3 id="实验结果">实验结果</h3>
-<p>batch size设置为24，使用优化器RAdam，学习率开始时设置为<span class="math inline">\(5e-5\)</span>。时间和空间超分辨率均为2x。使用数据集Vimeo-90K、UCF101、FISR dataset。训练过程，首先单独训练超分网络和插帧网络，然后冻结参数把它们和融合网络及调整网络拼接在一起训练，最终联合训练所有模块。</p>
-<h4 id="时空超分的互补结果">时空超分的互补结果</h4>
-<p><img src="/2021/02/09/DSFN/8.png"></p>
-<p>文章认为先超分再插帧在小动作区域有更好的细节，先插帧再超分能够在大动作区域有更好的重建效果。如图所示应该是1、3行表示小动作区域，先超分再插帧的效果更好，Error Map有更少的像素点有值；而2、4行则表示大动作区域，先插帧再超分的Error Map有更少的像素点有值。</p>
-<h4 id="不同融合策略的比较">不同融合策略的比较</h4>
-<p><img src="/2021/02/09/DSFN/9.png" style="zoom:67%;"></p>
-<p>One-mask表示Mask1 + Mask2 = 1，总的预测结果变成了两个分支结果的线性插值，Two-mask则表示总的预测结果是两个分支结果的线性组合，可以看出Two-mask更有优势。</p>
-<h4 id="选择不同上采样网络">选择不同上采样网络</h4>
-<p><img src="/2021/02/09/DSFN/10.png" style="zoom: 67%;"></p>
-<p>越新的方法作为backbone效果则越好。</p>
-<h4 id="与sota结果相比">与SOTA结果相比</h4>
-<p><img src="/2021/02/09/DSFN/11.png" style="zoom:67%;"></p>
-<p>并没有和最新的网络结果相比，例如Zooming Slow-Mo。</p>
+<p>是一种有监督方法，使用DRealSR进行训练，动态核的数量设置为5个，使用L1损失优化网络。</p>
+<h4 id="不同频率的可视化">不同频率的可视化</h4>
+<p><img src="/2021/02/16/ORNet/6.png" style="zoom: 67%;"></p>
+<p>对于FD模块，首先在图6(a)中对三个频率尺度的特征进行可视化，可以看到高频分支的特征包含更多的细节和纹理信息。然后根据图6(b)中的小波变换对低/中/高频特征进行分析。从左到右，频率范围从1增加到6中，低频特征的能量几乎完全集中在低频域，高频特征和中频特征的能量集中在相对更高的频率域。</p>
+<h4 id="不同频率数量的比较">不同频率数量的比较</h4>
+<p><img src="/2021/02/16/ORNet/7.png" style="zoom:50%;"></p>
+<p>提高频率分割的数量一定程度上能够提高效果。</p>
+<h4 id="消融实验">消融实验</h4>
+<p><img src="/2021/02/16/ORNet/8.png" style="zoom: 50%;"></p>
+<h4 id="与sota相比较">与SOTA相比较</h4>
+<p><img src="/2021/02/16/ORNet/9.png" style="zoom: 50%;"></p>
+<p>其他方法除了CDC外均没有在DRealSR上训练，因此除了CDC外本质上无法证明该方法的有效性。</p>
 <h3 id="结论">结论</h3>
-<p>本文提出了一种融合双分支结果的网络来进行时空超分辨率。然而，该网络并不是end-to-end训练的，借用已有的网络进行多阶段训练，并且正文没有给出参数量和计算量，可能代价也比较高。其次，重建完全由中间和最终输出帧的像素级重建损失来指导，把超分和插帧的过程都看成是独立的过程，各个中间结果之间没有加上时序的联系，这必然导致了性能的降低。因此，在时空超分中如何有效地利用时序信息进行更好的重建值得进行探索。</p>
+<p>作者提出一种全频域自适应网络(OR-Net)来实现真实图像超分辨率。比较有贡献的地方在于分析了真实图像与图像频率的关系，以及频率在网络中的影响。然而现在RealSR大部分流行的方式是无监督学习（或unpaired的方式），而该文是完全的有监督学习。</p>
+<p>有文章显示基于卷积的频率分离操作在PSNR和SSIM上稍高于基于小波变换的方法，但在视觉感知上（LPIPS指标）会稍差。对图像进行不同频率分离的方式会导致最终的重建效果有所不同。</p>
 
     </div>
 
@@ -388,21 +377,19 @@
 
     <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/STVSR/" rel="tag"># STVSR</a>
+              <a href="/tags/SISR/" rel="tag"># SISR</a>
+              <a href="/tags/RealSR/" rel="tag"># RealSR</a>
           </div>
 
         
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/2021/02/05/DualSR/" rel="prev" title="DualSR 论文阅读">
-                  <i class="fa fa-chevron-left"></i> DualSR 论文阅读
+                <a href="/2021/02/09/DSFN/" rel="prev" title="DSFN 论文阅读">
+                  <i class="fa fa-chevron-left"></i> DSFN 论文阅读
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/2021/02/16/ORNet/" rel="next" title="OR-Net 论文阅读">
-                  OR-Net 论文阅读 <i class="fa fa-chevron-right"></i>
-                </a>
             </div>
           </div>
     </footer>
