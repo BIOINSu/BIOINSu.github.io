@@ -452,10 +452,12 @@
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">int</span> num = <span class="number">6666</span>;</span><br><span class="line">String str = String.valueOf(num);</span><br></pre></td></tr></table></figure>
 ]]></content>
       <categories>
+        <category>Java</category>
         <category>Java基础</category>
       </categories>
       <tags>
         <tag>Java</tag>
+        <tag>Java基础</tag>
       </tags>
   </entry>
 </search>
