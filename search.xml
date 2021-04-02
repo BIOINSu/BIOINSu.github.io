@@ -416,7 +416,6 @@
     <title>Java中char、int、String相互转换</title>
     <url>/2021/04/01/Java%E4%B8%ADchar,int,String%E7%9B%B8%E4%BA%92%E8%BD%AC%E6%8D%A2/</url>
     <content><![CDATA[<h3 id="java中charintstring相互转换">Java中char、int、String相互转换</h3>
-<hr>
 <h4 id="char转int">char转int</h4>
 <p>在Java中用2个字节，即16位，来表示一个char。</p>
 <a id="more"></a>
@@ -431,7 +430,7 @@
 <p>小写字母<strong>a-z</strong>的ASCII码为：97-122；</p>
 <p><strong>空字符</strong>的ASCII码为0；</p>
 <p><strong>换行符</strong>的ASCII码为10。</p>
-<h2 id="section"><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">char</span> tmp = <span class="string">&#x27;a&#x27;</span>;</span><br><span class="line"><span class="keyword">int</span> num = (<span class="keyword">int</span>)tmp; <span class="comment">//num此时为&#x27;a&#x27;的ASCII 编码97</span></span><br></pre></td></tr></table></figure></h2></li>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">char</span> tmp = <span class="string">&#x27;a&#x27;</span>;</span><br><span class="line"><span class="keyword">int</span> num = (<span class="keyword">int</span>)tmp; <span class="comment">//num此时为&#x27;a&#x27;的ASCII 编码97</span></span><br></pre></td></tr></table></figure></li>
 </ul>
 <h4 id="int转char">int转char</h4>
 <ul>
@@ -440,14 +439,14 @@
 <li><p>当int为0到9的数字时，利用ASCII码</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">int</span> num = <span class="number">9</span>;</span><br><span class="line"><span class="keyword">char</span> ca = (<span class="keyword">char</span>)(num+<span class="number">48</span>) <span class="comment">//ca此时就代表了数字&#x27;9&#x27;</span></span><br></pre></td></tr></table></figure></li>
 <li><p>先将int转为String，再转成char，可以将数字拆开</p>
-<h2 id="section-1"><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">int</span> num = <span class="number">4596</span>;</span><br><span class="line">String str = String.valueOf(num);</span><br><span class="line"><span class="keyword">char</span>[] array = str.toCharArray();</span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; array.length; i++) &#123;</span><br><span class="line">	System.out.print(array[i]+<span class="string">&quot; &quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">4 5 9 6</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure></h2></li>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">int</span> num = <span class="number">4596</span>;</span><br><span class="line">String str = String.valueOf(num);</span><br><span class="line"><span class="keyword">char</span>[] array = str.toCharArray();</span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; array.length; i++) &#123;</span><br><span class="line">	System.out.print(array[i]+<span class="string">&quot; &quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">4 5 9 6</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure></li>
 </ul>
 <h4 id="char转string">char转String</h4>
-<h2 id="section-2"><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">String str = String.valueOf(<span class="string">&#x27;a&#x27;</span>);</span><br></pre></td></tr></table></figure></h2>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">String str = String.valueOf(<span class="string">&#x27;a&#x27;</span>);</span><br></pre></td></tr></table></figure>
 <h4 id="string转char">String转char</h4>
-<h2 id="section-3"><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">String str = <span class="string">&quot;Hello World&quot;</span>;</span><br><span class="line"><span class="keyword">char</span>[] array = str.toCharArray();</span><br></pre></td></tr></table></figure></h2>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">String str = <span class="string">&quot;Hello World&quot;</span>;</span><br><span class="line"><span class="keyword">char</span>[] array = str.toCharArray();</span><br></pre></td></tr></table></figure>
 <h4 id="string转int">String转int</h4>
-<h2 id="section-4"><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">String str = <span class="string">&quot;6666&quot;</span>;</span><br><span class="line"><span class="keyword">int</span> num = Integer.valueOf(str);</span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">当str非数字时报出运行时异常</span></span><br><span class="line"><span class="comment">java.lang.NumberFormatException</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure></h2>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">String str = <span class="string">&quot;6666&quot;</span>;</span><br><span class="line"><span class="keyword">int</span> num = Integer.valueOf(str);</span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">当str非数字时报出运行时异常</span></span><br><span class="line"><span class="comment">java.lang.NumberFormatException</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
 <h4 id="int转string">int转String</h4>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">int</span> num = <span class="number">6666</span>;</span><br><span class="line">String str = String.valueOf(num);</span><br></pre></td></tr></table></figure>
 ]]></content>
