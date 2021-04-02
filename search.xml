@@ -415,8 +415,7 @@
   <entry>
     <title>Java中char、int、String相互转换</title>
     <url>/2021/04/01/Java%E4%B8%ADchar,int,String%E7%9B%B8%E4%BA%92%E8%BD%AC%E6%8D%A2/</url>
-    <content><![CDATA[<h3 id="java中charintstring相互转换">Java中char、int、String相互转换</h3>
-<h4 id="char转int">char转int</h4>
+    <content><![CDATA[<h4 id="char转int">char转int</h4>
 <p>在Java中用2个字节，即16位，来表示一个char。</p>
 <a id="more"></a>
 <ul>
@@ -460,10 +459,9 @@
       </tags>
   </entry>
   <entry>
-    <title>Java中char、int、String相互转换</title>
+    <title>MySQL日志</title>
     <url>/2021/04/02/MySQLLog/</url>
-    <content><![CDATA[<h3 id="mysql日志">MySQL日志</h3>
-<p>日志是MySQL数据库的重要组成部分，记录着数据库运行期间各种状态信息。</p>
+    <content><![CDATA[<p>日志是MySQL数据库的重要组成部分，记录着数据库运行期间各种状态信息。</p>
 <a id="more"></a>
 <h4 id="binlog">binlog</h4>
 <ul>
