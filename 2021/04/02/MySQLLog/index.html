@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.3.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/maze.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/maze.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/maze.png">
+  <link rel="mask-icon" href="/images/maze.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","images":"/images","scheme":"Mist","version":"8.2.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false}};
+  </script>
+<meta name="description" content="MySQL日志 日志是MySQL数据库的重要组成部分，记录着数据库运行期间各种状态信息。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java中char、int、String相互转换">
+<meta property="og:url" content="http://example.com/2021/04/02/MySQLLog/index.html">
+<meta property="og:site_name" content="BIOINSu">
+<meta property="og:description" content="MySQL日志 日志是MySQL数据库的重要组成部分，记录着数据库运行期间各种状态信息。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2021/04/02/MySQLLog/3.png">
+<meta property="og:image" content="http://example.com/2021/04/02/MySQLLog/1.png">
+<meta property="og:image" content="http://example.com/2021/04/02/MySQLLog/0.png">
+<meta property="og:image" content="http://example.com/2021/04/02/MySQLLog/2.png">
+<meta property="article:published_time" content="2021-04-02T11:41:05.168Z">
+<meta property="article:modified_time" content="2021-04-02T11:47:34.993Z">
+<meta property="article:author" content="BIOINSu">
+<meta property="article:tag" content="数据库">
+<meta property="article:tag" content="MySQL">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2021/04/02/MySQLLog/3.png">
+
+
+<link rel="canonical" href="http://example.com/2021/04/02/MySQLLog/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+<title>Java中char、int、String相互转换 | BIOINSu</title>
+  
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BIOINSu</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql%E6%97%A5%E5%BF%97"><span class="nav-number">1.</span> <span class="nav-text">MySQL日志</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#binlog"><span class="nav-number">1.1.</span> <span class="nav-text">binlog</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#redo-log"><span class="nav-number">1.2.</span> <span class="nav-text">redo log</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undo-log"><span class="nav-number">1.3.</span> <span class="nav-text">undo log</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%89%E8%80%85%E5%8C%BA%E5%88%AB"><span class="nav-number">1.4.</span> <span class="nav-text">三者区别</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">1.5.</span> <span class="nav-text">参考资料</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">BIOINSu</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">9</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/BIOINSu" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;BIOINSu" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/04/02/MySQLLog/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BIOINSu">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BIOINSu">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Java中char、int、String相互转换
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2021-04-02 19:41:05 / 修改时间：19:47:34" itemprop="dateCreated datePublished" datetime="2021-04-02T19:41:05+08:00">2021-04-02</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/" itemprop="url" rel="index"><span itemprop="name">数据库</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/MySQL/" itemprop="url" rel="index"><span itemprop="name">MySQL</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h3 id="mysql日志">MySQL日志</h3>
+<p>日志是MySQL数据库的重要组成部分，记录着数据库运行期间各种状态信息。</p>
+<a id="more"></a>
+<h4 id="binlog">binlog</h4>
+<ul>
+<li><p><strong>概念</strong></p>
+<p>binlog属于逻辑日志，用于<strong>记录数据库执行的写入性操作</strong>(不包括查询)信息，以二进制的形式保存在磁盘中。binlog是MySQL的逻辑日志，并且由Server层进行记录，使用任何存储引擎的MySQL数据库都会记录binlog日志。</p>
+<blockquote>
+<p>逻辑日志：可以简单理解为记录的就是sql语句。但又不完全是sql语句这么简单，而是包括了执行的sql语句（增删改）反向的信息，也就意味着delete对应着delete本身和其反向的insert；update对应着update执行前后的版本的信息；insert对应着delete和insert本身的信息。</p>
+<p>物理日志：因为MySQL数据最终是保存在数据页中的，物理日志记录的就是数据页变更，即数据本身的值。</p>
+</blockquote></li>
+<li><p><strong>使用场景</strong></p>
+<p>binlog的主要使用场景有两个，分别是<strong>主从复制</strong>和<strong>数据恢复</strong>。</p>
+<p>主从复制：在Master端开启binlog，然后将binlog发送到各个Slave端，Slave端重放binlog从而达到主从数据一致。</p>
+<p><img src="/2021/04/02/MySQLLog/3.png" style="zoom:50%;"></p>
+<p>数据恢复：通过使用MySQL binlog工具来恢复数据。</p></li>
+<li><p><strong>产生时机</strong></p>
+<p>事务提交的时候，一次性将事务中的sql语句（一个事物可能对应多个sql语句）按照一定的格式记录到binlog中。</p></li>
+<li><p><strong>释放时机</strong></p>
+<p>binlog的默认是保持时间由参数expire_logs_days配置，也就是说对于非活动的日志文件，在生成时间超过expire_logs_days配置的天数之后，会被自动删除。</p></li>
+<li><p>binlog记录方式</p>
+<p>binlog是通过追加的方式进行写入的，可以通过max_binlog_size参数设置每个binlog文件的大小，当文件大小达到给定值之后，会生成新的文件来保存日志。</p></li>
+</ul>
+<h4 id="redo-log">redo log</h4>
+<ul>
+<li><p><strong>概念</strong></p>
+<p>redo log属于物理日志，记录事务<strong>对数据页做了哪些修改</strong>。</p>
+<blockquote>
+<p>InnoDB的修改数据的基本流程</p>
+<p>当我们想要修改DB上某一行数据的时候，InnoDB是把数据从磁盘读取到内存的缓冲池上进行修改。</p>
+<p>这个时候数据在内存中被修改，与磁盘中相比就存在了差异，我们称这种有差异的数据为<strong>脏页</strong>。</p>
+<p>InnoDB对脏页的处理不是每次生成脏页就将脏页刷新回磁盘，这样会产生海量的IO操作，严重影响InnoDB的处理性能。</p>
+<p>既然脏页与磁盘中的数据存在差异，那么如果在这期间DB出现故障就会造成数据的丢失。为了解决这个问题，redo log就应运而生了。</p>
+</blockquote>
+<p>redo log包括两部分：一个是内存中的日志缓冲(redo log buffer)，另一个是磁盘上的日志文件(redo log file)。</p>
+<p><img src="/2021/04/02/MySQLLog/1.png" style="zoom:67%;"></p>
+<p>mysql每执行一条DML语句，先将记录写入redo log buffer，后续某个时间点再一次性将多个操作记录写到redo log file。这种先写日志，再写磁盘的技术就是MySQL里经常说到的WAL(Write-Ahead Logging) 技术。</p></li>
+<li><p><strong>使用场景</strong></p>
+<p>redo log <strong>防止DB出现故障造成数据的丢失</strong>。当出现故障导致脏页还未来得及保存进磁盘时，通过redo log进行重做，从而达到事务的持久性这一特性。</p></li>
+<li><p><strong>产生时机</strong></p>
+<p>事务开始之后就产生redo log。</p></li>
+<li><p><strong>释放时机</strong></p>
+<p>当对应事务的脏页写入到磁盘之后，redo log的使命也就完成了，重做日志占用的空间就可以重用（被覆盖）。</p></li>
+<li><p><strong>redo log记录方式</strong></p>
+<p><img src="/2021/04/02/MySQLLog/0.png" style="zoom:50%;"></p>
+<p>redo log实际上记录数据页的变更，而这种变更记录是没必要全部保存，因此redo log实现上采用了大小固定，循环写入的方式，当写到结尾时，会回到开头循环写日志。</p>
+<p>checkpoint所做的事就是把脏页给刷新回磁盘。所以，当DB重启恢复时，只需要恢复checkpoint之后的数据。这样就能大大缩短恢复时间。</p>
+<p>check point到write pos之间是redo log待落盘的数据页更改记录。</p>
+<p>write pos到check point之间的部分是redo log空着的部分，用于记录新的记录。</p>
+<p>当write pos追上check point时，会先推动check point向前移动，空出位置再记录新的日志。</p></li>
+<li><p><strong>redo log写入磁盘的时机</strong>（buffer到file的时机）</p>
+<p>MySQL支持三种将redo log buffer写入redo log file的时机，可以通过innodb_flush_log_at_trx_commit参数配置，各参数值含义如下：</p>
+<p>0（延迟写）</p>
+<p>事务提交时不会将redo log buffer中日志写入到os buffer，而是每秒写入os buffer并调用fsync()写入到redo log file中。也就是说<strong>设置为0时是(大约)每秒刷新写入到磁盘中的</strong>，当系统崩溃，会丢失1秒钟的数据。</p>
+<p>1（实时写，实时刷）</p>
+<p>事务每次提交都会将redo log buffer中的日志写入os buffer并调用fsync()刷到redo log file中。这种方式即使系统崩溃也不会丢失任何数据，但是因为<strong>每次提交都写入磁盘</strong>，IO的性能较差。</p>
+<p>2（实时写，延迟刷）</p>
+<p>每次<strong>提交都仅写入</strong>到os buffer，然后是<strong>每秒调用</strong>fsync()将os buffer中的日志写入到redo log file。</p></li>
+</ul>
+<h4 id="undo-log">undo log</h4>
+<ul>
+<li><p>概念</p>
+<p><img src="/2021/04/02/MySQLLog/2.png" style="zoom: 67%;"></p>
+<p>undo log属于逻辑日志，保存了事务发生之前的<strong>数据的一个版本</strong>，可以用于回滚。其实本质上，老旧的记录就形成了undo log。</p></li>
+<li><p>使用场景</p>
+<p>多版本并发控制协议MVCC中，通过undo log形成记录的多个版本，能执行快照读时能够判断读取的是哪个版本的记录。</p></li>
+<li><p>产生时机</p>
+<p>不同事务或者相同事务的对同一记录的修改，会导致该记录的undo log成为一条记录版本线性表，既链表。</p></li>
+<li><p>释放时机</p>
+<p>当事务提交之后，undo log并不能立马被删除，而是放入待清理的链表，由purge线程判断是否由其他事务在使用undo log上的旧版本，决定是否可以清理undo log的日志空间。</p></li>
+</ul>
+<h4 id="三者区别">三者区别</h4>
+<table>
+<colgroup>
+<col style="width: 4%">
+<col style="width: 31%">
+<col style="width: 31%">
+<col style="width: 31%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>binlog</th>
+<th>redo log</th>
+<th>undo log</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>记录内容</td>
+<td>用于<strong>记录数据库执行的写入性操作</strong>(不包括查询)信息，以二进制的形式保存在磁盘中。</td>
+<td>记录事务<strong>对数据页做了哪些修改</strong>。</td>
+<td>保存了事务发生之前的<strong>数据的一个版本</strong>，可以用于回滚。其实本质上，老旧的记录就形成了undo log。</td>
+</tr>
+<tr class="even">
+<td>日志类型</td>
+<td>逻辑日志</td>
+<td>物理日志</td>
+<td>逻辑日志</td>
+</tr>
+<tr class="odd">
+<td>使用场景</td>
+<td><strong>主从复制</strong>和<strong>数据恢复</strong>。主从复制：在Master端开启binlog，然后将binlog发送到各个Slave端，Slave端重放binlog从而达到主从数据一致。数据恢复：通过使用MySQL binlog工具来恢复数据。</td>
+<td>redo log <strong>防止DB出现故障造成数据的丢失</strong>。当出现故障导致脏页还未来得及保存进磁盘时，通过redo log进行重做，从而达到事务的持久性这一特性。</td>
+<td>多版本并发控制协议<strong>MVCC中的快照读</strong>，通过undo log形成记录的多个版本，能执行快照读时能够判断读取的是哪个版本的记录。</td>
+</tr>
+</tbody>
+</table>
+<p><strong>redo log 和 bin log 区别</strong></p>
+<p>作用不同：redo log是保证事务的持久性的，binlog主要用于主从复制。</p>
+<p>内容不同：redo log是物理日志，是数据页面的修改之后的物理记录，binlog是逻辑日志，可以简单认为记录的就是sql语句</p>
+<p>产生时机不同：事务开始之后就产生redo log，事务提交的时候产生bin log。</p>
+<p>释放时机不同：当对应事务的脏页写入到磁盘之后，redo log可以被移除，超过一定时间后，binlog被删除。</p>
+<p>恢复效率：基于物理日志的redo log恢复数据的效率要高于语句逻辑日志的binlog。</p>
+<p>先写redo log，再写binlog，两个日志都提交成功（刷入磁盘），事务才算真正的完成。</p>
+<h4 id="参考资料">参考资料</h4>
+<p>https://cloud.tencent.com/developer/article/1679325</p>
+<p>https://www.cnblogs.com/wy123/p/8365234.html</p>
+<p>https://zhuanlan.zhihu.com/p/35355751</p>
+<p>https://www.cnblogs.com/xuwc/p/13873611.html</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag"># 数据库</a>
+              <a href="/tags/MySQL/" rel="tag"># MySQL</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/04/01/Java%E4%B8%ADchar,int,String%E7%9B%B8%E4%BA%92%E8%BD%AC%E6%8D%A2/" rel="prev" title="Java中char、int、String相互转换">
+                  <i class="fa fa-chevron-left"></i> Java中char、int、String相互转换
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">BIOINSu</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+  <script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'none'
+      },
+      options: {
+        renderActions: {
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              const target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3.1.2/es5/tex-mml-chtml.js';
+    script.defer = true;
+    document.head.appendChild(script);
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.typesetClear();
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+
+
+</body>
+</html>
