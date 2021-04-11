@@ -26,33 +26,33 @@
 <meta name="description" content="《Space-Time Video Super-Resolution Using Temporal Profiles》 ACMMM 2020 背景 在时空超分辨率中，直接将VFI（插帧）和VSR（超分）串联，不能充分利用视频的时空相关性，是一种次优做法。此外，在计算效率低的同时，也容易引入累积误差。Zooming Slow-Mo提出一种one-stage的做法，使用可变形的ConvLSTM来隐">
 <meta property="og:type" content="article">
 <meta property="og:title" content="TPSTVSR 论文阅读">
-<meta property="og:url" content="http://example.com/2021/02/26/TPSTVSR/index.html">
+<meta property="og:url" content="http://example.com/2021/02/26/SR_TPSTVSR/index.html">
 <meta property="og:site_name" content="BIOINSu">
 <meta property="og:description" content="《Space-Time Video Super-Resolution Using Temporal Profiles》 ACMMM 2020 背景 在时空超分辨率中，直接将VFI（插帧）和VSR（超分）串联，不能充分利用视频的时空相关性，是一种次优做法。此外，在计算效率低的同时，也容易引入累积误差。Zooming Slow-Mo提出一种one-stage的做法，使用可变形的ConvLSTM来隐">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://example.com/2021/02/26/TPSTVSR/0.png">
-<meta property="og:image" content="http://example.com/2021/02/26/TPSTVSR/1.png">
-<meta property="og:image" content="http://example.com/2021/02/26/TPSTVSR/8.png">
-<meta property="og:image" content="http://example.com/2021/02/26/TPSTVSR/2.png">
-<meta property="og:image" content="http://example.com/2021/02/26/TPSTVSR/3.png">
-<meta property="og:image" content="http://example.com/2021/02/26/TPSTVSR/4.png">
-<meta property="og:image" content="http://example.com/2021/02/26/TPSTVSR/5.png">
-<meta property="og:image" content="http://example.com/2021/02/26/TPSTVSR/6.png">
-<meta property="og:image" content="http://example.com/2021/02/26/TPSTVSR/7.png">
-<meta property="og:image" content="http://example.com/2021/02/26/TPSTVSR/9.png">
-<meta property="og:image" content="http://example.com/2021/02/26/TPSTVSR/10.png">
-<meta property="og:image" content="http://example.com/2021/02/26/TPSTVSR/11.png">
-<meta property="og:image" content="http://example.com/2021/02/26/TPSTVSR/12.png">
-<meta property="og:image" content="http://example.com/2021/02/26/TPSTVSR/13.png">
+<meta property="og:image" content="http://example.com/2021/02/26/SR_TPSTVSR/0.png">
+<meta property="og:image" content="http://example.com/2021/02/26/SR_TPSTVSR/1.png">
+<meta property="og:image" content="http://example.com/2021/02/26/SR_TPSTVSR/8.png">
+<meta property="og:image" content="http://example.com/2021/02/26/SR_TPSTVSR/2.png">
+<meta property="og:image" content="http://example.com/2021/02/26/SR_TPSTVSR/3.png">
+<meta property="og:image" content="http://example.com/2021/02/26/SR_TPSTVSR/4.png">
+<meta property="og:image" content="http://example.com/2021/02/26/SR_TPSTVSR/5.png">
+<meta property="og:image" content="http://example.com/2021/02/26/SR_TPSTVSR/6.png">
+<meta property="og:image" content="http://example.com/2021/02/26/SR_TPSTVSR/7.png">
+<meta property="og:image" content="http://example.com/2021/02/26/SR_TPSTVSR/9.png">
+<meta property="og:image" content="http://example.com/2021/02/26/SR_TPSTVSR/10.png">
+<meta property="og:image" content="http://example.com/2021/02/26/SR_TPSTVSR/11.png">
+<meta property="og:image" content="http://example.com/2021/02/26/SR_TPSTVSR/12.png">
+<meta property="og:image" content="http://example.com/2021/02/26/SR_TPSTVSR/13.png">
 <meta property="article:published_time" content="2021-02-26T07:47:19.454Z">
 <meta property="article:modified_time" content="2021-02-26T07:48:51.673Z">
 <meta property="article:author" content="BIOINSu">
 <meta property="article:tag" content="STVSR">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://example.com/2021/02/26/TPSTVSR/0.png">
+<meta name="twitter:image" content="http://example.com/2021/02/26/SR_TPSTVSR/0.png">
 
 
-<link rel="canonical" href="http://example.com/2021/02/26/TPSTVSR/">
+<link rel="canonical" href="http://example.com/2021/02/26/SR_TPSTVSR/">
 
 
 <script class="page-configurations">
@@ -216,7 +216,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">10</span>
+          <span class="site-state-item-count">12</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -273,7 +273,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/02/26/TPSTVSR/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/02/26/SR_TPSTVSR/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -329,44 +329,44 @@
 <p>在时空超分辨率中，直接将VFI（插帧）和VSR（超分）串联，不能充分利用视频的时空相关性，是一种次优做法。此外，在计算效率低的同时，也容易引入累积误差。Zooming Slow-Mo提出一种one-stage的做法，使用可变形的ConvLSTM来隐式对齐帧，这样可能会错过长依赖的时间上下文，因为当更多的帧融合时，需要设计更复杂的帧对齐规则。因此，本文提出利用 Temporal Profile (TP)来解决时空超分辨率问题。</p>
 <a id="more"></a>
 <p>视频帧在一个Patch上，可以转换为如下水平（vertical）TPs 和垂直（horizontal）TPs：</p>
-<p><img src="/2021/02/26/TPSTVSR/0.png" style="zoom: 50%;"></p>
+<p><img src="/2021/02/26/SR_TPSTVSR/0.png" style="zoom: 50%;"></p>
 <p>基于TP的时空超分辨率有以下几个好处：</p>
 <p>（1）STVSR可以有效地建模为基于学习的恢复任务，聚焦于TPs的特定二维结构。</p>
 <p>（2）TPs既包含空间维度又包含时间维度，可以更好地利用时空相关性。</p>
 <p>（3）与现有的多帧对齐方法相比，TPs能够更灵活地融合长依赖的时间上下文信息。</p>
 <h3 id="方法">方法</h3>
 <p>首先将低帧率和低分辨率的视频转换成TPs，然后将其送入Temporal Profile超分辨率模块（TPSRM）提高帧率，然后将TPs转换为视频域，发送给特征洗牌模块（FSM）生成具有目标空间分辨率的视频，最后通过调整模块（RM）去除伪影，增强细节。</p>
-<p><img src="/2021/02/26/TPSTVSR/1.png" style="zoom: 80%;"></p>
+<p><img src="/2021/02/26/SR_TPSTVSR/1.png" style="zoom: 80%;"></p>
 <ul>
 <li><p>Temporal-Profile Super-Resolution Module</p>
 <p>首先将输入视频帧 W x H x T 转换为垂直Temporal Profile T x H x W（转换为水平TP无太大区别），即在垂直方向上将视频帧切割成W个。然后输入TPSRM，将TP分辨率提高为 （2T-1）x 2H x W。TPSRM采用IMDN模型，用L1损失函数做监督，ground truth由高帧率高分辨率视频转换成TP得到。</p>
-<p><img src="/2021/02/26/TPSTVSR/8.png" style="zoom:60%;"></p></li>
+<p><img src="/2021/02/26/SR_TPSTVSR/8.png" style="zoom:60%;"></p></li>
 <li><p>Feature Shuffling Module</p>
 <p>该模块的目的是提高空间分辨率。经过TPSRM后，帧率提升为原来的两倍，H提高为原来的两倍，而W不变，FSM的目的就是将H再次提高两倍，W直接提高四倍。注意到其中Feature Shuffling阶段会将通道数（也就是帧率）减半，来将W提升2倍，在后面的模块需要将空间分辨率和通道数同时提升。CSR同样使用IMDN模块。</p>
-<p><img src="/2021/02/26/TPSTVSR/2.png" style="zoom: 67%;"></p></li>
+<p><img src="/2021/02/26/SR_TPSTVSR/2.png" style="zoom: 67%;"></p></li>
 <li><p>Refining Module</p>
 <p>该模块目的是消除伪影和增强细节，采用U-Net结构。</p>
-<p><img src="/2021/02/26/TPSTVSR/3.png" style="zoom: 67%;"></p></li>
+<p><img src="/2021/02/26/SR_TPSTVSR/3.png" style="zoom: 67%;"></p></li>
 </ul>
 <p>损失函数采用 L1、SSIM、VGG和Cycle Consistency四种损失函数。采用循环一致性损失来保证重构视频与输入的时空一致性，同时可以避免过度增强。</p>
-<p><img src="/2021/02/26/TPSTVSR/4.png" style="zoom:67%;"></p>
-<p><img src="/2021/02/26/TPSTVSR/5.png" style="zoom:67%;"></p>
-<p><img src="/2021/02/26/TPSTVSR/6.png" style="zoom:67%;"></p>
-<p><img src="/2021/02/26/TPSTVSR/7.png" style="zoom: 67%;"></p>
+<p><img src="/2021/02/26/SR_TPSTVSR/4.png" style="zoom:67%;"></p>
+<p><img src="/2021/02/26/SR_TPSTVSR/5.png" style="zoom:67%;"></p>
+<p><img src="/2021/02/26/SR_TPSTVSR/6.png" style="zoom:67%;"></p>
+<p><img src="/2021/02/26/SR_TPSTVSR/7.png" style="zoom: 67%;"></p>
 <h3 id="实验结果">实验结果</h3>
 <p>使用Vimeo90K数据集进行训练，进行空间4倍超分，时间2倍超分，batch size设置为1，学习率每2个epoch下降0.2，在一张1080Ti GPU上进行训练。</p>
 <h4 id="与sota对比">与SOTA对比</h4>
-<p><img src="/2021/02/26/TPSTVSR/9.png" style="zoom:80%;"></p>
+<p><img src="/2021/02/26/SR_TPSTVSR/9.png" style="zoom:80%;"></p>
 <h4 id="参数量与运行时间">参数量与运行时间</h4>
-<p><img src="/2021/02/26/TPSTVSR/10.png" style="zoom:80%;"></p>
+<p><img src="/2021/02/26/SR_TPSTVSR/10.png" style="zoom:80%;"></p>
 <h4 id="不同损失函数比较">不同损失函数比较</h4>
-<p><img src="/2021/02/26/TPSTVSR/11.png" style="zoom:67%;"></p>
+<p><img src="/2021/02/26/SR_TPSTVSR/11.png" style="zoom:67%;"></p>
 <h4 id="真实场景老电影恢复">真实场景：老电影恢复</h4>
 <p>由于相机设备的分辨率有限，老电影往往会出现严重的时空退化。另外，在不同的压缩程度下保存也会影响观感。因此时空超分有应用场景。从网络上直接下载老电影，并和Zooming Slow-Mo进行对比，两者同样在Vimeo90K上训练。</p>
-<p><img src="/2021/02/26/TPSTVSR/12.png" style="zoom: 67%;"></p>
+<p><img src="/2021/02/26/SR_TPSTVSR/12.png" style="zoom: 67%;"></p>
 <h3 id="结论">结论</h3>
 <p>本文从Temporal Profile的角度进行时空超分辨率，与Zooming Slow-Mo相比降低了参数量和运行时间。该网络利用的是滑动窗口的原理，当帧数过多时会造成显存大量占用的问题。此外，当一个移动的物体在视频中突然出现或消失时，由于快速的移动，TPs很难捕捉到全局信息，融合水平和垂直的TPs可能是一种解决方案。</p>
-<p><img src="/2021/02/26/TPSTVSR/13.png" style="zoom:67%;"></p>
+<p><img src="/2021/02/26/SR_TPSTVSR/13.png" style="zoom:67%;"></p>
 
     </div>
 

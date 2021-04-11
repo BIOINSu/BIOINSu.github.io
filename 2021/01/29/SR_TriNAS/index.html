@@ -26,28 +26,28 @@
 <meta name="description" content="《Trilevel Neural Architecture Search for Efficient Single Image Super-Resolution》 背景 传统的基于深度学习的超分辨率方法通常会在三层神经结构设计上选择以下变化：网络级优化、单元（cell）级优化以及内核（kernel）级优化。为一个深层SR模型人工执行这些优化需要较高的代价。并且，人工设计的架构往往不是最优的，对">
 <meta property="og:type" content="article">
 <meta property="og:title" content="TriNAS 论文阅读">
-<meta property="og:url" content="http://example.com/2021/01/29/TriNAS/index.html">
+<meta property="og:url" content="http://example.com/2021/01/29/SR_TriNAS/index.html">
 <meta property="og:site_name" content="BIOINSu">
 <meta property="og:description" content="《Trilevel Neural Architecture Search for Efficient Single Image Super-Resolution》 背景 传统的基于深度学习的超分辨率方法通常会在三层神经结构设计上选择以下变化：网络级优化、单元（cell）级优化以及内核（kernel）级优化。为一个深层SR模型人工执行这些优化需要较高的代价。并且，人工设计的架构往往不是最优的，对">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://example.com/2021/01/29/TriNAS/2.png">
-<meta property="og:image" content="http://example.com/2021/01/29/TriNAS/0.png">
-<meta property="og:image" content="http://example.com/2021/01/29/TriNAS/1.png">
-<meta property="og:image" content="http://example.com/2021/01/29/TriNAS/3.png">
-<meta property="og:image" content="http://example.com/2021/01/29/TriNAS/4.png">
-<meta property="og:image" content="http://example.com/2021/01/29/TriNAS/7.png">
-<meta property="og:image" content="http://example.com/2021/01/29/TriNAS/5.png">
-<meta property="og:image" content="http://example.com/2021/01/29/TriNAS/6.png">
+<meta property="og:image" content="http://example.com/2021/01/29/SR_TriNAS/2.png">
+<meta property="og:image" content="http://example.com/2021/01/29/SR_TriNAS/0.png">
+<meta property="og:image" content="http://example.com/2021/01/29/SR_TriNAS/1.png">
+<meta property="og:image" content="http://example.com/2021/01/29/SR_TriNAS/3.png">
+<meta property="og:image" content="http://example.com/2021/01/29/SR_TriNAS/4.png">
+<meta property="og:image" content="http://example.com/2021/01/29/SR_TriNAS/7.png">
+<meta property="og:image" content="http://example.com/2021/01/29/SR_TriNAS/5.png">
+<meta property="og:image" content="http://example.com/2021/01/29/SR_TriNAS/6.png">
 <meta property="article:published_time" content="2021-01-29T10:12:28.521Z">
 <meta property="article:modified_time" content="2021-01-29T10:47:59.783Z">
 <meta property="article:author" content="BIOINSu">
 <meta property="article:tag" content="SISR">
 <meta property="article:tag" content="NAS">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://example.com/2021/01/29/TriNAS/2.png">
+<meta name="twitter:image" content="http://example.com/2021/01/29/SR_TriNAS/2.png">
 
 
-<link rel="canonical" href="http://example.com/2021/01/29/TriNAS/">
+<link rel="canonical" href="http://example.com/2021/01/29/SR_TriNAS/">
 
 
 <script class="page-configurations">
@@ -211,7 +211,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">10</span>
+          <span class="site-state-item-count">12</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -268,7 +268,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/01/29/TriNAS/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/01/29/SR_TriNAS/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -329,16 +329,16 @@
 <p>在基准数据集上进行的实验表明，论文的的NAS算法所提供的SR模型在参数数量和FLOPS方面具有显着减轻的优势，其PSNR值可与当前的SOTA相媲美。</p>
 <h3 id="方法">方法</h3>
 <h4 id="搜索空间定义">搜索空间定义</h4>
-<p><img src="/2021/01/29/TriNAS/2.png" style="zoom: 60%;"></p>
+<p><img src="/2021/01/29/SR_TriNAS/2.png" style="zoom: 60%;"></p>
 <p>为了在模型容量和模型大小之间达到适当的平衡，同时保证最小的精度损失，论文提出在内核级、单元级和网络级结构上进行搜索，以得到高效的SR网络结构。</p>
 <ul>
 <li><p>网络级</p>
 <p>论文遵循AGD和SRResNet来定义网络级搜索空间。他们的超网结构使大多数计算都在低分辨率特征空间中进行，从而提高了计算效率。</p>
 <p>网络级架构搜索主要通过搜索五个残差块和两个上采样块。将Residual-in-Residual（RiR）模块中的dense block替换为包含可搜索单元级运算符和内核级运算的五个连续层。</p>
 <p>为了进行高效的上采样模块设计，论文替换了两个最初设计的上采样模块。取代的是一个PixelShuffel块，其中包含一个卷积层以及一个PixelShuffel层，以达到上采样的目的。由于PixelShuffle块固定在网络的尾部，因此在网络级搜索空间中添加了两个常规卷积层。最终，论文仅关注堆叠的五个RiR块和两个用于网络路径搜索的标准卷积层。</p>
-<p><img src="/2021/01/29/TriNAS/0.png" style="zoom:80%;"></p>
+<p><img src="/2021/01/29/SR_TriNAS/0.png" style="zoom:80%;"></p>
 <p>为了对网络级搜索空间建模，采用上图所示的AutoDeep-Lab网格状结构似乎是可行的解决方案。 但是，网格建模旨在遍历网络块的所有顺序路径。 每个节点表示这个位置的feature map，每个路径都从第一个节点开始，并沿着一组箭头到达最终的目标节点。 显然，所有路径共享大多数节点和箭头。 这种冗余共享导致路径，单元和内核之间的极端依赖，因为路径在层次上包括它们。 尽管这样的共享策略可以节省大量训练内存，但它极大地限制了搜索空间。 此外，紧密的结合可能会损害每条路径的贡献以及对某些冗余路径的修剪的学习。</p>
-<p><img src="/2021/01/29/TriNAS/1.png" style="zoom: 67%;"></p>
+<p><img src="/2021/01/29/SR_TriNAS/1.png" style="zoom: 67%;"></p>
 <p>论文提出了一种用于网络级路径搜索建模的树结构，来克服冗余共享的缺点。 如上图所示，树建模旨在遍历所有树结构路径。 在这里，每个节点仅连接到其父节点和子节点，因此，依赖性非常宽松。 但是，必须在训练时维护这样的关联，以降低内存消耗。 放宽不同路径的相关性可以实现灵活的网络级搜索空间。 对路径的较低依赖性可能会由于单元和内核之间的分层连接而导致它们之间可靠的关联，从而使它们的搜索空间更为通用。 此外，引入的树模型可以更好地解开路径之间的纠缠关系，从而能够对冗余路径进行修剪。</p></li>
 <li><p>单元级</p>
 <p>在单元级，论文搜索五个RiR块，每个块包含五个个可搜索的单元，即总共25个可搜索的单元。每个单元会选择如下操作符：</p>
@@ -351,21 +351,21 @@
 <p>为了解决这个问题，论文提出了sparsestmax，它在连续松弛过程中产生了良好的稀疏性，并且可以寻求具有优势的候选架构，同时具有诸如softmax之类的凸性和可微性。</p>
 <p>具体来说，为了实现离散网络级搜索空间的连续松弛，论文使用一组连续组合权值来聚合所有的网络路径，构成一个超网络。网络级架构搜索的树模型中每个特征图（即节点）都可以用作其对应路径的输出，然后可以将输出送到上采样层以获得超分结果。 论文根据提出的树模型对来自相关网络路径的所有特征图定义了一组权重<span class="math inline">\(\beta\)</span>，因此，超网的输出是所有中间特征图的加权组合。</p>
 <p>传统的连续松弛做法就是对所有的<span class="math inline">\(\beta\)</span>应用softmax函数来判断每个路径对总的网络的贡献。然而，softmax通常产生非零参数，即平滑变化的参数。因此，候选路径的贡献是相对均匀的，这防止超网络收敛到一个主要的候选结构。因此，利用sparsetmax来产生稀疏的分布，其中<span class="math inline">\(q\)</span>表示具有约束的单纯形：</p>
-<p><img src="/2021/01/29/TriNAS/3.png" style="zoom: 80%;"></p>
+<p><img src="/2021/01/29/SR_TriNAS/3.png" style="zoom: 80%;"></p>
 <p>sparsestmax的基本思想是将输入向量<span class="math inline">\(\beta\)</span>的欧几里德投影投射到概率单纯形上。该投射可能会触及单纯形边界，在这种情况下，sparsestmax会产生稀疏分布。为了获得更好的稀疏度，sparsestmax还引入了一个圆环约束，该圆环约束可以通过将单纯形外接圆的半径从零线性增加到某个阈值来逐步产生稀疏性。</p>
 <p>前文提到的树模型搜索架构有助于对路径进行剪枝，然而直接使用sparsestmax可能会在节点上产生无序的非零组合权重（极端情况是它们全部分布在奇/偶数节点上）。 在这种情况下，除非排序稀疏度，否则无法很好地修剪路径。 换句话说，只要非零组合权重沿路径下降，以便所有零权重都出现在路径的尾部，就可以执行网络级修剪，直接删除尾部即可。因此，论文提出利用排序的sparsetmax方法。 对每个路径<span class="math inline">\(p_i\)</span>内的权重<span class="math inline">\(\beta_i\)</span>施加排序约束。 直观上，这有助于使得浅层的输出feature maps对超网趋于相同的贡献度。排序的sparsetmax可以表示为：</p>
-<p><img src="/2021/01/29/TriNAS/4.png" style="zoom: 77%;"></p>
+<p><img src="/2021/01/29/SR_TriNAS/4.png" style="zoom: 77%;"></p>
 <p>上述讨论了网络级的连续松弛策略，即使用了排序的sparsetmax方法。对于单元级的连续松弛策略，同样给每个单元的输出定义权重<span class="math inline">\(\alpha\)</span>，并采用非排序的sparsetmax的方式进行连续松弛。对于内核级的连续松弛策略，则采用gumbel-softmax方法。</p>
 <h4 id="代理任务和优化">代理任务和优化</h4>
 <p>对于本文的三级NAS任务，论文不是从头训练模型，而是通过知识蒸馏方法，从而利用预先训练的最先进的图像超分辨率模型的知识。将预训练的ESRGAN模型作为teacher model，搜索阶段的代理任务是通过最小化模型输出与教师模型输出之间的知识精馏距离来搜索模型G。此外，图像SR任务偏向于更有效率的模型，因此在目标函数中加入模型效率项。</p>
 <p>由于架构搜索的参数的数量远远小于网络模型的参数的数量，因此在单个训练集上对它们进行联合优化容易出现过拟合。具体来说，将数据集分为训练集和验证集，分别在这两组数据上优化网络参数和架构搜索参数。</p>
 <h4 id="算法流程">算法流程</h4>
-<p><img src="/2021/01/29/TriNAS/7.png"></p>
+<p><img src="/2021/01/29/SR_TriNAS/7.png"></p>
 <h3 id="实验结果">实验结果</h3>
 <h4 id="与sota进行对比">与SOTA进行对比</h4>
-<p><img src="/2021/01/29/TriNAS/5.png" style="zoom: 50%;"></p>
+<p><img src="/2021/01/29/SR_TriNAS/5.png" style="zoom: 50%;"></p>
 <h4 id="softmax与sparsetmax对比">softmax与sparsetmax对比</h4>
-<p><img src="/2021/01/29/TriNAS/6.png" style="zoom: 67%;"></p>
+<p><img src="/2021/01/29/SR_TriNAS/6.png" style="zoom: 67%;"></p>
 <h3 id="结论">结论</h3>
 <p>本文介绍了用于单图像超分辨率任务的Trilevel NAS方法，主要是将排序的sparsetmax激活用于树模型的网络架构搜索中。树模型能够使得节点之间降低依赖性，提供灵活的搜索空间，并能够更好地进行剪枝优化；sparsetmax激活在连续松弛过程中产生了良好的稀疏性，使得超网能够收敛到一个主要的候选结构上；排序的sparsetmax同样能够更好地进行模型剪枝。</p>
 <p>论文中提到的sparsetmax仅使用在了网络级和单元级架构搜索，可以同样利用排序的sparsetmax去进一步地优化内核级的搜索空间，来产生更高效的超分模型，以达到高PSNR和高感知质量的效果。</p>
@@ -386,12 +386,12 @@
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/2021/01/28/basicvsr/" rel="prev" title="BasicVSR 论文阅读">
+                <a href="/2021/01/28/SR_Basicvsr/" rel="prev" title="BasicVSR 论文阅读">
                   <i class="fa fa-chevron-left"></i> BasicVSR 论文阅读
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/2021/02/05/DualSR/" rel="next" title="DualSR 论文阅读">
+                <a href="/2021/02/05/SR_DualSR/" rel="next" title="DualSR 论文阅读">
                   DualSR 论文阅读 <i class="fa fa-chevron-right"></i>
                 </a>
             </div>

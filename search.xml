@@ -57,149 +57,6 @@
 <p>本文提出提出了DualSR，一个轻量级的dual架构，它学习每个图像特定的LR-HR关系。它由下采样器和上采样器组成，在训练中使用循环一致性损失来相互改进。此外，论文提出了掩码插值损失，消除了图像低频区域的伪影，而不会导致边缘过于平滑。</p>
 <p>该方法是Zero-Shot的，无需HR图像进行监督，但本质上就是用了Bicubic上采样的低频部分来进行监督。之前的文章DynaVSR是用了元学习的思想，在测试时同样使用了类似循环一致性的方法，但在训练时为了更好的效果仍然使用了HR的图像。因此，可以思考如何将Zero-Shot的思想（目前来看还是想办法在Bicubic上采样的结果做文章），应用到VSR上，来达到完全无监督的效果。</p>
 ]]></content>
-      <categories>
-        <category>超分辨率</category>
-        <category>SISR</category>
-      </categories>
-      <tags>
-        <tag>SISR</tag>
-        <tag>RealSR</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>TriNAS 论文阅读</title>
-    <url>/2021/01/29/TriNAS/</url>
-    <content><![CDATA[<p>《Trilevel Neural Architecture Search for Efficient Single Image Super-Resolution》</p>
-<h3 id="背景">背景</h3>
-<p>传统的基于深度学习的超分辨率方法通常会在三层神经结构设计上选择以下变化：网络级优化、单元（cell）级优化以及内核（kernel）级优化。为一个深层SR模型人工执行这些优化需要较高的代价。并且，人工设计的架构往往不是最优的，对于真实超分辨率来说，可能在计算上效率低下。因此，论文提出了一种用于高效单图像超分辨率（SR）的三级神经架构搜索（TriNAS）方法。</p>
-<a id="more"></a>
-<p>论文首先在三个级别（即网络级别，单元级别和内核级别（卷积内核））定义离散搜索空间。提出了基于树模型的搜索框架来替代网格型的搜索框架，减少节点之间的依赖性。</p>
-<p>然后，与之前利用softmax进行连续松弛策略的NAS方法不同，论文利用排序的sparsestmax来使得三级搜索架构稀疏地起作用。因此，论文的NAS优化可以逐渐收敛到对超网起主要作用的神经架构。</p>
-<p>此外，论文提出的方法可以在单个阶段中同时进行搜索和训练，与传统的NAS算法相比，这大大减少了搜索和训练时间。</p>
-<p>在基准数据集上进行的实验表明，论文的的NAS算法所提供的SR模型在参数数量和FLOPS方面具有显着减轻的优势，其PSNR值可与当前的SOTA相媲美。</p>
-<h3 id="方法">方法</h3>
-<h4 id="搜索空间定义">搜索空间定义</h4>
-<p><img src="/2021/01/29/TriNAS/2.png" style="zoom: 60%;"></p>
-<p>为了在模型容量和模型大小之间达到适当的平衡，同时保证最小的精度损失，论文提出在内核级、单元级和网络级结构上进行搜索，以得到高效的SR网络结构。</p>
-<ul>
-<li><p>网络级</p>
-<p>论文遵循AGD和SRResNet来定义网络级搜索空间。他们的超网结构使大多数计算都在低分辨率特征空间中进行，从而提高了计算效率。</p>
-<p>网络级架构搜索主要通过搜索五个残差块和两个上采样块。将Residual-in-Residual（RiR）模块中的dense block替换为包含可搜索单元级运算符和内核级运算的五个连续层。</p>
-<p>为了进行高效的上采样模块设计，论文替换了两个最初设计的上采样模块。取代的是一个PixelShuffel块，其中包含一个卷积层以及一个PixelShuffel层，以达到上采样的目的。由于PixelShuffle块固定在网络的尾部，因此在网络级搜索空间中添加了两个常规卷积层。最终，论文仅关注堆叠的五个RiR块和两个用于网络路径搜索的标准卷积层。</p>
-<p><img src="/2021/01/29/TriNAS/0.png" style="zoom:80%;"></p>
-<p>为了对网络级搜索空间建模，采用上图所示的AutoDeep-Lab网格状结构似乎是可行的解决方案。 但是，网格建模旨在遍历网络块的所有顺序路径。 每个节点表示这个位置的feature map，每个路径都从第一个节点开始，并沿着一组箭头到达最终的目标节点。 显然，所有路径共享大多数节点和箭头。 这种冗余共享导致路径，单元和内核之间的极端依赖，因为路径在层次上包括它们。 尽管这样的共享策略可以节省大量训练内存，但它极大地限制了搜索空间。 此外，紧密的结合可能会损害每条路径的贡献以及对某些冗余路径的修剪的学习。</p>
-<p><img src="/2021/01/29/TriNAS/1.png" style="zoom: 67%;"></p>
-<p>论文提出了一种用于网络级路径搜索建模的树结构，来克服冗余共享的缺点。 如上图所示，树建模旨在遍历所有树结构路径。 在这里，每个节点仅连接到其父节点和子节点，因此，依赖性非常宽松。 但是，必须在训练时维护这样的关联，以降低内存消耗。 放宽不同路径的相关性可以实现灵活的网络级搜索空间。 对路径的较低依赖性可能会由于单元和内核之间的分层连接而导致它们之间可靠的关联，从而使它们的搜索空间更为通用。 此外，引入的树模型可以更好地解开路径之间的纠缠关系，从而能够对冗余路径进行修剪。</p></li>
-<li><p>单元级</p>
-<p>在单元级，论文搜索五个RiR块，每个块包含五个个可搜索的单元，即总共25个可搜索的单元。每个单元会选择如下操作符：</p>
-<p>Conv 1×1；Residual Block (2 layers of Conv 3×3 + skip-connection)；Conv 3×3；Depthwise Block (Conv 1×1 + Depthwise Conv3×3 + Conv 1×1).</p></li>
-<li><p>内核级</p>
-<p>对于内核级搜索，论文遵循super-kernel框架对该搜索空间进行建模。 对于每个卷积内核，先设置一个具有完整通道的超级内核。 为了修剪超级内核的通道数，需要一组可搜索的扩展比<span class="math inline">\(\phi=[\frac{1}{3},\frac{1}{2},\frac{4}{5},\frac{5}{6},1]\)</span>。并且设置参数<span class="math inline">\(\gamma_i\)</span>控制选择第<span class="math inline">\(i\)</span>个扩展比的概率。</p></li>
-</ul>
-<h4 id="连续松弛策略">连续松弛策略</h4>
-<p>为了使得NAS是可微的，关键思想是将离散的搜索空间的显式选择放宽为搜索空间中所有相关候选对象的的隐式选择。连续松弛使我们能够以完全可微的方式选择对超网贡献最大的候选者，然后就可以通过反向传播的方式优化整个超网，以实现高效的架构。流行的连续松弛策略之一是应用softmax来实现所有候选网络操作的混合。但是，softmax无法产生稀疏的分布，因此，它无法反映主导操作，这对于有效的结构设计而言至关重要。因此，使用softmax可以防止超级网络收敛到主要的候选架构。</p>
-<p>为了解决这个问题，论文提出了sparsestmax，它在连续松弛过程中产生了良好的稀疏性，并且可以寻求具有优势的候选架构，同时具有诸如softmax之类的凸性和可微性。</p>
-<p>具体来说，为了实现离散网络级搜索空间的连续松弛，论文使用一组连续组合权值来聚合所有的网络路径，构成一个超网络。网络级架构搜索的树模型中每个特征图（即节点）都可以用作其对应路径的输出，然后可以将输出送到上采样层以获得超分结果。 论文根据提出的树模型对来自相关网络路径的所有特征图定义了一组权重<span class="math inline">\(\beta\)</span>，因此，超网的输出是所有中间特征图的加权组合。</p>
-<p>传统的连续松弛做法就是对所有的<span class="math inline">\(\beta\)</span>应用softmax函数来判断每个路径对总的网络的贡献。然而，softmax通常产生非零参数，即平滑变化的参数。因此，候选路径的贡献是相对均匀的，这防止超网络收敛到一个主要的候选结构。因此，利用sparsetmax来产生稀疏的分布，其中<span class="math inline">\(q\)</span>表示具有约束的单纯形：</p>
-<p><img src="/2021/01/29/TriNAS/3.png" style="zoom: 80%;"></p>
-<p>sparsestmax的基本思想是将输入向量<span class="math inline">\(\beta\)</span>的欧几里德投影投射到概率单纯形上。该投射可能会触及单纯形边界，在这种情况下，sparsestmax会产生稀疏分布。为了获得更好的稀疏度，sparsestmax还引入了一个圆环约束，该圆环约束可以通过将单纯形外接圆的半径从零线性增加到某个阈值来逐步产生稀疏性。</p>
-<p>前文提到的树模型搜索架构有助于对路径进行剪枝，然而直接使用sparsestmax可能会在节点上产生无序的非零组合权重（极端情况是它们全部分布在奇/偶数节点上）。 在这种情况下，除非排序稀疏度，否则无法很好地修剪路径。 换句话说，只要非零组合权重沿路径下降，以便所有零权重都出现在路径的尾部，就可以执行网络级修剪，直接删除尾部即可。因此，论文提出利用排序的sparsetmax方法。 对每个路径<span class="math inline">\(p_i\)</span>内的权重<span class="math inline">\(\beta_i\)</span>施加排序约束。 直观上，这有助于使得浅层的输出feature maps对超网趋于相同的贡献度。排序的sparsetmax可以表示为：</p>
-<p><img src="/2021/01/29/TriNAS/4.png" style="zoom: 77%;"></p>
-<p>上述讨论了网络级的连续松弛策略，即使用了排序的sparsetmax方法。对于单元级的连续松弛策略，同样给每个单元的输出定义权重<span class="math inline">\(\alpha\)</span>，并采用非排序的sparsetmax的方式进行连续松弛。对于内核级的连续松弛策略，则采用gumbel-softmax方法。</p>
-<h4 id="代理任务和优化">代理任务和优化</h4>
-<p>对于本文的三级NAS任务，论文不是从头训练模型，而是通过知识蒸馏方法，从而利用预先训练的最先进的图像超分辨率模型的知识。将预训练的ESRGAN模型作为teacher model，搜索阶段的代理任务是通过最小化模型输出与教师模型输出之间的知识精馏距离来搜索模型G。此外，图像SR任务偏向于更有效率的模型，因此在目标函数中加入模型效率项。</p>
-<p>由于架构搜索的参数的数量远远小于网络模型的参数的数量，因此在单个训练集上对它们进行联合优化容易出现过拟合。具体来说，将数据集分为训练集和验证集，分别在这两组数据上优化网络参数和架构搜索参数。</p>
-<h4 id="算法流程">算法流程</h4>
-<p><img src="/2021/01/29/TriNAS/7.png"></p>
-<h3 id="实验结果">实验结果</h3>
-<h4 id="与sota进行对比">与SOTA进行对比</h4>
-<p><img src="/2021/01/29/TriNAS/5.png" style="zoom: 50%;"></p>
-<h4 id="softmax与sparsetmax对比">softmax与sparsetmax对比</h4>
-<p><img src="/2021/01/29/TriNAS/6.png" style="zoom: 67%;"></p>
-<h3 id="结论">结论</h3>
-<p>本文介绍了用于单图像超分辨率任务的Trilevel NAS方法，主要是将排序的sparsetmax激活用于树模型的网络架构搜索中。树模型能够使得节点之间降低依赖性，提供灵活的搜索空间，并能够更好地进行剪枝优化；sparsetmax激活在连续松弛过程中产生了良好的稀疏性，使得超网能够收敛到一个主要的候选结构上；排序的sparsetmax同样能够更好地进行模型剪枝。</p>
-<p>论文中提到的sparsetmax仅使用在了网络级和单元级架构搜索，可以同样利用排序的sparsetmax去进一步地优化内核级的搜索空间，来产生更高效的超分模型，以达到高PSNR和高感知质量的效果。</p>
-]]></content>
-      <categories>
-        <category>超分辨率</category>
-        <category>SISR</category>
-      </categories>
-      <tags>
-        <tag>SISR</tag>
-        <tag>NAS</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>BasicVSR 论文阅读</title>
-    <url>/2021/01/28/basicvsr/</url>
-    <content><![CDATA[<p>《BasicVSR：The Search for Essential Components in Video Super-Resolution and Beyond》</p>
-<h3 id="背景">背景</h3>
-<p>相比图像超分任务，视频超分网络会设计更多模块，因为它多了一个时空维度。因此复杂的设计结构在视频超分网络中是常见的。本文重新分析了视频超分网络中的四大模块（对齐、聚合、传播和上采样）的作用，以及它们的优缺点。提出了一个视频超分框架baseline，即BasicVSR，并在Reds和Vimeo数据集上训练，验证了该框架的有效性。</p>
-<p>另外，本文扩展BasicVSR框架，设计了信息重新填充机制和成对传播策略，促进信息聚合，即IconVSR网络。</p>
-<a id="more"></a>
-<h3 id="方法">方法</h3>
-<p>该部分首先分析了视频超分网络中四大模块中不同选择的作用，并在每个模块中选择最好的组件构成BasicVSR网络，该网络可以作为设计其他视频超分网络的骨架backbone。然后，作者在backbone的基础上引入了两种新的组件信息重新填充机制和成对传播策略，略微提升了参数量和运行时间，并提高了网络性能。</p>
-<h4 id="传播模块">传播模块</h4>
-<p>本质上，传播模块定义了各个输入帧究竟是如何在网络中进行传播的，当前各个帧的传播方式主要有如下几种：</p>
-<ul>
-<li><p>Local</p>
-<p>局部传播使用一个滑动窗口中的LR图像作为输入，然后利用这些局部信息完成重建任务。这是最常见的方式，也是TDAN、EDVR等方法的输入方式，例如一次性输入相邻的7帧，并选择重建第4帧，其他的作为参考帧。因此，网络能够访问的信息限制在这些局部相邻帧中。缺少远距离帧不可避免地限制了网络的表达能力。</p>
-<p><img src="/2021/01/28/basicvsr/0.png" style="zoom:67%;"></p>
-<p>如图所示，作者将测试集分成K个segments在BasicVSR网络中进行测试，可以看到当每个segments内的帧数越多的时候，其恢复的PSNR值越低，说明了帧的数量对网络有影响。</p>
-<p>对于非recurrent形式的网络，滑动窗口内的帧数越多则会导致网络的参数量和占用显存都会大规模增加，这是一个主要的缺陷。</p></li>
-<li><p>Unidirectional Propagation</p>
-<p>单向传播形式，即如RLSP、RSDN等普通recurrent网络的形式，每次输入一帧和相邻帧，并利用重建的相邻帧及其中间产物来完成当前参考帧的重建过程。</p>
-<p><img src="/2021/01/28/basicvsr/1.png" style="zoom:67%;"></p>
-<p>然而，单向传播的方式会涉及到隐状态，即前一帧的中间产物的处理问题。本质上隐状态代表了前一帧或前n帧的特征，因此当输入的帧数越靠前时，隐状态含有的信息越少，对参考帧的重建效果越差，如上图所示。</p></li>
-<li><p>Bidirectional Propagation</p>
-<p>双向传播形式解决上述两种问题，本质上就是网络同时利用前一帧和后一帧的隐状态，来完成当前参考帧的重建。前一帧的隐状态包含当前参考帧之前的所有信息，后一帧的隐状态包含当前参考帧之后的所有信息，这相当于可以利用前后所有帧的信息。</p></li>
-</ul>
-<h4 id="对齐模块">对齐模块</h4>
-<ul>
-<li><p>无对齐</p>
-<p>不对齐的特征或图像会影响聚合的效果，并最终导致性能降低。直接串联不对齐的特征以进行恢复，相邻帧的特征将不会与输入图像的特征在空间上对齐。由于卷积之类的局部操作具有相对较小的感受野，在相应位置集合信息时无法有效地利用相邻帧的信息，此时会导致较低的效率。</p></li>
-<li><p>基于图像的对齐</p>
-<p>基于图像的对齐使用光流估计相邻帧到参考帧的光流变化，然后利用光流的信息将相邻帧变形对齐到参考帧上。该过程是直接在图像上进行的，而非特征图上进行的。并且大部分的工作通常需要利用其他预训练的光流估计网络。</p></li>
-<li><p>基于特征的对齐</p>
-<p>基于特征的对齐最流行的方法是使用可变形卷积。然而本文使用的方式是基于光流的特征对齐，即先估计光流，然后根据光流将中间结果，即隐状态进行对齐，然后将对齐过后的特征和当前参考帧一起输入残差块进行重建。</p></li>
-</ul>
-<h4 id="聚合与上采样">聚合与上采样</h4>
-<p>文章对聚合方式没有进行过多探讨，只采用最基础的聚合方式，即拼接特征图并输入多个卷积作为聚合模块。</p>
-<p>上采样模块采用最经典有效的方式Pixel-shuffle。</p>
-<h4 id="basicvsr">BasicVSR</h4>
-<p><img src="/2021/01/28/basicvsr/2.png" style="zoom: 50%;"></p>
-<p>本文提出的Backbone即BasicVSR，采用了上述探讨的最基础的几个模块。对齐模块采用基于光流的特征对齐，对齐的对象是隐状态和光流图。传播模块采用的是双向传播模式，当前参考帧需要利用前后一帧的隐状态。聚合模块是直接拼接，上采样模块则为Pixel-shuffle。</p>
-<h4 id="iconvsr">IconVSR</h4>
-<p>在BasicVSR的基础上引入了两种新的组件信息重新填充机制和成对传播策略来提升网络的性能。</p>
-<ul>
-<li><p>Information-Refill</p>
-<p>信息重新填充机制是为了解决在图像边界和有遮挡区域的不精确对齐的问题。不精确对齐会导致误差的不断积加，特别是在网络中采用长距离传播的时候。为了解决特征不精确对齐带来的不利影响，本文提出了一个信息重新填充机制，以做特征修正。</p>
-<p><img src="/2021/01/28/basicvsr/3.png" style="zoom:67%;"></p>
-<p>如上图所示，E为特征提取模块，C为卷积单元。需要事先设定一些关键帧<span class="math inline">\(I_{key}\)</span>，当关键帧作为参考帧进行输入时，对齐的特征需要和前后帧的特征进行拼接，对当前的特征图进行修正，防止错误累加，最后才将对齐后的特征和参考帧一起输入重建模块。</p></li>
-<li><p>Coupled Propagation</p>
-<p>成对传播策略将后向传播的特征，即后向传播的隐状态，也作为正向传播模块的输入。而不是像BasicVSR中的那样，直接在U处融合前后两个传播分支的输出。</p>
-<p><img src="/2021/01/28/basicvsr/4.png" style="zoom:67%;"></p>
-<p>通过成对传播，前向传播分支从过去和将来的帧中接收信息，从而导致更高质量的特征，获得更好的输出。</p></li>
-</ul>
-<h3 id="实验结果">实验结果</h3>
-<h4 id="与sota进行对比">与SOTA进行对比</h4>
-<p><img src="/2021/01/28/basicvsr/5.png" style="zoom: 50%;"></p>
-<p><img src="/2021/01/28/basicvsr/6.png" style="zoom: 50%;"></p>
-<h4 id="信息重新填充机制和成对传播策略消融实验">信息重新填充机制和成对传播策略消融实验</h4>
-<p><img src="/2021/01/28/basicvsr/7.png" style="zoom: 50%;"></p>
-<h4 id="信息重新填充机制中的关键帧数量">信息重新填充机制中的关键帧数量</h4>
-<p><img src="/2021/01/28/basicvsr/8.png" style="zoom: 50%;"></p>
-<h3 id="总结">总结</h3>
-<p>本文中提出的BasicVSR和IconVSR，利用recurrent的机制进行超分辨率。BasicVSR主要利用了双向传播机制，使得长距离信息能够得到利用，IconVSR在此基础上直接在前向传播分支中利用后向传播的特征，直接在特征维度上利用长距离信息。</p>
-<p>同时注意到，双向传播机制的短板非常明显，无论是BasicVSR还是IconVSR都需要将所有视频帧全部输入到网络中之后才能够进行超分辨率，这是相比于滑动窗口最大的缺陷，这导致了基于双向传播的方法无法做到实时超分。并且，这需要保存大量的中间结果，即隐状态，这在训练时可能会导致大规模的显存占用情况存在。</p>
-]]></content>
-      <categories>
-        <category>超分辨率</category>
-        <category>VSR</category>
-      </categories>
-      <tags>
-        <tag>VSR</tag>
-      </tags>
   </entry>
   <entry>
     <title>Hello World</title>
@@ -226,75 +83,6 @@
       <tags>
         <tag>Testing</tag>
         <tag>Another Tag</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>DSFN 论文阅读</title>
-    <url>/2021/02/09/DSFN/</url>
-    <content><![CDATA[<p>《Dual-Stream Fusion Network for Spatiotemporal Video Super-Resolution》 WACV 2021</p>
-<h3 id="背景">背景</h3>
-<p>时空视频超分辨率，即在时间维度上提升帧率，在空间维度上提升分辨率。本文认为，直接级联已有空间和时间超分辨率的方法（没有另外设计）来实现时空上采样，改变它们的顺序能够使得结果具有互补性。 因此，本文提出了一种双流融合网络，以自适应地融合两个时空上采样流产生的中间结果，其中第一个流应用空间超分辨率，然后是时间超分辨率，而第二个流则先使用空间超分辨率再进行时间超分辨率。</p>
-<a id="more"></a>
-<h3 id="方法">方法</h3>
-<p><img src="/2021/02/09/DSFN/0.png" style="zoom:50%;"></p>
-<h4 id="框架的组件">框架的组件</h4>
-<ul>
-<li><p><span class="math inline">\(M_S\)</span></p>
-<p>空间超分辨率网络。本文使用的是单幅图像的超分辨率网络ESPCN、SAN。</p></li>
-<li><p><span class="math inline">\(M_T\)</span></p>
-<p>时间超分辨率网络。即插帧网络，本文使用SuperSloMo、DAIN。</p></li>
-<li><p><span class="math inline">\(F\)</span></p>
-<p>融合网络，负责将不同分支产生的结果进行融合。具体采用采用了U-Net，它包含五个具有跳跃连接的对称下采样和上采样卷积层。</p></li>
-<li><p><span class="math inline">\(R\)</span></p>
-<p>调整网络，增强细节。具体为三个残差块。</p></li>
-</ul>
-<h4 id="框架的执行">框架的执行</h4>
-<p>整个网络的流程具体来说就是将时空超分辨率分为两个分支，一个是先超分再插帧，另一个是先插帧再超分，然后通过融合网络融合两个分支的结果，最后通过调整网络进行细节调整。</p>
-<p>空间超分辨率网络接收单个输入帧，并进行超分，输出对应一帧的超分结果；时间超分辨率网络接收前后两帧，并预测中间帧的结果。</p>
-<p>先超分再插帧的过程可以表示为：</p>
-<p><img src="/2021/02/09/DSFN/1.png" style="zoom:67%;"></p>
-<p>先插帧再超分的过程可以表示为：</p>
-<p><img src="/2021/02/09/DSFN/2.png" style="zoom:67%;"></p>
-<p>本文认为，这两个数据流在时空上采样方面表现出互补的结果，其中先超分再插帧在运动较小的区域产生更精细的细节，而先插帧再超分在运动较大的区域提供更好的重建。</p>
-<p>将双分支预测得到的结果进行融合，融合的策略就是给两个分支的结果分别预测一个Mask，并将Mask和预测结果进行element-wise的乘法后相加，整个过程可以表示为：</p>
-<p><img src="/2021/02/09/DSFN/3.png" style="zoom:67%;"></p>
-<p>注意到，两个Mask之间，假如给予约束 Mask1 + Mask2 = 1，则总的预测结果变成了两个分支结果的线性插值，否则总的预测结果是两个分支结果的线性组合。</p>
-<p>最终，通过一个三个残差块的调整网络增强细节信息。</p>
-<p><img src="/2021/02/09/DSFN/4.png" style="zoom:67%;"></p>
-<h4 id="损失函数">损失函数</h4>
-<p>损失函数主要分为两个部分：重建损失、辅助损失。</p>
-<p><img src="/2021/02/09/DSFN/5.png" style="zoom:77%;"></p>
-<ul>
-<li><p>重建损失</p>
-<p>各个中间预测结果和GT的L1距离，作为重建损失。</p>
-<p><img src="/2021/02/09/DSFN/6.png" style="zoom:67%;"></p></li>
-<li><p>辅助损失</p>
-<p>主要是先超分再插帧的超分部分，以及先插帧再超分的插帧部分，对中间结果计算L1损失。</p>
-<p><img src="/2021/02/09/DSFN/7.png" style="zoom: 60%;"></p></li>
-</ul>
-<h3 id="实验结果">实验结果</h3>
-<p>batch size设置为24，使用优化器RAdam，学习率开始时设置为<span class="math inline">\(5e-5\)</span>。时间和空间超分辨率均为2x。使用数据集Vimeo-90K、UCF101、FISR dataset。训练过程，首先单独训练超分网络和插帧网络，然后冻结参数把它们和融合网络及调整网络拼接在一起训练，最终联合训练所有模块。</p>
-<h4 id="时空超分的互补结果">时空超分的互补结果</h4>
-<p><img src="/2021/02/09/DSFN/8.png"></p>
-<p>文章认为先超分再插帧在小动作区域有更好的细节，先插帧再超分能够在大动作区域有更好的重建效果。如图所示应该是1、3行表示小动作区域，先超分再插帧的效果更好，Error Map有更少的像素点有值；而2、4行则表示大动作区域，先插帧再超分的Error Map有更少的像素点有值。</p>
-<h4 id="不同融合策略的比较">不同融合策略的比较</h4>
-<p><img src="/2021/02/09/DSFN/9.png" style="zoom:67%;"></p>
-<p>One-mask表示Mask1 + Mask2 = 1，总的预测结果变成了两个分支结果的线性插值，Two-mask则表示总的预测结果是两个分支结果的线性组合，可以看出Two-mask更有优势。</p>
-<h4 id="选择不同上采样网络">选择不同上采样网络</h4>
-<p><img src="/2021/02/09/DSFN/10.png" style="zoom: 67%;"></p>
-<p>越新的方法作为backbone效果则越好。</p>
-<h4 id="与sota结果相比">与SOTA结果相比</h4>
-<p><img src="/2021/02/09/DSFN/11.png" style="zoom:67%;"></p>
-<p>并没有和最新的网络结果相比，例如Zooming Slow-Mo。</p>
-<h3 id="结论">结论</h3>
-<p>本文提出了一种融合双分支结果的网络来进行时空超分辨率。然而，该网络并不是end-to-end训练的，借用已有的网络进行多阶段训练，并且正文没有给出参数量和计算量，可能代价也比较高。其次，重建完全由中间和最终输出帧的像素级重建损失来指导，把超分和插帧的过程都看成是独立的过程，各个中间结果之间没有加上时序的联系，这必然导致了性能的降低。因此，在时空超分中如何有效地利用时序信息进行更好的重建值得进行探索。</p>
-]]></content>
-      <categories>
-        <category>超分辨率</category>
-        <category>STVSR</category>
-      </categories>
-      <tags>
-        <tag>STVSR</tag>
       </tags>
   </entry>
   <entry>
@@ -355,61 +143,6 @@
       <tags>
         <tag>SISR</tag>
         <tag>RealSR</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>TPSTVSR 论文阅读</title>
-    <url>/2021/02/26/TPSTVSR/</url>
-    <content><![CDATA[<p>《Space-Time Video Super-Resolution Using Temporal Profiles》 ACMMM 2020</p>
-<h3 id="背景">背景</h3>
-<p>在时空超分辨率中，直接将VFI（插帧）和VSR（超分）串联，不能充分利用视频的时空相关性，是一种次优做法。此外，在计算效率低的同时，也容易引入累积误差。Zooming Slow-Mo提出一种one-stage的做法，使用可变形的ConvLSTM来隐式对齐帧，这样可能会错过长依赖的时间上下文，因为当更多的帧融合时，需要设计更复杂的帧对齐规则。因此，本文提出利用 Temporal Profile (TP)来解决时空超分辨率问题。</p>
-<a id="more"></a>
-<p>视频帧在一个Patch上，可以转换为如下水平（vertical）TPs 和垂直（horizontal）TPs：</p>
-<p><img src="/2021/02/26/TPSTVSR/0.png" style="zoom: 50%;"></p>
-<p>基于TP的时空超分辨率有以下几个好处：</p>
-<p>（1）STVSR可以有效地建模为基于学习的恢复任务，聚焦于TPs的特定二维结构。</p>
-<p>（2）TPs既包含空间维度又包含时间维度，可以更好地利用时空相关性。</p>
-<p>（3）与现有的多帧对齐方法相比，TPs能够更灵活地融合长依赖的时间上下文信息。</p>
-<h3 id="方法">方法</h3>
-<p>首先将低帧率和低分辨率的视频转换成TPs，然后将其送入Temporal Profile超分辨率模块（TPSRM）提高帧率，然后将TPs转换为视频域，发送给特征洗牌模块（FSM）生成具有目标空间分辨率的视频，最后通过调整模块（RM）去除伪影，增强细节。</p>
-<p><img src="/2021/02/26/TPSTVSR/1.png" style="zoom: 80%;"></p>
-<ul>
-<li><p>Temporal-Profile Super-Resolution Module</p>
-<p>首先将输入视频帧 W x H x T 转换为垂直Temporal Profile T x H x W（转换为水平TP无太大区别），即在垂直方向上将视频帧切割成W个。然后输入TPSRM，将TP分辨率提高为 （2T-1）x 2H x W。TPSRM采用IMDN模型，用L1损失函数做监督，ground truth由高帧率高分辨率视频转换成TP得到。</p>
-<p><img src="/2021/02/26/TPSTVSR/8.png" style="zoom:60%;"></p></li>
-<li><p>Feature Shuffling Module</p>
-<p>该模块的目的是提高空间分辨率。经过TPSRM后，帧率提升为原来的两倍，H提高为原来的两倍，而W不变，FSM的目的就是将H再次提高两倍，W直接提高四倍。注意到其中Feature Shuffling阶段会将通道数（也就是帧率）减半，来将W提升2倍，在后面的模块需要将空间分辨率和通道数同时提升。CSR同样使用IMDN模块。</p>
-<p><img src="/2021/02/26/TPSTVSR/2.png" style="zoom: 67%;"></p></li>
-<li><p>Refining Module</p>
-<p>该模块目的是消除伪影和增强细节，采用U-Net结构。</p>
-<p><img src="/2021/02/26/TPSTVSR/3.png" style="zoom: 67%;"></p></li>
-</ul>
-<p>损失函数采用 L1、SSIM、VGG和Cycle Consistency四种损失函数。采用循环一致性损失来保证重构视频与输入的时空一致性，同时可以避免过度增强。</p>
-<p><img src="/2021/02/26/TPSTVSR/4.png" style="zoom:67%;"></p>
-<p><img src="/2021/02/26/TPSTVSR/5.png" style="zoom:67%;"></p>
-<p><img src="/2021/02/26/TPSTVSR/6.png" style="zoom:67%;"></p>
-<p><img src="/2021/02/26/TPSTVSR/7.png" style="zoom: 67%;"></p>
-<h3 id="实验结果">实验结果</h3>
-<p>使用Vimeo90K数据集进行训练，进行空间4倍超分，时间2倍超分，batch size设置为1，学习率每2个epoch下降0.2，在一张1080Ti GPU上进行训练。</p>
-<h4 id="与sota对比">与SOTA对比</h4>
-<p><img src="/2021/02/26/TPSTVSR/9.png" style="zoom:80%;"></p>
-<h4 id="参数量与运行时间">参数量与运行时间</h4>
-<p><img src="/2021/02/26/TPSTVSR/10.png" style="zoom:80%;"></p>
-<h4 id="不同损失函数比较">不同损失函数比较</h4>
-<p><img src="/2021/02/26/TPSTVSR/11.png" style="zoom:67%;"></p>
-<h4 id="真实场景老电影恢复">真实场景：老电影恢复</h4>
-<p>由于相机设备的分辨率有限，老电影往往会出现严重的时空退化。另外，在不同的压缩程度下保存也会影响观感。因此时空超分有应用场景。从网络上直接下载老电影，并和Zooming Slow-Mo进行对比，两者同样在Vimeo90K上训练。</p>
-<p><img src="/2021/02/26/TPSTVSR/12.png" style="zoom: 67%;"></p>
-<h3 id="结论">结论</h3>
-<p>本文从Temporal Profile的角度进行时空超分辨率，与Zooming Slow-Mo相比降低了参数量和运行时间。该网络利用的是滑动窗口的原理，当帧数过多时会造成显存大量占用的问题。此外，当一个移动的物体在视频中突然出现或消失时，由于快速的移动，TPs很难捕捉到全局信息，融合水平和垂直的TPs可能是一种解决方案。</p>
-<p><img src="/2021/02/26/TPSTVSR/13.png" style="zoom:67%;"></p>
-]]></content>
-      <categories>
-        <category>超分辨率</category>
-        <category>STVSR</category>
-      </categories>
-      <tags>
-        <tag>STVSR</tag>
       </tags>
   </entry>
   <entry>
@@ -694,6 +427,356 @@
       <tags>
         <tag>Spark</tag>
         <tag>Spark Core</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Java集合操作</title>
+    <url>/2021/04/11/Java%E9%9B%86%E5%90%88%E6%93%8D%E4%BD%9C/</url>
+    <content><![CDATA[<h3 id="java集合操作">Java集合操作</h3>
+<p>遍历集合、Map类型数据排序</p>
+<a id="more"></a>
+<h3 id="遍历集合">遍历集合</h3>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//Map.Entry遍历</span></span><br><span class="line"><span class="keyword">for</span> (Map.Entry&lt;String, Integer&gt; entry : tempMap.entrySet()) &#123;</span><br><span class="line">   String key = entry.getKey().toString();</span><br><span class="line">   String value = entry.getValue().toString();</span><br><span class="line">   System.out.println(<span class="string">&quot;key=&quot;</span> + key + <span class="string">&quot; value=&quot;</span> + value);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//keySet()遍历</span></span><br><span class="line">  <span class="keyword">for</span> (Object o : tempMap.keySet()) &#123;</span><br><span class="line">   System.out.println(<span class="string">&quot;key=&quot;</span> + o + <span class="string">&quot; value=&quot;</span> + tempMap.get(o));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="map类型数据排序">Map类型数据排序</h3>
+<p>注意TreeSet、TreeMap本身的Key就是按照字典序进行排序的。</p>
+<h4 id="完整方法">完整方法</h4>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"> <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">mapKeySort</span><span class="params">(HashMap&lt;Integer, String&gt; hm)</span> </span>&#123;</span><br><span class="line">     	<span class="comment">//定义一个list装载key、value</span></span><br><span class="line">        List&lt;Map.Entry&lt;Integer, String&gt;&gt; list = <span class="keyword">new</span> ArrayList&lt;Map.Entry&lt;Integer, String&gt;&gt;(hm.entrySet());</span><br><span class="line">        </span><br><span class="line">     	<span class="comment">//对list进行排序，自定义排序规则</span></span><br><span class="line">     	list.sort(<span class="keyword">new</span> Comparator&lt;Map.Entry&lt;Integer, String&gt;&gt;() &#123;</span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compare</span><span class="params">(Map.Entry&lt;Integer, String&gt; o1, Map.Entry&lt;Integer, String&gt; o2)</span> </span>&#123;</span><br><span class="line">                <span class="keyword">return</span> o1.getKey() &lt; o2.getKey() ? <span class="number">1</span> : ((o1.getKey() == o2.getKey()) ? <span class="number">0</span> : -<span class="number">1</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">     </span><br><span class="line">     	<span class="comment">/*打印结果查看</span></span><br><span class="line"><span class="comment">        for (Map.Entry&lt;Integer, String&gt; mapping : list) &#123;</span></span><br><span class="line"><span class="comment">            System.out.println(mapping.getKey() + &quot;:&quot; + mapping.getValue());</span></span><br><span class="line"><span class="comment">        &#125;</span></span><br><span class="line"><span class="comment">        */</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//最后把这个HashMap返回即可</span></span><br></pre></td></tr></table></figure>
+<h4 id="简单方法">简单方法</h4>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//获取key</span></span><br><span class="line">Object[] key_arr = hashmap.keySet().toArray();   </span><br><span class="line"><span class="comment">//对key排序</span></span><br><span class="line">Arrays.sort(key_arr);   </span><br><span class="line"><span class="comment">//通过key获取value</span></span><br><span class="line"><span class="keyword">for</span>(Object key : key_arr) &#123;   </span><br><span class="line">    Object value = hashmap.get(key);   </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>Java</category>
+        <category>Java基础</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
+        <tag>Java基础</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>BasicVSR 论文阅读</title>
+    <url>/2021/01/28/SR_Basicvsr/</url>
+    <content><![CDATA[<p>《BasicVSR：The Search for Essential Components in Video Super-Resolution and Beyond》</p>
+<h3 id="背景">背景</h3>
+<p>相比图像超分任务，视频超分网络会设计更多模块，因为它多了一个时空维度。因此复杂的设计结构在视频超分网络中是常见的。本文重新分析了视频超分网络中的四大模块（对齐、聚合、传播和上采样）的作用，以及它们的优缺点。提出了一个视频超分框架baseline，即BasicVSR，并在Reds和Vimeo数据集上训练，验证了该框架的有效性。</p>
+<p>另外，本文扩展BasicVSR框架，设计了信息重新填充机制和成对传播策略，促进信息聚合，即IconVSR网络。</p>
+<a id="more"></a>
+<h3 id="方法">方法</h3>
+<p>该部分首先分析了视频超分网络中四大模块中不同选择的作用，并在每个模块中选择最好的组件构成BasicVSR网络，该网络可以作为设计其他视频超分网络的骨架backbone。然后，作者在backbone的基础上引入了两种新的组件信息重新填充机制和成对传播策略，略微提升了参数量和运行时间，并提高了网络性能。</p>
+<h4 id="传播模块">传播模块</h4>
+<p>本质上，传播模块定义了各个输入帧究竟是如何在网络中进行传播的，当前各个帧的传播方式主要有如下几种：</p>
+<ul>
+<li><p>Local</p>
+<p>局部传播使用一个滑动窗口中的LR图像作为输入，然后利用这些局部信息完成重建任务。这是最常见的方式，也是TDAN、EDVR等方法的输入方式，例如一次性输入相邻的7帧，并选择重建第4帧，其他的作为参考帧。因此，网络能够访问的信息限制在这些局部相邻帧中。缺少远距离帧不可避免地限制了网络的表达能力。</p>
+<p><img src="/2021/01/28/SR_Basicvsr/0.png" style="zoom:67%;"></p>
+<p>如图所示，作者将测试集分成K个segments在BasicVSR网络中进行测试，可以看到当每个segments内的帧数越多的时候，其恢复的PSNR值越低，说明了帧的数量对网络有影响。</p>
+<p>对于非recurrent形式的网络，滑动窗口内的帧数越多则会导致网络的参数量和占用显存都会大规模增加，这是一个主要的缺陷。</p></li>
+<li><p>Unidirectional Propagation</p>
+<p>单向传播形式，即如RLSP、RSDN等普通recurrent网络的形式，每次输入一帧和相邻帧，并利用重建的相邻帧及其中间产物来完成当前参考帧的重建过程。</p>
+<p><img src="/2021/01/28/SR_Basicvsr/1.png" style="zoom:67%;"></p>
+<p>然而，单向传播的方式会涉及到隐状态，即前一帧的中间产物的处理问题。本质上隐状态代表了前一帧或前n帧的特征，因此当输入的帧数越靠前时，隐状态含有的信息越少，对参考帧的重建效果越差，如上图所示。</p></li>
+<li><p>Bidirectional Propagation</p>
+<p>双向传播形式解决上述两种问题，本质上就是网络同时利用前一帧和后一帧的隐状态，来完成当前参考帧的重建。前一帧的隐状态包含当前参考帧之前的所有信息，后一帧的隐状态包含当前参考帧之后的所有信息，这相当于可以利用前后所有帧的信息。</p></li>
+</ul>
+<h4 id="对齐模块">对齐模块</h4>
+<ul>
+<li><p>无对齐</p>
+<p>不对齐的特征或图像会影响聚合的效果，并最终导致性能降低。直接串联不对齐的特征以进行恢复，相邻帧的特征将不会与输入图像的特征在空间上对齐。由于卷积之类的局部操作具有相对较小的感受野，在相应位置集合信息时无法有效地利用相邻帧的信息，此时会导致较低的效率。</p></li>
+<li><p>基于图像的对齐</p>
+<p>基于图像的对齐使用光流估计相邻帧到参考帧的光流变化，然后利用光流的信息将相邻帧变形对齐到参考帧上。该过程是直接在图像上进行的，而非特征图上进行的。并且大部分的工作通常需要利用其他预训练的光流估计网络。</p></li>
+<li><p>基于特征的对齐</p>
+<p>基于特征的对齐最流行的方法是使用可变形卷积。然而本文使用的方式是基于光流的特征对齐，即先估计光流，然后根据光流将中间结果，即隐状态进行对齐，然后将对齐过后的特征和当前参考帧一起输入残差块进行重建。</p></li>
+</ul>
+<h4 id="聚合与上采样">聚合与上采样</h4>
+<p>文章对聚合方式没有进行过多探讨，只采用最基础的聚合方式，即拼接特征图并输入多个卷积作为聚合模块。</p>
+<p>上采样模块采用最经典有效的方式Pixel-shuffle。</p>
+<h4 id="basicvsr">BasicVSR</h4>
+<p><img src="/2021/01/28/SR_Basicvsr/2.png" style="zoom: 50%;"></p>
+<p>本文提出的Backbone即BasicVSR，采用了上述探讨的最基础的几个模块。对齐模块采用基于光流的特征对齐，对齐的对象是隐状态和光流图。传播模块采用的是双向传播模式，当前参考帧需要利用前后一帧的隐状态。聚合模块是直接拼接，上采样模块则为Pixel-shuffle。</p>
+<h4 id="iconvsr">IconVSR</h4>
+<p>在BasicVSR的基础上引入了两种新的组件信息重新填充机制和成对传播策略来提升网络的性能。</p>
+<ul>
+<li><p>Information-Refill</p>
+<p>信息重新填充机制是为了解决在图像边界和有遮挡区域的不精确对齐的问题。不精确对齐会导致误差的不断积加，特别是在网络中采用长距离传播的时候。为了解决特征不精确对齐带来的不利影响，本文提出了一个信息重新填充机制，以做特征修正。</p>
+<p><img src="/2021/01/28/SR_Basicvsr/3.png" style="zoom:67%;"></p>
+<p>如上图所示，E为特征提取模块，C为卷积单元。需要事先设定一些关键帧<span class="math inline">\(I_{key}\)</span>，当关键帧作为参考帧进行输入时，对齐的特征需要和前后帧的特征进行拼接，对当前的特征图进行修正，防止错误累加，最后才将对齐后的特征和参考帧一起输入重建模块。</p></li>
+<li><p>Coupled Propagation</p>
+<p>成对传播策略将后向传播的特征，即后向传播的隐状态，也作为正向传播模块的输入。而不是像BasicVSR中的那样，直接在U处融合前后两个传播分支的输出。</p>
+<p><img src="/2021/01/28/SR_Basicvsr/4.png" style="zoom:67%;"></p>
+<p>通过成对传播，前向传播分支从过去和将来的帧中接收信息，从而导致更高质量的特征，获得更好的输出。</p></li>
+</ul>
+<h3 id="实验结果">实验结果</h3>
+<h4 id="与sota进行对比">与SOTA进行对比</h4>
+<p><img src="/2021/01/28/SR_Basicvsr/5.png" style="zoom: 50%;"></p>
+<p><img src="/2021/01/28/SR_Basicvsr/6.png" style="zoom: 50%;"></p>
+<h4 id="信息重新填充机制和成对传播策略消融实验">信息重新填充机制和成对传播策略消融实验</h4>
+<p><img src="/2021/01/28/SR_Basicvsr/7.png" style="zoom: 50%;"></p>
+<h4 id="信息重新填充机制中的关键帧数量">信息重新填充机制中的关键帧数量</h4>
+<p><img src="/2021/01/28/SR_Basicvsr/8.png" style="zoom: 50%;"></p>
+<h3 id="总结">总结</h3>
+<p>本文中提出的BasicVSR和IconVSR，利用recurrent的机制进行超分辨率。BasicVSR主要利用了双向传播机制，使得长距离信息能够得到利用，IconVSR在此基础上直接在前向传播分支中利用后向传播的特征，直接在特征维度上利用长距离信息。</p>
+<p>同时注意到，双向传播机制的短板非常明显，无论是BasicVSR还是IconVSR都需要将所有视频帧全部输入到网络中之后才能够进行超分辨率，这是相比于滑动窗口最大的缺陷，这导致了基于双向传播的方法无法做到实时超分。并且，这需要保存大量的中间结果，即隐状态，这在训练时可能会导致大规模的显存占用情况存在。</p>
+]]></content>
+      <categories>
+        <category>超分辨率</category>
+        <category>VSR</category>
+      </categories>
+      <tags>
+        <tag>VSR</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>DSFN 论文阅读</title>
+    <url>/2021/02/09/SR_DSFN/</url>
+    <content><![CDATA[<p>《Dual-Stream Fusion Network for Spatiotemporal Video Super-Resolution》 WACV 2021</p>
+<h3 id="背景">背景</h3>
+<p>时空视频超分辨率，即在时间维度上提升帧率，在空间维度上提升分辨率。本文认为，直接级联已有空间和时间超分辨率的方法（没有另外设计）来实现时空上采样，改变它们的顺序能够使得结果具有互补性。 因此，本文提出了一种双流融合网络，以自适应地融合两个时空上采样流产生的中间结果，其中第一个流应用空间超分辨率，然后是时间超分辨率，而第二个流则先使用空间超分辨率再进行时间超分辨率。</p>
+<a id="more"></a>
+<h3 id="方法">方法</h3>
+<p><img src="/2021/02/09/SR_DSFN/0.png" style="zoom:50%;"></p>
+<h4 id="框架的组件">框架的组件</h4>
+<ul>
+<li><p><span class="math inline">\(M_S\)</span></p>
+<p>空间超分辨率网络。本文使用的是单幅图像的超分辨率网络ESPCN、SAN。</p></li>
+<li><p><span class="math inline">\(M_T\)</span></p>
+<p>时间超分辨率网络。即插帧网络，本文使用SuperSloMo、DAIN。</p></li>
+<li><p><span class="math inline">\(F\)</span></p>
+<p>融合网络，负责将不同分支产生的结果进行融合。具体采用采用了U-Net，它包含五个具有跳跃连接的对称下采样和上采样卷积层。</p></li>
+<li><p><span class="math inline">\(R\)</span></p>
+<p>调整网络，增强细节。具体为三个残差块。</p></li>
+</ul>
+<h4 id="框架的执行">框架的执行</h4>
+<p>整个网络的流程具体来说就是将时空超分辨率分为两个分支，一个是先超分再插帧，另一个是先插帧再超分，然后通过融合网络融合两个分支的结果，最后通过调整网络进行细节调整。</p>
+<p>空间超分辨率网络接收单个输入帧，并进行超分，输出对应一帧的超分结果；时间超分辨率网络接收前后两帧，并预测中间帧的结果。</p>
+<p>先超分再插帧的过程可以表示为：</p>
+<p><img src="/2021/02/09/SR_DSFN/1.png" style="zoom:67%;"></p>
+<p>先插帧再超分的过程可以表示为：</p>
+<p><img src="/2021/02/09/SR_DSFN/2.png" style="zoom:67%;"></p>
+<p>本文认为，这两个数据流在时空上采样方面表现出互补的结果，其中先超分再插帧在运动较小的区域产生更精细的细节，而先插帧再超分在运动较大的区域提供更好的重建。</p>
+<p>将双分支预测得到的结果进行融合，融合的策略就是给两个分支的结果分别预测一个Mask，并将Mask和预测结果进行element-wise的乘法后相加，整个过程可以表示为：</p>
+<p><img src="/2021/02/09/SR_DSFN/3.png" style="zoom:67%;"></p>
+<p>注意到，两个Mask之间，假如给予约束 Mask1 + Mask2 = 1，则总的预测结果变成了两个分支结果的线性插值，否则总的预测结果是两个分支结果的线性组合。</p>
+<p>最终，通过一个三个残差块的调整网络增强细节信息。</p>
+<p><img src="/2021/02/09/SR_DSFN/4.png" style="zoom:67%;"></p>
+<h4 id="损失函数">损失函数</h4>
+<p>损失函数主要分为两个部分：重建损失、辅助损失。</p>
+<p><img src="/2021/02/09/SR_DSFN/5.png" style="zoom:77%;"></p>
+<ul>
+<li><p>重建损失</p>
+<p>各个中间预测结果和GT的L1距离，作为重建损失。</p>
+<p><img src="/2021/02/09/SR_DSFN/6.png" style="zoom:67%;"></p></li>
+<li><p>辅助损失</p>
+<p>主要是先超分再插帧的超分部分，以及先插帧再超分的插帧部分，对中间结果计算L1损失。</p>
+<p><img src="/2021/02/09/SR_DSFN/7.png" style="zoom: 60%;"></p></li>
+</ul>
+<h3 id="实验结果">实验结果</h3>
+<p>batch size设置为24，使用优化器RAdam，学习率开始时设置为<span class="math inline">\(5e-5\)</span>。时间和空间超分辨率均为2x。使用数据集Vimeo-90K、UCF101、FISR dataset。训练过程，首先单独训练超分网络和插帧网络，然后冻结参数把它们和融合网络及调整网络拼接在一起训练，最终联合训练所有模块。</p>
+<h4 id="时空超分的互补结果">时空超分的互补结果</h4>
+<p><img src="/2021/02/09/SR_DSFN/8.png"></p>
+<p>文章认为先超分再插帧在小动作区域有更好的细节，先插帧再超分能够在大动作区域有更好的重建效果。如图所示应该是1、3行表示小动作区域，先超分再插帧的效果更好，Error Map有更少的像素点有值；而2、4行则表示大动作区域，先插帧再超分的Error Map有更少的像素点有值。</p>
+<h4 id="不同融合策略的比较">不同融合策略的比较</h4>
+<p><img src="/2021/02/09/SR_DSFN/9.png" style="zoom:67%;"></p>
+<p>One-mask表示Mask1 + Mask2 = 1，总的预测结果变成了两个分支结果的线性插值，Two-mask则表示总的预测结果是两个分支结果的线性组合，可以看出Two-mask更有优势。</p>
+<h4 id="选择不同上采样网络">选择不同上采样网络</h4>
+<p><img src="/2021/02/09/SR_DSFN/10.png" style="zoom: 67%;"></p>
+<p>越新的方法作为backbone效果则越好。</p>
+<h4 id="与sota结果相比">与SOTA结果相比</h4>
+<p><img src="/2021/02/09/SR_DSFN/11.png" style="zoom:67%;"></p>
+<p>并没有和最新的网络结果相比，例如Zooming Slow-Mo。</p>
+<h3 id="结论">结论</h3>
+<p>本文提出了一种融合双分支结果的网络来进行时空超分辨率。然而，该网络并不是end-to-end训练的，借用已有的网络进行多阶段训练，并且正文没有给出参数量和计算量，可能代价也比较高。其次，重建完全由中间和最终输出帧的像素级重建损失来指导，把超分和插帧的过程都看成是独立的过程，各个中间结果之间没有加上时序的联系，这必然导致了性能的降低。因此，在时空超分中如何有效地利用时序信息进行更好的重建值得进行探索。</p>
+]]></content>
+      <categories>
+        <category>超分辨率</category>
+        <category>STVSR</category>
+      </categories>
+      <tags>
+        <tag>STVSR</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>DualSR 论文阅读</title>
+    <url>/2021/02/05/SR_DualSR/</url>
+    <content><![CDATA[<p>《DualSR: Zero-Shot Dual Learning for Real-World Super-Resolution》 WACV 2021</p>
+<h3 id="背景">背景</h3>
+<p>许多基于深度学习的SR方法在庞大数据集上学习复杂的LR-HR上采样关系。但是，这些经过预训练的SR方法通常在直接从相机捕获的图像上表现差很多。它们接受了干净，无噪声，合成的LR图像进行训练，而真实LR图像的退化过程与理想条件不同。现实情况下，每个摄像机的采集参数，例如传感器的点扩展功能（PSF），也不同。即使是同一台摄像机拍摄的图像，也会因光线条件、景深以及抖动而产生的模糊等而有所不同。这些条件使得训练一个在所有不同图像退化条件下都能表现良好的CNN变得很困难。</p>
+<a id="more"></a>
+<p>许多盲SR方法在超分之前都会估算退化过程。 盲超分的SOTA使用深度学习来学习图像特定的下采样器（降级模型参数），上采样器使用该下采样器对输入的LR图像进行超分辨。 但是，从单个输入图像估计合适的下采样器很复杂。 尤其是在存在噪声或其他采集伪像的情况下，这些方法通常无法估算出良好的降级参数。 错误的降级会严重降低上采样器的效率，并降低SR性能。</p>
+<p>受诸如CycleGAN 和 DualGAN 等最新无监督方法的启发，论文引入了Zero-Shot DualSR，一种双路径架构，用于在现实世界中的LR图像上实现超分辨率，并且是一种无监督的方案。</p>
+<h3 id="方法">方法</h3>
+<p><img src="/2021/02/05/SR_DualSR/0.png" style="zoom: 50%;"></p>
+<h4 id="框架的组件">框架的组件</h4>
+<ul>
+<li><p><span class="math inline">\(G_{UP}\)</span></p>
+<p>上采样器。与ZSSR类似，采用了简单的8层全卷积网络，并采用了ReLU激活。在输入和输出之间存在一个全局的残差连接。将LR图像放大到输出大小，然后才将其送入网络。</p></li>
+<li><p><span class="math inline">\(G_{DN}\)</span> &amp; <span class="math inline">\(D_{DN}\)</span></p>
+<p>下采样器和判别器。使用KernelGAN中的生成器和判别器。</p>
+<p>生成器是一个深层线性网络（没有任何激活）。小的感受野强迫使网络仅使用LR图像的局部特征（例如边缘），而不是依赖于高级全局特征。 因此，生成器<span class="math inline">\(G_{DN}\)</span>学习能够生成图像的kernel，该图像在patch分布上与输入LR图像相似。</p>
+<p><img src="/2021/02/05/SR_DualSR/1.png" style="zoom:55%;"></p>
+<p>判别器是一个全卷积的PatchGAN，其感受野为7x7。</p>
+<p><img src="/2021/02/05/SR_DualSR/2.png" style="zoom:60%;"></p></li>
+</ul>
+<h4 id="框架的执行">框架的执行</h4>
+<p>在前向循环中，首先应用上采样器以生成2x的上采样图像。，然后应用下采样器并将上采样的图像转换回1x。</p>
+<p>同样，在后向循环中，首先由<span class="math inline">\(G_{DN}\)</span>生成1/2x的图像，然后<span class="math inline">\(G_{UP}\)</span>将图像上采样回到原始比例。</p>
+<h4 id="损失函数">损失函数</h4>
+<p>损失函数主要分为三部分：对抗损失、循环一致性损失、掩码插值损失。</p>
+<p><img src="/2021/02/05/SR_DualSR/3.png" style="zoom: 67%;"></p>
+<ul>
+<li><p>对抗损失</p>
+<p>对于下采样器<span class="math inline">\(G_{DN}\)</span>，希望其能够生成和真实LR相同的图像，判别器尽可能认为它是真实的LR（标签为1），损失如下（正则化项<span class="math inline">\(R\)</span>具体见KernelGAN论文）：</p>
+<p><img src="/2021/02/05/SR_DualSR/4.png" style="zoom:60%;"></p>
+<p>对于判别器<span class="math inline">\(D_{DN}\)</span>,希望其能够判别哪些是真实的LR，即让真实的LR被判别为1，合成的LR被判别为0：</p>
+<p><img src="/2021/02/05/SR_DualSR/5.png" style="zoom:60%;"></p></li>
+<li><p>循环一致性损失</p>
+<p>确保<span class="math inline">\(G_{UP}\)</span>和<span class="math inline">\(G_{DN}\)</span>可以还原由另一个执行的操作。</p>
+<p><img src="/2021/02/05/SR_DualSR/6.png" style="zoom:60%;"></p></li>
+<li><p>掩码插值损失</p>
+<p>Bicubic上采样能够能够正确地对低频部分进行上采样，但是无法重构高频细节。对所有像素使用Bicubic能够产生无伪影但模糊的结果。因此，论文仅对图像低频部分应用插值损失。首先对Bicubic上采样的图像应用Sobel算子，它主要用作边缘检测，是一种离散性差分算子，用来计算图像亮度函数的灰度近似值。应用Sobel算子能够产生mask，该mask在低频区域的像素值较高，在图像的高频区域的像素值较低。</p>
+<p><img src="/2021/02/05/SR_DualSR/7.png" style="zoom:60%;"></p>
+<p>然后应用掩码插值损失使得<span class="math inline">\(G_{UP}\)</span>的结果和Bicubic上采样的结果仅在低频部分是相近的。</p>
+<p><img src="/2021/02/05/SR_DualSR/8.png" style="zoom:60%;"></p></li>
+</ul>
+<h3 id="实验结果">实验结果</h3>
+<p>训练使用的 patch size 为 64 x 64 以及 128 x 128。训练和测试时不使用任何数据增强（图像变换）。因为训练时间很少，所以可以用暴力搜索方法来获得<span class="math inline">\(\lambda_{cycle}=5,\lambda_{inter}=2\)</span>。</p>
+<p>在RTX 2080 Ti GPU上，论文的方法平均训练+推理时间为233秒。 对于KernelGAN + ZSSR 的组合，运行时间为281秒，对于BlindSR，则为370秒。 像SAN这样的有监督深度学习SR方法具有很长的训练时间，并且图像大小显着影响其推理时间。对于SAN +，在DIV2KRK基准上测试每张图片平均需要298秒。</p>
+<h4 id="合成的真实lr数据集">合成的真实LR数据集</h4>
+<p><img src="/2021/02/05/SR_DualSR/9.png" style="zoom: 45%;"></p>
+<h4 id="realsr数据集">RealSR数据集</h4>
+<p>该数据集通过调整焦距获得不同尺度图像，但作者认为不同尺度间没有完全对齐，因此只放出视觉效果。</p>
+<p><img src="/2021/02/05/SR_DualSR/10.png" style="zoom:40%;"></p>
+<h4 id="掩码插值损失">掩码插值损失</h4>
+<p><img src="/2021/02/05/SR_DualSR/11.png" style="zoom:50%;"></p>
+<h3 id="结论">结论</h3>
+<p>本文提出提出了DualSR，一个轻量级的dual架构，它学习每个图像特定的LR-HR关系。它由下采样器和上采样器组成，在训练中使用循环一致性损失来相互改进。此外，论文提出了掩码插值损失，消除了图像低频区域的伪影，而不会导致边缘过于平滑。</p>
+<p>该方法是Zero-Shot的，无需HR图像进行监督，但本质上就是用了Bicubic上采样的低频部分来进行监督。之前的文章DynaVSR是用了元学习的思想，在测试时同样使用了类似循环一致性的方法，但在训练时为了更好的效果仍然使用了HR的图像。因此，可以思考如何将Zero-Shot的思想（目前来看还是想办法在Bicubic上采样的结果做文章），应用到VSR上，来达到完全无监督的效果。</p>
+]]></content>
+      <categories>
+        <category>超分辨率</category>
+        <category>SISR</category>
+      </categories>
+      <tags>
+        <tag>SISR</tag>
+        <tag>RealSR</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>TPSTVSR 论文阅读</title>
+    <url>/2021/02/26/SR_TPSTVSR/</url>
+    <content><![CDATA[<p>《Space-Time Video Super-Resolution Using Temporal Profiles》 ACMMM 2020</p>
+<h3 id="背景">背景</h3>
+<p>在时空超分辨率中，直接将VFI（插帧）和VSR（超分）串联，不能充分利用视频的时空相关性，是一种次优做法。此外，在计算效率低的同时，也容易引入累积误差。Zooming Slow-Mo提出一种one-stage的做法，使用可变形的ConvLSTM来隐式对齐帧，这样可能会错过长依赖的时间上下文，因为当更多的帧融合时，需要设计更复杂的帧对齐规则。因此，本文提出利用 Temporal Profile (TP)来解决时空超分辨率问题。</p>
+<a id="more"></a>
+<p>视频帧在一个Patch上，可以转换为如下水平（vertical）TPs 和垂直（horizontal）TPs：</p>
+<p><img src="/2021/02/26/SR_TPSTVSR/0.png" style="zoom: 50%;"></p>
+<p>基于TP的时空超分辨率有以下几个好处：</p>
+<p>（1）STVSR可以有效地建模为基于学习的恢复任务，聚焦于TPs的特定二维结构。</p>
+<p>（2）TPs既包含空间维度又包含时间维度，可以更好地利用时空相关性。</p>
+<p>（3）与现有的多帧对齐方法相比，TPs能够更灵活地融合长依赖的时间上下文信息。</p>
+<h3 id="方法">方法</h3>
+<p>首先将低帧率和低分辨率的视频转换成TPs，然后将其送入Temporal Profile超分辨率模块（TPSRM）提高帧率，然后将TPs转换为视频域，发送给特征洗牌模块（FSM）生成具有目标空间分辨率的视频，最后通过调整模块（RM）去除伪影，增强细节。</p>
+<p><img src="/2021/02/26/SR_TPSTVSR/1.png" style="zoom: 80%;"></p>
+<ul>
+<li><p>Temporal-Profile Super-Resolution Module</p>
+<p>首先将输入视频帧 W x H x T 转换为垂直Temporal Profile T x H x W（转换为水平TP无太大区别），即在垂直方向上将视频帧切割成W个。然后输入TPSRM，将TP分辨率提高为 （2T-1）x 2H x W。TPSRM采用IMDN模型，用L1损失函数做监督，ground truth由高帧率高分辨率视频转换成TP得到。</p>
+<p><img src="/2021/02/26/SR_TPSTVSR/8.png" style="zoom:60%;"></p></li>
+<li><p>Feature Shuffling Module</p>
+<p>该模块的目的是提高空间分辨率。经过TPSRM后，帧率提升为原来的两倍，H提高为原来的两倍，而W不变，FSM的目的就是将H再次提高两倍，W直接提高四倍。注意到其中Feature Shuffling阶段会将通道数（也就是帧率）减半，来将W提升2倍，在后面的模块需要将空间分辨率和通道数同时提升。CSR同样使用IMDN模块。</p>
+<p><img src="/2021/02/26/SR_TPSTVSR/2.png" style="zoom: 67%;"></p></li>
+<li><p>Refining Module</p>
+<p>该模块目的是消除伪影和增强细节，采用U-Net结构。</p>
+<p><img src="/2021/02/26/SR_TPSTVSR/3.png" style="zoom: 67%;"></p></li>
+</ul>
+<p>损失函数采用 L1、SSIM、VGG和Cycle Consistency四种损失函数。采用循环一致性损失来保证重构视频与输入的时空一致性，同时可以避免过度增强。</p>
+<p><img src="/2021/02/26/SR_TPSTVSR/4.png" style="zoom:67%;"></p>
+<p><img src="/2021/02/26/SR_TPSTVSR/5.png" style="zoom:67%;"></p>
+<p><img src="/2021/02/26/SR_TPSTVSR/6.png" style="zoom:67%;"></p>
+<p><img src="/2021/02/26/SR_TPSTVSR/7.png" style="zoom: 67%;"></p>
+<h3 id="实验结果">实验结果</h3>
+<p>使用Vimeo90K数据集进行训练，进行空间4倍超分，时间2倍超分，batch size设置为1，学习率每2个epoch下降0.2，在一张1080Ti GPU上进行训练。</p>
+<h4 id="与sota对比">与SOTA对比</h4>
+<p><img src="/2021/02/26/SR_TPSTVSR/9.png" style="zoom:80%;"></p>
+<h4 id="参数量与运行时间">参数量与运行时间</h4>
+<p><img src="/2021/02/26/SR_TPSTVSR/10.png" style="zoom:80%;"></p>
+<h4 id="不同损失函数比较">不同损失函数比较</h4>
+<p><img src="/2021/02/26/SR_TPSTVSR/11.png" style="zoom:67%;"></p>
+<h4 id="真实场景老电影恢复">真实场景：老电影恢复</h4>
+<p>由于相机设备的分辨率有限，老电影往往会出现严重的时空退化。另外，在不同的压缩程度下保存也会影响观感。因此时空超分有应用场景。从网络上直接下载老电影，并和Zooming Slow-Mo进行对比，两者同样在Vimeo90K上训练。</p>
+<p><img src="/2021/02/26/SR_TPSTVSR/12.png" style="zoom: 67%;"></p>
+<h3 id="结论">结论</h3>
+<p>本文从Temporal Profile的角度进行时空超分辨率，与Zooming Slow-Mo相比降低了参数量和运行时间。该网络利用的是滑动窗口的原理，当帧数过多时会造成显存大量占用的问题。此外，当一个移动的物体在视频中突然出现或消失时，由于快速的移动，TPs很难捕捉到全局信息，融合水平和垂直的TPs可能是一种解决方案。</p>
+<p><img src="/2021/02/26/SR_TPSTVSR/13.png" style="zoom:67%;"></p>
+]]></content>
+      <categories>
+        <category>超分辨率</category>
+        <category>STVSR</category>
+      </categories>
+      <tags>
+        <tag>STVSR</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>TriNAS 论文阅读</title>
+    <url>/2021/01/29/SR_TriNAS/</url>
+    <content><![CDATA[<p>《Trilevel Neural Architecture Search for Efficient Single Image Super-Resolution》</p>
+<h3 id="背景">背景</h3>
+<p>传统的基于深度学习的超分辨率方法通常会在三层神经结构设计上选择以下变化：网络级优化、单元（cell）级优化以及内核（kernel）级优化。为一个深层SR模型人工执行这些优化需要较高的代价。并且，人工设计的架构往往不是最优的，对于真实超分辨率来说，可能在计算上效率低下。因此，论文提出了一种用于高效单图像超分辨率（SR）的三级神经架构搜索（TriNAS）方法。</p>
+<a id="more"></a>
+<p>论文首先在三个级别（即网络级别，单元级别和内核级别（卷积内核））定义离散搜索空间。提出了基于树模型的搜索框架来替代网格型的搜索框架，减少节点之间的依赖性。</p>
+<p>然后，与之前利用softmax进行连续松弛策略的NAS方法不同，论文利用排序的sparsestmax来使得三级搜索架构稀疏地起作用。因此，论文的NAS优化可以逐渐收敛到对超网起主要作用的神经架构。</p>
+<p>此外，论文提出的方法可以在单个阶段中同时进行搜索和训练，与传统的NAS算法相比，这大大减少了搜索和训练时间。</p>
+<p>在基准数据集上进行的实验表明，论文的的NAS算法所提供的SR模型在参数数量和FLOPS方面具有显着减轻的优势，其PSNR值可与当前的SOTA相媲美。</p>
+<h3 id="方法">方法</h3>
+<h4 id="搜索空间定义">搜索空间定义</h4>
+<p><img src="/2021/01/29/SR_TriNAS/2.png" style="zoom: 60%;"></p>
+<p>为了在模型容量和模型大小之间达到适当的平衡，同时保证最小的精度损失，论文提出在内核级、单元级和网络级结构上进行搜索，以得到高效的SR网络结构。</p>
+<ul>
+<li><p>网络级</p>
+<p>论文遵循AGD和SRResNet来定义网络级搜索空间。他们的超网结构使大多数计算都在低分辨率特征空间中进行，从而提高了计算效率。</p>
+<p>网络级架构搜索主要通过搜索五个残差块和两个上采样块。将Residual-in-Residual（RiR）模块中的dense block替换为包含可搜索单元级运算符和内核级运算的五个连续层。</p>
+<p>为了进行高效的上采样模块设计，论文替换了两个最初设计的上采样模块。取代的是一个PixelShuffel块，其中包含一个卷积层以及一个PixelShuffel层，以达到上采样的目的。由于PixelShuffle块固定在网络的尾部，因此在网络级搜索空间中添加了两个常规卷积层。最终，论文仅关注堆叠的五个RiR块和两个用于网络路径搜索的标准卷积层。</p>
+<p><img src="/2021/01/29/SR_TriNAS/0.png" style="zoom:80%;"></p>
+<p>为了对网络级搜索空间建模，采用上图所示的AutoDeep-Lab网格状结构似乎是可行的解决方案。 但是，网格建模旨在遍历网络块的所有顺序路径。 每个节点表示这个位置的feature map，每个路径都从第一个节点开始，并沿着一组箭头到达最终的目标节点。 显然，所有路径共享大多数节点和箭头。 这种冗余共享导致路径，单元和内核之间的极端依赖，因为路径在层次上包括它们。 尽管这样的共享策略可以节省大量训练内存，但它极大地限制了搜索空间。 此外，紧密的结合可能会损害每条路径的贡献以及对某些冗余路径的修剪的学习。</p>
+<p><img src="/2021/01/29/SR_TriNAS/1.png" style="zoom: 67%;"></p>
+<p>论文提出了一种用于网络级路径搜索建模的树结构，来克服冗余共享的缺点。 如上图所示，树建模旨在遍历所有树结构路径。 在这里，每个节点仅连接到其父节点和子节点，因此，依赖性非常宽松。 但是，必须在训练时维护这样的关联，以降低内存消耗。 放宽不同路径的相关性可以实现灵活的网络级搜索空间。 对路径的较低依赖性可能会由于单元和内核之间的分层连接而导致它们之间可靠的关联，从而使它们的搜索空间更为通用。 此外，引入的树模型可以更好地解开路径之间的纠缠关系，从而能够对冗余路径进行修剪。</p></li>
+<li><p>单元级</p>
+<p>在单元级，论文搜索五个RiR块，每个块包含五个个可搜索的单元，即总共25个可搜索的单元。每个单元会选择如下操作符：</p>
+<p>Conv 1×1；Residual Block (2 layers of Conv 3×3 + skip-connection)；Conv 3×3；Depthwise Block (Conv 1×1 + Depthwise Conv3×3 + Conv 1×1).</p></li>
+<li><p>内核级</p>
+<p>对于内核级搜索，论文遵循super-kernel框架对该搜索空间进行建模。 对于每个卷积内核，先设置一个具有完整通道的超级内核。 为了修剪超级内核的通道数，需要一组可搜索的扩展比<span class="math inline">\(\phi=[\frac{1}{3},\frac{1}{2},\frac{4}{5},\frac{5}{6},1]\)</span>。并且设置参数<span class="math inline">\(\gamma_i\)</span>控制选择第<span class="math inline">\(i\)</span>个扩展比的概率。</p></li>
+</ul>
+<h4 id="连续松弛策略">连续松弛策略</h4>
+<p>为了使得NAS是可微的，关键思想是将离散的搜索空间的显式选择放宽为搜索空间中所有相关候选对象的的隐式选择。连续松弛使我们能够以完全可微的方式选择对超网贡献最大的候选者，然后就可以通过反向传播的方式优化整个超网，以实现高效的架构。流行的连续松弛策略之一是应用softmax来实现所有候选网络操作的混合。但是，softmax无法产生稀疏的分布，因此，它无法反映主导操作，这对于有效的结构设计而言至关重要。因此，使用softmax可以防止超级网络收敛到主要的候选架构。</p>
+<p>为了解决这个问题，论文提出了sparsestmax，它在连续松弛过程中产生了良好的稀疏性，并且可以寻求具有优势的候选架构，同时具有诸如softmax之类的凸性和可微性。</p>
+<p>具体来说，为了实现离散网络级搜索空间的连续松弛，论文使用一组连续组合权值来聚合所有的网络路径，构成一个超网络。网络级架构搜索的树模型中每个特征图（即节点）都可以用作其对应路径的输出，然后可以将输出送到上采样层以获得超分结果。 论文根据提出的树模型对来自相关网络路径的所有特征图定义了一组权重<span class="math inline">\(\beta\)</span>，因此，超网的输出是所有中间特征图的加权组合。</p>
+<p>传统的连续松弛做法就是对所有的<span class="math inline">\(\beta\)</span>应用softmax函数来判断每个路径对总的网络的贡献。然而，softmax通常产生非零参数，即平滑变化的参数。因此，候选路径的贡献是相对均匀的，这防止超网络收敛到一个主要的候选结构。因此，利用sparsetmax来产生稀疏的分布，其中<span class="math inline">\(q\)</span>表示具有约束的单纯形：</p>
+<p><img src="/2021/01/29/SR_TriNAS/3.png" style="zoom: 80%;"></p>
+<p>sparsestmax的基本思想是将输入向量<span class="math inline">\(\beta\)</span>的欧几里德投影投射到概率单纯形上。该投射可能会触及单纯形边界，在这种情况下，sparsestmax会产生稀疏分布。为了获得更好的稀疏度，sparsestmax还引入了一个圆环约束，该圆环约束可以通过将单纯形外接圆的半径从零线性增加到某个阈值来逐步产生稀疏性。</p>
+<p>前文提到的树模型搜索架构有助于对路径进行剪枝，然而直接使用sparsestmax可能会在节点上产生无序的非零组合权重（极端情况是它们全部分布在奇/偶数节点上）。 在这种情况下，除非排序稀疏度，否则无法很好地修剪路径。 换句话说，只要非零组合权重沿路径下降，以便所有零权重都出现在路径的尾部，就可以执行网络级修剪，直接删除尾部即可。因此，论文提出利用排序的sparsetmax方法。 对每个路径<span class="math inline">\(p_i\)</span>内的权重<span class="math inline">\(\beta_i\)</span>施加排序约束。 直观上，这有助于使得浅层的输出feature maps对超网趋于相同的贡献度。排序的sparsetmax可以表示为：</p>
+<p><img src="/2021/01/29/SR_TriNAS/4.png" style="zoom: 77%;"></p>
+<p>上述讨论了网络级的连续松弛策略，即使用了排序的sparsetmax方法。对于单元级的连续松弛策略，同样给每个单元的输出定义权重<span class="math inline">\(\alpha\)</span>，并采用非排序的sparsetmax的方式进行连续松弛。对于内核级的连续松弛策略，则采用gumbel-softmax方法。</p>
+<h4 id="代理任务和优化">代理任务和优化</h4>
+<p>对于本文的三级NAS任务，论文不是从头训练模型，而是通过知识蒸馏方法，从而利用预先训练的最先进的图像超分辨率模型的知识。将预训练的ESRGAN模型作为teacher model，搜索阶段的代理任务是通过最小化模型输出与教师模型输出之间的知识精馏距离来搜索模型G。此外，图像SR任务偏向于更有效率的模型，因此在目标函数中加入模型效率项。</p>
+<p>由于架构搜索的参数的数量远远小于网络模型的参数的数量，因此在单个训练集上对它们进行联合优化容易出现过拟合。具体来说，将数据集分为训练集和验证集，分别在这两组数据上优化网络参数和架构搜索参数。</p>
+<h4 id="算法流程">算法流程</h4>
+<p><img src="/2021/01/29/SR_TriNAS/7.png"></p>
+<h3 id="实验结果">实验结果</h3>
+<h4 id="与sota进行对比">与SOTA进行对比</h4>
+<p><img src="/2021/01/29/SR_TriNAS/5.png" style="zoom: 50%;"></p>
+<h4 id="softmax与sparsetmax对比">softmax与sparsetmax对比</h4>
+<p><img src="/2021/01/29/SR_TriNAS/6.png" style="zoom: 67%;"></p>
+<h3 id="结论">结论</h3>
+<p>本文介绍了用于单图像超分辨率任务的Trilevel NAS方法，主要是将排序的sparsetmax激活用于树模型的网络架构搜索中。树模型能够使得节点之间降低依赖性，提供灵活的搜索空间，并能够更好地进行剪枝优化；sparsetmax激活在连续松弛过程中产生了良好的稀疏性，使得超网能够收敛到一个主要的候选结构上；排序的sparsetmax同样能够更好地进行模型剪枝。</p>
+<p>论文中提到的sparsetmax仅使用在了网络级和单元级架构搜索，可以同样利用排序的sparsetmax去进一步地优化内核级的搜索空间，来产生更高效的超分模型，以达到高PSNR和高感知质量的效果。</p>
+]]></content>
+      <categories>
+        <category>超分辨率</category>
+        <category>SISR</category>
+      </categories>
+      <tags>
+        <tag>SISR</tag>
+        <tag>NAS</tag>
       </tags>
   </entry>
 </search>
