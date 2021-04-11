@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.3.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/maze.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/maze.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/maze.png">
+  <link rel="mask-icon" href="/images/maze.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","images":"/images","scheme":"Mist","version":"8.2.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false}};
+  </script>
+<meta name="description" content="总结  闭包 闭包就是一个携带了外部作用域的函数，当它需要被分发到各个节点上执行的时候，需要外部作用域所在的对象是可序列化的。 使用这种外部变量的形式，会造成每个Task中都存在一个该变量的副本。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spark闭包、累加器和广播变量">
+<meta property="og:url" content="http://example.com/2021/04/11/Spark%E9%97%AD%E5%8C%85%E7%B4%AF%E5%8A%A0%E5%99%A8%E5%B9%BF%E6%92%AD%E5%8F%98%E9%87%8F/index.html">
+<meta property="og:site_name" content="BIOINSu">
+<meta property="og:description" content="总结  闭包 闭包就是一个携带了外部作用域的函数，当它需要被分发到各个节点上执行的时候，需要外部作用域所在的对象是可序列化的。 使用这种外部变量的形式，会造成每个Task中都存在一个该变量的副本。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2021/04/11/Spark%E9%97%AD%E5%8C%85%E7%B4%AF%E5%8A%A0%E5%99%A8%E5%B9%BF%E6%92%AD%E5%8F%98%E9%87%8F/0.png">
+<meta property="og:image" content="http://example.com/2021/04/11/Spark%E9%97%AD%E5%8C%85%E7%B4%AF%E5%8A%A0%E5%99%A8%E5%B9%BF%E6%92%AD%E5%8F%98%E9%87%8F/2.png">
+<meta property="og:image" content="http://example.com/2021/04/11/Spark%E9%97%AD%E5%8C%85%E7%B4%AF%E5%8A%A0%E5%99%A8%E5%B9%BF%E6%92%AD%E5%8F%98%E9%87%8F/1.png">
+<meta property="article:published_time" content="2021-04-11T02:22:22.039Z">
+<meta property="article:modified_time" content="2021-04-11T02:24:14.747Z">
+<meta property="article:author" content="BIOINSu">
+<meta property="article:tag" content="Spark">
+<meta property="article:tag" content="Spark Core">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2021/04/11/Spark%E9%97%AD%E5%8C%85%E7%B4%AF%E5%8A%A0%E5%99%A8%E5%B9%BF%E6%92%AD%E5%8F%98%E9%87%8F/0.png">
+
+
+<link rel="canonical" href="http://example.com/2021/04/11/Spark%E9%97%AD%E5%8C%85%E7%B4%AF%E5%8A%A0%E5%99%A8%E5%B9%BF%E6%92%AD%E5%8F%98%E9%87%8F/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+<title>Spark闭包、累加器和广播变量 | BIOINSu</title>
+  
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BIOINSu</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">1.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%97%AD%E5%8C%85"><span class="nav-number">2.</span> <span class="nav-text">闭包</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%E5%BC%95%E5%87%BA"><span class="nav-number">2.1.</span> <span class="nav-text">问题引出</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="nav-number">2.2.</span> <span class="nav-text">解决方案</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B9%BF%E6%92%AD%E5%8F%98%E9%87%8F"><span class="nav-number">3.</span> <span class="nav-text">广播变量</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B9%BF%E6%92%AD%E5%8F%98%E9%87%8F%E7%9A%84%E4%BD%BF%E7%94%A8"><span class="nav-number">3.1.</span> <span class="nav-text">广播变量的使用</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E5%B9%BF%E6%92%AD%E5%8F%98%E9%87%8F"><span class="nav-number">3.1.1.</span> <span class="nav-text">创建广播变量</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-value-%E8%8E%B7%E5%8F%96%E6%95%B0%E6%8D%AE"><span class="nav-number">3.1.2.</span> <span class="nav-text">使用 value 获取数据</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-unpersist-%E5%88%A0%E9%99%A4%E6%95%B0%E6%8D%AE"><span class="nav-number">3.1.3.</span> <span class="nav-text">使用 unpersist 删除数据</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-destroy-%E9%94%80%E6%AF%81%E5%8F%98%E9%87%8F"><span class="nav-number">3.1.4.</span> <span class="nav-text">使用 destroy 销毁变量,</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B9%BF%E6%92%AD%E5%8F%98%E9%87%8F%E7%9A%84%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-number">3.2.</span> <span class="nav-text">广播变量的使用场景</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B4%AF%E5%8A%A0%E5%99%A8"><span class="nav-number">4.</span> <span class="nav-text">累加器</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%80%9A%E7%94%A8%E7%B4%AF%E5%8A%A0%E5%99%A8"><span class="nav-number">4.1.</span> <span class="nav-text">通用累加器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E7%B4%AF%E5%8A%A0%E5%99%A8"><span class="nav-number">4.2.</span> <span class="nav-text">自定义累加器</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">5.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">BIOINSu</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">10</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/BIOINSu" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;BIOINSu" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/04/11/Spark%E9%97%AD%E5%8C%85%E7%B4%AF%E5%8A%A0%E5%99%A8%E5%B9%BF%E6%92%AD%E5%8F%98%E9%87%8F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BIOINSu">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BIOINSu">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Spark闭包、累加器和广播变量
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2021-04-11 10:22:22 / 修改时间：10:24:14" itemprop="dateCreated datePublished" datetime="2021-04-11T10:22:22+08:00">2021-04-11</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Spark/" itemprop="url" rel="index"><span itemprop="name">Spark</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Spark/Spark-Core/" itemprop="url" rel="index"><span itemprop="name">Spark Core</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h3 id="总结">总结</h3>
+<ul>
+<li><p>闭包</p>
+<p>闭包<strong>就是一个携带了外部作用域的函数</strong>，当它需要被分发到各个节点上执行的时候，需要外部作用域所在的对象是可序列化的。</p>
+<p>使用这种外部变量的形式，会造成每个Task中都存在一个该变量的副本。</p></li>
+</ul>
+<a id="more"></a>
+<ul>
+<li><p>广播变量</p>
+<p>广播变量是一种变量，广播变量允许开发者将一个 <code>Read-Only</code> 的变量<strong>缓存到集群中每个节点中</strong>，而不是传递给每一个 Task 一个副本，每个Executor中只会存在一个副本。</p>
+<ul>
+<li><p>解决了外部变量在每个Task中都存在副本的问题，每个Executor只会存在一份广播变量的副本，节省空间。</p></li>
+<li><p>在Driver端可以修改广播变量的值，<strong>在Executor端无法修改广播变量的值。</strong></p></li>
+<li><p>广播变量只能在Driver端定义，不能在Executor端定义。</p></li>
+<li><p>不能将RDD广播，因为RDD是不存储数据的。可以将RDD的结果广播出去。</p></li>
+</ul></li>
+<li><p>累加器</p>
+<p>累加器是一个<strong>支持添加操作的分布式变量</strong>，可以在分布式环境下保持一致性。</p>
+<ul>
+<li>累加器在Driver端定义赋初始值，累加器只能在Driver端读取最后的值，在Excutor端更新。</li>
+<li>在Driver端可以修改广播变量的值，<strong>在Executor端可以修改累加器的值。</strong></li>
+</ul></li>
+</ul>
+<h3 id="闭包">闭包</h3>
+<p>如果一个函数<strong>携带了外部的作用域</strong>，这种<strong>函数称为闭包</strong>。</p>
+<p>在Scala中，函数是一个对象，继承自FunctionN。</p>
+<h4 id="问题引出">问题引出</h4>
+<p>在spark中实现统计List(1,2,3)的和。如果使用下面的代码，程序打印的结果不是6，而是0。</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">object</span> <span class="title">Test</span> </span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">main</span></span>(args:<span class="type">Array</span>[<span class="type">String</span>]):<span class="type">Unit</span> = &#123;</span><br><span class="line">      <span class="keyword">val</span> conf = <span class="keyword">new</span> <span class="type">SparkConf</span>().setAppName(<span class="string">&quot;test&quot;</span>);</span><br><span class="line">      <span class="keyword">val</span> sc = <span class="keyword">new</span> <span class="type">SparkContext</span>(conf)</span><br><span class="line"></span><br><span class="line">      <span class="keyword">val</span> rdd = sc.parallelize(<span class="type">List</span>(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>))</span><br><span class="line">      <span class="keyword">var</span> counter = <span class="number">0</span></span><br><span class="line">      <span class="comment">//warn: don&#x27;t do this</span></span><br><span class="line">      rdd.foreach(x =&gt; counter += x)</span><br><span class="line">      println(<span class="string">&quot;Counter value: &quot;</span>+counter) <span class="comment">//打印结果为0</span></span><br><span class="line"></span><br><span class="line">      sc.stop()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>问题分析： counter是在foreach函数外部定义的，也就是在driver程序中定义，而foreach函数是属于rdd对象的，rdd函数的执行位置是各个worker节点（或者说worker进程），main函数是在driver节点上（或者说driver进程上）执行的。所以当counter变量在driver中定义，被在rdd中使用的时候，出现了变量的跨域问题，也就是闭包问题。</p>
+<p>问题解释： 对于上面程序中的counter变量，由于在main函数和在rdd对象中foreach函数是属于不同作用域的，所以，传进foreach中的counter是一个副本，初始值都为0。foreach中叠加的是counter的副本，不管副本如何变化，都不会影响到main函数中的counter，所以最终打印出来的counter为0。</p>
+<h4 id="解决方案">解决方案</h4>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Test</span></span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">main</span></span>(args: <span class="type">Array</span>[<span class="type">String</span>]) &#123;</span><br><span class="line">    <span class="keyword">val</span> sc = <span class="keyword">new</span> <span class="type">SparkContext</span>(<span class="keyword">new</span> <span class="type">SparkConf</span>())</span><br><span class="line">    <span class="keyword">val</span> newRDD = sc.textFile(<span class="string">&quot;&quot;</span>)</span><br><span class="line"></span><br><span class="line">    newRDD.map(data =&gt; &#123;</span><br><span class="line">      <span class="comment">//do something</span></span><br><span class="line">      println(data.toString)</span><br><span class="line">    &#125;)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果在RDD的函数中调用了在函数外部定义的对象，这些对象需要通过网络从driver所在节点传给其他的worker节点，所以<strong>要求这些类是可序列化的</strong>，比如在Java或者Scala中实现Serializable类。Worker节点接收到程序之后，在Spark资源管理器的指挥下运行RDD程序。不同Worker节点之间的运行操作是并行的。</p>
+<p><img src="/2021/04/11/Spark%E9%97%AD%E5%8C%85%E7%B4%AF%E5%8A%A0%E5%99%A8%E5%B9%BF%E6%92%AD%E5%8F%98%E9%87%8F/0.png" style="zoom:67%;"></p>
+<p>除了用外部定义的对象来实现类似的功能，Spark还另外提供了两种机制，分别是<strong>Broadcast</strong>和<strong>Accumulator</strong>。</p>
+<p>相比于外部变量的方式，在一定场景下使用Broadcast比较有优势，因为所广播的数据在每一个Worker节点上面只存一个副本，而在Spark算子中使用到的外部变量会在每一个用到它的Task中保存一个副本，即使这些task在同一个节点上面。所以当数据量比较大的时候，建议使用广播而不是外部变量。</p>
+<h3 id="广播变量">广播变量</h3>
+<p>广播变量是一种变量，广播变量允许开发者将一个 <code>Read-Only</code> 的变量缓存到集群中每个节点中, 而不是传递给每一个 Task 一个副本，每个Executor中只会存在一个副本。</p>
+<p>变量一旦被定义为一个广播变量，那么这个变量只能读，不能修改。</p>
+<p><img src="/2021/04/11/Spark%E9%97%AD%E5%8C%85%E7%B4%AF%E5%8A%A0%E5%99%A8%E5%B9%BF%E6%92%AD%E5%8F%98%E9%87%8F/2.png" style="zoom:50%;"></p>
+<h4 id="广播变量的使用">广播变量的使用</h4>
+<h5 id="创建广播变量">创建广播变量</h5>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> b = sc.broadcast(<span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+<p>如果 Log 级别为 DEBUG 的时候, 会打印如下信息</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">DEBUG BlockManager: Put block broadcast_0 locally took  430 ms</span><br><span class="line">DEBUG BlockManager: Putting block broadcast_0 without replication took  431 ms</span><br><span class="line">DEBUG BlockManager: Told master about block broadcast_0_piece0</span><br><span class="line">DEBUG BlockManager: Put block broadcast_0_piece0 locally took  4 ms</span><br><span class="line">DEBUG BlockManager: Putting block broadcast_0_piece0 without replication took  4 ms</span><br></pre></td></tr></table></figure>
+<h5 id="使用-value-获取数据">使用 <code>value</code> 获取数据</h5>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">b.value</span><br></pre></td></tr></table></figure>
+<p>获取数据的时候会打印如下信息</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">DEBUG BlockManager: Getting local block broadcast_0</span><br><span class="line">DEBUG BlockManager: Level for block broadcast_0 is StorageLevel(disk, memory, deserialized, 1 replicas)</span><br></pre></td></tr></table></figure>
+<p>使用 <code>value</code> 方法的注意点</p>
+<p>方法签名 <code>value: T</code></p>
+<p>在destroy之前才能使用value：在 <code>value</code> 方法内部会确保使用获取数据的时候, 变量必须是可用状态, 所以必须在变量被 <code>destroy</code> 之前使用 <code>value</code> 方法, 如果使用 <code>value</code> 时变量已经失效, 则会报出以下错误：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">org.apache.spark.SparkException: Attempted to use Broadcast(0) after it was destroyed (destroy at &lt;console&gt;:27)</span><br><span class="line">  at org.apache.spark.broadcast.Broadcast.assertValid(Broadcast.scala:144)</span><br><span class="line">  at org.apache.spark.broadcast.Broadcast.value(Broadcast.scala:69)</span><br><span class="line">  ... 48 elided</span><br></pre></td></tr></table></figure>
+<h5 id="使用-unpersist-删除数据">使用 <code>unpersist</code> 删除数据</h5>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">b.unpersist</span><br></pre></td></tr></table></figure>
+<h5 id="使用-destroy-销毁变量">使用 <code>destroy</code> 销毁变量,</h5>
+<p>释放内存空间</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">b.destroy</span><br></pre></td></tr></table></figure>
+<p>销毁以后, 会打印如下信息</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">DEBUG BlockManager: Removing broadcast 0</span><br><span class="line">DEBUG BlockManager: Removing block broadcast_0_piece0</span><br><span class="line">DEBUG BlockManager: Told master about block broadcast_0_piece0</span><br><span class="line">DEBUG BlockManager: Removing block broadcast_0</span><br></pre></td></tr></table></figure>
+<p>使用 <code>destroy</code> 方法的注意点</p>
+<p>方法签名 <code>destroy(): Unit</code></p>
+<p>不要多次删除广播变量：<code>destroy</code> 方法会移除广播变量, 彻底销毁掉, 但是如果你试图多次 <code>destroy</code> 广播变量, 则会报出以下错误</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">org.apache.spark.SparkException: Attempted to use Broadcast(0) after it was destroyed (destroy at &lt;console&gt;:27)</span><br><span class="line">  at org.apache.spark.broadcast.Broadcast.assertValid(Broadcast.scala:144)</span><br><span class="line">  at org.apache.spark.broadcast.Broadcast.destroy(Broadcast.scala:107)</span><br><span class="line">  at org.apache.spark.broadcast.Broadcast.destroy(Broadcast.scala:98)</span><br><span class="line">  ... 48 elided</span><br></pre></td></tr></table></figure>
+<h4 id="广播变量的使用场景">广播变量的使用场景</h4>
+<p>正常情况下使用 Task 拉取数据的时候, 会将数据拷贝到 Executor 中多次, 但是使用广播变量的时候只会复制一份数据到 Executor 中, 所以在两种情况下特别适合使用广播变量</p>
+<ul>
+<li>一个 Executor 中有多个 Task 的时候</li>
+<li>一个变量比较大的时候</li>
+<li>大RDD和小RDD执行join操作时。当一个 RDD 很大并且还需要和另外一个 RDD 执行 <code>join</code> 的时候, 可以将较小的 RDD 广播出去, 然后使用大的 RDD 在算子 <code>map</code> 中直接 <code>join</code>, 从而实现在 Map 端 <code>join</code>。</li>
+</ul>
+<h3 id="累加器">累加器</h3>
+<h4 id="通用累加器">通用累加器</h4>
+<p>Accumulators(累加器) 是一个只支持 added(添加) 的分布式变量, 可以在分布式环境下保持一致性, 并且能够做到高效的并发。</p>
+<p><img src="/2021/04/11/Spark%E9%97%AD%E5%8C%85%E7%B4%AF%E5%8A%A0%E5%99%A8%E5%B9%BF%E6%92%AD%E5%8F%98%E9%87%8F/1.png" style="zoom:50%;"></p>
+<ul>
+<li><p>Accumulator 是支持并发并行的, 在任何地方都可以通过 add 来修改数值, 无论是 Driver 还是 Executor</p></li>
+<li><p>只能在 Driver 中才能调用 value 来获取数值</p></li>
+</ul>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> config = <span class="keyword">new</span> <span class="type">SparkConf</span>().setAppName(<span class="string">&quot;ip_ana&quot;</span>).setMaster(<span class="string">&quot;local[6]&quot;</span>)</span><br><span class="line"><span class="keyword">val</span> sc = <span class="keyword">new</span> <span class="type">SparkContext</span>(config)</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> counter = sc.longAccumulator(<span class="string">&quot;counter&quot;</span>)</span><br><span class="line"></span><br><span class="line">sc.parallelize(<span class="type">Seq</span>(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>))</span><br><span class="line">  .foreach(counter.add(_))</span><br><span class="line"></span><br><span class="line"><span class="comment">// 运行结果: 15</span></span><br><span class="line">println(counter.value)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>累加器能保证在 Spark 任务出现问题被重启的时候不会出现重复计算</li>
+<li>累加器只有在 Action 执行的时候才会被触发</li>
+</ul>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> config = <span class="keyword">new</span> <span class="type">SparkConf</span>().setAppName(<span class="string">&quot;ip_ana&quot;</span>).setMaster(<span class="string">&quot;local[6]&quot;</span>)</span><br><span class="line"><span class="keyword">val</span> sc = <span class="keyword">new</span> <span class="type">SparkContext</span>(config)</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> counter = sc.longAccumulator(<span class="string">&quot;counter&quot;</span>)</span><br><span class="line"></span><br><span class="line">sc.parallelize(<span class="type">Seq</span>(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>))</span><br><span class="line">  .map(counter.add(_)) <span class="comment">// 这个地方不是 Action, 而是一个 Transformation</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 运行结果是 0</span></span><br><span class="line">println(counter.value)</span><br></pre></td></tr></table></figure>
+<h4 id="自定义累加器">自定义累加器</h4>
+<p>可以通过自定义累加器来实现更多类型的累加器, 累加器的作用远远不只是累加, 比如可以实现一个累加器, 用于向里面添加一些运行信息。</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//继承AccumulatorV2这个类，传入String类型，返回Set[String]类型</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">InfoAccumulator</span> <span class="keyword">extends</span> <span class="title">AccumulatorV2</span>[<span class="type">String</span>, <span class="type">Set</span>[<span class="type">String</span>]] </span>&#123;</span><br><span class="line">  <span class="comment">//定义一个可变长度的Set，即 mutable.Set[String]  </span></span><br><span class="line">  <span class="keyword">private</span> <span class="keyword">val</span> infos: mutable.<span class="type">Set</span>[<span class="type">String</span>] = mutable.<span class="type">Set</span>()</span><br><span class="line"></span><br><span class="line">  <span class="comment">//判断累加器对象是否为空，这里就是判断这个Set是否为空</span></span><br><span class="line">  <span class="keyword">override</span> <span class="function"><span class="keyword">def</span> <span class="title">isZero</span></span>: <span class="type">Boolean</span> = &#123;</span><br><span class="line">    infos.isEmpty</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">//返回一个拷贝的累加器</span></span><br><span class="line">  <span class="keyword">override</span> <span class="function"><span class="keyword">def</span> <span class="title">copy</span></span>(): <span class="type">AccumulatorV2</span>[<span class="type">String</span>, <span class="type">Set</span>[<span class="type">String</span>]] = &#123;</span><br><span class="line">    <span class="keyword">val</span> newAccumulator = <span class="keyword">new</span> <span class="type">InfoAccumulator</span>()</span><br><span class="line">    infos.synchronized &#123; <span class="comment">//使用synchronized关键字保证线程安全</span></span><br><span class="line">      newAccumulator.infos ++= infos <span class="comment">//把一个Set添加到另一个Set中使用++=</span></span><br><span class="line">    &#125;</span><br><span class="line">    newAccumulator</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">//清空累加器</span></span><br><span class="line">  <span class="keyword">override</span> <span class="function"><span class="keyword">def</span> <span class="title">reset</span></span>(): <span class="type">Unit</span> = &#123;</span><br><span class="line">    infos.clear()</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">//往累加器中添加元素</span></span><br><span class="line">  <span class="keyword">override</span> <span class="function"><span class="keyword">def</span> <span class="title">add</span></span>(v: <span class="type">String</span>): <span class="type">Unit</span> = &#123;</span><br><span class="line">    infos += v</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">//累加器在进行累加的时候，可能每个分布式节点都有一个实例</span></span><br><span class="line">  <span class="comment">//在最后的Driver中进行合并，通过调用这个merge方法把所有的实例内容合并起来，</span></span><br><span class="line">  <span class="keyword">override</span> <span class="function"><span class="keyword">def</span> <span class="title">merge</span></span>(other: <span class="type">AccumulatorV2</span>[<span class="type">String</span>, <span class="type">Set</span>[<span class="type">String</span>]]): <span class="type">Unit</span> = &#123;</span><br><span class="line">    infos ++= other.value <span class="comment">//这里的value就是下面这个方法返回的</span></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">//提供给外部累加结果，注意返回一个不可变的类型，防止外部进行修改</span></span><br><span class="line">  <span class="keyword">override</span> <span class="function"><span class="keyword">def</span> <span class="title">value</span></span>: <span class="type">Set</span>[<span class="type">String</span>] = &#123;</span><br><span class="line">    infos.toSet</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//测试案例</span></span><br><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">accumulator2</span></span>(): <span class="type">Unit</span> = &#123;</span><br><span class="line">  <span class="keyword">val</span> config = <span class="keyword">new</span> <span class="type">SparkConf</span>().setAppName(<span class="string">&quot;ip_ana&quot;</span>).setMaster(<span class="string">&quot;local[6]&quot;</span>)</span><br><span class="line">  <span class="keyword">val</span> sc = <span class="keyword">new</span> <span class="type">SparkContext</span>(config)</span><br><span class="line"></span><br><span class="line">  <span class="keyword">val</span> infoAccumulator = <span class="keyword">new</span> <span class="type">InfoAccumulator</span>()</span><br><span class="line">  sc.register(infoAccumulator, <span class="string">&quot;infos&quot;</span>)</span><br><span class="line"></span><br><span class="line">  sc.parallelize(<span class="type">Seq</span>(<span class="string">&quot;1&quot;</span>, <span class="string">&quot;2&quot;</span>, <span class="string">&quot;3&quot;</span>))</span><br><span class="line">    .foreach(item =&gt; infoAccumulator.add(item))</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 运行结果: Set(3, 1, 2)</span></span><br><span class="line">  println(infoAccumulator.value)</span><br><span class="line"></span><br><span class="line">  sc.stop()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="参考资料">参考资料</h3>
+<p>https://knifefly.cn/2018/05/21/%E7%90%86%E8%A7%A3spark%E9%97%AD%E5%8C%85/（闭包）</p>
+<p>https://blog.csdn.net/weixin_43854618/article/details/105680445（累加器）</p>
+<p>https://www.cnblogs.com/qingyunzong/p/8890483.html#_label1（广播变量和累加器）</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Spark/" rel="tag"># Spark</a>
+              <a href="/tags/Spark-Core/" rel="tag"># Spark Core</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/04/02/MySQLLog/" rel="prev" title="MySQL日志">
+                  <i class="fa fa-chevron-left"></i> MySQL日志
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">BIOINSu</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+  <script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'none'
+      },
+      options: {
+        renderActions: {
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              const target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3.1.2/es5/tex-mml-chtml.js';
+    script.defer = true;
+    document.head.appendChild(script);
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.typesetClear();
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+
+
+</body>
+</html>
