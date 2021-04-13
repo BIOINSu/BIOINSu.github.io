@@ -28,58 +28,6 @@
       </tags>
   </entry>
   <entry>
-    <title>OR-Net 论文阅读</title>
-    <url>/2021/02/16/ORNet/</url>
-    <content><![CDATA[<p>《Learning Omni-frequency Region-adaptive Representations for Real Image Super-Resolution》 2021</p>
-<h3 id="背景">背景</h3>
-<p>Real World数据包含不同的、复杂的退化方式，例如模糊、噪声和降采样，因此导致传统深度学习方法在真实数据集上表现不好。</p>
-<p>RealSR和DRealSR不仅提出了两个真实数据集，还提出了两种真实超分方法 laplacian pyramid based kernel prediction network (LP-KPN) 和 component divide-and- conquer (CDC)。然而，它们都是在像素水平上进行重建（区域、边缘和角落），没有利用到频率信息。</p>
-<a id="more"></a>
-<p>图像的频率是表征图像中灰度变化剧烈程度的指标，是灰度在平面空间上的梯度。图像的主要成分是低频信息，它形成了图像的基本灰度等级，对图像结构的决定作用较小；中频信息决定了图像的基本结构，形成了图像的主要边缘结构；高频信息形成了图像的边缘和细节，是在中频信息上对图像内容的进一步强化。</p>
-<p><img src="/2021/02/16/ORNet/0.png" style="zoom: 50%;"></p>
-<p>作者观察到，对于图a可以看出，LR的退化在各个频率上都存在。对于图b可以看出，在不同区域中的不同频率组件内，真实LR的退化也是不同的。</p>
-<p>因此，本文作者提出ORNet，在图像的不同频率上增强相应的频率因子，最终通过区域自适应频率聚合模块，结合动态卷积和空间注意力机制，针对HR图像的不同位置，有选择性地重建不同的频率分量。</p>
-<h3 id="方法">方法</h3>
-<p><img src="/2021/02/16/ORNet/1.png" style="zoom: 67%;"></p>
-<h4 id="框架的组件">框架的组件</h4>
-<ul>
-<li><p>Frequency Decomposition (FD) Module</p>
-<p>对图像进行频率分离，可以在传统的信号处理方法中采用小波变换或离散余弦变换来实现。然而，由于数学运算的确定性和任务无关性，这种转换不可避免地为low-level恢复任务丢弃了一些关键、详细的信息。为了在模拟小波变换的同时避免关键信息丢失，作者提出通过可学习的隐空间下采样，来分解混合特征表示。类似的操作可以参考OctConv。</p>
-<p>具体来说，作者首先利用步长较大的卷积层(如stride= 2)对特征表示进行下采样，提取粗特征，即低频分量。然后，从原始特征(下采样前)中减去这些相对低频的分量，以获得其余相对高频的特征表示。</p></li>
-<li><p>Frequency Enhancement Unit (FEU)</p>
-<p>该单元对不同频率的信息进行增强。如b种所示结构，将CA的结果和普通卷积的结果相拼接，并加入dense connection。目的是有助于各分支在不同阶段选择性融合相应的频率分量，从而提高各分支在不同频域的表示能力。</p></li>
-<li><p>Region-adaptive Frequency Aggregation (RFA) Module</p>
-<p>该模块对不同频率组件进行自适应聚合。</p>
-<p><img src="/2021/02/16/ORNet/4.png" style="zoom:50%;"></p>
-<p>即预测多个动态卷积核，并设置一个可学习的权重向量，将多个卷积核组合在一起形成动态卷积核，通过它生成attention map并与原来的特征图做乘法。</p></li>
-</ul>
-<h4 id="框架的执行">框架的执行</h4>
-<p>首先将输入图像进行频率分离。用大步长卷积提取低频特征，并不断减去低频特征获得高频特征。</p>
-<p><img src="/2021/02/16/ORNet/2.png" style="zoom: 67%;"></p>
-<p>上箭头表示双线性插值上采样，下箭头表示带步长卷积进行下采样。</p>
-<p>接着，通过FEU来增强不同频率的表示，以弥补低/中/高频信息的丢失，并将低频信息与不同高频信息相结合。</p>
-<p><img src="/2021/02/16/ORNet/3.png" style="zoom: 60%;"></p>
-<p>真实LR图像中不同区域的频率信息丢失是不同的。因此，有必要对不同区域的全频分量进行自适应聚合，以恢复更真实、纹理细节更丰富的HR图像。通过作者提出的RFA模块，使用动态卷积核的方式生成attention map来组合多个频率下的组件，最终通过pixel shuffle提高分辨率。</p>
-<p><img src="/2021/02/16/ORNet/5.png" style="zoom:60%;"></p>
-<h3 id="实验结果">实验结果</h3>
-<p>是一种有监督方法，使用DRealSR进行训练，动态核的数量设置为5个，使用L1损失优化网络。</p>
-<h4 id="不同频率的可视化">不同频率的可视化</h4>
-<p><img src="/2021/02/16/ORNet/6.png" style="zoom: 67%;"></p>
-<p>对于FD模块，首先在图6(a)中对三个频率尺度的特征进行可视化，可以看到高频分支的特征包含更多的细节和纹理信息。然后根据图6(b)中的小波变换对低/中/高频特征进行分析。从左到右，频率范围从1增加到6中，低频特征的能量几乎完全集中在低频域，高频特征和中频特征的能量集中在相对更高的频率域。</p>
-<h4 id="不同频率数量的比较">不同频率数量的比较</h4>
-<p><img src="/2021/02/16/ORNet/7.png" style="zoom:50%;"></p>
-<p>提高频率分割的数量一定程度上能够提高效果。</p>
-<h4 id="消融实验">消融实验</h4>
-<p><img src="/2021/02/16/ORNet/8.png" style="zoom: 50%;"></p>
-<h4 id="与sota相比较">与SOTA相比较</h4>
-<p><img src="/2021/02/16/ORNet/9.png" style="zoom: 50%;"></p>
-<p>其他方法除了CDC外均没有在DRealSR上训练，因此除了CDC外本质上无法证明该方法的有效性。</p>
-<h3 id="结论">结论</h3>
-<p>作者提出一种全频域自适应网络(OR-Net)来实现真实图像超分辨率。比较有贡献的地方在于分析了真实图像与图像频率的关系，以及频率在网络中的影响。然而现在RealSR大部分流行的方式是无监督学习（或unpaired的方式），而该文是完全的有监督学习。</p>
-<p>有文章显示基于卷积的频率分离操作在PSNR和SSIM上稍高于基于小波变换的方法，但在视觉感知上（LPIPS指标）会稍差。对图像进行不同频率分离的方式会导致最终的重建效果有所不同。</p>
-]]></content>
-  </entry>
-  <entry>
     <title>Java中char、int、String相互转换</title>
     <url>/2021/04/01/Java%E4%B8%ADchar,int,String%E7%9B%B8%E4%BA%92%E8%BD%AC%E6%8D%A2/</url>
     <content><![CDATA[<h4 id="char转int">char转int</h4>
@@ -876,6 +824,66 @@
       <tags>
         <tag>SISR</tag>
         <tag>RealSR</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>MySQL窗口函数</title>
+    <url>/2021/04/13/MySQL%E7%AA%97%E5%8F%A3/</url>
+    <content><![CDATA[<p>窗口指的是记录的集合。窗口函数也就是在满足某种条件的记录集合上执行的特殊函数。</p>
+<a id="more"></a>
+<h4 id="基本用法">基本用法</h4>
+<blockquote>
+<p>函数名 OVER (子句)</p>
+</blockquote>
+<p>函数名部分即表示窗口函数。</p>
+<p>over关键字用来指定函数执行的窗口范围，若后面括号中什么都不写，则窗口函数基于所有行进行计算；如果不为空，则支持以下4中语法来设置窗口：</p>
+<ul>
+<li><p><code>PARTITION BY</code> 子句：窗口按照哪些字段进行分组，窗口函数在不同的分组上分别执行；</p></li>
+<li><p><code>ORDER BY</code>子句：按照哪些字段进行排序，窗口函数将按照排序后的记录顺序进行编号；</p></li>
+<li><p><code>FRAME</code>子句：FRAME是当前分区的一个子集，子句用来定义子集的规则，通常用来作为滑动窗口使用</p></li>
+<li><p>window_name：给窗口指定一个别名。如果SQL中涉及的窗口较多，采用别名可以看起来更清晰易读；</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    <span class="built_in">rank</span> ( ) <span class="keyword">over</span> w1 </span><br><span class="line"><span class="keyword">FROM</span></span><br><span class="line">    employee <span class="keyword">window</span> w1 <span class="keyword">AS</span> ( <span class="keyword">PARTITION</span> <span class="keyword">BY</span> Company <span class="keyword">ORDER</span> <span class="keyword">BY</span> Salary <span class="keyword">DESC</span> )</span><br><span class="line">    </span><br><span class="line"># <span class="keyword">from</span> <span class="keyword">table</span>后面加了一个关键字<span class="keyword">WINDOW</span>，后面跟了一个子句，这样在<span class="keyword">select</span>中就可以使用这个w1作为窗口了。</span><br></pre></td></tr></table></figure>
+<h4 id="窗口函数">窗口函数</h4></li>
+</ul>
+<p>窗口函数，在某些记录的集合上执行的函数。</p>
+<h5 id="序号函数">序号函数</h5>
+<p>row_number()/rank()/dense_rank()</p>
+<p>作用：显示分区中的当前行号（排名是需要通过<code>ORDER BY</code>子句实现的）</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span>,</span><br><span class="line">   <span class="built_in">rank</span>() <span class="keyword">over</span> (<span class="keyword">order</span> <span class="keyword">by</span> 成绩 <span class="keyword">desc</span>) <span class="keyword">as</span> ranking,</span><br><span class="line">   <span class="built_in">dense_rank</span>() <span class="keyword">over</span> (<span class="keyword">order</span> <span class="keyword">by</span> 成绩 <span class="keyword">desc</span>) <span class="keyword">as</span> dese_rank,</span><br><span class="line">   <span class="built_in">row_number</span>() <span class="keyword">over</span> (<span class="keyword">order</span> <span class="keyword">by</span> 成绩 <span class="keyword">desc</span>) <span class="keyword">as</span> row_num</span><br><span class="line"><span class="keyword">from</span> 班级;</span><br></pre></td></tr></table></figure>
+<p><img src="/2021/04/13/MySQL%E7%AA%97%E5%8F%A3/Users\lenovo\Desktop\笔记\MySQL窗口\0.png" style="zoom:67%;"></p>
+<ul>
+<li><p>rank函数：如果有并列名次的行，会占用下一名次的位置。比如正常排名是1，2，3，4，但是现在前3名是并列的名次，结果是：1，1，1，4。</p></li>
+<li><p>dense_rank函数：如果有并列名次的行，不占用下一名次的位置。比如正常排名是1，2，3，4，但是现在前3名是并列的名次，结果是：1，1，1，2。</p></li>
+<li><p>row_number函数：不考虑并列名次的情况。比如前3名是并列的名次，排名是正常的1，2，3，4。</p></li>
+</ul>
+<h5 id="分布函数">分布函数</h5>
+<p>percent_rank()/cume_dist()</p>
+<p>percent_rank()</p>
+<p>用途：和之前的RANK()函数相关，每行按照公式进行计算：(rank - 1) / (rows - 1)</p>
+<p>其中，rank为RANK()函数产生的序号，rows为当前窗口的记录总行数该函数可以用来计算分位数。</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    <span class="built_in">percent_rank</span> ( ) <span class="keyword">over</span> ( <span class="keyword">PARTITION</span> <span class="keyword">BY</span> Company <span class="keyword">ORDER</span> <span class="keyword">BY</span> Salary <span class="keyword">DESC</span> ),</span><br><span class="line">    Company,</span><br><span class="line">    Salary </span><br><span class="line"><span class="keyword">FROM</span></span><br><span class="line">    employee </span><br><span class="line"><span class="keyword">WHERE</span></span><br><span class="line">    Company <span class="operator">=</span> <span class="string">&#x27;Microsoft&#x27;</span></span><br></pre></td></tr></table></figure>
+<p><img src="/2021/04/13/MySQL%E7%AA%97%E5%8F%A3/Users\lenovo\Desktop\笔记\MySQL窗口\1.png" style="zoom:67%;"></p>
+<p>cume_dist()</p>
+<p>用途：分组内小于等于当前rank值的行数/分组内总行数。</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    <span class="built_in">cume_dist</span> ( ) <span class="keyword">over</span> ( <span class="keyword">PARTITION</span> <span class="keyword">BY</span> Company <span class="keyword">ORDER</span> <span class="keyword">BY</span> Salary <span class="keyword">DESC</span> ),</span><br><span class="line">    Company,</span><br><span class="line">    Salary </span><br><span class="line"><span class="keyword">FROM</span></span><br><span class="line">    employee </span><br><span class="line"><span class="keyword">WHERE</span></span><br><span class="line">    Company <span class="operator">=</span> <span class="string">&#x27;Microsoft&#x27;</span></span><br></pre></td></tr></table></figure>
+<p><img src="/2021/04/13/MySQL%E7%AA%97%E5%8F%A3/Users\lenovo\Desktop\笔记\MySQL窗口\2.png" style="zoom:67%;"></p>
+<h5 id="聚合函数">聚合函数</h5>
+<p>sum/avg/max/min/count</p>
+<p>用途：在窗口中每条记录动态应用聚合函数(sum/avg/max/min/count)，可以动态计算在指定的窗口内的各种聚合函数值。</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    <span class="built_in">avg</span>( Salary ) <span class="keyword">over</span> ( <span class="keyword">PARTITION</span> <span class="keyword">BY</span> Company <span class="keyword">ORDER</span> <span class="keyword">BY</span> Salary <span class="keyword">DESC</span> ),</span><br><span class="line">    Company,</span><br><span class="line">    Salary </span><br><span class="line"><span class="keyword">FROM</span></span><br><span class="line">    employee </span><br><span class="line"><span class="keyword">WHERE</span></span><br><span class="line">    Company <span class="operator">=</span> <span class="string">&#x27;Microsoft&#x27;</span></span><br></pre></td></tr></table></figure>
+<p>按照分组的每一行，求累计的平均值。根据over子句分组之后，挨个行进行select，并执行over前面的函数，因为over子句已经把记录变成了符合条件的一些行集，所以select的方式就改变了。</p>
+<p><img src="/2021/04/13/MySQL%E7%AA%97%E5%8F%A3/Users\lenovo\Desktop\笔记\MySQL窗口\3.png" style="zoom:67%;"></p>
+<h4 id="参考资料">参考资料</h4>
+<p>https://leetcode-cn.com/problems/department-top-three-salaries/solution/tu-jie-sqlmian-shi-ti-jing-dian-topnwen-ti-by-houz/</p>
+<p>https://www.jianshu.com/p/e5c5bfb1e28b</p>
+]]></content>
+      <categories>
+        <category>数据库</category>
+        <category>MySQL</category>
+      </categories>
+      <tags>
+        <tag>数据库</tag>
+        <tag>MySQL</tag>
       </tags>
   </entry>
 </search>
