@@ -74,138 +74,6 @@
       </tags>
   </entry>
   <entry>
-    <title>MySQL日志</title>
-    <url>/2021/04/02/MySQLLog/</url>
-    <content><![CDATA[<p>日志是MySQL数据库的重要组成部分，记录着数据库运行期间各种状态信息。</p>
-<a id="more"></a>
-<h4 id="binlog">binlog</h4>
-<ul>
-<li><p><strong>概念</strong></p>
-<p>binlog属于逻辑日志，用于<strong>记录数据库执行的写入性操作</strong>(不包括查询)信息，以二进制的形式保存在磁盘中。binlog是MySQL的逻辑日志，并且由Server层进行记录，使用任何存储引擎的MySQL数据库都会记录binlog日志。</p>
-<blockquote>
-<p>逻辑日志：可以简单理解为记录的就是sql语句。但又不完全是sql语句这么简单，而是包括了执行的sql语句（增删改）反向的信息，也就意味着delete对应着delete本身和其反向的insert；update对应着update执行前后的版本的信息；insert对应着delete和insert本身的信息。</p>
-<p>物理日志：因为MySQL数据最终是保存在数据页中的，物理日志记录的就是数据页变更，即数据本身的值。</p>
-</blockquote></li>
-<li><p><strong>使用场景</strong></p>
-<p>binlog的主要使用场景有两个，分别是<strong>主从复制</strong>和<strong>数据恢复</strong>。</p>
-<p>主从复制：在Master端开启binlog，然后将binlog发送到各个Slave端，Slave端重放binlog从而达到主从数据一致。</p>
-<p><img src="/2021/04/02/MySQLLog/3.png" style="zoom:50%;"></p>
-<p>数据恢复：通过使用MySQL binlog工具来恢复数据。</p></li>
-<li><p><strong>产生时机</strong></p>
-<p>事务提交的时候，一次性将事务中的sql语句（一个事物可能对应多个sql语句）按照一定的格式记录到binlog中。</p></li>
-<li><p><strong>释放时机</strong></p>
-<p>binlog的默认是保持时间由参数expire_logs_days配置，也就是说对于非活动的日志文件，在生成时间超过expire_logs_days配置的天数之后，会被自动删除。</p></li>
-<li><p>binlog记录方式</p>
-<p>binlog是通过追加的方式进行写入的，可以通过max_binlog_size参数设置每个binlog文件的大小，当文件大小达到给定值之后，会生成新的文件来保存日志。</p></li>
-</ul>
-<h4 id="redo-log">redo log</h4>
-<ul>
-<li><p><strong>概念</strong></p>
-<p>redo log属于物理日志，记录事务<strong>对数据页做了哪些修改</strong>。</p>
-<blockquote>
-<p>InnoDB的修改数据的基本流程</p>
-<p>当我们想要修改DB上某一行数据的时候，InnoDB是把数据从磁盘读取到内存的缓冲池上进行修改。</p>
-<p>这个时候数据在内存中被修改，与磁盘中相比就存在了差异，我们称这种有差异的数据为<strong>脏页</strong>。</p>
-<p>InnoDB对脏页的处理不是每次生成脏页就将脏页刷新回磁盘，这样会产生海量的IO操作，严重影响InnoDB的处理性能。</p>
-<p>既然脏页与磁盘中的数据存在差异，那么如果在这期间DB出现故障就会造成数据的丢失。为了解决这个问题，redo log就应运而生了。</p>
-</blockquote>
-<p>redo log包括两部分：一个是内存中的日志缓冲(redo log buffer)，另一个是磁盘上的日志文件(redo log file)。</p>
-<p><img src="/2021/04/02/MySQLLog/1.png" style="zoom:67%;"></p>
-<p>mysql每执行一条DML语句，先将记录写入redo log buffer，后续某个时间点再一次性将多个操作记录写到redo log file。这种先写日志，再写磁盘的技术就是MySQL里经常说到的WAL(Write-Ahead Logging) 技术。</p></li>
-<li><p><strong>使用场景</strong></p>
-<p>redo log <strong>防止DB出现故障造成数据的丢失</strong>。当出现故障导致脏页还未来得及保存进磁盘时，通过redo log进行重做，从而达到事务的持久性这一特性。</p></li>
-<li><p><strong>产生时机</strong></p>
-<p>事务开始之后就产生redo log。</p></li>
-<li><p><strong>释放时机</strong></p>
-<p>当对应事务的脏页写入到磁盘之后，redo log的使命也就完成了，重做日志占用的空间就可以重用（被覆盖）。</p></li>
-<li><p><strong>redo log记录方式</strong></p>
-<p><img src="/2021/04/02/MySQLLog/0.png" style="zoom:50%;"></p>
-<p>redo log实际上记录数据页的变更，而这种变更记录是没必要全部保存，因此redo log实现上采用了大小固定，循环写入的方式，当写到结尾时，会回到开头循环写日志。</p>
-<p>checkpoint所做的事就是把脏页给刷新回磁盘。所以，当DB重启恢复时，只需要恢复checkpoint之后的数据。这样就能大大缩短恢复时间。</p>
-<p>check point到write pos之间是redo log待落盘的数据页更改记录。</p>
-<p>write pos到check point之间的部分是redo log空着的部分，用于记录新的记录。</p>
-<p>当write pos追上check point时，会先推动check point向前移动，空出位置再记录新的日志。</p></li>
-<li><p><strong>redo log写入磁盘的时机</strong>（buffer到file的时机）</p>
-<p>MySQL支持三种将redo log buffer写入redo log file的时机，可以通过innodb_flush_log_at_trx_commit参数配置，各参数值含义如下：</p>
-<p>0（延迟写）</p>
-<p>事务提交时不会将redo log buffer中日志写入到os buffer，而是每秒写入os buffer并调用fsync()写入到redo log file中。也就是说<strong>设置为0时是(大约)每秒刷新写入到磁盘中的</strong>，当系统崩溃，会丢失1秒钟的数据。</p>
-<p>1（实时写，实时刷）</p>
-<p>事务每次提交都会将redo log buffer中的日志写入os buffer并调用fsync()刷到redo log file中。这种方式即使系统崩溃也不会丢失任何数据，但是因为<strong>每次提交都写入磁盘</strong>，IO的性能较差。</p>
-<p>2（实时写，延迟刷）</p>
-<p>每次<strong>提交都仅写入</strong>到os buffer，然后是<strong>每秒调用</strong>fsync()将os buffer中的日志写入到redo log file。</p></li>
-</ul>
-<h4 id="undo-log">undo log</h4>
-<ul>
-<li><p>概念</p>
-<p><img src="/2021/04/02/MySQLLog/2.png" style="zoom: 67%;"></p>
-<p>undo log属于逻辑日志，保存了事务发生之前的<strong>数据的一个版本</strong>，可以用于回滚。其实本质上，老旧的记录就形成了undo log。</p></li>
-<li><p>使用场景</p>
-<p>多版本并发控制协议MVCC中，通过undo log形成记录的多个版本，能执行快照读时能够判断读取的是哪个版本的记录。</p></li>
-<li><p>产生时机</p>
-<p>不同事务或者相同事务的对同一记录的修改，会导致该记录的undo log成为一条记录版本线性表，既链表。</p></li>
-<li><p>释放时机</p>
-<p>当事务提交之后，undo log并不能立马被删除，而是放入待清理的链表，由purge线程判断是否由其他事务在使用undo log上的旧版本，决定是否可以清理undo log的日志空间。</p></li>
-</ul>
-<h4 id="三者区别">三者区别</h4>
-<table>
-<colgroup>
-<col style="width: 4%">
-<col style="width: 31%">
-<col style="width: 31%">
-<col style="width: 31%">
-</colgroup>
-<thead>
-<tr class="header">
-<th></th>
-<th>binlog</th>
-<th>redo log</th>
-<th>undo log</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>记录内容</td>
-<td>用于<strong>记录数据库执行的写入性操作</strong>(不包括查询)信息，以二进制的形式保存在磁盘中。</td>
-<td>记录事务<strong>对数据页做了哪些修改</strong>。</td>
-<td>保存了事务发生之前的<strong>数据的一个版本</strong>，可以用于回滚。其实本质上，老旧的记录就形成了undo log。</td>
-</tr>
-<tr class="even">
-<td>日志类型</td>
-<td>逻辑日志</td>
-<td>物理日志</td>
-<td>逻辑日志</td>
-</tr>
-<tr class="odd">
-<td>使用场景</td>
-<td><strong>主从复制</strong>和<strong>数据恢复</strong>。主从复制：在Master端开启binlog，然后将binlog发送到各个Slave端，Slave端重放binlog从而达到主从数据一致。数据恢复：通过使用MySQL binlog工具来恢复数据。</td>
-<td>redo log <strong>防止DB出现故障造成数据的丢失</strong>。当出现故障导致脏页还未来得及保存进磁盘时，通过redo log进行重做，从而达到事务的持久性这一特性。</td>
-<td>多版本并发控制协议<strong>MVCC中的快照读</strong>，通过undo log形成记录的多个版本，能执行快照读时能够判断读取的是哪个版本的记录。</td>
-</tr>
-</tbody>
-</table>
-<p><strong>redo log 和 bin log 区别</strong></p>
-<p>作用不同：redo log是保证事务的持久性的，binlog主要用于主从复制。</p>
-<p>内容不同：redo log是物理日志，是数据页面的修改之后的物理记录，binlog是逻辑日志，可以简单认为记录的就是sql语句</p>
-<p>产生时机不同：事务开始之后就产生redo log，事务提交的时候产生bin log。</p>
-<p>释放时机不同：当对应事务的脏页写入到磁盘之后，redo log可以被移除，超过一定时间后，binlog被删除。</p>
-<p>恢复效率：基于物理日志的redo log恢复数据的效率要高于语句逻辑日志的binlog。</p>
-<p>先写redo log，再写binlog，两个日志都提交成功（刷入磁盘），事务才算真正的完成。</p>
-<h4 id="参考资料">参考资料</h4>
-<p>https://cloud.tencent.com/developer/article/1679325</p>
-<p>https://www.cnblogs.com/wy123/p/8365234.html</p>
-<p>https://zhuanlan.zhihu.com/p/35355751</p>
-<p>https://www.cnblogs.com/xuwc/p/13873611.html</p>
-]]></content>
-      <categories>
-        <category>数据库</category>
-        <category>MySQL</category>
-      </categories>
-      <tags>
-        <tag>数据库</tag>
-        <tag>MySQL</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Spark闭包、累加器和广播变量</title>
     <url>/2021/04/11/Spark%E9%97%AD%E5%8C%85%E7%B4%AF%E5%8A%A0%E5%99%A8%E5%B9%BF%E6%92%AD%E5%8F%98%E9%87%8F/</url>
     <content><![CDATA[<h3 id="总结">总结</h3>
@@ -827,71 +695,38 @@
       </tags>
   </entry>
   <entry>
-    <title>MySQL窗口函数</title>
-    <url>/2021/04/13/MySQL%E7%AA%97%E5%8F%A3/</url>
-    <content><![CDATA[<p>窗口指的是记录的集合。窗口函数也就是在满足某种条件的记录集合上执行的特殊函数。</p>
-<a id="more"></a>
-<h4 id="基本用法">基本用法</h4>
-<blockquote>
-<p>函数名 OVER (子句)</p>
-</blockquote>
-<p>函数名部分即表示窗口函数。</p>
-<p>over关键字用来指定函数执行的窗口范围，若后面括号中什么都不写，则窗口函数基于所有行进行计算；如果不为空，则支持以下4中语法来设置窗口：</p>
-<ul>
-<li><p><code>PARTITION BY</code> 子句：窗口按照哪些字段进行分组，窗口函数在不同的分组上分别执行；</p></li>
-<li><p><code>ORDER BY</code>子句：按照哪些字段进行排序，窗口函数将按照排序后的记录顺序进行编号；</p></li>
-<li><p><code>FRAME</code>子句：FRAME是当前分区的一个子集，子句用来定义子集的规则，通常用来作为滑动窗口使用</p></li>
-<li><p>window_name：给窗口指定一个别名。如果SQL中涉及的窗口较多，采用别名可以看起来更清晰易读；</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    <span class="built_in">rank</span> ( ) <span class="keyword">over</span> w1 </span><br><span class="line"><span class="keyword">FROM</span></span><br><span class="line">    employee <span class="keyword">window</span> w1 <span class="keyword">AS</span> ( <span class="keyword">PARTITION</span> <span class="keyword">BY</span> Company <span class="keyword">ORDER</span> <span class="keyword">BY</span> Salary <span class="keyword">DESC</span> )</span><br><span class="line">    </span><br><span class="line"># <span class="keyword">from</span> <span class="keyword">table</span>后面加了一个关键字<span class="keyword">WINDOW</span>，后面跟了一个子句，这样在<span class="keyword">select</span>中就可以使用这个w1作为窗口了。</span><br></pre></td></tr></table></figure>
-<h4 id="窗口函数">窗口函数</h4></li>
-</ul>
-<p>窗口函数，在某些记录的集合上执行的函数。</p>
-<h5 id="序号函数">序号函数</h5>
-<p>row_number()/rank()/dense_rank()</p>
-<p>作用：显示分区中的当前行号（排名是需要通过<code>ORDER BY</code>子句实现的）</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span>,</span><br><span class="line">   <span class="built_in">rank</span>() <span class="keyword">over</span> (<span class="keyword">order</span> <span class="keyword">by</span> 成绩 <span class="keyword">desc</span>) <span class="keyword">as</span> ranking,</span><br><span class="line">   <span class="built_in">dense_rank</span>() <span class="keyword">over</span> (<span class="keyword">order</span> <span class="keyword">by</span> 成绩 <span class="keyword">desc</span>) <span class="keyword">as</span> dese_rank,</span><br><span class="line">   <span class="built_in">row_number</span>() <span class="keyword">over</span> (<span class="keyword">order</span> <span class="keyword">by</span> 成绩 <span class="keyword">desc</span>) <span class="keyword">as</span> row_num</span><br><span class="line"><span class="keyword">from</span> 班级;</span><br></pre></td></tr></table></figure>
-<p><img src="/2021/04/13/MySQL%E7%AA%97%E5%8F%A3/0.png" style="zoom:67%;"></p>
-<ul>
-<li><p>rank函数：如果有并列名次的行，会占用下一名次的位置。比如正常排名是1，2，3，4，但是现在前3名是并列的名次，结果是：1，1，1，4。</p></li>
-<li><p>dense_rank函数：如果有并列名次的行，不占用下一名次的位置。比如正常排名是1，2，3，4，但是现在前3名是并列的名次，结果是：1，1，1，2。</p></li>
-<li><p>row_number函数：不考虑并列名次的情况。比如前3名是并列的名次，排名是正常的1，2，3，4。</p></li>
-</ul>
-<h5 id="分布函数">分布函数</h5>
-<p>percent_rank()/cume_dist()</p>
-<p>percent_rank()</p>
-<p>用途：和之前的RANK()函数相关，每行按照公式进行计算：(rank - 1) / (rows - 1)</p>
-<p>其中，rank为RANK()函数产生的序号，rows为当前窗口的记录总行数该函数可以用来计算分位数。</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    <span class="built_in">percent_rank</span> ( ) <span class="keyword">over</span> ( <span class="keyword">PARTITION</span> <span class="keyword">BY</span> Company <span class="keyword">ORDER</span> <span class="keyword">BY</span> Salary <span class="keyword">DESC</span> ),</span><br><span class="line">    Company,</span><br><span class="line">    Salary </span><br><span class="line"><span class="keyword">FROM</span></span><br><span class="line">    employee </span><br><span class="line"><span class="keyword">WHERE</span></span><br><span class="line">    Company <span class="operator">=</span> <span class="string">&#x27;Microsoft&#x27;</span></span><br></pre></td></tr></table></figure>
-<p><img src="/2021/04/13/MySQL%E7%AA%97%E5%8F%A3/1.png" style="zoom:67%;"></p>
-<p>cume_dist()</p>
-<p>用途：分组内小于等于当前rank值的行数/分组内总行数。</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    <span class="built_in">cume_dist</span> ( ) <span class="keyword">over</span> ( <span class="keyword">PARTITION</span> <span class="keyword">BY</span> Company <span class="keyword">ORDER</span> <span class="keyword">BY</span> Salary <span class="keyword">DESC</span> ),</span><br><span class="line">    Company,</span><br><span class="line">    Salary </span><br><span class="line"><span class="keyword">FROM</span></span><br><span class="line">    employee </span><br><span class="line"><span class="keyword">WHERE</span></span><br><span class="line">    Company <span class="operator">=</span> <span class="string">&#x27;Microsoft&#x27;</span></span><br></pre></td></tr></table></figure>
-<p><img src="/2021/04/13/MySQL%E7%AA%97%E5%8F%A3/2.png" style="zoom:67%;"></p>
-<h5 id="聚合函数">聚合函数</h5>
-<p>sum/avg/max/min/count</p>
-<p>用途：在窗口中每条记录动态应用聚合函数(sum/avg/max/min/count)，可以动态计算在指定的窗口内的各种聚合函数值。</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    <span class="built_in">avg</span>( Salary ) <span class="keyword">over</span> ( <span class="keyword">PARTITION</span> <span class="keyword">BY</span> Company <span class="keyword">ORDER</span> <span class="keyword">BY</span> Salary <span class="keyword">DESC</span> ),</span><br><span class="line">    Company,</span><br><span class="line">    Salary </span><br><span class="line"><span class="keyword">FROM</span></span><br><span class="line">    employee </span><br><span class="line"><span class="keyword">WHERE</span></span><br><span class="line">    Company <span class="operator">=</span> <span class="string">&#x27;Microsoft&#x27;</span></span><br></pre></td></tr></table></figure>
-<p>按照分组的每一行，求累计的平均值。根据over子句分组之后，挨个行进行select，并执行over前面的函数，因为over子句已经把记录变成了符合条件的一些行集，所以select的方式就改变了。</p>
-<p><img src="/2021/04/13/MySQL%E7%AA%97%E5%8F%A3/3.png" style="zoom:67%;"></p>
-<h4 id="参考资料">参考资料</h4>
-<p>https://leetcode-cn.com/problems/department-top-three-salaries/solution/tu-jie-sqlmian-shi-ti-jing-dian-topnwen-ti-by-houz/</p>
-<p>https://www.jianshu.com/p/e5c5bfb1e28b</p>
-]]></content>
-      <categories>
-        <category>数据库</category>
-        <category>MySQL</category>
-      </categories>
-      <tags>
-        <tag>数据库</tag>
-        <tag>MySQL</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>计算机网络传输层</title>
     <url>/2021/04/13/%E8%AE%A1%E7%BD%91_%E4%BC%A0%E8%BE%93%E5%B1%82/</url>
     <content><![CDATA[<h3 id="计算机网络传输层">计算机网络传输层</h3>
-<p>TCP异常断开、TCP 粘包、拆包</p>
+<p>TCP异常断开、TCP 粘包拆包</p>
 <a id="more"></a>
+<h4 id="tcp异常断开">TCP异常断开</h4>
+<h5 id="服务器进程终止">服务器进程终止</h5>
+<p>当服务器TCP接收到来自客户的数据时，既然先前打开那个套接口的进程已经终止，于是响应一个RST报文。</p>
+<h5 id="服务器主机崩溃">服务器主机崩溃</h5>
+<p>当服务器主机崩溃时，它不能发送任何东西，客户端TCP持续重传数据，试图从服务器上接受一个ACK。</p>
+<ul>
+<li>假设服务器已崩溃，从而对客户的数据分节根本没有响应，当客户端TCP最终放弃时，返回客户进程一个错误ETIMEDOUT。</li>
+<li>如果某个中间路由器判定服务器主机已不可达，从而响应以一个“destination unreachable”，那么所返回的错误是EHOSTUNREACH或ENETUNREACH。</li>
+</ul>
+<p>为了快速检测出服务器已经不可达，有如下解决方案：</p>
+<ul>
+<li><p>给客户端设置一个超时时间，当超过这个时间后服务器还未响应数据时即认为服务器已经崩溃。</p></li>
+<li><p>心跳检测机制，给双方设置一个守护进程，定期发送心跳检测数据包，另一方需要进行回应。</p></li>
+<li><p>在Linux Socket编程中，开启SO_KEEPALIVE参数。</p>
+<blockquote>
+<p>SO_KEEPALIVE的过程？</p>
+<p>1、如果通信两端超过2个小时没有交换数据，那么开启keep-alive的一端会自动发一个keep-alive包给对端。 2、如果对端正常的回应ACK包，那么一切都没问题，再等个2小时后发包(如果这两个小时仍然没有数据交换)。 3、如果对端回应RST包，表明对端程序崩溃或重启，这边socket产生ECONNRESET错误，并且关闭。 4、如果对端一直没回应，这边会每75秒再发包给对端，总共发8次共11分钟15秒。最后socket产生 ETIMEDOUT 错误，并且关闭。或者收到ICMP错误，表明主机不可到达，则会产生 EHOSTUNREACH 错误。</p>
+<p>SO_KEEPALIVE和心跳机制的区别？</p>
+<p>SO_KEEPALIVE是实现在传输层的TCP协议，心跳实现在应用层实现，本质没有任何区别，但应用层需要自己来定义心跳包格式。</p>
+</blockquote></li>
+</ul>
+<h5 id="服务器主机崩溃后重启">服务器主机崩溃后重启</h5>
+<p>当服务器主机崩溃后重启时，它的TCP丢失了崩溃前的所有连接信息，因此服务器TCP对于所收到的来自客户的数据响应以一个RST，客户端进程返回ECONNRESET错误。</p>
+<h5 id="服务器主机关机">服务器主机关机</h5>
+<p>Unix系统关机时，init进程通常先给所有进程发送SIGTERM信号（该信号可被捕获），再等待一段固定的时间（一般在5~20秒之间），然后给所有仍在运行的进程发送SIGKILL信号（该信号不能被捕获）。</p>
+<p>这么做是留给所有运行中的进程一小段时间来清除和终止。</p>
+<p>如果不捕获SIGTERM信号并终止，服务器将由SIGKILL信号终止。当服务器进程终止时，它的所有打开着的描述字都被关闭，随后发生的步骤与服务器主机崩溃一样。</p>
 <h4 id="tcp-粘包拆包">TCP 粘包、拆包</h4>
 <p>产生的原因：</p>
 <ul>
@@ -916,6 +751,7 @@
 <h4 id="参考资料">参考资料</h4>
 <p>https://zhuanlan.zhihu.com/p/108822858（粘包、拆包）</p>
 <p>https://www.nowcoder.com/questionTerminal/72fa8f3cb67e4711ba8eee581f8be92b（TCP异常断开）</p>
+<p>https://zhuanlan.zhihu.com/p/79957519 （异常断开）</p>
 ]]></content>
       <categories>
         <category>计算机网络</category>
@@ -924,6 +760,237 @@
       <tags>
         <tag>计算机网络</tag>
         <tag>传输层</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>MySQL日志</title>
+    <url>/2021/04/02/MySQL_%E6%97%A5%E5%BF%97/</url>
+    <content><![CDATA[<p>日志是MySQL数据库的重要组成部分，记录着数据库运行期间各种状态信息。</p>
+<a id="more"></a>
+<h4 id="binlog">binlog</h4>
+<ul>
+<li><p><strong>概念</strong></p>
+<p>binlog属于逻辑日志，用于<strong>记录数据库执行的写入性操作</strong>(不包括查询)信息，以二进制的形式保存在磁盘中。binlog是MySQL的逻辑日志，并且由Server层进行记录，使用任何存储引擎的MySQL数据库都会记录binlog日志。</p>
+<blockquote>
+<p>逻辑日志：可以简单理解为记录的就是sql语句。但又不完全是sql语句这么简单，而是包括了执行的sql语句（增删改）反向的信息，也就意味着delete对应着delete本身和其反向的insert；update对应着update执行前后的版本的信息；insert对应着delete和insert本身的信息。</p>
+<p>物理日志：因为MySQL数据最终是保存在数据页中的，物理日志记录的就是数据页变更，即数据本身的值。</p>
+</blockquote></li>
+<li><p><strong>使用场景</strong></p>
+<p>binlog的主要使用场景有两个，分别是<strong>主从复制</strong>和<strong>数据恢复</strong>。</p>
+<p>主从复制：在Master端开启binlog，然后将binlog发送到各个Slave端，Slave端重放binlog从而达到主从数据一致。</p>
+<p><img src="/2021/04/02/MySQL_%E6%97%A5%E5%BF%97/3.png" style="zoom:50%;"></p>
+<p>数据恢复：通过使用MySQL binlog工具来恢复数据。</p></li>
+<li><p><strong>产生时机</strong></p>
+<p>事务提交的时候，一次性将事务中的sql语句（一个事物可能对应多个sql语句）按照一定的格式记录到binlog中。</p></li>
+<li><p><strong>释放时机</strong></p>
+<p>binlog的默认是保持时间由参数expire_logs_days配置，也就是说对于非活动的日志文件，在生成时间超过expire_logs_days配置的天数之后，会被自动删除。</p></li>
+<li><p>binlog记录方式</p>
+<p>binlog是通过追加的方式进行写入的，可以通过max_binlog_size参数设置每个binlog文件的大小，当文件大小达到给定值之后，会生成新的文件来保存日志。</p></li>
+</ul>
+<h4 id="redo-log">redo log</h4>
+<ul>
+<li><p><strong>概念</strong></p>
+<p>redo log属于物理日志，记录事务<strong>对数据页做了哪些修改</strong>。</p>
+<blockquote>
+<p>InnoDB的修改数据的基本流程</p>
+<p>当我们想要修改DB上某一行数据的时候，InnoDB是把数据从磁盘读取到内存的缓冲池上进行修改。</p>
+<p>这个时候数据在内存中被修改，与磁盘中相比就存在了差异，我们称这种有差异的数据为<strong>脏页</strong>。</p>
+<p>InnoDB对脏页的处理不是每次生成脏页就将脏页刷新回磁盘，这样会产生海量的IO操作，严重影响InnoDB的处理性能。</p>
+<p>既然脏页与磁盘中的数据存在差异，那么如果在这期间DB出现故障就会造成数据的丢失。为了解决这个问题，redo log就应运而生了。</p>
+</blockquote>
+<p>redo log包括两部分：一个是内存中的日志缓冲(redo log buffer)，另一个是磁盘上的日志文件(redo log file)。</p>
+<p><img src="/2021/04/02/MySQL_%E6%97%A5%E5%BF%97/1.png" style="zoom:67%;"></p>
+<p>mysql每执行一条DML语句，先将记录写入redo log buffer，后续某个时间点再一次性将多个操作记录写到redo log file。这种先写日志，再写磁盘的技术就是MySQL里经常说到的WAL(Write-Ahead Logging) 技术。</p></li>
+<li><p><strong>使用场景</strong></p>
+<p>redo log <strong>防止DB出现故障造成数据的丢失</strong>。当出现故障导致脏页还未来得及保存进磁盘时，通过redo log进行重做，从而达到事务的持久性这一特性。</p></li>
+<li><p><strong>产生时机</strong></p>
+<p>事务开始之后就产生redo log。</p></li>
+<li><p><strong>释放时机</strong></p>
+<p>当对应事务的脏页写入到磁盘之后，redo log的使命也就完成了，重做日志占用的空间就可以重用（被覆盖）。</p></li>
+<li><p><strong>redo log记录方式</strong></p>
+<p><img src="/2021/04/02/MySQL_%E6%97%A5%E5%BF%97/0.png" style="zoom:50%;"></p>
+<p>redo log实际上记录数据页的变更，而这种变更记录是没必要全部保存，因此redo log实现上采用了大小固定，循环写入的方式，当写到结尾时，会回到开头循环写日志。</p>
+<p>checkpoint所做的事就是把脏页给刷新回磁盘。所以，当DB重启恢复时，只需要恢复checkpoint之后的数据。这样就能大大缩短恢复时间。</p>
+<p>check point到write pos之间是redo log待落盘的数据页更改记录。</p>
+<p>write pos到check point之间的部分是redo log空着的部分，用于记录新的记录。</p>
+<p>当write pos追上check point时，会先推动check point向前移动，空出位置再记录新的日志。</p></li>
+<li><p><strong>redo log写入磁盘的时机</strong>（buffer到file的时机）</p>
+<p>MySQL支持三种将redo log buffer写入redo log file的时机，可以通过innodb_flush_log_at_trx_commit参数配置，各参数值含义如下：</p>
+<p>0（延迟写）</p>
+<p>事务提交时不会将redo log buffer中日志写入到os buffer，而是每秒写入os buffer并调用fsync()写入到redo log file中。也就是说<strong>设置为0时是(大约)每秒刷新写入到磁盘中的</strong>，当系统崩溃，会丢失1秒钟的数据。</p>
+<p>1（实时写，实时刷）</p>
+<p>事务每次提交都会将redo log buffer中的日志写入os buffer并调用fsync()刷到redo log file中。这种方式即使系统崩溃也不会丢失任何数据，但是因为<strong>每次提交都写入磁盘</strong>，IO的性能较差。</p>
+<p>2（实时写，延迟刷）</p>
+<p>每次<strong>提交都仅写入</strong>到os buffer，然后是<strong>每秒调用</strong>fsync()将os buffer中的日志写入到redo log file。</p></li>
+</ul>
+<h4 id="undo-log">undo log</h4>
+<ul>
+<li><p>概念</p>
+<p><img src="/2021/04/02/MySQL_%E6%97%A5%E5%BF%97/2.png" style="zoom: 67%;"></p>
+<p>undo log属于逻辑日志，保存了事务发生之前的<strong>数据的一个版本</strong>，可以用于回滚。其实本质上，老旧的记录就形成了undo log。</p></li>
+<li><p>使用场景</p>
+<p>多版本并发控制协议MVCC中，通过undo log形成记录的多个版本，能执行快照读时能够判断读取的是哪个版本的记录。</p></li>
+<li><p>产生时机</p>
+<p>不同事务或者相同事务的对同一记录的修改，会导致该记录的undo log成为一条记录版本线性表，既链表。</p></li>
+<li><p>释放时机</p>
+<p>当事务提交之后，undo log并不能立马被删除，而是放入待清理的链表，由purge线程判断是否由其他事务在使用undo log上的旧版本，决定是否可以清理undo log的日志空间。</p></li>
+</ul>
+<h4 id="三者区别">三者区别</h4>
+<table>
+<colgroup>
+<col style="width: 4%">
+<col style="width: 31%">
+<col style="width: 31%">
+<col style="width: 31%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>binlog</th>
+<th>redo log</th>
+<th>undo log</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>记录内容</td>
+<td>用于<strong>记录数据库执行的写入性操作</strong>(不包括查询)信息，以二进制的形式保存在磁盘中。</td>
+<td>记录事务<strong>对数据页做了哪些修改</strong>。</td>
+<td>保存了事务发生之前的<strong>数据的一个版本</strong>，可以用于回滚。其实本质上，老旧的记录就形成了undo log。</td>
+</tr>
+<tr class="even">
+<td>日志类型</td>
+<td>逻辑日志</td>
+<td>物理日志</td>
+<td>逻辑日志</td>
+</tr>
+<tr class="odd">
+<td>使用场景</td>
+<td><strong>主从复制</strong>和<strong>数据恢复</strong>。主从复制：在Master端开启binlog，然后将binlog发送到各个Slave端，Slave端重放binlog从而达到主从数据一致。数据恢复：通过使用MySQL binlog工具来恢复数据。</td>
+<td>redo log <strong>防止DB出现故障造成数据的丢失</strong>。当出现故障导致脏页还未来得及保存进磁盘时，通过redo log进行重做，从而达到事务的持久性这一特性。</td>
+<td>多版本并发控制协议<strong>MVCC中的快照读</strong>，通过undo log形成记录的多个版本，能执行快照读时能够判断读取的是哪个版本的记录。</td>
+</tr>
+</tbody>
+</table>
+<p><strong>redo log 和 bin log 区别</strong></p>
+<p>作用不同：redo log是保证事务的持久性的，binlog主要用于主从复制。</p>
+<p>内容不同：redo log是物理日志，是数据页面的修改之后的物理记录，binlog是逻辑日志，可以简单认为记录的就是sql语句</p>
+<p>产生时机不同：事务开始之后就产生redo log，事务提交的时候产生bin log。</p>
+<p>释放时机不同：当对应事务的脏页写入到磁盘之后，redo log可以被移除，超过一定时间后，binlog被删除。</p>
+<p>恢复效率：基于物理日志的redo log恢复数据的效率要高于语句逻辑日志的binlog。</p>
+<p>先写redo log，再写binlog，两个日志都提交成功（刷入磁盘），事务才算真正的完成。</p>
+<h4 id="参考资料">参考资料</h4>
+<p>https://cloud.tencent.com/developer/article/1679325</p>
+<p>https://www.cnblogs.com/wy123/p/8365234.html</p>
+<p>https://zhuanlan.zhihu.com/p/35355751</p>
+<p>https://www.cnblogs.com/xuwc/p/13873611.html</p>
+]]></content>
+      <categories>
+        <category>数据库</category>
+        <category>MySQL</category>
+      </categories>
+      <tags>
+        <tag>数据库</tag>
+        <tag>MySQL</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>海量数据问题</title>
+    <url>/2021/04/14/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E6%B5%B7%E9%87%8F%E6%95%B0%E6%8D%AE%E9%97%AE%E9%A2%98/</url>
+    <content><![CDATA[<p>海量数据问题，就是数据量太大，所以导致要么是无法在较短时间内迅速解决，要么是数据太大导致无法一次性装入内存。</p>
+<a id="more"></a>
+<h3 id="基础">基础</h3>
+<h4 id="换算单位">换算单位</h4>
+<ul>
+<li>1 byte = 8 bit</li>
+<li>1 KB = <span class="math inline">\(2^{10}\)</span> byte = 1024 byte ≈ <span class="math inline">\(10^3\)</span> byte</li>
+<li>1 MB = <span class="math inline">\(2^{20}\)</span> byte ≈ <span class="math inline">\(10^6\)</span> byte</li>
+<li>1 GB = <span class="math inline">\(2^{30}\)</span> byte ≈ <span class="math inline">\(10^9\)</span> byte</li>
+<li>1 千万 = <span class="math inline">\(10^7\)</span></li>
+<li>1 亿 = <span class="math inline">\(10^8\)</span></li>
+</ul>
+<p>1 个整数占 4 byte，1 亿个整数占 4*<span class="math inline">\(10^8\)</span> byte ≈ 400 MB。</p>
+<h4 id="位图bitmap">位图(bitmap)</h4>
+<p>用一个bit位来标记某个元素对应的值。由于采用了Bit为单位来存储数据，因此在存储空间方面，可以大大节省。</p>
+<p>想知道某个元素出现过没有。如果为每个所有可能的值分配1个bit。</p>
+<p>但对于海量的、取值分布很均匀的集合进行<strong>去重</strong>，Bitmap极大地压缩了所需要的内存空间。于此同时，还额外地完成了对原始数组的<strong>排序工作</strong>。</p>
+<h4 id="bloom-filter布隆过滤器">Bloom Filter(布隆过滤器)</h4>
+<h4 id="trie树">trie树</h4>
+<p>前缀统计，词频统计。</p>
+<h4 id="外部排序">外部排序</h4>
+<p>大数据的排序，去重。</p>
+<p>1、首先按内存大小，将外存上的文件分成若干子文件。</p>
+<p>2、依次读入内存并利用有效的内部排序对他们进行排序，并将排序后得到的有序字文件重新写入外存，通常称这些子文件为归并段。</p>
+<p>3、对这些归并段进行逐趟归并，使归并段逐渐由小到大，直至得到整个有序文件。</p>
+<p>外排序的优化方法：置换选择 败者树原理，最优归并树。</p>
+]]></content>
+      <categories>
+        <category>大数据</category>
+        <category>海量数据</category>
+      </categories>
+      <tags>
+        <tag>大数据</tag>
+        <tag>海量数据</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>MySQL窗口函数</title>
+    <url>/2021/04/13/MySQL_%E7%AA%97%E5%8F%A3/</url>
+    <content><![CDATA[<p>窗口指的是记录的集合。窗口函数也就是在满足某种条件的记录集合上执行的特殊函数。</p>
+<a id="more"></a>
+<h4 id="基本用法">基本用法</h4>
+<blockquote>
+<p>函数名 OVER (子句)</p>
+</blockquote>
+<p>函数名部分即表示窗口函数。</p>
+<p>over关键字用来指定函数执行的窗口范围，若后面括号中什么都不写，则窗口函数基于所有行进行计算；如果不为空，则支持以下4中语法来设置窗口：</p>
+<ul>
+<li><p><code>PARTITION BY</code> 子句：窗口按照哪些字段进行分组，窗口函数在不同的分组上分别执行；</p></li>
+<li><p><code>ORDER BY</code>子句：按照哪些字段进行排序，窗口函数将按照排序后的记录顺序进行编号；</p></li>
+<li><p><code>FRAME</code>子句：FRAME是当前分区的一个子集，子句用来定义子集的规则，通常用来作为滑动窗口使用</p></li>
+<li><p>window_name：给窗口指定一个别名。如果SQL中涉及的窗口较多，采用别名可以看起来更清晰易读；</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    <span class="built_in">rank</span> ( ) <span class="keyword">over</span> w1 </span><br><span class="line"><span class="keyword">FROM</span></span><br><span class="line">    employee <span class="keyword">window</span> w1 <span class="keyword">AS</span> ( <span class="keyword">PARTITION</span> <span class="keyword">BY</span> Company <span class="keyword">ORDER</span> <span class="keyword">BY</span> Salary <span class="keyword">DESC</span> )</span><br><span class="line">    </span><br><span class="line"># <span class="keyword">from</span> <span class="keyword">table</span>后面加了一个关键字<span class="keyword">WINDOW</span>，后面跟了一个子句，这样在<span class="keyword">select</span>中就可以使用这个w1作为窗口了。</span><br></pre></td></tr></table></figure>
+<h4 id="窗口函数">窗口函数</h4></li>
+</ul>
+<p>窗口函数，在某些记录的集合上执行的函数。</p>
+<h5 id="序号函数">序号函数</h5>
+<p>row_number()/rank()/dense_rank()</p>
+<p>作用：显示分区中的当前行号（排名是需要通过<code>ORDER BY</code>子句实现的）</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span>,</span><br><span class="line">   <span class="built_in">rank</span>() <span class="keyword">over</span> (<span class="keyword">order</span> <span class="keyword">by</span> 成绩 <span class="keyword">desc</span>) <span class="keyword">as</span> ranking,</span><br><span class="line">   <span class="built_in">dense_rank</span>() <span class="keyword">over</span> (<span class="keyword">order</span> <span class="keyword">by</span> 成绩 <span class="keyword">desc</span>) <span class="keyword">as</span> dese_rank,</span><br><span class="line">   <span class="built_in">row_number</span>() <span class="keyword">over</span> (<span class="keyword">order</span> <span class="keyword">by</span> 成绩 <span class="keyword">desc</span>) <span class="keyword">as</span> row_num</span><br><span class="line"><span class="keyword">from</span> 班级;</span><br></pre></td></tr></table></figure>
+<p><img src="/2021/04/13/MySQL_%E7%AA%97%E5%8F%A3/0.png" style="zoom:67%;"></p>
+<ul>
+<li><p>rank函数：如果有并列名次的行，会占用下一名次的位置。比如正常排名是1，2，3，4，但是现在前3名是并列的名次，结果是：1，1，1，4。</p></li>
+<li><p>dense_rank函数：如果有并列名次的行，不占用下一名次的位置。比如正常排名是1，2，3，4，但是现在前3名是并列的名次，结果是：1，1，1，2。</p></li>
+<li><p>row_number函数：不考虑并列名次的情况。比如前3名是并列的名次，排名是正常的1，2，3，4。</p></li>
+</ul>
+<h5 id="分布函数">分布函数</h5>
+<p>percent_rank()/cume_dist()</p>
+<p>percent_rank()</p>
+<p>用途：和之前的RANK()函数相关，每行按照公式进行计算：(rank - 1) / (rows - 1)</p>
+<p>其中，rank为RANK()函数产生的序号，rows为当前窗口的记录总行数该函数可以用来计算分位数。</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    <span class="built_in">percent_rank</span> ( ) <span class="keyword">over</span> ( <span class="keyword">PARTITION</span> <span class="keyword">BY</span> Company <span class="keyword">ORDER</span> <span class="keyword">BY</span> Salary <span class="keyword">DESC</span> ),</span><br><span class="line">    Company,</span><br><span class="line">    Salary </span><br><span class="line"><span class="keyword">FROM</span></span><br><span class="line">    employee </span><br><span class="line"><span class="keyword">WHERE</span></span><br><span class="line">    Company <span class="operator">=</span> <span class="string">&#x27;Microsoft&#x27;</span></span><br></pre></td></tr></table></figure>
+<p><img src="/2021/04/13/MySQL_%E7%AA%97%E5%8F%A3/1.png" style="zoom:67%;"></p>
+<p>cume_dist()</p>
+<p>用途：分组内小于等于当前rank值的行数/分组内总行数。</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    <span class="built_in">cume_dist</span> ( ) <span class="keyword">over</span> ( <span class="keyword">PARTITION</span> <span class="keyword">BY</span> Company <span class="keyword">ORDER</span> <span class="keyword">BY</span> Salary <span class="keyword">DESC</span> ),</span><br><span class="line">    Company,</span><br><span class="line">    Salary </span><br><span class="line"><span class="keyword">FROM</span></span><br><span class="line">    employee </span><br><span class="line"><span class="keyword">WHERE</span></span><br><span class="line">    Company <span class="operator">=</span> <span class="string">&#x27;Microsoft&#x27;</span></span><br></pre></td></tr></table></figure>
+<p><img src="/2021/04/13/MySQL_%E7%AA%97%E5%8F%A3/2.png" style="zoom:67%;"></p>
+<h5 id="聚合函数">聚合函数</h5>
+<p>sum/avg/max/min/count</p>
+<p>用途：在窗口中每条记录动态应用聚合函数(sum/avg/max/min/count)，可以动态计算在指定的窗口内的各种聚合函数值。</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    <span class="built_in">avg</span>( Salary ) <span class="keyword">over</span> ( <span class="keyword">PARTITION</span> <span class="keyword">BY</span> Company <span class="keyword">ORDER</span> <span class="keyword">BY</span> Salary <span class="keyword">DESC</span> ),</span><br><span class="line">    Company,</span><br><span class="line">    Salary </span><br><span class="line"><span class="keyword">FROM</span></span><br><span class="line">    employee </span><br><span class="line"><span class="keyword">WHERE</span></span><br><span class="line">    Company <span class="operator">=</span> <span class="string">&#x27;Microsoft&#x27;</span></span><br></pre></td></tr></table></figure>
+<p>按照分组的每一行，求累计的平均值。根据over子句分组之后，挨个行进行select，并执行over前面的函数，因为over子句已经把记录变成了符合条件的一些行集，所以select的方式就改变了。</p>
+<p><img src="/2021/04/13/MySQL_%E7%AA%97%E5%8F%A3/3.png" style="zoom:67%;"></p>
+<h4 id="参考资料">参考资料</h4>
+<p>https://leetcode-cn.com/problems/department-top-three-salaries/solution/tu-jie-sqlmian-shi-ti-jing-dian-topnwen-ti-by-houz/</p>
+<p>https://www.jianshu.com/p/e5c5bfb1e28b</p>
+]]></content>
+      <categories>
+        <category>数据库</category>
+        <category>MySQL</category>
+      </categories>
+      <tags>
+        <tag>数据库</tag>
+        <tag>MySQL</tag>
       </tags>
   </entry>
 </search>
