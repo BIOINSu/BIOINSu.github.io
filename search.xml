@@ -1109,7 +1109,7 @@
       </tags>
   </entry>
   <entry>
-    <title></title>
+    <title>MySQL SQL</title>
     <url>/2021/04/17/MySQL_SQL/</url>
     <content><![CDATA[<p>SQL 是用于访问和处理数据库的标准的计算机语言。</p>
 <a id="more"></a>
@@ -1127,6 +1127,14 @@
 <h3 id="参考资料">参考资料</h3>
 <p>https://www.codeleading.com/article/5399898432/ （在线峰值）</p>
 ]]></content>
+      <categories>
+        <category>数据库</category>
+        <category>MySQL</category>
+      </categories>
+      <tags>
+        <tag>数据库</tag>
+        <tag>MySQL</tag>
+      </tags>
   </entry>
   <entry>
     <title>Spark闭包、累加器和广播变量</title>
