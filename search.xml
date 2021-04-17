@@ -74,112 +74,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Spark闭包、累加器和广播变量</title>
-    <url>/2021/04/11/Spark%E9%97%AD%E5%8C%85%E7%B4%AF%E5%8A%A0%E5%99%A8%E5%B9%BF%E6%92%AD%E5%8F%98%E9%87%8F/</url>
-    <content><![CDATA[<h3 id="总结">总结</h3>
-<ul>
-<li><p>闭包</p>
-<p>闭包<strong>就是一个携带了外部作用域的函数</strong>，当它需要被分发到各个节点上执行的时候，需要外部作用域所在的对象是可序列化的。</p>
-<p>使用这种外部变量的形式，会造成每个Task中都存在一个该变量的副本。</p></li>
-</ul>
-<a id="more"></a>
-<ul>
-<li><p>广播变量</p>
-<p>广播变量是一种变量，广播变量允许开发者将一个 <code>Read-Only</code> 的变量<strong>缓存到集群中每个节点中</strong>，而不是传递给每一个 Task 一个副本，每个Executor中只会存在一个副本。</p>
-<ul>
-<li><p>解决了外部变量在每个Task中都存在副本的问题，每个Executor只会存在一份广播变量的副本，节省空间。</p></li>
-<li><p>在Driver端可以修改广播变量的值，<strong>在Executor端无法修改广播变量的值。</strong></p></li>
-<li><p>广播变量只能在Driver端定义，不能在Executor端定义。</p></li>
-<li><p>不能将RDD广播，因为RDD是不存储数据的。可以将RDD的结果广播出去。</p></li>
-</ul></li>
-<li><p>累加器</p>
-<p>累加器是一个<strong>支持添加操作的分布式变量</strong>，可以在分布式环境下保持一致性。</p>
-<ul>
-<li>累加器在Driver端定义赋初始值，累加器只能在Driver端读取最后的值，在Excutor端更新。</li>
-<li>在Driver端可以修改广播变量的值，<strong>在Executor端可以修改累加器的值。</strong></li>
-</ul></li>
-</ul>
-<h3 id="闭包">闭包</h3>
-<p>如果一个函数<strong>携带了外部的作用域</strong>，这种<strong>函数称为闭包</strong>。</p>
-<p>在Scala中，函数是一个对象，继承自FunctionN。</p>
-<h4 id="问题引出">问题引出</h4>
-<p>在spark中实现统计List(1,2,3)的和。如果使用下面的代码，程序打印的结果不是6，而是0。</p>
-<figure class="highlight scala"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">object</span> <span class="title">Test</span> </span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">main</span></span>(args:<span class="type">Array</span>[<span class="type">String</span>]):<span class="type">Unit</span> = &#123;</span><br><span class="line">      <span class="keyword">val</span> conf = <span class="keyword">new</span> <span class="type">SparkConf</span>().setAppName(<span class="string">&quot;test&quot;</span>);</span><br><span class="line">      <span class="keyword">val</span> sc = <span class="keyword">new</span> <span class="type">SparkContext</span>(conf)</span><br><span class="line"></span><br><span class="line">      <span class="keyword">val</span> rdd = sc.parallelize(<span class="type">List</span>(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>))</span><br><span class="line">      <span class="keyword">var</span> counter = <span class="number">0</span></span><br><span class="line">      <span class="comment">//warn: don&#x27;t do this</span></span><br><span class="line">      rdd.foreach(x =&gt; counter += x)</span><br><span class="line">      println(<span class="string">&quot;Counter value: &quot;</span>+counter) <span class="comment">//打印结果为0</span></span><br><span class="line"></span><br><span class="line">      sc.stop()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>问题分析： counter是在foreach函数外部定义的，也就是在driver程序中定义，而foreach函数是属于rdd对象的，rdd函数的执行位置是各个worker节点（或者说worker进程），main函数是在driver节点上（或者说driver进程上）执行的。所以当counter变量在driver中定义，被在rdd中使用的时候，出现了变量的跨域问题，也就是闭包问题。</p>
-<p>问题解释： 对于上面程序中的counter变量，由于在main函数和在rdd对象中foreach函数是属于不同作用域的，所以，传进foreach中的counter是一个副本，初始值都为0。foreach中叠加的是counter的副本，不管副本如何变化，都不会影响到main函数中的counter，所以最终打印出来的counter为0。</p>
-<h4 id="解决方案">解决方案</h4>
-<figure class="highlight scala"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Test</span></span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">main</span></span>(args: <span class="type">Array</span>[<span class="type">String</span>]) &#123;</span><br><span class="line">    <span class="keyword">val</span> sc = <span class="keyword">new</span> <span class="type">SparkContext</span>(<span class="keyword">new</span> <span class="type">SparkConf</span>())</span><br><span class="line">    <span class="keyword">val</span> newRDD = sc.textFile(<span class="string">&quot;&quot;</span>)</span><br><span class="line"></span><br><span class="line">    newRDD.map(data =&gt; &#123;</span><br><span class="line">      <span class="comment">//do something</span></span><br><span class="line">      println(data.toString)</span><br><span class="line">    &#125;)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>如果在RDD的函数中调用了在函数外部定义的对象，这些对象需要通过网络从driver所在节点传给其他的worker节点，所以<strong>要求这些类是可序列化的</strong>，比如在Java或者Scala中实现Serializable类。Worker节点接收到程序之后，在Spark资源管理器的指挥下运行RDD程序。不同Worker节点之间的运行操作是并行的。</p>
-<p><img src="/2021/04/11/Spark%E9%97%AD%E5%8C%85%E7%B4%AF%E5%8A%A0%E5%99%A8%E5%B9%BF%E6%92%AD%E5%8F%98%E9%87%8F/0.png" style="zoom:67%;"></p>
-<p>除了用外部定义的对象来实现类似的功能，Spark还另外提供了两种机制，分别是<strong>Broadcast</strong>和<strong>Accumulator</strong>。</p>
-<p>相比于外部变量的方式，在一定场景下使用Broadcast比较有优势，因为所广播的数据在每一个Worker节点上面只存一个副本，而在Spark算子中使用到的外部变量会在每一个用到它的Task中保存一个副本，即使这些task在同一个节点上面。所以当数据量比较大的时候，建议使用广播而不是外部变量。</p>
-<h3 id="广播变量">广播变量</h3>
-<p>广播变量是一种变量，广播变量允许开发者将一个 <code>Read-Only</code> 的变量缓存到集群中每个节点中, 而不是传递给每一个 Task 一个副本，每个Executor中只会存在一个副本。</p>
-<p>变量一旦被定义为一个广播变量，那么这个变量只能读，不能修改。</p>
-<p><img src="/2021/04/11/Spark%E9%97%AD%E5%8C%85%E7%B4%AF%E5%8A%A0%E5%99%A8%E5%B9%BF%E6%92%AD%E5%8F%98%E9%87%8F/2.png" style="zoom:50%;"></p>
-<h4 id="广播变量的使用">广播变量的使用</h4>
-<h5 id="创建广播变量">创建广播变量</h5>
-<figure class="highlight scala"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> b = sc.broadcast(<span class="number">1</span>)</span><br></pre></td></tr></table></figure>
-<p>如果 Log 级别为 DEBUG 的时候, 会打印如下信息</p>
-<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">DEBUG BlockManager: Put block broadcast_0 locally took  430 ms</span><br><span class="line">DEBUG BlockManager: Putting block broadcast_0 without replication took  431 ms</span><br><span class="line">DEBUG BlockManager: Told master about block broadcast_0_piece0</span><br><span class="line">DEBUG BlockManager: Put block broadcast_0_piece0 locally took  4 ms</span><br><span class="line">DEBUG BlockManager: Putting block broadcast_0_piece0 without replication took  4 ms</span><br></pre></td></tr></table></figure>
-<h5 id="使用-value-获取数据">使用 <code>value</code> 获取数据</h5>
-<figure class="highlight scala"><table><tr><td class="code"><pre><span class="line">b.value</span><br></pre></td></tr></table></figure>
-<p>获取数据的时候会打印如下信息</p>
-<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">DEBUG BlockManager: Getting local block broadcast_0</span><br><span class="line">DEBUG BlockManager: Level for block broadcast_0 is StorageLevel(disk, memory, deserialized, 1 replicas)</span><br></pre></td></tr></table></figure>
-<p>使用 <code>value</code> 方法的注意点</p>
-<p>方法签名 <code>value: T</code></p>
-<p>在destroy之前才能使用value：在 <code>value</code> 方法内部会确保使用获取数据的时候, 变量必须是可用状态, 所以必须在变量被 <code>destroy</code> 之前使用 <code>value</code> 方法, 如果使用 <code>value</code> 时变量已经失效, 则会报出以下错误：</p>
-<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">org.apache.spark.SparkException: Attempted to use Broadcast(0) after it was destroyed (destroy at &lt;console&gt;:27)</span><br><span class="line">  at org.apache.spark.broadcast.Broadcast.assertValid(Broadcast.scala:144)</span><br><span class="line">  at org.apache.spark.broadcast.Broadcast.value(Broadcast.scala:69)</span><br><span class="line">  ... 48 elided</span><br></pre></td></tr></table></figure>
-<h5 id="使用-unpersist-删除数据">使用 <code>unpersist</code> 删除数据</h5>
-<figure class="highlight scala"><table><tr><td class="code"><pre><span class="line">b.unpersist</span><br></pre></td></tr></table></figure>
-<h5 id="使用-destroy-销毁变量">使用 <code>destroy</code> 销毁变量,</h5>
-<p>释放内存空间</p>
-<figure class="highlight scala"><table><tr><td class="code"><pre><span class="line">b.destroy</span><br></pre></td></tr></table></figure>
-<p>销毁以后, 会打印如下信息</p>
-<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">DEBUG BlockManager: Removing broadcast 0</span><br><span class="line">DEBUG BlockManager: Removing block broadcast_0_piece0</span><br><span class="line">DEBUG BlockManager: Told master about block broadcast_0_piece0</span><br><span class="line">DEBUG BlockManager: Removing block broadcast_0</span><br></pre></td></tr></table></figure>
-<p>使用 <code>destroy</code> 方法的注意点</p>
-<p>方法签名 <code>destroy(): Unit</code></p>
-<p>不要多次删除广播变量：<code>destroy</code> 方法会移除广播变量, 彻底销毁掉, 但是如果你试图多次 <code>destroy</code> 广播变量, 则会报出以下错误</p>
-<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">org.apache.spark.SparkException: Attempted to use Broadcast(0) after it was destroyed (destroy at &lt;console&gt;:27)</span><br><span class="line">  at org.apache.spark.broadcast.Broadcast.assertValid(Broadcast.scala:144)</span><br><span class="line">  at org.apache.spark.broadcast.Broadcast.destroy(Broadcast.scala:107)</span><br><span class="line">  at org.apache.spark.broadcast.Broadcast.destroy(Broadcast.scala:98)</span><br><span class="line">  ... 48 elided</span><br></pre></td></tr></table></figure>
-<h4 id="广播变量的使用场景">广播变量的使用场景</h4>
-<p>正常情况下使用 Task 拉取数据的时候, 会将数据拷贝到 Executor 中多次, 但是使用广播变量的时候只会复制一份数据到 Executor 中, 所以在两种情况下特别适合使用广播变量</p>
-<ul>
-<li>一个 Executor 中有多个 Task 的时候</li>
-<li>一个变量比较大的时候</li>
-<li>大RDD和小RDD执行join操作时。当一个 RDD 很大并且还需要和另外一个 RDD 执行 <code>join</code> 的时候, 可以将较小的 RDD 广播出去, 然后使用大的 RDD 在算子 <code>map</code> 中直接 <code>join</code>, 从而实现在 Map 端 <code>join</code>。</li>
-</ul>
-<h3 id="累加器">累加器</h3>
-<h4 id="通用累加器">通用累加器</h4>
-<p>Accumulators(累加器) 是一个只支持 added(添加) 的分布式变量, 可以在分布式环境下保持一致性, 并且能够做到高效的并发。</p>
-<p><img src="/2021/04/11/Spark%E9%97%AD%E5%8C%85%E7%B4%AF%E5%8A%A0%E5%99%A8%E5%B9%BF%E6%92%AD%E5%8F%98%E9%87%8F/1.png" style="zoom:50%;"></p>
-<ul>
-<li><p>Accumulator 是支持并发并行的, 在任何地方都可以通过 add 来修改数值, 无论是 Driver 还是 Executor</p></li>
-<li><p>只能在 Driver 中才能调用 value 来获取数值</p></li>
-</ul>
-<figure class="highlight scala"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> config = <span class="keyword">new</span> <span class="type">SparkConf</span>().setAppName(<span class="string">&quot;ip_ana&quot;</span>).setMaster(<span class="string">&quot;local[6]&quot;</span>)</span><br><span class="line"><span class="keyword">val</span> sc = <span class="keyword">new</span> <span class="type">SparkContext</span>(config)</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> counter = sc.longAccumulator(<span class="string">&quot;counter&quot;</span>)</span><br><span class="line"></span><br><span class="line">sc.parallelize(<span class="type">Seq</span>(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>))</span><br><span class="line">  .foreach(counter.add(_))</span><br><span class="line"></span><br><span class="line"><span class="comment">// 运行结果: 15</span></span><br><span class="line">println(counter.value)</span><br></pre></td></tr></table></figure>
-<ul>
-<li>累加器能保证在 Spark 任务出现问题被重启的时候不会出现重复计算</li>
-<li>累加器只有在 Action 执行的时候才会被触发</li>
-</ul>
-<figure class="highlight scala"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> config = <span class="keyword">new</span> <span class="type">SparkConf</span>().setAppName(<span class="string">&quot;ip_ana&quot;</span>).setMaster(<span class="string">&quot;local[6]&quot;</span>)</span><br><span class="line"><span class="keyword">val</span> sc = <span class="keyword">new</span> <span class="type">SparkContext</span>(config)</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> counter = sc.longAccumulator(<span class="string">&quot;counter&quot;</span>)</span><br><span class="line"></span><br><span class="line">sc.parallelize(<span class="type">Seq</span>(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>))</span><br><span class="line">  .map(counter.add(_)) <span class="comment">// 这个地方不是 Action, 而是一个 Transformation</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 运行结果是 0</span></span><br><span class="line">println(counter.value)</span><br></pre></td></tr></table></figure>
-<h4 id="自定义累加器">自定义累加器</h4>
-<p>可以通过自定义累加器来实现更多类型的累加器, 累加器的作用远远不只是累加, 比如可以实现一个累加器, 用于向里面添加一些运行信息。</p>
-<figure class="highlight scala"><table><tr><td class="code"><pre><span class="line"><span class="comment">//继承AccumulatorV2这个类，传入String类型，返回Set[String]类型</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">InfoAccumulator</span> <span class="keyword">extends</span> <span class="title">AccumulatorV2</span>[<span class="type">String</span>, <span class="type">Set</span>[<span class="type">String</span>]] </span>&#123;</span><br><span class="line">  <span class="comment">//定义一个可变长度的Set，即 mutable.Set[String]  </span></span><br><span class="line">  <span class="keyword">private</span> <span class="keyword">val</span> infos: mutable.<span class="type">Set</span>[<span class="type">String</span>] = mutable.<span class="type">Set</span>()</span><br><span class="line"></span><br><span class="line">  <span class="comment">//判断累加器对象是否为空，这里就是判断这个Set是否为空</span></span><br><span class="line">  <span class="keyword">override</span> <span class="function"><span class="keyword">def</span> <span class="title">isZero</span></span>: <span class="type">Boolean</span> = &#123;</span><br><span class="line">    infos.isEmpty</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">//返回一个拷贝的累加器</span></span><br><span class="line">  <span class="keyword">override</span> <span class="function"><span class="keyword">def</span> <span class="title">copy</span></span>(): <span class="type">AccumulatorV2</span>[<span class="type">String</span>, <span class="type">Set</span>[<span class="type">String</span>]] = &#123;</span><br><span class="line">    <span class="keyword">val</span> newAccumulator = <span class="keyword">new</span> <span class="type">InfoAccumulator</span>()</span><br><span class="line">    infos.synchronized &#123; <span class="comment">//使用synchronized关键字保证线程安全</span></span><br><span class="line">      newAccumulator.infos ++= infos <span class="comment">//把一个Set添加到另一个Set中使用++=</span></span><br><span class="line">    &#125;</span><br><span class="line">    newAccumulator</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">//清空累加器</span></span><br><span class="line">  <span class="keyword">override</span> <span class="function"><span class="keyword">def</span> <span class="title">reset</span></span>(): <span class="type">Unit</span> = &#123;</span><br><span class="line">    infos.clear()</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">//往累加器中添加元素</span></span><br><span class="line">  <span class="keyword">override</span> <span class="function"><span class="keyword">def</span> <span class="title">add</span></span>(v: <span class="type">String</span>): <span class="type">Unit</span> = &#123;</span><br><span class="line">    infos += v</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">//累加器在进行累加的时候，可能每个分布式节点都有一个实例</span></span><br><span class="line">  <span class="comment">//在最后的Driver中进行合并，通过调用这个merge方法把所有的实例内容合并起来，</span></span><br><span class="line">  <span class="keyword">override</span> <span class="function"><span class="keyword">def</span> <span class="title">merge</span></span>(other: <span class="type">AccumulatorV2</span>[<span class="type">String</span>, <span class="type">Set</span>[<span class="type">String</span>]]): <span class="type">Unit</span> = &#123;</span><br><span class="line">    infos ++= other.value <span class="comment">//这里的value就是下面这个方法返回的</span></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">//提供给外部累加结果，注意返回一个不可变的类型，防止外部进行修改</span></span><br><span class="line">  <span class="keyword">override</span> <span class="function"><span class="keyword">def</span> <span class="title">value</span></span>: <span class="type">Set</span>[<span class="type">String</span>] = &#123;</span><br><span class="line">    infos.toSet</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//测试案例</span></span><br><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">accumulator2</span></span>(): <span class="type">Unit</span> = &#123;</span><br><span class="line">  <span class="keyword">val</span> config = <span class="keyword">new</span> <span class="type">SparkConf</span>().setAppName(<span class="string">&quot;ip_ana&quot;</span>).setMaster(<span class="string">&quot;local[6]&quot;</span>)</span><br><span class="line">  <span class="keyword">val</span> sc = <span class="keyword">new</span> <span class="type">SparkContext</span>(config)</span><br><span class="line"></span><br><span class="line">  <span class="keyword">val</span> infoAccumulator = <span class="keyword">new</span> <span class="type">InfoAccumulator</span>()</span><br><span class="line">  sc.register(infoAccumulator, <span class="string">&quot;infos&quot;</span>)</span><br><span class="line"></span><br><span class="line">  sc.parallelize(<span class="type">Seq</span>(<span class="string">&quot;1&quot;</span>, <span class="string">&quot;2&quot;</span>, <span class="string">&quot;3&quot;</span>))</span><br><span class="line">    .foreach(item =&gt; infoAccumulator.add(item))</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 运行结果: Set(3, 1, 2)</span></span><br><span class="line">  println(infoAccumulator.value)</span><br><span class="line"></span><br><span class="line">  sc.stop()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="参考资料">参考资料</h3>
-<p>https://knifefly.cn/2018/05/21/%E7%90%86%E8%A7%A3spark%E9%97%AD%E5%8C%85/（闭包）</p>
-<p>https://blog.csdn.net/weixin_43854618/article/details/105680445（累加器）</p>
-<p>https://www.cnblogs.com/qingyunzong/p/8890483.html#_label1（广播变量和累加器）</p>
-]]></content>
-      <categories>
-        <category>Spark</category>
-        <category>Spark Core</category>
-      </categories>
-      <tags>
-        <tag>Spark</tag>
-        <tag>Spark Core</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Java集合操作</title>
     <url>/2021/04/11/Java%E9%9B%86%E5%90%88%E6%93%8D%E4%BD%9C/</url>
     <content><![CDATA[<h3 id="java集合操作">Java集合操作</h3>
@@ -191,7 +85,7 @@
 <h3 id="map类型数据排序">Map类型数据排序</h3>
 <p>注意TreeSet、TreeMap本身的Key就是按照字典序进行排序的。</p>
 <h4 id="完整方法">完整方法</h4>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"> <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">mapKeySort</span><span class="params">(HashMap&lt;Integer, String&gt; hm)</span> </span>&#123;</span><br><span class="line">     	<span class="comment">//定义一个list装载key、value</span></span><br><span class="line">        List&lt;Map.Entry&lt;Integer, String&gt;&gt; list = <span class="keyword">new</span> ArrayList&lt;Map.Entry&lt;Integer, String&gt;&gt;(hm.entrySet());</span><br><span class="line">        </span><br><span class="line">     	<span class="comment">//对list进行排序，自定义排序规则</span></span><br><span class="line">     	list.sort(<span class="keyword">new</span> Comparator&lt;Map.Entry&lt;Integer, String&gt;&gt;() &#123;</span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compare</span><span class="params">(Map.Entry&lt;Integer, String&gt; o1, Map.Entry&lt;Integer, String&gt; o2)</span> </span>&#123;</span><br><span class="line">                <span class="keyword">return</span> o1.getKey() &lt; o2.getKey() ? <span class="number">1</span> : ((o1.getKey() == o2.getKey()) ? <span class="number">0</span> : -<span class="number">1</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">     </span><br><span class="line">     	<span class="comment">/*打印结果查看</span></span><br><span class="line"><span class="comment">        for (Map.Entry&lt;Integer, String&gt; mapping : list) &#123;</span></span><br><span class="line"><span class="comment">            System.out.println(mapping.getKey() + &quot;:&quot; + mapping.getValue());</span></span><br><span class="line"><span class="comment">        &#125;</span></span><br><span class="line"><span class="comment">        */</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//最后把这个HashMap返回即可</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"> <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">mapKeySort</span><span class="params">(HashMap&lt;Integer, String&gt; hm)</span> </span>&#123;</span><br><span class="line">     	<span class="comment">//定义一个list装载key、value</span></span><br><span class="line">        List&lt;Map.Entry&lt;Integer, String&gt;&gt; list = <span class="keyword">new</span> ArrayList&lt;Map.Entry&lt;Integer, String&gt;&gt;(hm.entrySet());</span><br><span class="line">        </span><br><span class="line">     	<span class="comment">//对list进行排序，自定义排序规则</span></span><br><span class="line">     	list.sort(<span class="keyword">new</span> Comparator&lt;Map.Entry&lt;Integer, String&gt;&gt;() &#123;</span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compare</span><span class="params">(Map.Entry&lt;Integer, String&gt; o1, Map.Entry&lt;Integer, String&gt; o2)</span> </span>&#123;</span><br><span class="line">                <span class="keyword">return</span> o1.getKey() &lt; o2.getKey() ? <span class="number">1</span> : ((o1.getKey() == o2.getKey()) ? <span class="number">0</span> : -<span class="number">1</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">     </span><br><span class="line">     	<span class="comment">/*打印结果查看</span></span><br><span class="line"><span class="comment">        for (Map.Entry&lt;Integer, String&gt; mapping : list) &#123;</span></span><br><span class="line"><span class="comment">            System.out.println(mapping.getKey() + &quot;:&quot; + mapping.getValue());</span></span><br><span class="line"><span class="comment">        &#125;</span></span><br><span class="line"><span class="comment">        */</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//最后把这个List返回即可</span></span><br></pre></td></tr></table></figure>
 <h4 id="简单方法">简单方法</h4>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//获取key</span></span><br><span class="line">Object[] key_arr = hashmap.keySet().toArray();   </span><br><span class="line"><span class="comment">//对key排序</span></span><br><span class="line">Arrays.sort(key_arr);   </span><br><span class="line"><span class="comment">//通过key获取value</span></span><br><span class="line"><span class="keyword">for</span>(Object key : key_arr) &#123;   </span><br><span class="line">    Object value = hashmap.get(key);   </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 ]]></content>
@@ -1000,9 +894,9 @@
 <li><p><code>ORDER BY</code>子句：按照哪些字段进行排序，窗口函数将按照排序后的记录顺序进行编号；</p></li>
 <li><p><code>FRAME</code>子句：FRAME是当前分区的一个子集，子句用来定义子集的规则，通常用来作为滑动窗口使用</p></li>
 <li><p>window_name：给窗口指定一个别名。如果SQL中涉及的窗口较多，采用别名可以看起来更清晰易读；</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    <span class="built_in">rank</span> ( ) <span class="keyword">over</span> w1 </span><br><span class="line"><span class="keyword">FROM</span></span><br><span class="line">    employee <span class="keyword">window</span> w1 <span class="keyword">AS</span> ( <span class="keyword">PARTITION</span> <span class="keyword">BY</span> Company <span class="keyword">ORDER</span> <span class="keyword">BY</span> Salary <span class="keyword">DESC</span> )</span><br><span class="line">    </span><br><span class="line"># <span class="keyword">from</span> <span class="keyword">table</span>后面加了一个关键字<span class="keyword">WINDOW</span>，后面跟了一个子句，这样在<span class="keyword">select</span>中就可以使用这个w1作为窗口了。</span><br></pre></td></tr></table></figure>
-<h4 id="窗口函数">窗口函数</h4></li>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    <span class="built_in">rank</span> ( ) <span class="keyword">over</span> w1 </span><br><span class="line"><span class="keyword">FROM</span></span><br><span class="line">    employee <span class="keyword">window</span> w1 <span class="keyword">AS</span> ( <span class="keyword">PARTITION</span> <span class="keyword">BY</span> Company <span class="keyword">ORDER</span> <span class="keyword">BY</span> Salary <span class="keyword">DESC</span> )</span><br><span class="line">    </span><br><span class="line"># <span class="keyword">from</span> <span class="keyword">table</span>后面加了一个关键字<span class="keyword">WINDOW</span>，后面跟了一个子句，这样在<span class="keyword">select</span>中就可以使用这个w1作为窗口了。</span><br></pre></td></tr></table></figure></li>
 </ul>
+<h4 id="窗口函数">窗口函数</h4>
 <p>窗口函数，在某些记录的集合上执行的函数。</p>
 <h5 id="序号函数">序号函数</h5>
 <p>row_number()/rank()/dense_rank()</p>
@@ -1212,6 +1106,132 @@
       <tags>
         <tag>数据结构与算法</tag>
         <tag>算法</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title></title>
+    <url>/2021/04/17/MySQL_SQL/</url>
+    <content><![CDATA[<p>SQL 是用于访问和处理数据库的标准的计算机语言。</p>
+<a id="more"></a>
+<h3 id="函数">函数</h3>
+<h4 id="limit-offset函数">LIMIT OFFSET函数</h4>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#选择排名第二高的工资</span><br><span class="line">select</span><br><span class="line">ifnull(</span><br><span class="line">(</span><br><span class="line">    select distinct Salary from Employee order by Salary desc limit 1 offset 1</span><br><span class="line">)</span><br><span class="line">,</span><br><span class="line">null</span><br><span class="line">)</span><br><span class="line">as SecondHighestSalary</span><br></pre></td></tr></table></figure>
+<h4 id="窗口函数">窗口函数</h4>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#每个部门里面工资前三高的员工</span><br><span class="line">select d.name as department, a.name as employee, a.salary as salary</span><br><span class="line">from</span><br><span class="line">(</span><br><span class="line">    #利用排名函数 dense_rank() 获得分区下的排名</span><br><span class="line">    select *, dense_rank() over( partition by departmentid order by salary desc) as t</span><br><span class="line">    from Employee</span><br><span class="line">)</span><br><span class="line">as a </span><br><span class="line">inner join department as d # 用部门id连接</span><br><span class="line">on a.DepartmentId &#x3D; d.Id </span><br><span class="line">where t &lt;&#x3D; 3 #选择排名高的</span><br></pre></td></tr></table></figure>
+<h4 id="case-when">CASE WHEN</h4>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="keyword">distinct</span> <span class="type">Date</span>,</span><br><span class="line"><span class="built_in">sum</span>(<span class="keyword">case</span> <span class="keyword">Result</span> <span class="keyword">when</span> <span class="string">&#x27;胜&#x27;</span> <span class="keyword">then</span> <span class="number">1</span> <span class="keyword">else</span> <span class="number">0</span> <span class="keyword">end</span>) <span class="keyword">as</span> <span class="string">&#x27;胜&#x27;</span>,</span><br><span class="line"><span class="built_in">sum</span>(<span class="keyword">case</span> <span class="keyword">Result</span> <span class="keyword">when</span> <span class="string">&#x27;负&#x27;</span> <span class="keyword">then</span> <span class="number">1</span> <span class="keyword">else</span> <span class="number">0</span> <span class="keyword">end</span>) <span class="keyword">as</span> <span class="string">&#x27;负&#x27;</span></span><br><span class="line"><span class="keyword">from</span> test</span><br><span class="line"><span class="keyword">group</span> <span class="keyword">by</span> <span class="type">date</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    STUDENT_NAME,</span><br><span class="line">    (<span class="keyword">CASE</span> <span class="keyword">WHEN</span> score <span class="operator">&lt;</span> <span class="number">60</span> <span class="keyword">THEN</span> <span class="string">&#x27;不及格&#x27;</span></span><br><span class="line">        <span class="keyword">WHEN</span> score <span class="operator">&gt;=</span> <span class="number">60</span> <span class="keyword">AND</span> score <span class="operator">&lt;</span> <span class="number">80</span> <span class="keyword">THEN</span> <span class="string">&#x27;及格&#x27;</span></span><br><span class="line">        <span class="keyword">WHEN</span> score <span class="operator">&gt;=</span> <span class="number">80</span> <span class="keyword">THEN</span> <span class="string">&#x27;优秀&#x27;</span></span><br><span class="line">        <span class="keyword">WHEN</span> score <span class="keyword">IS</span> <span class="keyword">NULL</span> <span class="keyword">THEN</span> <span class="string">&#x27;缺席考试&#x27;</span></span><br><span class="line">        <span class="keyword">ELSE</span> <span class="string">&#x27;异常&#x27;</span> <span class="keyword">END</span>) <span class="keyword">AS</span> REMARK</span><br><span class="line"><span class="keyword">FROM</span></span><br><span class="line">    <span class="keyword">TABLE</span></span><br></pre></td></tr></table></figure>
+<h3 id="面试">面试</h3>
+<h4 id="计算用户在线峰值">计算用户在线峰值</h4>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">(timestampe:String,uid:Int,logtype:Int)</span><br><span class="line">时间戳 用户ID 上线下线状态(-1下线，1上线)</span><br><span class="line"></span><br><span class="line">select</span><br><span class="line">    max(max_users)</span><br><span class="line">from </span><br><span class="line">(</span><br><span class="line">    select</span><br><span class="line">        sum(logtype) over(order by &#96;timestampe&#96;) as max_users #排序后第一行到本行的和，就统计了当前时刻究竟有多少人在线</span><br><span class="line">    from</span><br><span class="line">    (</span><br><span class="line">        select</span><br><span class="line">            uid,</span><br><span class="line">            unix_timestamp(timestampe) as &#96;timestampe&#96;, #unix_timestamp 自&#39;1970-01-01 00:00:00&#39;的到当前时间的秒数差</span><br><span class="line">            logtype</span><br><span class="line">        from</span><br><span class="line">            mytable</span><br><span class="line">    ) as a  #将登录时间和登出时间多列成多行</span><br><span class="line">)as b</span><br></pre></td></tr></table></figure>
+<h3 id="参考资料">参考资料</h3>
+<p>https://www.codeleading.com/article/5399898432/ （在线峰值）</p>
+]]></content>
+  </entry>
+  <entry>
+    <title>Spark闭包、累加器和广播变量</title>
+    <url>/2021/04/11/Spark_%E9%97%AD%E5%8C%85%E7%B4%AF%E5%8A%A0%E5%99%A8%E5%B9%BF%E6%92%AD%E5%8F%98%E9%87%8F/</url>
+    <content><![CDATA[<h3 id="总结">总结</h3>
+<ul>
+<li><p>闭包</p>
+<p>闭包<strong>就是一个携带了外部作用域的函数</strong>，当它需要被分发到各个节点上执行的时候，需要外部作用域所在的对象是可序列化的。</p>
+<p>使用这种外部变量的形式，会造成每个Task中都存在一个该变量的副本。</p></li>
+</ul>
+<a id="more"></a>
+<ul>
+<li><p>广播变量</p>
+<p>广播变量是一种变量，广播变量允许开发者将一个 <code>Read-Only</code> 的变量<strong>缓存到集群中每个节点中</strong>，而不是传递给每一个 Task 一个副本，每个Executor中只会存在一个副本。</p>
+<ul>
+<li><p>解决了外部变量在每个Task中都存在副本的问题，每个Executor只会存在一份广播变量的副本，节省空间。</p></li>
+<li><p>在Driver端可以修改广播变量的值，<strong>在Executor端无法修改广播变量的值。</strong></p></li>
+<li><p>广播变量只能在Driver端定义，不能在Executor端定义。</p></li>
+<li><p>不能将RDD广播，因为RDD是不存储数据的。可以将RDD的结果广播出去。</p></li>
+</ul></li>
+<li><p>累加器</p>
+<p>累加器是一个<strong>支持添加操作的分布式变量</strong>，可以在分布式环境下保持一致性。</p>
+<ul>
+<li>累加器在Driver端定义赋初始值，累加器只能在Driver端读取最后的值，在Excutor端更新。</li>
+<li>在Driver端可以修改广播变量的值，<strong>在Executor端可以修改累加器的值。</strong></li>
+</ul></li>
+</ul>
+<h3 id="闭包">闭包</h3>
+<p>如果一个函数<strong>携带了外部的作用域</strong>，这种<strong>函数称为闭包</strong>。</p>
+<p>在Scala中，函数是一个对象，继承自FunctionN。</p>
+<h4 id="问题引出">问题引出</h4>
+<p>在spark中实现统计List(1,2,3)的和。如果使用下面的代码，程序打印的结果不是6，而是0。</p>
+<figure class="highlight scala"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">object</span> <span class="title">Test</span> </span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">main</span></span>(args:<span class="type">Array</span>[<span class="type">String</span>]):<span class="type">Unit</span> = &#123;</span><br><span class="line">      <span class="keyword">val</span> conf = <span class="keyword">new</span> <span class="type">SparkConf</span>().setAppName(<span class="string">&quot;test&quot;</span>);</span><br><span class="line">      <span class="keyword">val</span> sc = <span class="keyword">new</span> <span class="type">SparkContext</span>(conf)</span><br><span class="line"></span><br><span class="line">      <span class="keyword">val</span> rdd = sc.parallelize(<span class="type">List</span>(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>))</span><br><span class="line">      <span class="keyword">var</span> counter = <span class="number">0</span></span><br><span class="line">      <span class="comment">//warn: don&#x27;t do this</span></span><br><span class="line">      rdd.foreach(x =&gt; counter += x)</span><br><span class="line">      println(<span class="string">&quot;Counter value: &quot;</span>+counter) <span class="comment">//打印结果为0</span></span><br><span class="line"></span><br><span class="line">      sc.stop()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>问题分析： counter是在foreach函数外部定义的，也就是在driver程序中定义，而foreach函数是属于rdd对象的，rdd函数的执行位置是各个worker节点（或者说worker进程），main函数是在driver节点上（或者说driver进程上）执行的。所以当counter变量在driver中定义，被在rdd中使用的时候，出现了变量的跨域问题，也就是闭包问题。</p>
+<p>问题解释： 对于上面程序中的counter变量，由于在main函数和在rdd对象中foreach函数是属于不同作用域的，所以，传进foreach中的counter是一个副本，初始值都为0。foreach中叠加的是counter的副本，不管副本如何变化，都不会影响到main函数中的counter，所以最终打印出来的counter为0。</p>
+<h4 id="解决方案">解决方案</h4>
+<figure class="highlight scala"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Test</span></span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">main</span></span>(args: <span class="type">Array</span>[<span class="type">String</span>]) &#123;</span><br><span class="line">    <span class="keyword">val</span> sc = <span class="keyword">new</span> <span class="type">SparkContext</span>(<span class="keyword">new</span> <span class="type">SparkConf</span>())</span><br><span class="line">    <span class="keyword">val</span> newRDD = sc.textFile(<span class="string">&quot;&quot;</span>)</span><br><span class="line"></span><br><span class="line">    newRDD.map(data =&gt; &#123;</span><br><span class="line">      <span class="comment">//do something</span></span><br><span class="line">      println(data.toString)</span><br><span class="line">    &#125;)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果在RDD的函数中调用了在函数外部定义的对象，这些对象需要通过网络从driver所在节点传给其他的worker节点，所以<strong>要求这些类是可序列化的</strong>，比如在Java或者Scala中实现Serializable类。Worker节点接收到程序之后，在Spark资源管理器的指挥下运行RDD程序。不同Worker节点之间的运行操作是并行的。</p>
+<p><img src="/2021/04/11/Spark_%E9%97%AD%E5%8C%85%E7%B4%AF%E5%8A%A0%E5%99%A8%E5%B9%BF%E6%92%AD%E5%8F%98%E9%87%8F/0.png" style="zoom:67%;"></p>
+<p>除了用外部定义的对象来实现类似的功能，Spark还另外提供了两种机制，分别是<strong>Broadcast</strong>和<strong>Accumulator</strong>。</p>
+<p>相比于外部变量的方式，在一定场景下使用Broadcast比较有优势，因为所广播的数据在每一个Worker节点上面只存一个副本，而在Spark算子中使用到的外部变量会在每一个用到它的Task中保存一个副本，即使这些task在同一个节点上面。所以当数据量比较大的时候，建议使用广播而不是外部变量。</p>
+<h3 id="广播变量">广播变量</h3>
+<p>广播变量是一种变量，广播变量允许开发者将一个 <code>Read-Only</code> 的变量缓存到集群中每个节点中, 而不是传递给每一个 Task 一个副本，每个Executor中只会存在一个副本。</p>
+<p>变量一旦被定义为一个广播变量，那么这个变量只能读，不能修改。</p>
+<p><img src="/2021/04/11/Spark_%E9%97%AD%E5%8C%85%E7%B4%AF%E5%8A%A0%E5%99%A8%E5%B9%BF%E6%92%AD%E5%8F%98%E9%87%8F/2.png" style="zoom:50%;"></p>
+<h4 id="广播变量的使用">广播变量的使用</h4>
+<h5 id="创建广播变量">创建广播变量</h5>
+<figure class="highlight scala"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> b = sc.broadcast(<span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+<p>如果 Log 级别为 DEBUG 的时候, 会打印如下信息</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">DEBUG BlockManager: Put block broadcast_0 locally took  430 ms</span><br><span class="line">DEBUG BlockManager: Putting block broadcast_0 without replication took  431 ms</span><br><span class="line">DEBUG BlockManager: Told master about block broadcast_0_piece0</span><br><span class="line">DEBUG BlockManager: Put block broadcast_0_piece0 locally took  4 ms</span><br><span class="line">DEBUG BlockManager: Putting block broadcast_0_piece0 without replication took  4 ms</span><br></pre></td></tr></table></figure>
+<h5 id="使用-value-获取数据">使用 <code>value</code> 获取数据</h5>
+<figure class="highlight scala"><table><tr><td class="code"><pre><span class="line">b.value</span><br></pre></td></tr></table></figure>
+<p>获取数据的时候会打印如下信息</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">DEBUG BlockManager: Getting local block broadcast_0</span><br><span class="line">DEBUG BlockManager: Level for block broadcast_0 is StorageLevel(disk, memory, deserialized, 1 replicas)</span><br></pre></td></tr></table></figure>
+<p>使用 <code>value</code> 方法的注意点</p>
+<p>方法签名 <code>value: T</code></p>
+<p>在destroy之前才能使用value：在 <code>value</code> 方法内部会确保使用获取数据的时候, 变量必须是可用状态, 所以必须在变量被 <code>destroy</code> 之前使用 <code>value</code> 方法, 如果使用 <code>value</code> 时变量已经失效, 则会报出以下错误：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">org.apache.spark.SparkException: Attempted to use Broadcast(0) after it was destroyed (destroy at &lt;console&gt;:27)</span><br><span class="line">  at org.apache.spark.broadcast.Broadcast.assertValid(Broadcast.scala:144)</span><br><span class="line">  at org.apache.spark.broadcast.Broadcast.value(Broadcast.scala:69)</span><br><span class="line">  ... 48 elided</span><br></pre></td></tr></table></figure>
+<h5 id="使用-unpersist-删除数据">使用 <code>unpersist</code> 删除数据</h5>
+<figure class="highlight scala"><table><tr><td class="code"><pre><span class="line">b.unpersist</span><br></pre></td></tr></table></figure>
+<h5 id="使用-destroy-销毁变量">使用 <code>destroy</code> 销毁变量,</h5>
+<p>释放内存空间</p>
+<figure class="highlight scala"><table><tr><td class="code"><pre><span class="line">b.destroy</span><br></pre></td></tr></table></figure>
+<p>销毁以后, 会打印如下信息</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">DEBUG BlockManager: Removing broadcast 0</span><br><span class="line">DEBUG BlockManager: Removing block broadcast_0_piece0</span><br><span class="line">DEBUG BlockManager: Told master about block broadcast_0_piece0</span><br><span class="line">DEBUG BlockManager: Removing block broadcast_0</span><br></pre></td></tr></table></figure>
+<p>使用 <code>destroy</code> 方法的注意点</p>
+<p>方法签名 <code>destroy(): Unit</code></p>
+<p>不要多次删除广播变量：<code>destroy</code> 方法会移除广播变量, 彻底销毁掉, 但是如果你试图多次 <code>destroy</code> 广播变量, 则会报出以下错误</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">org.apache.spark.SparkException: Attempted to use Broadcast(0) after it was destroyed (destroy at &lt;console&gt;:27)</span><br><span class="line">  at org.apache.spark.broadcast.Broadcast.assertValid(Broadcast.scala:144)</span><br><span class="line">  at org.apache.spark.broadcast.Broadcast.destroy(Broadcast.scala:107)</span><br><span class="line">  at org.apache.spark.broadcast.Broadcast.destroy(Broadcast.scala:98)</span><br><span class="line">  ... 48 elided</span><br></pre></td></tr></table></figure>
+<h4 id="广播变量的使用场景">广播变量的使用场景</h4>
+<p>正常情况下使用 Task 拉取数据的时候, 会将数据拷贝到 Executor 中多次, 但是使用广播变量的时候只会复制一份数据到 Executor 中, 所以在两种情况下特别适合使用广播变量</p>
+<ul>
+<li>一个 Executor 中有多个 Task 的时候</li>
+<li>一个变量比较大的时候</li>
+<li>大RDD和小RDD执行join操作时。当一个 RDD 很大并且还需要和另外一个 RDD 执行 <code>join</code> 的时候, 可以将较小的 RDD 广播出去, 然后使用大的 RDD 在算子 <code>map</code> 中直接 <code>join</code>, 从而实现在 Map 端 <code>join</code>。</li>
+</ul>
+<h3 id="累加器">累加器</h3>
+<h4 id="通用累加器">通用累加器</h4>
+<p>Accumulators(累加器) 是一个只支持 added(添加) 的分布式变量, 可以在分布式环境下保持一致性, 并且能够做到高效的并发。</p>
+<p><img src="/2021/04/11/Spark_%E9%97%AD%E5%8C%85%E7%B4%AF%E5%8A%A0%E5%99%A8%E5%B9%BF%E6%92%AD%E5%8F%98%E9%87%8F/1.png" style="zoom:50%;"></p>
+<ul>
+<li><p>Accumulator 是支持并发并行的, 在任何地方都可以通过 add 来修改数值, 无论是 Driver 还是 Executor</p></li>
+<li><p>只能在 Driver 中才能调用 value 来获取数值</p></li>
+</ul>
+<figure class="highlight scala"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> config = <span class="keyword">new</span> <span class="type">SparkConf</span>().setAppName(<span class="string">&quot;ip_ana&quot;</span>).setMaster(<span class="string">&quot;local[6]&quot;</span>)</span><br><span class="line"><span class="keyword">val</span> sc = <span class="keyword">new</span> <span class="type">SparkContext</span>(config)</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> counter = sc.longAccumulator(<span class="string">&quot;counter&quot;</span>)</span><br><span class="line"></span><br><span class="line">sc.parallelize(<span class="type">Seq</span>(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>))</span><br><span class="line">  .foreach(counter.add(_))</span><br><span class="line"></span><br><span class="line"><span class="comment">// 运行结果: 15</span></span><br><span class="line">println(counter.value)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>累加器能保证在 Spark 任务出现问题被重启的时候不会出现重复计算</li>
+<li>累加器只有在 Action 执行的时候才会被触发</li>
+</ul>
+<figure class="highlight scala"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> config = <span class="keyword">new</span> <span class="type">SparkConf</span>().setAppName(<span class="string">&quot;ip_ana&quot;</span>).setMaster(<span class="string">&quot;local[6]&quot;</span>)</span><br><span class="line"><span class="keyword">val</span> sc = <span class="keyword">new</span> <span class="type">SparkContext</span>(config)</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> counter = sc.longAccumulator(<span class="string">&quot;counter&quot;</span>)</span><br><span class="line"></span><br><span class="line">sc.parallelize(<span class="type">Seq</span>(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>))</span><br><span class="line">  .map(counter.add(_)) <span class="comment">// 这个地方不是 Action, 而是一个 Transformation</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 运行结果是 0</span></span><br><span class="line">println(counter.value)</span><br></pre></td></tr></table></figure>
+<h4 id="自定义累加器">自定义累加器</h4>
+<p>可以通过自定义累加器来实现更多类型的累加器, 累加器的作用远远不只是累加, 比如可以实现一个累加器, 用于向里面添加一些运行信息。</p>
+<figure class="highlight scala"><table><tr><td class="code"><pre><span class="line"><span class="comment">//继承AccumulatorV2这个类，传入String类型，返回Set[String]类型</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">InfoAccumulator</span> <span class="keyword">extends</span> <span class="title">AccumulatorV2</span>[<span class="type">String</span>, <span class="type">Set</span>[<span class="type">String</span>]] </span>&#123;</span><br><span class="line">  <span class="comment">//定义一个可变长度的Set，即 mutable.Set[String]  </span></span><br><span class="line">  <span class="keyword">private</span> <span class="keyword">val</span> infos: mutable.<span class="type">Set</span>[<span class="type">String</span>] = mutable.<span class="type">Set</span>()</span><br><span class="line"></span><br><span class="line">  <span class="comment">//判断累加器对象是否为空，这里就是判断这个Set是否为空</span></span><br><span class="line">  <span class="keyword">override</span> <span class="function"><span class="keyword">def</span> <span class="title">isZero</span></span>: <span class="type">Boolean</span> = &#123;</span><br><span class="line">    infos.isEmpty</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">//返回一个拷贝的累加器</span></span><br><span class="line">  <span class="keyword">override</span> <span class="function"><span class="keyword">def</span> <span class="title">copy</span></span>(): <span class="type">AccumulatorV2</span>[<span class="type">String</span>, <span class="type">Set</span>[<span class="type">String</span>]] = &#123;</span><br><span class="line">    <span class="keyword">val</span> newAccumulator = <span class="keyword">new</span> <span class="type">InfoAccumulator</span>()</span><br><span class="line">    infos.synchronized &#123; <span class="comment">//使用synchronized关键字保证线程安全</span></span><br><span class="line">      newAccumulator.infos ++= infos <span class="comment">//把一个Set添加到另一个Set中使用++=</span></span><br><span class="line">    &#125;</span><br><span class="line">    newAccumulator</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">//清空累加器</span></span><br><span class="line">  <span class="keyword">override</span> <span class="function"><span class="keyword">def</span> <span class="title">reset</span></span>(): <span class="type">Unit</span> = &#123;</span><br><span class="line">    infos.clear()</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">//往累加器中添加元素</span></span><br><span class="line">  <span class="keyword">override</span> <span class="function"><span class="keyword">def</span> <span class="title">add</span></span>(v: <span class="type">String</span>): <span class="type">Unit</span> = &#123;</span><br><span class="line">    infos += v</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">//累加器在进行累加的时候，可能每个分布式节点都有一个实例</span></span><br><span class="line">  <span class="comment">//在最后的Driver中进行合并，通过调用这个merge方法把所有的实例内容合并起来，</span></span><br><span class="line">  <span class="keyword">override</span> <span class="function"><span class="keyword">def</span> <span class="title">merge</span></span>(other: <span class="type">AccumulatorV2</span>[<span class="type">String</span>, <span class="type">Set</span>[<span class="type">String</span>]]): <span class="type">Unit</span> = &#123;</span><br><span class="line">    infos ++= other.value <span class="comment">//这里的value就是下面这个方法返回的</span></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">//提供给外部累加结果，注意返回一个不可变的类型，防止外部进行修改</span></span><br><span class="line">  <span class="keyword">override</span> <span class="function"><span class="keyword">def</span> <span class="title">value</span></span>: <span class="type">Set</span>[<span class="type">String</span>] = &#123;</span><br><span class="line">    infos.toSet</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//测试案例</span></span><br><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">accumulator2</span></span>(): <span class="type">Unit</span> = &#123;</span><br><span class="line">  <span class="keyword">val</span> config = <span class="keyword">new</span> <span class="type">SparkConf</span>().setAppName(<span class="string">&quot;ip_ana&quot;</span>).setMaster(<span class="string">&quot;local[6]&quot;</span>)</span><br><span class="line">  <span class="keyword">val</span> sc = <span class="keyword">new</span> <span class="type">SparkContext</span>(config)</span><br><span class="line"></span><br><span class="line">  <span class="keyword">val</span> infoAccumulator = <span class="keyword">new</span> <span class="type">InfoAccumulator</span>()</span><br><span class="line">  sc.register(infoAccumulator, <span class="string">&quot;infos&quot;</span>)</span><br><span class="line"></span><br><span class="line">  sc.parallelize(<span class="type">Seq</span>(<span class="string">&quot;1&quot;</span>, <span class="string">&quot;2&quot;</span>, <span class="string">&quot;3&quot;</span>))</span><br><span class="line">    .foreach(item =&gt; infoAccumulator.add(item))</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 运行结果: Set(3, 1, 2)</span></span><br><span class="line">  println(infoAccumulator.value)</span><br><span class="line"></span><br><span class="line">  sc.stop()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="参考资料">参考资料</h3>
+<p>https://knifefly.cn/2018/05/21/%E7%90%86%E8%A7%A3spark%E9%97%AD%E5%8C%85/（闭包）</p>
+<p>https://blog.csdn.net/weixin_43854618/article/details/105680445（累加器）</p>
+<p>https://www.cnblogs.com/qingyunzong/p/8890483.html#_label1（广播变量和累加器）</p>
+]]></content>
+      <categories>
+        <category>Spark</category>
+        <category>Spark Core</category>
+      </categories>
+      <tags>
+        <tag>Spark</tag>
+        <tag>Spark Core</tag>
       </tags>
   </entry>
 </search>
