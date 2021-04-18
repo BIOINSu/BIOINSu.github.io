@@ -22,17 +22,19 @@
     var NexT = window.NexT || {};
     var CONFIG = {"hostname":"example.com","root":"/","images":"/images","scheme":"Mist","version":"8.2.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false}};
   </script>
-<meta name="description" content="114 二叉树展开为链表 题目描述 给你二叉树的根结点 root ，请你将它展开为一个单链表： 展开后的单链表应该同样使用 TreeNode ，其中 right 子指针指向链表中下一个结点，而左子指针始终为 null 。 展开后的单链表应该与二叉树 先序遍历 顺序相同。 题解： 时间复杂度O(\(n\))： 空间复杂度O(\(n\))： 12345678910111213141516">
+<meta name="description" content="LeetCode中与树有关的题目。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="BIOINSu">
+<meta property="og:title" content="LeetCode 树">
 <meta property="og:url" content="http://example.com/2021/04/18/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_LeetCode_%E6%A0%91/index.html">
 <meta property="og:site_name" content="BIOINSu">
-<meta property="og:description" content="114 二叉树展开为链表 题目描述 给你二叉树的根结点 root ，请你将它展开为一个单链表： 展开后的单链表应该同样使用 TreeNode ，其中 right 子指针指向链表中下一个结点，而左子指针始终为 null 。 展开后的单链表应该与二叉树 先序遍历 顺序相同。 题解： 时间复杂度O(\(n\))： 空间复杂度O(\(n\))： 12345678910111213141516">
+<meta property="og:description" content="LeetCode中与树有关的题目。">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://example.com/2021/04/18/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_LeetCode_%E6%A0%91/0.png">
 <meta property="article:published_time" content="2021-04-18T03:03:39.784Z">
-<meta property="article:modified_time" content="2021-04-18T03:25:13.424Z">
+<meta property="article:modified_time" content="2021-04-18T06:15:07.329Z">
 <meta property="article:author" content="BIOINSu">
+<meta property="article:tag" content="数据结构与算法">
+<meta property="article:tag" content="LeetCode">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="http://example.com/2021/04/18/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_LeetCode_%E6%A0%91/0.png">
 
@@ -49,7 +51,7 @@
     lang   : 'zh-CN'
   };
 </script>
-<title> | BIOINSu</title>
+<title>LeetCode 树 | BIOINSu</title>
   
 
 
@@ -208,13 +210,13 @@
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-count">20</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-count">24</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -271,7 +273,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          
+          LeetCode 树
         </h1>
 
         <div class="post-meta-container">
@@ -283,7 +285,20 @@
       <span class="post-meta-item-text">发表于</span>
       
 
-      <time title="创建时间：2021-04-18 11:03:39 / 修改时间：11:25:13" itemprop="dateCreated datePublished" datetime="2021-04-18T11:03:39+08:00">2021-04-18</time>
+      <time title="创建时间：2021-04-18 11:03:39 / 修改时间：14:15:07" itemprop="dateCreated datePublished" datetime="2021-04-18T11:03:39+08:00">2021-04-18</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/" itemprop="url" rel="index"><span itemprop="name">数据结构与算法</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/LeetCode/" itemprop="url" rel="index"><span itemprop="name">LeetCode</span></a>
+        </span>
     </span>
 
   
@@ -296,7 +311,9 @@
     
     
     <div class="post-body" itemprop="articleBody">
-        <h3 id="二叉树展开为链表">114 二叉树展开为链表</h3>
+        <p>LeetCode中与树有关的题目。</p>
+<a id="more"></a>
+<h3 id="二叉树展开为链表">114 二叉树展开为链表</h3>
 <p><strong>题目描述</strong></p>
 <p>给你二叉树的根结点 root ，请你将它展开为一个单链表：</p>
 <p>展开后的单链表应该同样使用 TreeNode ，其中 right 子指针指向链表中下一个结点，而左子指针始终为 null 。 展开后的单链表应该与二叉树 先序遍历 顺序相同。</p>
@@ -351,6 +368,10 @@
     
 
     <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/" rel="tag"># 数据结构与算法</a>
+              <a href="/tags/LeetCode/" rel="tag"># LeetCode</a>
+          </div>
 
         
 
@@ -430,7 +451,38 @@
 
 
 
-  
+  <script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'none'
+      },
+      options: {
+        renderActions: {
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              const target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3.1.2/es5/tex-mml-chtml.js';
+    script.defer = true;
+    document.head.appendChild(script);
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.typesetClear();
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
 
 
 </body>

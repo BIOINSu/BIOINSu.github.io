@@ -1329,9 +1329,11 @@
       </tags>
   </entry>
   <entry>
-    <title></title>
+    <title>LeetCode 树</title>
     <url>/2021/04/18/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_LeetCode_%E6%A0%91/</url>
-    <content><![CDATA[<h3 id="二叉树展开为链表">114 二叉树展开为链表</h3>
+    <content><![CDATA[<p>LeetCode中与树有关的题目。</p>
+<a id="more"></a>
+<h3 id="二叉树展开为链表">114 二叉树展开为链表</h3>
 <p><strong>题目描述</strong></p>
 <p>给你二叉树的根结点 root ，请你将它展开为一个单链表：</p>
 <p>展开后的单链表应该同样使用 TreeNode ，其中 right 子指针指向链表中下一个结点，而左子指针始终为 null 。 展开后的单链表应该与二叉树 先序遍历 顺序相同。</p>
@@ -1379,5 +1381,13 @@
 <h3 id="题解来源">题解来源</h3>
 <p>https://leetcode-cn.com/problems/check-completeness-of-a-binary-tree/solution/hen-jian-dan-de-si-lu-dai-ma-hen-jian-ji-by-yuanyb/ （二叉树的完全性检验）</p>
 ]]></content>
+      <categories>
+        <category>数据结构与算法</category>
+        <category>LeetCode</category>
+      </categories>
+      <tags>
+        <tag>数据结构与算法</tag>
+        <tag>LeetCode</tag>
+      </tags>
   </entry>
 </search>
