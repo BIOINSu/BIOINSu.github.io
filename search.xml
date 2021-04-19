@@ -368,6 +368,13 @@
 <p>Kafka可以将主题划分为多个分区（Partition），会根据分区规则选择把消息存储到哪个分区中，如果分区规则设置的合理，那么所有的消息将会被均匀的分布到不同的分区中，这样就实现了负载均衡 和水平扩展。</p>
 <p>一个分区可以有多个副本，这些副本保存在不同的broker上。每个分区的副本中都会有一个作为 Leader。当一个broker失败时，Leader在这台broker上的分区都会变得不可用，kafka会自动移除 Leader，再其他副本中选一个作为新的Leader。</p>
 <p>消息同步：先写入到leader中，follower再同步。Producer只将该消息发送到该Partition的Leader。Leader会将该消息写入其本地Log。每个Follower都从Leader pull数据。这种方式上，Follower存储的数据顺序与Leader保持一致。Follower在收到该消息并写入其Log后，向Leader发送ACK。一旦Leader收到了ISR中的所有Replica的ACK，该消息就被认为已经commit了，Leader将增加HW（即offset）并且向Producer发送ACK。</p>
+<p>数据库与数据仓库的区别</p>
+<p>数据库是面向事务型，用户较为关心操作的响应时间。数据仓库是面向分析型的，一般针对历史数据进行分析，允许一定的冗余存在便于挖掘数据。</p>
+<p>HIVE SQL与SQL的区别</p>
+<p>HIVE就是利用SQL语句在HDFS上执行map reduce操作。</p>
+<p>4.Hive不支持将数据插入现有的表或分区中 Hive仅支持覆盖重写整个表。 insert overwrite 表 （重写覆盖）</p>
+<p>Hive不支持等值连接：</p>
+<p>SQL中内关联可以这样写： select * from a , b where a.key = b.key Hive中应该这样写： select * from a join b on a.key = b.key</p>
 ]]></content>
       <categories>
         <category>大数据</category>
@@ -964,6 +971,8 @@
     <content><![CDATA[<p>SQL 是用于访问和处理数据库的标准的计算机语言。</p>
 <a id="more"></a>
 <h3 id="函数">函数</h3>
+<h4 id="lfet-join函数">LFET JOIN函数</h4>
+<p>where 是在两个表join完成后，再附上where条件。而 and 则是在表连接前过滤A表或B表里面哪些记录符合连接条件。</p>
 <h4 id="limit-offset函数">LIMIT OFFSET函数</h4>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#选择排名第二高的工资</span><br><span class="line">select</span><br><span class="line">ifnull(</span><br><span class="line">(</span><br><span class="line">    select distinct Salary from Employee order by Salary desc limit 1 offset 1</span><br><span class="line">)</span><br><span class="line">,</span><br><span class="line">null</span><br><span class="line">)</span><br><span class="line">as SecondHighestSalary</span><br></pre></td></tr></table></figure>
 <h4 id="窗口函数">窗口函数</h4>
@@ -972,8 +981,14 @@
 <figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="keyword">distinct</span> <span class="type">Date</span>,</span><br><span class="line"><span class="built_in">sum</span>(<span class="keyword">case</span> <span class="keyword">Result</span> <span class="keyword">when</span> <span class="string">&#x27;胜&#x27;</span> <span class="keyword">then</span> <span class="number">1</span> <span class="keyword">else</span> <span class="number">0</span> <span class="keyword">end</span>) <span class="keyword">as</span> <span class="string">&#x27;胜&#x27;</span>,</span><br><span class="line"><span class="built_in">sum</span>(<span class="keyword">case</span> <span class="keyword">Result</span> <span class="keyword">when</span> <span class="string">&#x27;负&#x27;</span> <span class="keyword">then</span> <span class="number">1</span> <span class="keyword">else</span> <span class="number">0</span> <span class="keyword">end</span>) <span class="keyword">as</span> <span class="string">&#x27;负&#x27;</span></span><br><span class="line"><span class="keyword">from</span> test</span><br><span class="line"><span class="keyword">group</span> <span class="keyword">by</span> <span class="type">date</span></span><br></pre></td></tr></table></figure>
 <figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    STUDENT_NAME,</span><br><span class="line">    (<span class="keyword">CASE</span> <span class="keyword">WHEN</span> score <span class="operator">&lt;</span> <span class="number">60</span> <span class="keyword">THEN</span> <span class="string">&#x27;不及格&#x27;</span></span><br><span class="line">        <span class="keyword">WHEN</span> score <span class="operator">&gt;=</span> <span class="number">60</span> <span class="keyword">AND</span> score <span class="operator">&lt;</span> <span class="number">80</span> <span class="keyword">THEN</span> <span class="string">&#x27;及格&#x27;</span></span><br><span class="line">        <span class="keyword">WHEN</span> score <span class="operator">&gt;=</span> <span class="number">80</span> <span class="keyword">THEN</span> <span class="string">&#x27;优秀&#x27;</span></span><br><span class="line">        <span class="keyword">WHEN</span> score <span class="keyword">IS</span> <span class="keyword">NULL</span> <span class="keyword">THEN</span> <span class="string">&#x27;缺席考试&#x27;</span></span><br><span class="line">        <span class="keyword">ELSE</span> <span class="string">&#x27;异常&#x27;</span> <span class="keyword">END</span>) <span class="keyword">AS</span> REMARK</span><br><span class="line"><span class="keyword">FROM</span></span><br><span class="line">    <span class="keyword">TABLE</span></span><br></pre></td></tr></table></figure>
 <h3 id="面试">面试</h3>
+<h4 id="查询连续登录用户">查询连续登录用户</h4>
+<p>1、因为每天用户登录次数可能不止一次，所以需要先将用户每天的登录日期去重。</p>
+<p>2、再用row_number() over(partition by _ order by _)函数将用户id分组，按照登陆时间进行排序。</p>
+<p>3、计算登录日期减去第二步骤得到的结果值，用户连续登陆情况下，每次相减的结果都相同。</p>
+<p>4、按照id和日期分组并求和，筛选大于等于7的即为连续7天登陆的用户。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># id, date</span><br><span class="line"># 用户ID，用户登录时间</span><br><span class="line"></span><br><span class="line">#最后先按照id和结果列进行 group by，然后统计结果，旋转连续天数大于7的用户id</span><br><span class="line">select id,count(*) from </span><br><span class="line">(</span><br><span class="line">    #date函数仅返回日期部分，不返回时间部分，结果列表示  用户连续登陆情况下，每次相减的结果都相同</span><br><span class="line">    select *,date(日期)-cum as 结果 from </span><br><span class="line">    (</span><br><span class="line">        #按照用户分组，按照时间排序, cum是排名</span><br><span class="line">        select *,row_number() over(PARTITION by id order by 日期) as cum from </span><br><span class="line">        (</span><br><span class="line">            #给时间去重</span><br><span class="line">            select DISTINCT date(date) as 日期,id from orde) a </span><br><span class="line">    )b</span><br><span class="line">)c GROUP BY id,结果 having count(*)&gt;&#x3D;7;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 <h4 id="计算用户在线峰值">计算用户在线峰值</h4>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">(timestampe:String,uid:Int,logtype:Int)</span><br><span class="line">时间戳 用户ID 上线下线状态(-1下线，1上线)</span><br><span class="line"></span><br><span class="line">select</span><br><span class="line">    max(max_users)</span><br><span class="line">from </span><br><span class="line">(</span><br><span class="line">    select</span><br><span class="line">        sum(logtype) over(order by &#96;timestampe&#96;) as max_users #排序后第一行到本行的和，就统计了当前时刻究竟有多少人在线</span><br><span class="line">    from</span><br><span class="line">    (</span><br><span class="line">        select</span><br><span class="line">            uid,</span><br><span class="line">            unix_timestamp(timestampe) as &#96;timestampe&#96;, #unix_timestamp 自&#39;1970-01-01 00:00:00&#39;的到当前时间的秒数差</span><br><span class="line">            logtype</span><br><span class="line">        from</span><br><span class="line">            mytable</span><br><span class="line">    ) as a  #将登录时间和登出时间多列成多行</span><br><span class="line">)as b</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#(timestampe:String, uid:Int, logtype:Int)</span><br><span class="line">#时间戳 用户ID 上线下线状态(-1下线，1上线)</span><br><span class="line"></span><br><span class="line">select</span><br><span class="line">    max(max_users)</span><br><span class="line">from </span><br><span class="line">(</span><br><span class="line">    select</span><br><span class="line">        sum(logtype) over(order by &#96;timestampe&#96;) as max_users #排序后第一行到本行的和，就统计了当前时刻究竟有多少人在线</span><br><span class="line">    from</span><br><span class="line">    (</span><br><span class="line">        select</span><br><span class="line">            uid,</span><br><span class="line">            unix_timestamp(timestampe) as &#96;timestampe&#96;, #unix_timestamp 自&#39;1970-01-01 00:00:00&#39;的到当前时间的秒数差</span><br><span class="line">            logtype</span><br><span class="line">        from</span><br><span class="line">            mytable</span><br><span class="line">    ) as a  #将登录时间和登出时间多列成多行</span><br><span class="line">)as b</span><br></pre></td></tr></table></figure>
 <h3 id="参考资料">参考资料</h3>
 <p>https://www.codeleading.com/article/5399898432/ （在线峰值）</p>
 ]]></content>
@@ -2354,32 +2369,6 @@
       <tags>
         <tag>数据结构与算法</tag>
         <tag>剑指Offer</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title></title>
-    <url>/2021/04/19/%E5%85%B6%E4%BB%96_%E9%9D%A2%E8%AF%95/</url>
-    <content><![CDATA[<a id="more"></a>
-<p>说一个你本科做过的印象最深的项目，难点</p>
-<p>搭建大数据平台处理日志数量统计项目，需要统计的是uv，就是一段时间内访问的用户数量。主要是用十台普通计算机主机搭建了一个Hadoop集群，用HDFS存数据，用Yarn作为资源管理器，用Spark作为计算框架。难点在于大数据的组间比较多，首先要理解它们的关系，其次是容错性的问题，集群通常有机器检测不到或者突然间宕机的状态（解决方法，观察宕机原因，发现日志被存满，写一个脚本取删除日志），还有编程中可能会出现一些对象无法序列化的问题，可能是由于闭包问题引起的，需要修正代码。</p>
-<p>说一个你研究生做过的印象最深的项目，难点</p>
-<p>TCBB，难点：数据比较大，缺失值比较多，</p>
-<p>遇到过的压力最大的事，如何缓解压力</p>
-<p>ds离职，跑步，思考下一步到底要干嘛，列个计划</p>
-<p>自身的优势</p>
-<p>做事比较认真努力，有条理性，会把要做的事情列个计划，按计划完成任务，每个阶段清楚自己在干嘛；</p>
-<p>缺点</p>
-<p>内向、表达</p>
-<p>你为什么要来xx</p>
-<p>做实业、有创新能力的公司，不管是面向个人的产品还是一些商用产品，都是实实在在能够为人们带来便捷，能够促进人们生活发展，所以我希望加入华为，利用我的专业知识希在一个更大的平台来展示自己的能力。</p>
-]]></content>
-      <categories>
-        <category>其他</category>
-        <category>面试</category>
-      </categories>
-      <tags>
-        <tag>其他</tag>
-        <tag>面试</tag>
       </tags>
   </entry>
 </search>
