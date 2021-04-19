@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.3.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/maze.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/maze.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/maze.png">
+  <link rel="mask-icon" href="/images/maze.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","images":"/images","scheme":"Mist","version":"8.2.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false}};
+  </script>
+<meta name="description" content="剑指Offer中关于堆栈的题目解析。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="剑指Offer 堆栈">
+<meta property="og:url" content="http://example.com/2021/04/19/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E5%89%91%E6%8C%87_%E5%A0%86%E6%A0%88/index.html">
+<meta property="og:site_name" content="BIOINSu">
+<meta property="og:description" content="剑指Offer中关于堆栈的题目解析。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2021/04/19/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E5%89%91%E6%8C%87_%E5%A0%86%E6%A0%88/0.png">
+<meta property="og:image" content="http://example.com/2021/04/19/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E5%89%91%E6%8C%87_%E5%A0%86%E6%A0%88/1.png">
+<meta property="og:image" content="http://example.com/2021/04/19/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E5%89%91%E6%8C%87_%E5%A0%86%E6%A0%88/2.png">
+<meta property="og:image" content="http://example.com/2021/04/19/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E5%89%91%E6%8C%87_%E5%A0%86%E6%A0%88/3.png">
+<meta property="og:image" content="http://example.com/2021/04/19/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E5%89%91%E6%8C%87_%E5%A0%86%E6%A0%88/4.png">
+<meta property="og:image" content="http://example.com/2021/04/19/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E5%89%91%E6%8C%87_%E5%A0%86%E6%A0%88/5.png">
+<meta property="article:published_time" content="2021-04-19T03:03:32.856Z">
+<meta property="article:modified_time" content="2021-04-19T03:07:55.204Z">
+<meta property="article:author" content="BIOINSu">
+<meta property="article:tag" content="数据结构与算法">
+<meta property="article:tag" content="剑指Offer">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2021/04/19/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E5%89%91%E6%8C%87_%E5%A0%86%E6%A0%88/0.png">
+
+
+<link rel="canonical" href="http://example.com/2021/04/19/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E5%89%91%E6%8C%87_%E5%A0%86%E6%A0%88/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+<title>剑指Offer 堆栈 | BIOINSu</title>
+  
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BIOINSu</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%A8%E4%B8%A4%E4%B8%AA%E6%A0%88%E5%AE%9E%E7%8E%B0%E9%98%9F%E5%88%97"><span class="nav-number">1.</span> <span class="nav-text">01 用两个栈实现队列</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8C%85%E5%90%ABmin%E5%87%BD%E6%95%B0%E7%9A%84%E6%A0%88%E6%9C%80%E5%B0%8F%E6%A0%88"><span class="nav-number">2.</span> <span class="nav-text">02 包含min函数的栈&#x2F;最小栈</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%88%E7%9A%84%E5%8E%8B%E5%85%A5%E5%BC%B9%E5%87%BA%E5%BA%8F%E5%88%97"><span class="nav-number">3.</span> <span class="nav-text">03 栈的压入、弹出序列</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E6%B5%81%E4%B8%AD%E7%9A%84%E4%B8%AD%E4%BD%8D%E6%95%B0"><span class="nav-number">4.</span> <span class="nav-text">04 数据流中的中位数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%BB%91%E5%8A%A8%E7%AA%97%E5%8F%A3%E7%9A%84%E6%9C%80%E5%A4%A7%E5%80%BC%E5%A0%86%E6%88%96%E5%8F%8C%E7%AB%AF%E9%98%9F%E5%88%97"><span class="nav-number">5.</span> <span class="nav-text">05 滑动窗口的最大值&#x2F;堆或双端队列</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%80%E5%B0%8F%E7%9A%84k%E4%B8%AA%E6%95%B0%E5%BF%AB%E9%80%9F%E9%80%89%E6%8B%A9"><span class="nav-number">6.</span> <span class="nav-text">06 最小的K个数&#x2F;快速选择</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E9%A2%98%E8%A7%A3"><span class="nav-number">7.</span> <span class="nav-text">参考题解</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">BIOINSu</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">27</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">21</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">25</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/BIOINSu" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;BIOINSu" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/04/19/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E5%89%91%E6%8C%87_%E5%A0%86%E6%A0%88/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BIOINSu">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BIOINSu">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          剑指Offer 堆栈
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2021-04-19 11:03:32 / 修改时间：11:07:55" itemprop="dateCreated datePublished" datetime="2021-04-19T11:03:32+08:00">2021-04-19</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/" itemprop="url" rel="index"><span itemprop="name">数据结构与算法</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E5%89%91%E6%8C%87Offer/" itemprop="url" rel="index"><span itemprop="name">剑指Offer</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>剑指Offer中关于堆栈的题目解析。</p>
+<a id="more"></a>
+<h3 id="用两个栈实现队列">01 用两个栈实现队列</h3>
+<p><strong>题目描述</strong> 用两个栈来实现一个队列，完成队列的Push和Pop操作。 队列中的元素为int类型。</p>
+<p><strong>题解</strong></p>
+<p>Push：</p>
+<p>时间复杂度O(<span class="math inline">\(1\)</span>)：stack1每次仅涉及一个元素的操作。</p>
+<p>空间复杂度O(<span class="math inline">\(n\)</span>)：stack1中存储<span class="math inline">\(n\)</span>个元素。</p>
+<p>Pop：</p>
+<p>时间复杂度O(<span class="math inline">\(n\)</span>)：在最坏情况下，stack2 为空，算法需要从 stack1 中弹出 <span class="math inline">\(n\)</span> 个元素，然后再压入stack2中；最好情况下stack2不为空，则复杂度为O(1)。</p>
+<p>空间复杂度O(<span class="math inline">\(n\)</span>)：stack2中存储<span class="math inline">\(n\)</span>个元素。</p>
+<p>栈，是一种先进后出的数据结构。队列，是一种先进先出的数据结构。</p>
+<p>有两个栈stack1和stack2，当队列进入元素时（Push），压入stack1中。</p>
+<p>当需要出队时（Pop），若stack2中有元素，则先将stack2中元素弹出，直到为空，再将stack1中元素全部弹出压入stack2中，然后继续弹出。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.Stack;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    Stack&lt;Integer&gt; stack1 = <span class="keyword">new</span> Stack&lt;Integer&gt;();</span><br><span class="line">    Stack&lt;Integer&gt; stack2 = <span class="keyword">new</span> Stack&lt;Integer&gt;();</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">push</span><span class="params">(<span class="keyword">int</span> node)</span> </span>&#123;</span><br><span class="line">        stack1.push(node);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">pop</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span>(stack2.size() == <span class="number">0</span>)&#123;</span><br><span class="line">            <span class="keyword">while</span>(stack1.size() != <span class="number">0</span>)&#123;</span><br><span class="line">                stack2.push( stack1.pop() );</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> stack2.pop();</span><br><span class="line">    </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="包含min函数的栈最小栈">02 包含min函数的栈/最小栈</h3>
+<p><strong>题目描述</strong> 定义栈的数据结构，请在该类型中实现一个能够获得栈中所含最小元素的min函数（时间复杂度应为O(1)）。</p>
+<p><strong>题解</strong></p>
+<p>时间复杂度O(1)：所有操作的复杂度均为O(1)。</p>
+<p>空间复杂度O(<span class="math inline">\(n\)</span>)：一共有n个待入栈元素，最差情况下栈中存储所有待入栈元素。</p>
+<p><img src="/2021/04/19/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E5%89%91%E6%8C%87_%E5%A0%86%E6%A0%88/0.png" style="zoom:67%;"></p>
+<p>可通过建立辅助栈实现； 数据栈 A： 栈 A用于存储所有元素，保证入栈 push() 函数、出栈 pop() 函数、获取栈顶 top() 函数的正常逻辑。 辅助栈 B： 栈 B中存储栈 A中所有 非严格降序 的元素，则栈 A中的最小元素始终对应栈 B的栈顶元素，即 min() 函数只需返回栈 B的栈顶元素即可。 因此，只需设法维护好 栈 B的元素，使其保持非严格降序，即可实现 min() 函数的 O(1)复杂度。维护则分为push和pop，只有小于等于当前栈顶的才push，只有A pop的元素和栈顶相等才pop。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.Stack;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> Stack&lt;Integer&gt; master = <span class="keyword">new</span> Stack&lt;Integer&gt;();</span><br><span class="line">    <span class="keyword">private</span> Stack&lt;Integer&gt; slave = <span class="keyword">new</span> Stack&lt;Integer&gt;();</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">push</span><span class="params">(<span class="keyword">int</span> node)</span> </span>&#123;</span><br><span class="line">        master.push(node);</span><br><span class="line">        <span class="keyword">if</span>(slave.size() == <span class="number">0</span>)</span><br><span class="line">            slave.push(node);</span><br><span class="line">        <span class="keyword">else</span>&#123;</span><br><span class="line">            <span class="keyword">if</span>(slave.peek() &gt;= node)</span><br><span class="line">                slave.push(node);</span><br><span class="line">        &#125;</span><br><span class="line">            </span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">pop</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> node = master.pop();</span><br><span class="line">        <span class="keyword">if</span>(node == slave.peek())</span><br><span class="line">            slave.pop();</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">top</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> master.peek();</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">min</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> slave.peek();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="栈的压入弹出序列">03 栈的压入、弹出序列</h3>
+<p>题目描述</p>
+<p>输入两个整数序列，第一个序列表示栈的压入顺序，请判断第二个序列是否可能为该栈的弹出顺序。假设压入栈的所有数字均不相等。例如序列1,2,3,4,5是某栈的压入顺序，序列4,5,3,2,1是该压栈序列对应的一个弹出序列，但4,3,5,1,2就不可能是该压栈序列的弹出序列。（注意：这两个序列的长度是相等的）</p>
+<p>输入</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[1,2,3,4,5],[4,3,5,1,2]</span><br></pre></td></tr></table></figure>
+<p>返回值</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">false</span><br></pre></td></tr></table></figure>
+<p><strong>题解</strong></p>
+<p>时间复杂度 O(<span class="math inline">\(n\)</span>) ： 其中 <span class="math inline">\(n\)</span> 为列表 pushed 的长度；每个元素最多入栈与出栈一次，即最多共 2<span class="math inline">\(n\)</span> 次出入栈操作。 空间复杂度 O(<span class="math inline">\(n\)</span>) ： 辅助栈 stack 最多同时存储 <span class="math inline">\(n\)</span> 个元素。</p>
+<p><img src="/2021/04/19/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E5%89%91%E6%8C%87_%E5%A0%86%E6%A0%88/1.png" style="zoom: 50%;"></p>
+<p>考虑借用一个辅助栈 stack，模拟 压入 / 弹出操作的排列。根据是否模拟成功，即可得到结果。</p>
+<p>入栈操作： 按照压栈序列的顺序执行。 出栈操作： <strong>每次</strong>入栈后，循环判断 “栈顶元素 == 弹出序列的当前元素” 是否成立，将符合弹出序列顺序的栈顶元素全部弹出。</p>
+<p>若最终能够全部弹出，则表明该弹出序列是满足条件的。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.*;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">IsPopOrder</span><span class="params">(<span class="keyword">int</span> [] pushA,<span class="keyword">int</span> [] popA)</span> </span>&#123;</span><br><span class="line">      	</span><br><span class="line">        <span class="comment">//模拟栈</span></span><br><span class="line">        Stack&lt;Integer&gt; sta = <span class="keyword">new</span> Stack&lt;Integer&gt;();</span><br><span class="line">        </span><br><span class="line">        <span class="comment">//两个指针，一个指向压入序列，一个指向弹出序列</span></span><br><span class="line">        <span class="keyword">int</span> i = <span class="number">0</span>, j = <span class="number">0</span>;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">//按照压入序列逐个压入</span></span><br><span class="line">        <span class="keyword">for</span>(; i &lt; pushA.length; i++)&#123;</span><br><span class="line">            </span><br><span class="line">            sta.push(pushA[i]);</span><br><span class="line">            <span class="comment">//每次压入后都判断是否能够弹出</span></span><br><span class="line">            <span class="keyword">while</span>(!sta.isEmpty() &amp;&amp; sta.peek() == popA[j])&#123;</span><br><span class="line">                sta.pop();</span><br><span class="line">                j++;</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">//最终若能全部弹出则满足条件</span></span><br><span class="line">        <span class="keyword">return</span> sta.isEmpty();</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="数据流中的中位数">04 数据流中的中位数</h3>
+<p>题目描述 如何得到一个数据流中的中位数？</p>
+<p>如果从数据流中读出奇数个数值，那么中位数就是所有数值排序之后位于中间的数值。如果从数据流中读出偶数个数值，那么中位数就是所有数值排序之后中间两个数的平均值。我们使用Insert()方法读取数据流，使用GetMedian()方法获取当前读取数据的中位数。</p>
+<p><strong>题解</strong></p>
+<p>时间复杂度 O(<span class="math inline">\(logn\)</span>) ： 优先队列的出队入队操作都是对数级别的，数据在两个堆中间来回操作是常数级别的。 空间复杂度 O(<span class="math inline">\(n\)</span>) ： 使用了三个辅助空间，其中两个堆的空间复杂度是 O(<span class="math inline">\(n/2\)</span>)， 一个表示数据流元素个数的计数器占用空间O(1)。</p>
+<p>一种最容易想到的思路是，数据流新进来一个数，都把它与已经读出来的数进行一次排序，这样中位数就可以很容易得到。这样做不好的地方是：排序的时间复杂度为 O(<span class="math inline">\(nlogn\)</span>)，但事实上，对除了中位数以外的其它位置的元素并不关心。</p>
+<p><img src="/2021/04/19/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E5%89%91%E6%8C%87_%E5%A0%86%E6%A0%88/2.png" style="zoom:67%;"></p>
+<p>通过维护一个大顶堆表示前有序数组，维护一个小顶堆表示后有序数组，解决求取中位数的问题。</p>
+<p>堆可以通过java中的优先队列PriorityQueue实现。</p>
+<p>注意到，大顶堆堆顶元素必须小于小顶堆堆顶元素，这可以通过先将数据加入大顶堆再加入小顶堆实现。</p>
+<p><img src="/2021/04/19/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E5%89%91%E6%8C%87_%E5%A0%86%E6%A0%88/3.png" style="zoom: 60%;"></p>
+<p>大顶堆存储<span class="math inline">\(n\)</span>个或<span class="math inline">\(n+1\)</span>个数，取决于数据流的总数据量是偶数还是奇数，小顶堆存储<span class="math inline">\(n\)</span>个元素。</p>
+<p>每当一个元素到来时，先将其添加到大顶堆，然后取出堆顶元素表示大顶堆中的最大值，加入小顶堆中。</p>
+<p>若总数据量是偶数，则两边存储元素数目一样，不做任何操作。</p>
+<p>若总数据量是奇数，则大顶堆应该多存储一个值表示中位数，因此将小顶堆堆顶元素取出表示堆中最小值，并加入大顶堆。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.*;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">	</span><br><span class="line">    <span class="keyword">int</span> count = <span class="number">0</span>; <span class="comment">//计数可以优化成boolean</span></span><br><span class="line">    <span class="comment">//PriorityQueue&lt;Integer&gt; left = new PriorityQueue&lt;Integer&gt;((x, y)-&gt;(y-x)); //左边大顶堆</span></span><br><span class="line">    PriorityQueue&lt;Integer&gt; left = <span class="keyword">new</span> PriorityQueue&lt;Integer&gt;( <span class="keyword">new</span> Comparator&lt;Integer&gt;()&#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compare</span><span class="params">(Integer o1, Integer o2)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> o2.compareTo(o1);</span><br><span class="line">        &#125;      </span><br><span class="line">    &#125; ); <span class="comment">//传入lambda表达式会慢非常多    </span></span><br><span class="line">    PriorityQueue&lt;Integer&gt; right = <span class="keyword">new</span> PriorityQueue&lt;Integer&gt;();<span class="comment">//右边默认小顶堆</span></span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">Insert</span><span class="params">(Integer num)</span> </span>&#123;</span><br><span class="line">        count++;</span><br><span class="line">        </span><br><span class="line">        left.add(num);</span><br><span class="line">        right.add( left.remove() );</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span>(count%<span class="number">2</span> == <span class="number">1</span>)</span><br><span class="line">            left.add( right.remove() );</span><br><span class="line">    	</span><br><span class="line">        <span class="comment">/*</span></span><br><span class="line"><span class="comment">        奇数情况下，可以先判断num是否大于小顶堆中的最小值，如果大于则需要插入并删除堆顶，</span></span><br><span class="line"><span class="comment">        否则直接插入大顶堆即可，这样就免去了维护小顶堆的时间</span></span><br><span class="line"><span class="comment">        </span></span><br><span class="line"><span class="comment">        if(count%2 == 1)&#123;    </span></span><br><span class="line"><span class="comment">            if(right.size()&gt;0 &amp;&amp; num &gt; right.peek() )&#123;</span></span><br><span class="line"><span class="comment">                right.add(num);</span></span><br><span class="line"><span class="comment">                num = right.remove();</span></span><br><span class="line"><span class="comment">            &#125;      </span></span><br><span class="line"><span class="comment">            left.add( num );            </span></span><br><span class="line"><span class="comment">        &#125;else&#123;            </span></span><br><span class="line"><span class="comment">            left.add(num);</span></span><br><span class="line"><span class="comment">            right.add( left.remove() );            </span></span><br><span class="line"><span class="comment">        &#125;</span></span><br><span class="line"><span class="comment">        */</span></span><br><span class="line">        </span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Double <span class="title">GetMedian</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(count % <span class="number">2</span> == <span class="number">0</span>)&#123;</span><br><span class="line">            <span class="keyword">return</span> (left.peek()+right.peek())/<span class="number">2.0</span>;</span><br><span class="line">        &#125;<span class="keyword">else</span></span><br><span class="line">            <span class="keyword">return</span> (<span class="keyword">double</span>)left.peek(); <span class="comment">//注意数据类型转换</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="滑动窗口的最大值堆或双端队列">05 滑动窗口的最大值/堆或双端队列</h3>
+<p>题目描述</p>
+<p>给定一个数组和滑动窗口的大小，找出所有滑动窗口里数值的最大值。例如，如果输入数组{2,3,4,2,6,2,5,1}及滑动窗口的大小3，那么一共存在6个滑动窗口，他们的最大值分别为{4,4,6,6,6,5}； 针对数组{2,3,4,2,6,2,5,1}的滑动窗口有以下6个： {[2,3,4],2,6,2,5,1}， {2,[3,4,2],6,2,5,1}， {2,3,[4,2,6],2,5,1}， {2,3,4,[2,6,2],5,1}， {2,3,4,2,[6,2,5],1}， {2,3,4,2,6,[2,5,1]}。</p>
+<p>窗口大于数组长度的时候，返回空</p>
+<p><strong>输入</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[2,3,4,2,6,2,5,1],3</span><br></pre></td></tr></table></figure>
+<p>返回值</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[4,4,6,6,6,5]</span><br></pre></td></tr></table></figure>
+<p><strong>题解</strong></p>
+<p>时间复杂度 O(<span class="math inline">\(nlogk\)</span>) ： 其中 <span class="math inline">\(n\)</span> 为数组长度，<span class="math inline">\(logk\)</span>为重建堆的时间复杂度。 空间复杂度 O(<span class="math inline">\(k\)</span>) ： 维护窗口中元素的堆。</p>
+<p>对滑动窗口中的元素维护一个最大堆。堆通过java中的优先队列PriorityQueue实现。每次窗口移动时，先删除掉窗口上一个元素，然后将新元素加入堆，则堆顶就是窗口元素的最大值。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.*;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> ArrayList&lt;Integer&gt; <span class="title">maxInWindows</span><span class="params">(<span class="keyword">int</span> [] num, <span class="keyword">int</span> size)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        </span><br><span class="line">        ArrayList&lt;Integer&gt; res = <span class="keyword">new</span> ArrayList&lt;Integer&gt;();</span><br><span class="line">        <span class="keyword">if</span>(num == <span class="keyword">null</span> || num.length == <span class="number">0</span> || num.length &lt; size || size == <span class="number">0</span>) <span class="comment">//注意size不能为0</span></span><br><span class="line">            <span class="keyword">return</span> res;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">//声明最大堆</span></span><br><span class="line">        PriorityQueue&lt;Integer&gt; pq = <span class="keyword">new</span> PriorityQueue&lt;Integer&gt;( <span class="keyword">new</span> Comparator&lt;Integer&gt;()&#123;            </span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compare</span><span class="params">(Integer o1, Integer o2)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> o2.compareTo(o1);</span><br><span class="line">        &#125;                 </span><br><span class="line">        &#125;);</span><br><span class="line">        </span><br><span class="line">        <span class="comment">//用第一个窗口初始化</span></span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; size; j++)</span><br><span class="line">            pq.add(num[j]);</span><br><span class="line">        res.add(pq.peek());</span><br><span class="line">        </span><br><span class="line">        <span class="comment">//窗口移动</span></span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">1</span>; i+size &lt;= num.length; i++)&#123;</span><br><span class="line">            </span><br><span class="line">            pq.remove(num[i-<span class="number">1</span>]);</span><br><span class="line">            pq.add(num[i+size-<span class="number">1</span>]);</span><br><span class="line">            res.add(pq.peek());</span><br><span class="line">            </span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> res;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>时间复杂度 O(<span class="math inline">\(n\)</span>) ： 只需要遍历一次数组，同时每一个下标恰好被放入队列一次，并且最多被弹出队列一次。 空间复杂度 O(<span class="math inline">\(k\)</span>) ： 双端队列中存储的元素。</p>
+<p><img src="/2021/04/19/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E5%89%91%E6%8C%87_%E5%A0%86%E6%A0%88/4.png"></p>
+<p>双端队列，既可以从队头出队，也可以从队尾出队，则不用遵循先进先出的规则。</p>
+<p>双端队列中，本质上是维护了窗口中<strong>以最大值为开始的递减序列</strong>。非递减序列中的数值则被删除，不会出现在双端队列中。当窗口移动时，只有那些递减序列中的值才有可能被删除。</p>
+<p>整个过程为：</p>
+<p>1.想将我们第一个窗口的所有值存入单调双端队列中，单调队列里面的值为单调递减的。如果发现队尾元素小于要加入的元素，则将队尾元素出队，直到队尾元素大于新元素时，再让新元素入队，目的就是维护一个单调递减的队列。</p>
+<p>2.我们将第一个窗口的所有值，按照单调队列的规则入队之后，因为队列为单调递减，所以队头元素必为当前窗口的最大值，则将队头元素添加到数组中。</p>
+<p>3.移动窗口，<strong>判断当前窗口前的元素是否和队头元素相等，如果相等则出队</strong>。</p>
+<p>4.继续然后按照规则进行入队，维护单调递减队列。</p>
+<p>5.每次将队头元素存到返回数组里。</p>
+<p>最终返回数组。</p>
+<p>使用Java中的LinkedList类来实现双端队列，其中有offerFirst()、offerLast()、removeFirst()、removeLast()、peekFirst()方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.*;</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> ArrayList&lt;Integer&gt; <span class="title">maxInWindows</span><span class="params">(<span class="keyword">int</span> [] num, <span class="keyword">int</span> size)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="comment">//存储结果</span></span><br><span class="line">        ArrayList&lt;Integer&gt; res = <span class="keyword">new</span> ArrayList&lt;Integer&gt;();</span><br><span class="line">        <span class="keyword">if</span>(num == <span class="keyword">null</span> || num.length == <span class="number">0</span> || size == <span class="number">0</span> || size &gt; num.length)</span><br><span class="line">            <span class="keyword">return</span> res;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">//建立一个双端队列</span></span><br><span class="line">        Deque&lt;Integer&gt; deque = <span class="keyword">new</span> LinkedList&lt;&gt;();</span><br><span class="line">        <span class="comment">//初始化双端队列</span></span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; size; i++)&#123;</span><br><span class="line">            <span class="comment">//当队列中的元素小于当前元素时，出队</span></span><br><span class="line">            <span class="keyword">while</span>(!deque.isEmpty() &amp;&amp; deque.peekLast()&lt;num[i]) deque.removeLast();</span><br><span class="line">            <span class="comment">//将当前元素加入队列</span></span><br><span class="line">            deque.offerLast(num[i]);</span><br><span class="line">        &#125;</span><br><span class="line">        res.add(deque.peekFirst());<span class="comment">//注意这里也要加入</span></span><br><span class="line">        </span><br><span class="line">        <span class="comment">//开始滑动窗口,注意此时新加入的元素是num[i+size-1]</span></span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">1</span>; i &lt;= num.length - size; i++ )&#123;</span><br><span class="line">            </span><br><span class="line">            <span class="comment">//判断是否要出队列</span></span><br><span class="line">            <span class="keyword">if</span>(num[i-<span class="number">1</span>] == deque.peekFirst()) deque.removeFirst();</span><br><span class="line">            </span><br><span class="line">            <span class="comment">//当队列中的元素小于当前新加入的元素，出队</span></span><br><span class="line">            <span class="keyword">while</span>(!deque.isEmpty() &amp;&amp; deque.peekLast()&lt;num[i+size-<span class="number">1</span>]) deque.removeLast();</span><br><span class="line">            </span><br><span class="line">            <span class="comment">//将当前元素加入队列</span></span><br><span class="line">            deque.offerLast(num[i+size-<span class="number">1</span>]);</span><br><span class="line">            </span><br><span class="line">            res.add(deque.peekFirst());</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> res;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="最小的k个数快速选择">06 最小的K个数/快速选择</h3>
+<p><strong>题目描述</strong></p>
+<p>输入n个整数，找出其中最小的K个数。例如输入4,5,1,6,2,7,3,8这8个数字，则最小的4个数字是1,2,3,4。</p>
+<p>输入</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[4,5,1,6,2,7,3,8],4</span><br></pre></td></tr></table></figure>
+<p>返回值</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[1,2,3,4]</span><br></pre></td></tr></table></figure>
+<p><strong>题解</strong></p>
+<p>时间复杂度 O(<span class="math inline">\(nlogk\)</span>) ： 其中 <span class="math inline">\(n\)</span> 为数组长度，每个元素都要进行一次入堆操作，<span class="math inline">\(logk\)</span>为重建堆的时间复杂度。 空间复杂度 O(<span class="math inline">\(k\)</span>) ： 维护窗口中元素的堆。</p>
+<p>维护一个堆。</p>
+<p><img src="/2021/04/19/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E5%89%91%E6%8C%87_%E5%A0%86%E6%A0%88/5.png" style="zoom:67%;"></p>
+<p>平均时间复杂度 O(<span class="math inline">\(n\)</span>)，最坏情况下为O(<span class="math inline">\(n^2\)</span>) ： 其中 <span class="math inline">\(n\)</span> 为数组长度，时间复杂度根据不同主元的选择而不同。 空间复杂度 O(<span class="math inline">\(k\)</span>) ： 维护窗口中元素的堆。</p>
+<p>“查找第 k 大的元素”是一类算法问题，称为<strong>选择问题</strong>。找第 k 大的数，或者找前 k 大的数，有一个经典的 quick select（快速选择）算法。这个名字和 quick sort（快速排序）看起来很像，算法的思想也和快速排序类似，都是分治法的思想。</p>
+<p>回顾快速排序的思路。快速排序中有一步很重要的操作是 partition（划分），从数组中随机选取一个枢纽元素 v，然后原地移动数组中的元素，使得比 v 小的元素在 v 的左边，比 v 大的元素在 v 的右边，如下图所示：</p>
+<p>这个 partition 操作是原地进行的，需要 O(n)的时间，接下来，快速排序会递归地排序左右两侧的数组。</p>
+<p>而快速选择（quick select）算法的不同之处在于，接下来只需要<strong>递归地选择一侧的数组</strong>。快速选择算法想当于一个“<strong>不完全</strong>”的快速排序，因为我们只需要知道最小的 k 个数是哪些，并<strong>不需要知道它们的顺序</strong>。</p>
+<p>目的是寻找最小的 k 个数。假设经过一次 partition 操作，枢纽元素位于下标 m，也就是说，左侧的数组有 m 个元素，是原数组中最小的 m 个数。那么：</p>
+<ul>
+<li>若 k=m，我们就找到了最小的 k 个数，就是左侧的数组；</li>
+<li>若 k&lt;m ，则最小的 k 个数一定都在左侧数组中，我们只需要对左侧数组递归地 parition 即可；</li>
+<li>若 k&gt;m，则左侧数组中的 mm 个数都属于最小的 kk 个数，我们还需要在右侧数组中寻找最小的 k-mk−m 个数，对右侧数组递归地 partition 即可。</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//递归版本</span></span><br><span class="line"><span class="keyword">import</span> java.util.*;</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> ArrayList&lt;Integer&gt; <span class="title">GetLeastNumbers_Solution</span><span class="params">(<span class="keyword">int</span> [] input, <span class="keyword">int</span> k)</span> </span>&#123;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">//存储结果</span></span><br><span class="line">        ArrayList&lt;Integer&gt; res = <span class="keyword">new</span> ArrayList&lt;Integer&gt;();</span><br><span class="line">        </span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span>(input == <span class="keyword">null</span> || input.length == <span class="number">0</span> || k &gt; input.length)</span><br><span class="line">            <span class="keyword">return</span> res;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">//传入的全部是数组中的下标，所以传入k-1</span></span><br><span class="line">        recur(input, <span class="number">0</span>, input.length-<span class="number">1</span>, k-<span class="number">1</span>);</span><br><span class="line">        <span class="comment">//将数组中的值进行复制</span></span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; k; i++)</span><br><span class="line">            res.add(input[i]);</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> res;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">recur</span><span class="params">(<span class="keyword">int</span> [] input, <span class="keyword">int</span> left, <span class="keyword">int</span> right, <span class="keyword">int</span> k)</span></span>&#123;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span>(left == right)</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">int</span> pivot = input[left];</span><br><span class="line">        <span class="keyword">int</span> i = left, j = right;</span><br><span class="line">        <span class="keyword">while</span>(i &lt;= j)&#123;</span><br><span class="line">            <span class="keyword">while</span>(i &lt;= j &amp;&amp; input[i] &lt; pivot) i++;</span><br><span class="line">            <span class="keyword">while</span>(i &lt;= j &amp;&amp; pivot &lt; input[j]) j--;</span><br><span class="line">            <span class="keyword">if</span>(i &lt;= j)&#123; <span class="comment">//++、--之后可能会不满足i&lt;=j的条件，需要进行判断</span></span><br><span class="line">                swap(input, i, j);</span><br><span class="line">                i++;</span><br><span class="line">                j--;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">//判断递归条件，这里只会递归左数组或者右数组之一，此时 j+1 = i 或 i == j</span></span><br><span class="line">        <span class="keyword">if</span>( left &lt;= k &amp;&amp; k &lt;= j) recur(input, left, j, k);</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span>( i &lt;= k &amp;&amp; k &lt;= right) recur(input, i, right, k);</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">swap</span><span class="params">(<span class="keyword">int</span> [] input, <span class="keyword">int</span> i, <span class="keyword">int</span> j)</span></span>&#123;</span><br><span class="line">        <span class="keyword">int</span> tmp = input[i];</span><br><span class="line">        input[i] = input[j];</span><br><span class="line">        input[j] = tmp;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//非递归版本</span></span><br><span class="line"><span class="keyword">import</span> java.util.*;</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> ArrayList&lt;Integer&gt; <span class="title">GetLeastNumbers_Solution</span><span class="params">(<span class="keyword">int</span> [] input, <span class="keyword">int</span> k)</span> </span>&#123;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">//存储结果</span></span><br><span class="line">        ArrayList&lt;Integer&gt; res = <span class="keyword">new</span> ArrayList&lt;Integer&gt;();</span><br><span class="line">        </span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span>(input == <span class="keyword">null</span> || input.length == <span class="number">0</span> || k &gt; input.length)</span><br><span class="line">            <span class="keyword">return</span> res;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">//进行划分</span></span><br><span class="line">        <span class="keyword">int</span> left = <span class="number">0</span>, right = input.length - <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">int</span> pivot = input[left];</span><br><span class="line">        <span class="keyword">int</span> i = left, j = right;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">while</span>(left &lt; right)&#123; <span class="comment">//注意这里不能等</span></span><br><span class="line">                                   </span><br><span class="line">            pivot = input[left]; i = left; j = right;</span><br><span class="line">             <span class="keyword">while</span>(i &lt;= j)&#123; <span class="comment">//进行多次交换</span></span><br><span class="line">                <span class="keyword">while</span>(i &lt;= j &amp;&amp; input[i] &lt; pivot) i++;</span><br><span class="line">            	<span class="keyword">while</span>(i &lt;= j &amp;&amp; pivot &lt; input[j] )  j--;           </span><br><span class="line">            	<span class="keyword">if</span>(i &lt;= j)&#123;</span><br><span class="line">                    swap(input, i, j);</span><br><span class="line">                    i++;</span><br><span class="line">                    j--;</span><br><span class="line">                &#125;</span><br><span class="line">             &#125;</span><br><span class="line">                        </span><br><span class="line">            <span class="comment">//判断，并更改left、right的范围</span></span><br><span class="line">            <span class="comment">//注意这里只能if else，不能用if else if把递归的条件照搬（会导致同时满足条件？暂不清楚）</span></span><br><span class="line">            <span class="keyword">if</span>(left &lt;= k-<span class="number">1</span> &amp;&amp; k-<span class="number">1</span> &lt;= j) right = j;</span><br><span class="line">            <span class="keyword">else</span> left = i;</span><br><span class="line">            </span><br><span class="line">        &#125;       </span><br><span class="line">        </span><br><span class="line">        <span class="comment">//将数组中的值进行复制</span></span><br><span class="line">        <span class="keyword">for</span>(i = <span class="number">0</span>; i &lt; k; i++)</span><br><span class="line">            res.add(input[i]);</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> res;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">swap</span><span class="params">(<span class="keyword">int</span> [] input, <span class="keyword">int</span> i, <span class="keyword">int</span> j)</span></span>&#123;</span><br><span class="line">        <span class="keyword">int</span> tmp = input[i];</span><br><span class="line">        input[i] = input[j];</span><br><span class="line">        input[j] = tmp;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="参考题解">参考题解</h3>
+<p>包含min函数的栈：https://leetcode-cn.com/problems/bao-han-minhan-shu-de-zhan-lcof/solution/mian-shi-ti-30-bao-han-minhan-shu-de-zhan-fu-zhu-z/</p>
+<p>栈的压入、弹出序列：https://leetcode-cn.com/problems/zhan-de-ya-ru-dan-chu-xu-lie-lcof/solution/mian-shi-ti-31-zhan-de-ya-ru-dan-chu-xu-lie-mo-n-2/</p>
+<p>https://leetcode-cn.com/problems/zhan-de-ya-ru-dan-chu-xu-lie-lcof/solution/tan-xin-by-z1m/</p>
+<p>数据流中的中位数：https://leetcode-cn.com/problems/find-median-from-data-stream/solution/you-xian-dui-lie-python-dai-ma-java-dai-ma-by-liwe/</p>
+<p>滑动窗口的最大值：https://leetcode-cn.com/problems/sliding-window-maximum/solution/zhe-hui-yi-miao-dong-bu-liao-liao-de-hua-7fy5/</p>
+<p>最小的k个数：https://leetcode-cn.com/problems/zui-xiao-de-kge-shu-lcof/solution/tu-jie-top-k-wen-ti-de-liang-chong-jie-fa-you-lie-/</p>
+<p>https://leetcode-cn.com/problems/zui-xiao-de-kge-shu-lcof/solution/wei-ruan-mian-shi-jiao-xun-x-by-jerry_nju/</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/" rel="tag"># 数据结构与算法</a>
+              <a href="/tags/%E5%89%91%E6%8C%87Offer/" rel="tag"># 剑指Offer</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/04/19/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E5%89%91%E6%8C%87_%E5%AD%97%E7%AC%A6%E4%B8%B2/" rel="prev" title="剑指Offer 字符串">
+                  <i class="fa fa-chevron-left"></i> 剑指Offer 字符串
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">BIOINSu</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+  <script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'none'
+      },
+      options: {
+        renderActions: {
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              const target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3.1.2/es5/tex-mml-chtml.js';
+    script.defer = true;
+    document.head.appendChild(script);
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.typesetClear();
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+
+
+</body>
+</html>
