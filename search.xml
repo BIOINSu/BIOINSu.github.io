@@ -2371,4 +2371,47 @@
         <tag>剑指Offer</tag>
       </tags>
   </entry>
+  <entry>
+    <title>常用Linux命令</title>
+    <url>/2021/04/19/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F_Linux%E5%91%BD%E4%BB%A4/</url>
+    <content><![CDATA[<p>常用Linux命令：top</p>
+<a id="more"></a>
+<h3 id="top">Top</h3>
+<h4 id="统计信息区系统资源信息区">统计信息区（系统资源信息区）</h4>
+<p><img src="/2021/04/19/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F_Linux%E5%91%BD%E4%BB%A4/0.png"></p>
+<p><strong>第一行：输出系统任务队列信息</strong> <strong>18:46:38</strong>：系统当前时间 <strong>up 2days 1:54</strong>：系统开机后到现在的总运行时间 <strong>1 user</strong>：当前登录用户数 <strong>load average: 0, 0.01, 0.05</strong>：系统负载，系统运行队列的平均利用率，可认为是可运行进程的平均数；三个数值分别为 1分钟、5分钟、15分钟前到现在的平均值；单核CPU中load average的值=1时表示满负荷状态，多核CPU中满负载的load average值为1*CPU核数</p>
+<p><strong>第二行：任务进程信息</strong></p>
+<p><img src="/2021/04/19/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F_Linux%E5%91%BD%E4%BB%A4/5.png"></p>
+<p><strong>total</strong>：系统全部进程的数量 <strong>running</strong>：运行状态的进程数量 <strong>sleeping</strong>：睡眠状态的进程数量 <strong>stoped</strong>：停止状态的进程数量 <strong>zombie</strong>：僵尸进程数量</p>
+<p><strong>第三行：CPU信息</strong></p>
+<p><img src="/2021/04/19/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F_Linux%E5%91%BD%E4%BB%A4/1.png"></p>
+<p><strong>us</strong>：用户空间占用CPU百分比 <strong>sy</strong>：内核空间占用CPU百分比 <strong>ni</strong>：已调整优先级的用户进程的CPU百分比 <strong>id</strong>：空闲CPU百分比，越低说明CPU使用率越高 <strong>wa</strong>：等待IO完成的CPU百分比 <strong>hi</strong>：处理硬件中断的占用CPU百分比 <strong>si</strong>：处理软中断占用CPU百分比 <strong>st</strong>：虚拟机占用CPU百分比</p>
+<p><strong>第四行：物理内存信息</strong></p>
+<p><img src="/2021/04/19/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F_Linux%E5%91%BD%E4%BB%A4/2.png"></p>
+<p>以下内存单位均为MB</p>
+<p><strong>total</strong>：物理内存总量 <strong>free</strong>：空闲内存总量 <strong>used</strong>：使用中内存总量 <strong>buff/cacge</strong>：用于内核缓存的内存量</p>
+<p><strong>第五行：交互区内存信息</strong></p>
+<p><img src="/2021/04/19/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F_Linux%E5%91%BD%E4%BB%A4/3.png"></p>
+<p><strong>total</strong>：交换区总量 <strong>free</strong>：空闲交换区总量 <strong>used</strong>：使用的交换区总量 <strong>avail Mem</strong>：可用交换区总量 注：如果used不断在变化， 说明内核在不断进行内存和swap的数据交换，说明内存真的不够用了</p>
+<p>问题：内存空间还剩多少空闲呢？</p>
+<p>答案：空闲内存=空闲内存总量+缓冲内存量 +可用交换区总量</p>
+<blockquote>
+<p>SWAP交换空间，当某进程向OS请求内存发现不足时，OS会把内存中暂时不用的数据交换出去，放在SWAP分区中。</p>
+</blockquote>
+<h4 id="进程信息区进程列表">进程信息区（进程列表）</h4>
+<p><img src="/2021/04/19/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F_Linux%E5%91%BD%E4%BB%A4/4.png" style="zoom: 80%;"></p>
+<p><strong>PID</strong>：进程号 <strong>USER</strong>：运行进程的用户 <strong>PR</strong>：优先级 <strong>NI</strong>：nice值。负值表示高优先级，正值表示低优先级 <strong>VIRT</strong>：占用虚拟内存，单位kb。VIRT=SWAP+RES <strong>RES</strong>：占用真实内存，单位kb <strong>SHR</strong>：共享内存大小，单位kb <strong>S</strong>：进程状态 <strong>%CPU</strong>：占用CPU百分比 <strong>%MEM</strong>：占用内存百分比 <strong>TIME+</strong>：上次启动后至今的总运行时间 <strong>COMMAND</strong>：命令名or命令行</p>
+<p><strong>进程状态</strong> R=运行状态 S=睡眠状态 D=不可中断的睡眠状态 T=跟踪/停止 Z=僵尸进程</p>
+<h3 id="参考资料">参考资料</h3>
+<p>https://cloud.tencent.com/developer/article/1640762 （Top命令）</p>
+]]></content>
+      <categories>
+        <category>操作系统</category>
+        <category>Linux</category>
+      </categories>
+      <tags>
+        <tag>操作系统</tag>
+        <tag>Linux</tag>
+      </tags>
+  </entry>
 </search>
