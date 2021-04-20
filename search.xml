@@ -2379,6 +2379,7 @@
     <content><![CDATA[<p>常用Linux命令：top</p>
 <a id="more"></a>
 <h3 id="top">Top</h3>
+<p>对系统资源和进程的信息进行监控。</p>
 <h4 id="统计信息区系统资源信息区">统计信息区（系统资源信息区）</h4>
 <p><img src="/2021/04/19/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F_Linux%E5%91%BD%E4%BB%A4/0.png"></p>
 <p><strong>第一行：输出系统任务队列信息</strong> <strong>18:46:38</strong>：系统当前时间 <strong>up 2days 1:54</strong>：系统开机后到现在的总运行时间 <strong>1 user</strong>：当前登录用户数 <strong>load average: 0, 0.01, 0.05</strong>：系统负载，系统运行队列的平均利用率，可认为是可运行进程的平均数；三个数值分别为 1分钟、5分钟、15分钟前到现在的平均值；单核CPU中load average的值=1时表示满负荷状态，多核CPU中满负载的load average值为1*CPU核数</p>
@@ -2432,6 +2433,30 @@
       <tags>
         <tag>Spark</tag>
         <tag>Spark Core</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>设计模式</title>
+    <url>/2021/04/20/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1_%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/</url>
+    <content><![CDATA[<p>设计模式（Design pattern）是代码设计经验的总结。使用设计模式是为了可重用代码，让代码更容易被他人理解，保证代码可靠性。常用设计模式：单例模式</p>
+<a id="more"></a>
+<h3 id="单例模式">单例模式</h3>
+<p>单例（Singleton）模式：某个类只能生成一个实例，该类提供了一个全局访问点供外部获取该实例。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span> </span>&#123;</span><br><span class="line"> </span><br><span class="line">	<span class="comment">/* 持有私有静态实例，防止被引用，此处赋值为null，目的是实现延迟加载 */</span></span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> Singleton instance = <span class="keyword">null</span>;</span><br><span class="line"> </span><br><span class="line">	<span class="comment">/* 私有构造方法，防止被实例化 */</span></span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="title">Singleton</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	&#125;</span><br><span class="line"> </span><br><span class="line">	<span class="comment">/* 静态工程方法，创建实例 */</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">if</span> (instance == <span class="keyword">null</span>) &#123;</span><br><span class="line">			instance = <span class="keyword">new</span> Singleton();</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> instance;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">/* 线程安全</span></span><br><span class="line"><span class="comment">	public static Singleton getInstance() &#123;</span></span><br><span class="line"><span class="comment">		if (instance == null) &#123;</span></span><br><span class="line"><span class="comment">			synchronized (instance) &#123;</span></span><br><span class="line"><span class="comment">				if (instance == null) &#123;</span></span><br><span class="line"><span class="comment">					instance = new Singleton();</span></span><br><span class="line"><span class="comment">				&#125;</span></span><br><span class="line"><span class="comment">			&#125;</span></span><br><span class="line"><span class="comment">		&#125;</span></span><br><span class="line"><span class="comment">		return instance;</span></span><br><span class="line"><span class="comment">	&#125;</span></span><br><span class="line"><span class="comment">	*/</span></span><br><span class="line"></span><br><span class="line"> </span><br><span class="line">	<span class="comment">/* 如果该对象被用于序列化，可以保证对象在序列化前后保持一致 */</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> Object <span class="title">readResolve</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> instance;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="观察者模式发布-订阅模式">观察者模式/发布-订阅模式</h3>
+<p>多个对象间存在一对多关系，当一个对象发生改变时，会把这种改变通知给其他多个对象，从而影响其他对象的行为。</p>
+<h3 id="工厂模式">工厂模式</h3>
+<p>就是建立一个工厂类，对实现了同一接口的一些类进行实例的创建。</p>
+<h3 id="参考资料">参考资料</h3>
+<p>https://blog.csdn.net/sugar_no1/article/details/88317950</p>
+]]></content>
+      <categories>
+        <category>系统设计</category>
+        <category>设计模式</category>
+      </categories>
+      <tags>
+        <tag>系统设计</tag>
+        <tag>设计模式</tag>
       </tags>
   </entry>
 </search>
