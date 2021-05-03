@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.3.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/maze.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/maze.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/maze.png">
+  <link rel="mask-icon" href="/images/maze.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","images":"/images","scheme":"Mist","version":"8.2.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false}};
+  </script>
+<meta name="description" content="Apache Flink是一个分布式的计算框架，用于在无界数据（流处理）和有界数据（批处理）上进行有状态的计算。本文主要介绍了分布式计算框架的四个阶段，以及对Flink的简介，主要包括Flink的四大基石及其特性，以及Flink包括的技术栈。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="01 Flink简介">
+<meta property="og:url" content="http://example.com/2021/05/03/Flink_%E7%AE%80%E4%BB%8B/index.html">
+<meta property="og:site_name" content="BIOINSu">
+<meta property="og:description" content="Apache Flink是一个分布式的计算框架，用于在无界数据（流处理）和有界数据（批处理）上进行有状态的计算。本文主要介绍了分布式计算框架的四个阶段，以及对Flink的简介，主要包括Flink的四大基石及其特性，以及Flink包括的技术栈。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2021/05/03/Flink_%E7%AE%80%E4%BB%8B/Blog/source/_posts/Flink_简介/0.jpg">
+<meta property="og:image" content="http://example.com/2021/05/03/Flink_%E7%AE%80%E4%BB%8B/Blog/source/_posts/Flink_简介/0.png">
+<meta property="article:published_time" content="2021-05-03T03:17:53.376Z">
+<meta property="article:modified_time" content="2021-05-03T11:07:30.056Z">
+<meta property="article:author" content="BIOINSu">
+<meta property="article:tag" content="Flink">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2021/05/03/Flink_%E7%AE%80%E4%BB%8B/Blog/source/_posts/Flink_简介/0.jpg">
+
+
+<link rel="canonical" href="http://example.com/2021/05/03/Flink_%E7%AE%80%E4%BB%8B/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+<title>01 Flink简介 | BIOINSu</title>
+  
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BIOINSu</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#flink"><span class="nav-number">1.</span> <span class="nav-text">Flink</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97%E6%A1%86%E6%9E%B6"><span class="nav-number">1.1.</span> <span class="nav-text">分布式计算框架</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%97%A0%E7%95%8C%E6%9C%89%E7%95%8C%E6%95%B0%E6%8D%AE"><span class="nav-number">1.2.</span> <span class="nav-text">无界&#x2F;有界数据</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#spark-streaming-vs-flink"><span class="nav-number">1.3.</span> <span class="nav-text">Spark Streaming VS Flink</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#flink%E5%9B%9B%E5%A4%A7%E5%9F%BA%E7%9F%B3"><span class="nav-number">2.</span> <span class="nav-text">Flink四大基石</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#checkpoint"><span class="nav-number">2.1.</span> <span class="nav-text">Checkpoint</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#state"><span class="nav-number">2.2.</span> <span class="nav-text">State</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#window"><span class="nav-number">2.3.</span> <span class="nav-text">Window</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#time"><span class="nav-number">2.4.</span> <span class="nav-text">Time</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#flink%E7%89%B9%E6%80%A7"><span class="nav-number">3.</span> <span class="nav-text">Flink特性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#flink%E6%8A%80%E6%9C%AF%E6%A0%88"><span class="nav-number">4.</span> <span class="nav-text">Flink技术栈</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">5.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">BIOINSu</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">32</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/BIOINSu" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;BIOINSu" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/05/03/Flink_%E7%AE%80%E4%BB%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BIOINSu">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BIOINSu">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          01 Flink简介
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2021-05-03 11:17:53 / 修改时间：19:07:30" itemprop="dateCreated datePublished" datetime="2021-05-03T11:17:53+08:00">2021-05-03</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Flink/" itemprop="url" rel="index"><span itemprop="name">Flink</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>Apache Flink是一个分布式的计算框架，用于在无界数据（流处理）和有界数据（批处理）上进行有状态的计算。本文主要介绍了分布式计算框架的四个阶段，以及对Flink的简介，主要包括Flink的四大基石及其特性，以及Flink包括的技术栈。</p>
+<a id="more"></a>
+<h3 id="flink">Flink</h3>
+<p>Apache Flink是一个分布式的计算框架，用于在无界数据（流处理）和有界数据（批处理）上进行有状态的计算。</p>
+<p><img src="/2021/05/03/Flink_%E7%AE%80%E4%BB%8B/Blog\source\_posts\Flink_简介\0.jpg" style="zoom:67%;"></p>
+<h4 id="分布式计算框架">分布式计算框架</h4>
+<ul>
+<li><p>Hadoop的MapReduce，将计算过程严格区分为Map阶段和Reduce阶段，当需要实现复杂的操作时，需要编写多个Map和Reduce程序实现这个过程，因此会发生多次的磁盘溢写。</p></li>
+<li><p>Apache Tez，在Hadoop Yarn之上基于DAG（有向无环图，Directed Acyclic Graph）的计算框架，可以将多个有依赖的MapReduce作业转换为一个作业（这样只需写一次HDFS），从而大大提升DAG作业的性能。</p></li>
+<li><p>Spark，基于内存的计算，提供Spark Streaming支持微批次的计算（伪实时），将流处理和批处理本质上都看成是批处理进行计算（不考虑Struct Streaming）。</p></li>
+<li><p>Flink，同样支持基于内存的计算，将流处理和批处理本质上都看成流处理进行计算，进一步提升实时性，提供适用于机器学习的迭代计算。</p></li>
+</ul>
+<h4 id="无界有界数据">无界/有界数据</h4>
+<ul>
+<li>无界数据：数据不停地产生，对每条数据进行处理。</li>
+<li>有界数据：将数据划分（按照时间等标准）成多组数据，每次处理一个组内的数据。</li>
+</ul>
+<h4 id="spark-streaming-vs-flink">Spark Streaming VS Flink</h4>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th>Spark Streaming</th>
+<th>Flink</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>实时计算</td>
+<td>基于RDD的微批次处理</td>
+<td>流处理</td>
+</tr>
+<tr class="even">
+<td>容错</td>
+<td>血缘机制和Checkpoint</td>
+<td>基于快照的轻量级Checkpoint（成本低）</td>
+</tr>
+<tr class="odd">
+<td>内存管理</td>
+<td>通过JVM实现内存管理，需要用户注意程序的编写</td>
+<td>由Flink实现的一套内存管理机制</td>
+</tr>
+<tr class="even">
+<td>延迟</td>
+<td>100ms</td>
+<td>10ms</td>
+</tr>
+</tbody>
+</table>
+<h3 id="flink四大基石">Flink四大基石</h3>
+<h4 id="checkpoint">Checkpoint</h4>
+<p>Checkpoint 是 Flink 实现容错机制最核心的功能，基于chandy-lamport算法实现分布式计算任务的一致性语义。</p>
+<p>根据配置周期性地基于 Stream 中各个 Operator/Task 的状态来生成快照，从而将这些状态数据定期 持久化存储下来，当 Flink 程序一旦</p>
+<p>意外崩溃时，重新运行程序时可以有选择地从这些快照进行 恢复，从而修正因为故障带来的程序数据异常。</p>
+<h4 id="state">State</h4>
+<p>Flink支持状态管理机制，state 一般指一个具体的 task/operator 的状态，可以认为状态管理机制保存了程序的中间计算结果或者是历史计算结果。</p>
+<h4 id="window">Window</h4>
+<p>窗口机制是一种将无界数据按照一定的规则切割为有界数据的方式，它将一个无限的数据流拆分成有限大小的数据组，并在每一组数据上进行处理。</p>
+<h4 id="time">Time</h4>
+<p>Flink可以根据不同的时间标准来处理数据。</p>
+<p>Event Time：是事件创建的时间。它通常由事件中的时间戳描述，例如采集的日志数据中，每一条日志都会记录自己的生成时间</p>
+<p>Ingestion Time：是数据进入 Flink 的时间。</p>
+<p>Processing Time：是每一个执行基于时间操作的算子的本地系统时间，与机器相关。</p>
+<h3 id="flink特性">Flink特性</h3>
+<ul>
+<li><p>支持高吞吐、低延迟、高性能的流处理</p></li>
+<li><p>有状态计算的Exactly-once语义。状态是指flink能够维护数据在时序上的聚类和聚合，同时它的checkpoint机制</p></li>
+<li><p>支持带有事件时间（event time）语义的流处理和窗口处理。事件时间的语义使流计算的结果更加精确，尤其在事件到达无序或者延迟的情况下。</p></li>
+<li><p>支持高度灵活的窗口（window）操作。支持基于time、count、session，以及data-driven的窗口操作，能很好的对现实环境中的创建的数据进行建模。</p></li>
+<li><p>轻量的容错处理（ fault tolerance）。 它使得系统既能保持高的吞吐率又能保证exactly-once的一致性。通过轻量的state snapshots实现</p></li>
+<li><p>支持savepoints 机制（一般手动触发）。即可以将应用的运行状态保存下来；在升级应用或者处理历史数据是能够做到无状态丢失和最小停机时间。</p></li>
+<li><p>支持大规模的集群模式，支持yarn、Mesos。可运行在成千上万的节点上</p></li>
+<li><p>运行时同时支持流处理和批处理</p></li>
+<li><p>支持具有Backpressure（背压）功能的持续流模型</p></li>
+<li><p>Flink在JVM内部实现了自己的内存管理</p></li>
+<li><p>支持迭代计算</p></li>
+<li><p>支持程序自动优化：避免特定情况下Shuffle、排序等昂贵操作，中间结果进行缓存</p></li>
+</ul>
+<h3 id="flink技术栈">Flink技术栈</h3>
+<p><img src="/2021/05/03/Flink_%E7%AE%80%E4%BB%8B/Blog\source\_posts\Flink_简介\0.png" style="zoom: 67%;"></p>
+<ul>
+<li><p>Deployment层： 该层主要涉及了Flink的部署模式，Flink支持多种部署模式：本地、集群（Standalone/YARN）、云（GCE/EC2）。</p></li>
+<li><p>Runtime层：Runtime层提供了支持Flink计算的全部核心实现，比如支持分布式Stream处理、JobGraph到ExecutionGraph的映射、调度等，为上层API层提供基础服务。</p></li>
+<li><p>API层： 主要实现了面向无界数据的流处理 DataStream API 和 面向有界数据的批处理 DataSet API。</p></li>
+<li><p>Libraries层：Flink应用框架层，构建满足特定应用的计算框架，分别对应于面向流处理和面向批处理两类。面向流处理支持：CEP（复杂事件处理）、基于SQL的操作（基于Table的关系操作）；面向批处理支持：FlinkML（机器学习库）、Gelly（图计算）、基于SQL的操作（基于Table的关系操作）。</p></li>
+</ul>
+<h3 id="参考资料">参考资料</h3>
+<p>https://www.jianshu.com/p/2ee7134d7373（特性）</p>
+<p>https://blog.csdn.net/weixin_43563705/article/details/107614714（基石）</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Flink/" rel="tag"># Flink</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/04/24/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E5%9B%9E%E6%BA%AF%E6%B3%95/" rel="prev" title="回溯法">
+                  <i class="fa fa-chevron-left"></i> 回溯法
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">BIOINSu</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+  <script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'none'
+      },
+      options: {
+        renderActions: {
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              const target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3.1.2/es5/tex-mml-chtml.js';
+    script.defer = true;
+    document.head.appendChild(script);
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.typesetClear();
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+
+
+</body>
+</html>
