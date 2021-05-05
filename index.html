@@ -194,7 +194,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">33</span>
+          <span class="site-state-item-count">34</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -241,6 +241,95 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/05/05/Flink02_%E6%9E%B6%E6%9E%84%E4%BD%93%E7%B3%BB/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BIOINSu">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BIOINSu">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/05/05/Flink02_%E6%9E%B6%E6%9E%84%E4%BD%93%E7%B3%BB/" class="post-title-link" itemprop="url">02 Flink架构体系</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2021-05-05 19:48:38 / 修改时间：21:45:32" itemprop="dateCreated datePublished" datetime="2021-05-05T19:48:38+08:00">2021-05-05</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Flink/" itemprop="url" rel="index"><span itemprop="name">Flink</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <a id="more"></a>
+<h3 id="flink架构">Flink架构</h3>
+<h3 id="flink编程模型">Flink编程模型</h3>
+<p>编程模型指的是Flink提供的API的类型，根据不同的抽象级别提供不同的API进行流处理或批处理。</p>
+<p><img src="/2021/05/05/Flink02_%E6%9E%B6%E6%9E%84%E4%BD%93%E7%B3%BB/Blog\source\_posts\Flink02_架构体系\0.png" style="zoom: 50%;"></p>
+<ul>
+<li><p>Stateful Stream Process</p>
+<p>最底层的API进行的是有状态的流式计算，它提供的过程函数（Process Function） 与 DataStream API 相集成， 使其可以对某些特定的操作进行底层的抽象， 它允许用户可以自由地处理来自一个或多个数据流的事件。这类API可以<strong>获得状态数据和事件的时间</strong>，从而可以注册事件时间并处理时间回调，完成复杂的逻辑。</p></li>
+<li><p>DataStream/DataSet API</p>
+<p><strong>针对流处理和批处理</strong>分别封装了DataStream API（有界或无界流数据） 和 DataSet API（有界数据集），提供了一些进行数据处理的通用算子如转换 （ transformations） ， 连接（joins） ， 聚合（aggregations） ， 窗口操作（windows） 等。</p></li>
+<li><p>Table API</p>
+<p>将数据封装成<strong>二维表格</strong>的形式，提供进行表格处理的API， 其中表可能会动态变化（流式数据） 。 Table API 可以提供例如 select、 project、 join、 group-by、 aggregate 等操作。 此外，Table API 程序在执行之前会经过内置优化器进行优化，可以在表格与DataStream/DataSet 之间无缝切换 ，允许程序混用 Table API 与 DataStream/DataSet API。</p></li>
+<li><p>SQL</p>
+<p>以SQL形式抽象的API和Table API比较相似，SQL 查询可以直接在 Table API 定义的表上执行。</p></li>
+</ul>
+<h3 id="参考资料">参考资料</h3>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -335,7 +424,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/05/03/Flink_%E7%AE%80%E4%BB%8B/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/05/03/Flink01_%E7%AE%80%E4%BB%8B/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -348,7 +437,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/05/03/Flink_%E7%AE%80%E4%BB%8B/" class="post-title-link" itemprop="url">01 Flink简介</a>
+          <a href="/2021/05/03/Flink01_%E7%AE%80%E4%BB%8B/" class="post-title-link" itemprop="url">01 Flink简介</a>
         </h2>
 
         <div class="post-meta-container">
@@ -358,10 +447,16 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2021-05-03 11:17:53 / 修改时间：19:07:30" itemprop="dateCreated datePublished" datetime="2021-05-03T11:17:53+08:00">2021-05-03</time>
+      <time title="创建时间：2021-05-03 11:17:53" itemprop="dateCreated datePublished" datetime="2021-05-03T11:17:53+08:00">2021-05-03</time>
     </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-05-05 22:22:59" itemprop="dateModified" datetime="2021-05-05T22:22:59+08:00">2021-05-05</time>
+      </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
         <i class="far fa-folder"></i>
@@ -382,10 +477,11 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>Apache Flink是一个分布式的计算框架，用于在无界数据（流处理）和有界数据（批处理）上进行有状态的计算。本文主要介绍了分布式计算框架的四个阶段，以及对Flink的简介，主要包括Flink的四大基石及其特性，以及Flink包括的技术栈。</p>
+          <p><img src="/2021/05/03/Flink01_%E7%AE%80%E4%BB%8B/0.jpg" style="zoom:67%;"></p>
+<p>Apache Flink是一个分布式的计算框架，用于在无界数据（流处理）和有界数据（批处理）上进行有状态的计算。本文主要介绍了分布式计算框架的四个阶段，以及对Flink的简介，主要包括Flink的四大基石及其特性，以及Flink包括的技术栈。</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2021/05/03/Flink_%E7%AE%80%E4%BB%8B/#more" rel="contents">
+              <a class="btn" href="/2021/05/03/Flink01_%E7%AE%80%E4%BB%8B/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -987,97 +1083,6 @@
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2021/04/19/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E5%89%91%E6%8C%87_%E6%95%B0%E7%BB%84/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/04/18/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E5%89%91%E6%8C%87_%E9%93%BE%E8%A1%A8/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="BIOINSu">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BIOINSu">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/04/18/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E5%89%91%E6%8C%87_%E9%93%BE%E8%A1%A8/" class="post-title-link" itemprop="url">剑指Offer 链表</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-04-18 23:42:50" itemprop="dateCreated datePublished" datetime="2021-04-18T23:42:50+08:00">2021-04-18</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-04-19 00:03:21" itemprop="dateModified" datetime="2021-04-19T00:03:21+08:00">2021-04-19</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/" itemprop="url" rel="index"><span itemprop="name">数据结构与算法</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E5%89%91%E6%8C%87Offer/" itemprop="url" rel="index"><span itemprop="name">剑指Offer</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>剑指Offer中关于链表的题目解析。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/04/18/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E5%89%91%E6%8C%87_%E9%93%BE%E8%A1%A8/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
