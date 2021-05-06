@@ -2734,6 +2734,49 @@
 <li><p>SQL</p>
 <p>以SQL形式抽象的API和Table API比较相似，SQL 查询可以直接在 Table API 定义的表上执行。</p></li>
 </ul>
+<h3 id="任务的提交流程">任务的提交流程</h3>
+<p>https://blog.csdn.net/weixin_44318830/article/details/107453663?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522162022478716780261941913%2522%252C%2522scm%2522%253A%252220140713.130102334.pc%255Fblog.%2522%257D&amp;request_id=162022478716780261941913&amp;biz_id=0&amp;utm_medium=distribute.pc_search_result.none-task-blog-2<sub>blog</sub>first_rank_v2~rank_v29-8-107453663.pc_v2_rank_blog_default&amp;utm_term=flink</p>
+<h3 id="程序与数据流">程序与数据流</h3>
+<h4 id="flink中的程序">Flink中的程序</h4>
+<p>可以将Flink中的程序分成三个步骤：数据读取（Source）、数据转换（Transformation）、数据写入（Sink）。</p>
+<p><img src="/2021/05/05/Flink02_%E6%9E%B6%E6%9E%84%E4%BD%93%E7%B3%BB/Blog\source\_posts\Flink02_架构体系\1.png" style="zoom:50%;"></p>
+<p>每个 Flink 上运行的程序会被映射成一个 Streaming Dataflows，它包含了 Streams 和 Transformations Operators。</p>
+<p>一个 Stream 可 以看成一个中间结果，即<strong>数据</strong>。</p>
+<p>一个 Transformations 是以一个或多个 Stream 作为输入的某种 Operator，即操作，该 Operator 利用这些 Streams 进行计算从而产生一个或多个 Result Stream。</p>
+<h4 id="flink中的并行并行度">Flink中的并行（并行度）</h4>
+<p>Flink 程序的执行具有并行、分布式的特性。在执行过程中，一个 Stream 包含一个或多个 Stream Partition。而每个 Operator 包含一个或多个 Operator Subtask，这些 Operator Subtasks 在不同的<strong>线程</strong>、不同的<strong>物理机</strong>或不同的<strong>容器</strong>中彼此互不依赖的执行。</p>
+<p>一个特定 Operator 的 Subtask 的个数被称之为其 <strong>Parallelism(并行度)</strong>，注意这里指的是Operator的并行度，不是整个Flink程序的并行度。一个 Stream 的并行度总是等同于产生它的 Operator 的并行度。一个程序中，不同的 Operator 可能具有不同的并行度。</p>
+<p><img src="/2021/05/05/Flink02_%E6%9E%B6%E6%9E%84%E4%BD%93%E7%B3%BB/Blog\source\_posts\Flink02_架构体系\2.png" style="zoom: 80%;"></p>
+<p>如上图，Source被分成Source1和Source2，它们分别为Source这个Operator的Subtask。每一个Operator Subtask都是在不同的线程当中独立执行的。一个Operator的并行度，就等于Operator Subtask的个数。上图Source这个Operator的并行度为2。而一个Stream的并行度就等于它生成的Operator的并行度。</p>
+<p>数据在两个Operator之间传递的时候有两种模式，这取决于Operator的种类：</p>
+<p><strong>One to One</strong>模式：两个operator用此模式传递的时候，会保持数据的分区数和数据的排序；如上图中的Source1到Map1，它就保留的Source的分区特性，以及分区元素处理的有序性。（此时，可以把这两个Operator合并为一个Operator Chain）</p>
+<p><strong>Redistributing</strong> （重新分配）模式：这种模式会<strong>改变数据的分区数</strong>；每个一个Operator Subtask会根据选择Transformation把数据发送到不同的目标subtasks，比如keyBy()会通过<strong>hashcode重新分区</strong>，broadcast()和rebalance()方法会<strong>随机重新分区</strong>，这些操作都会引起 Redistributing 过程，而 Redistributing 过程就类似 于 Spark 中的 shuffle 过程。</p>
+<h4 id="operator-chain">Operator Chain</h4>
+<p>Flink的所有操作都称之为Operator，客户端在提交任务的时候会对Operator进行优化操作，<strong>能进行合并的</strong>Operator（One to One模式）会被合并为一个Operator，<strong>合并后的Operator称为Operator Chain</strong>，实际上就是一个执行链它包括了多个操作，每个执行链会在TaskManager上一个独立的<strong>线程</strong>中执行。</p>
+<p>每个Operator Chain或Operator就称为一个<strong>Task</strong>，每个Task会在一个单独的线程中执行。将 Operators 链接成 Task 是非常有效的优化，它能减少线程之间的切换和基于缓存区的数据交换，在减少时延的同时提升吞吐量。</p>
+<p><img src="/2021/05/05/Flink02_%E6%9E%B6%E6%9E%84%E4%BD%93%E7%B3%BB/Blog\source\_posts\Flink02_架构体系\3.png" style="zoom:67%;"></p>
+<h3 id="slot槽与-sharing-slot共享槽">Slot（槽）与 Sharing Slot（共享槽）</h3>
+<h4 id="slot">Slot</h4>
+<p>每个<strong>TaskManager是一个JVM的进程</strong>, 可以在不同的线程中执行一个或多个子任务。 通过Task Slot来控制能接收多少个Task，至少要有一个Task Slot。</p>
+<p>每个Task Slot表示TaskManager中拥有一定资源的一个固定大小的子集，<strong>代表一个线程</strong>，它能够执行一个Task。</p>
+<p><strong>一个Flink程序的最大并行度由集群中所有Task Manager的Slot的数量决定。</strong></p>
+<p><img src="/2021/05/05/Flink02_%E6%9E%B6%E6%9E%84%E4%BD%93%E7%B3%BB/Blog\source\_posts\Flink02_架构体系\4.png" style="zoom: 80%;"></p>
+<p>一般来说，<strong>槽的个数都是和一台主机中CPU的核数相等</strong>，比如8核，那么就分配8个槽。</p>
+<p>同时这个Task Manager进程的内存被划分到多个Slot中。图中有2个TaskManager，每个TaskManager有3个Slot的，每个Slot占有约1/3的TaskManager进程的内存。</p>
+<p>内存被划分到不同的Slot之后可以获得如下好处:</p>
+<ul>
+<li>TaskManager最多能同时并发执行的任务是可以控制的，那就是3个，因为不能超过Slot的数量。</li>
+<li>Slot有独占的内存空间，这样在一个TaskManager中可以运行多个不同的作业，作业之间不受影响。</li>
+</ul>
+<h4 id="sharing-slot">Sharing Slot</h4>
+<p>Flink允许子任务（Operator）共享槽，即使它们是不同任务（Operator）的子任务（Operator Subtask），只要它们来自同一个作业即可。</p>
+<p><img src="/2021/05/05/Flink02_%E6%9E%B6%E6%9E%84%E4%BD%93%E7%B3%BB/Blog\source\_posts\Flink02_架构体系\5.png" style="zoom:90%;"></p>
+<p>允许槽共享有几个主要好处：</p>
+<ul>
+<li><p>只需计算一个作业（Job）中最高的并行度（parallelism）所需要的Task Slot即可，只要这个满足，整个作业都能满足。</p></li>
+<li><p>资源分配更加公平，如果有比较空闲的Slot可以将更多的任务分配给它。图中若没有任务槽共享，负载较低的Source/Map等Subtask将会占据许多资源，而负载较高的窗口Subtask则会缺乏资源。</p></li>
+<li><p>有了槽共享，可以将基本并行度（base parallelism）从2提升到6（不允许槽共享，则一个TaskManager中只有一个槽执行该作业的Task），提高了槽资源的利用率。</p></li>
+</ul>
 <h3 id="参考资料">参考资料</h3>
 ]]></content>
       <categories>
