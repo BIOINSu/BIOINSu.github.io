@@ -22,16 +22,24 @@
     var NexT = window.NexT || {};
     var CONFIG = {"hostname":"example.com","root":"/","images":"/images","scheme":"Mist","version":"8.2.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false}};
   </script>
-<meta property="og:type" content="website">
-<meta property="og:title" content="BIOINSu">
-<meta property="og:url" content="http://example.com/tags/Flink/index.html">
+<meta name="description" content="Flink中对有界数据进行计算（批处理）。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="04 Flink Dataset">
+<meta property="og:url" content="http://example.com/2021/05/09/Flink04_DatasetAPI/index.html">
 <meta property="og:site_name" content="BIOINSu">
+<meta property="og:description" content="Flink中对有界数据进行计算（批处理）。">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2021/05/09/Flink04_DatasetAPI/0.png">
+<meta property="og:image" content="http://example.com/2021/05/09/Flink04_DatasetAPI/1.png">
+<meta property="article:published_time" content="2021-05-09T02:11:40.726Z">
+<meta property="article:modified_time" content="2021-05-09T02:30:05.517Z">
 <meta property="article:author" content="BIOINSu">
+<meta property="article:tag" content="Flink">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2021/05/09/Flink04_DatasetAPI/0.png">
 
 
-<link rel="canonical" href="http://example.com/tags/Flink/">
+<link rel="canonical" href="http://example.com/2021/05/09/Flink04_DatasetAPI/">
 
 
 <script class="page-configurations">
@@ -39,11 +47,11 @@
   CONFIG.page = {
     sidebar: "",
     isHome : false,
-    isPost : false,
+    isPost : true,
     lang   : 'zh-CN'
   };
 </script>
-<title>标签: Flink | BIOINSu</title>
+<title>04 Flink Dataset | BIOINSu</title>
   
 
 
@@ -168,7 +176,7 @@
 
   <aside class="sidebar">
 
-    <div class="sidebar-inner sidebar-overview-active">
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
       <ul class="sidebar-nav">
         <li class="sidebar-nav-toc">
           文章目录
@@ -181,6 +189,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E7%A1%80"><span class="nav-number">1.</span> <span class="nav-text">基础</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8D%A2%E7%AE%97%E5%8D%95%E4%BD%8D"><span class="nav-number">1.1.</span> <span class="nav-text">换算单位</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B9%B6%E8%A1%8C%E5%BA%A6%E8%AE%BE%E7%BD%AE"><span class="nav-number">2.</span> <span class="nav-text">并行度设置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">3.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -240,110 +249,121 @@
 </noscript>
 
 
-    <div class="main-inner tag posts-collapse">
+    <div class="main-inner post posts-expand">
 
 
   
-  
-  
-  <div class="post-block">
-    <div class="post-content">
-      <div class="collection-title">
-        <h2 class="collection-header">Flink
-          <small>标签</small>
-        </h2>
-      </div>
 
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/05/09/Flink04_DatasetAPI/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BIOINSu">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BIOINSu">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          04 Flink Dataset
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
       
-    <div class="collection-year">
-      <span class="collection-header">2021</span>
+
+      <time title="创建时间：2021-05-09 10:11:40 / 修改时间：10:30:05" itemprop="dateCreated datePublished" datetime="2021-05-09T10:11:40+08:00">2021-05-09</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Flink/" itemprop="url" rel="index"><span itemprop="name">Flink</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>Flink中对有界数据进行计算（批处理）。</p>
+<a id="more"></a>
+<h3 id="基础">基础</h3>
+<h4 id="换算单位">换算单位</h4>
+<h3 id="并行度设置">并行度设置</h3>
+<p>一个Flink程序由多个Operator组成(source、transformation和 sink)。一个Operator由多个并行的Task(线程)来执行， 一个Operator的并行Task(线程)数目就被称为该Operator(任务)的并行度(Parallel)。</p>
+<p>1、Operator Level（算子级别）</p>
+<p>Operator的并行度可以通过调用 setParallelism()方法来指定。</p>
+<p><img src="/2021/05/09/Flink04_DatasetAPI/0.png" style="zoom: 80%;"></p>
+<p>2、Execution Environment Level（Env级别）</p>
+<p>执行环境的默认并行度可以通过调用setParallelism()方法指定。执行环境的并行度可以通过显式设置算子的并行度而改变。</p>
+<p><img src="/2021/05/09/Flink04_DatasetAPI/1.png" style="zoom:80%;"></p>
+<p>3、Client Level（客户端级别）</p>
+<p>并行度可以在客户端将job提交到Flink时设定，可以通过-p参数指定并行度：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./bin/flink run -p 10 WordCount-java.jar</span><br></pre></td></tr></table></figure>
+<p>4、System Level（系统默认级别）</p>
+<p>在系统级可以通过设置flink-conf.yaml文件中的parallelism.default属性来指定所有执行环境的默认并行度。</p>
+<p>总结：</p>
+<p>1、并行度的优先级：算子级别 &gt; env级别 &gt; Client级别 &gt; 系统默认级别 (越靠前具体的代码并行度的优先级越高)</p>
+<p>2、建议不设置算子并行度，如果算子并行度发生变化，可能会在算子之间发生Redistributing，造成数据的shuffle;</p>
+<p>3、不建议使用系统默认配置，配置太过于死板，修改起来比较麻烦；</p>
+<p>4、可以设置env级别或者Client级别。</p>
+<h3 id="参考资料">参考资料</h3>
+
     </div>
 
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-      <div class="post-meta-container">
-        <time itemprop="dateCreated"
-              datetime="2021-05-09T11:52:17+08:00"
-              content="2021-05-09">
-          05-09
-        </time>
-      </div>
+    
+    
+    
 
-      <div class="post-title">
-          <a class="post-title-link" href="/2021/05/09/Flink05_DataStreamAPI/" itemprop="url">
-            <span itemprop="name">05 Flink DataStream</span>
-          </a>
-      </div>
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Flink/" rel="tag"># Flink</a>
+          </div>
 
-      
-    </header>
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/05/05/Flink02_%E6%9E%B6%E6%9E%84%E4%BD%93%E7%B3%BB/" rel="prev" title="02 Flink架构体系">
+                  <i class="fa fa-chevron-left"></i> 02 Flink架构体系
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/05/09/Flink05_DataStreamAPI/" rel="next" title="05 Flink DataStream">
+                  05 Flink DataStream <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
   </article>
+</div>
 
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-      <div class="post-meta-container">
-        <time itemprop="dateCreated"
-              datetime="2021-05-09T10:11:40+08:00"
-              content="2021-05-09">
-          05-09
-        </time>
-      </div>
 
-      <div class="post-title">
-          <a class="post-title-link" href="/2021/05/09/Flink04_DatasetAPI/" itemprop="url">
-            <span itemprop="name">04 Flink Dataset</span>
-          </a>
-      </div>
 
-      
-    </header>
-  </article>
 
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-      <div class="post-meta-container">
-        <time itemprop="dateCreated"
-              datetime="2021-05-05T19:48:38+08:00"
-              content="2021-05-05">
-          05-05
-        </time>
-      </div>
 
-      <div class="post-title">
-          <a class="post-title-link" href="/2021/05/05/Flink02_%E6%9E%B6%E6%9E%84%E4%BD%93%E7%B3%BB/" itemprop="url">
-            <span itemprop="name">02 Flink架构体系</span>
-          </a>
-      </div>
-
-      
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-      <div class="post-meta-container">
-        <time itemprop="dateCreated"
-              datetime="2021-05-03T11:17:53+08:00"
-              content="2021-05-03">
-          05-03
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/2021/05/03/Flink01_%E7%AE%80%E4%BB%8B/" itemprop="url">
-            <span itemprop="name">01 Flink简介</span>
-          </a>
-      </div>
-
-      
-    </header>
-  </article>
-
-    </div>
-  </div>
-  
-  
-  
 
 
 <script>
@@ -403,7 +423,38 @@
 
 
 
-  
+  <script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'none'
+      },
+      options: {
+        renderActions: {
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              const target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3.1.2/es5/tex-mml-chtml.js';
+    script.defer = true;
+    document.head.appendChild(script);
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.typesetClear();
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
 
 
 </body>
