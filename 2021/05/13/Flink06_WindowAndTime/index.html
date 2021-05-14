@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.3.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/maze.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/maze.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/maze.png">
+  <link rel="mask-icon" href="/images/maze.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","images":"/images","scheme":"Mist","version":"8.2.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false}};
+  </script>
+<meta name="description" content="Window 窗口 Window 是Flink中用来收集一定范围内数据的一种方式。 滑动窗口，指的是把源源不断的数据看成是已经存在的，然后通过滑动设定好的窗口来对每个窗口内的数据进行计算。滑动窗口有两个属性，一个是窗口大小，一个是滑动间隔。  当 滑动窗口大小 &#x3D; 滑动间隔时，所有的数据都能参与计算，且窗口内的数据不重复，此时称这样的窗口为滚动窗口。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Flink四大基石：窗口与时间">
+<meta property="og:url" content="http://example.com/2021/05/13/Flink06_WindowAndTime/index.html">
+<meta property="og:site_name" content="BIOINSu">
+<meta property="og:description" content="Window 窗口 Window 是Flink中用来收集一定范围内数据的一种方式。 滑动窗口，指的是把源源不断的数据看成是已经存在的，然后通过滑动设定好的窗口来对每个窗口内的数据进行计算。滑动窗口有两个属性，一个是窗口大小，一个是滑动间隔。  当 滑动窗口大小 &#x3D; 滑动间隔时，所有的数据都能参与计算，且窗口内的数据不重复，此时称这样的窗口为滚动窗口。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2021/05/13/Flink06_WindowAndTime/image-20210513182928464.png">
+<meta property="og:image" content="http://example.com/2021/05/13/Flink06_WindowAndTime/image-20210513183200282.png">
+<meta property="og:image" content="http://example.com/2021/05/13/Flink06_WindowAndTime/0.png">
+<meta property="og:image" content="http://example.com/2021/05/13/Flink06_WindowAndTime/image-20210513195510260.png">
+<meta property="og:image" content="http://example.com/2021/05/13/Flink06_WindowAndTime/image-20210513195540682.png">
+<meta property="og:image" content="http://example.com/2021/05/13/Flink06_WindowAndTime/image-20210513195913227.png">
+<meta property="og:image" content="http://example.com/2021/05/13/Flink06_WindowAndTime/image-20210513204137999.png">
+<meta property="og:image" content="http://example.com/2021/05/13/Flink06_WindowAndTime/image-20210513211157290.png">
+<meta property="article:published_time" content="2021-05-13T10:14:04.290Z">
+<meta property="article:modified_time" content="2021-05-14T05:47:20.432Z">
+<meta property="article:author" content="BIOINSu">
+<meta property="article:tag" content="Flink">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2021/05/13/Flink06_WindowAndTime/image-20210513182928464.png">
+
+
+<link rel="canonical" href="http://example.com/2021/05/13/Flink06_WindowAndTime/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+<title>Flink四大基石：窗口与时间 | BIOINSu</title>
+  
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BIOINSu</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#window"><span class="nav-number">1.</span> <span class="nav-text">Window</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%AA%97%E5%8F%A3%E5%88%92%E5%88%86%E6%96%B9%E5%BC%8F"><span class="nav-number">1.0.1.</span> <span class="nav-text">窗口划分方式</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#time-windows"><span class="nav-number">1.1.</span> <span class="nav-text">Time-Windows</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#count-window"><span class="nav-number">1.2.</span> <span class="nav-text">Count-Window</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#time"><span class="nav-number">2.</span> <span class="nav-text">Time</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%97%B6%E9%97%B4%E5%88%86%E7%B1%BB"><span class="nav-number">2.1.</span> <span class="nav-text">时间分类</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#watermark-%E6%B0%B4%E4%BD%8D%E7%BA%BF"><span class="nav-number">2.2.</span> <span class="nav-text">Watermark 水位线</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E9%97%AE%E9%A2%98"><span class="nav-number">2.2.1.</span> <span class="nav-text">解决问题</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%AA%97%E5%8F%A3%E7%9A%84%E5%BC%80%E5%A7%8B%E6%97%B6%E9%97%B4"><span class="nav-number">2.2.2.</span> <span class="nav-text">窗口的开始时间</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">3.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">BIOINSu</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">37</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">27</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">31</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/BIOINSu" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;BIOINSu" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/05/13/Flink06_WindowAndTime/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BIOINSu">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BIOINSu">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Flink四大基石：窗口与时间
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-05-13 18:14:04" itemprop="dateCreated datePublished" datetime="2021-05-13T18:14:04+08:00">2021-05-13</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-05-14 13:47:20" itemprop="dateModified" datetime="2021-05-14T13:47:20+08:00">2021-05-14</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Flink/" itemprop="url" rel="index"><span itemprop="name">Flink</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h3 id="window">Window</h3>
+<p>窗口 Window 是Flink中用来收集一定范围内数据的一种方式。</p>
+<p>滑动窗口，指的是把源源不断的数据看成是已经存在的，然后通过滑动设定好的窗口来对每个窗口内的数据进行计算。滑动窗口有两个属性，一个是窗口大小，一个是滑动间隔。</p>
+<p><img src="/2021/05/13/Flink06_WindowAndTime/image-20210513182928464.png" alt="image-20210513182928464" style="zoom:67%;"></p>
+<p>当 滑动窗口大小 = 滑动间隔时，所有的数据都能参与计算，且窗口内的数据不重复，此时称这样的窗口为滚动窗口。</p>
+<a id="more"></a>
+<p><img src="/2021/05/13/Flink06_WindowAndTime/image-20210513183200282.png" alt="image-20210513183200282" style="zoom:67%;"></p>
+<p>当 滑动窗口大小 &gt; 滑动间隔时，所有的数据都能参与计算，且窗口内的数据有重复，会重复地参与计算。</p>
+<h5 id="窗口划分方式">窗口划分方式</h5>
+<p>在 Flink 中 Window 可以是时间驱动的(Time Window)，即以时间为标准对数据进行划分，也可以是数据驱动的(Count Window)，即以数据的数量为标准对流式数据进行划分。</p>
+<p><img src="/2021/05/13/Flink06_WindowAndTime/0.png" style="zoom:80%;"></p>
+<p>如果根据时间划分窗口，那么它就是一个time-window，比如每1分钟统计一次或每10分钟统计一次。如果根据数据划分窗口，那么它就是一个count-window，比如每5个数据统计一次或每50个数据统计一次。</p>
+<p>Flink支持窗口的两个重要属性窗口长度size和滑动间隔interval。</p>
+<ul>
+<li>如果size = interval，那么就会形成tumbling-window(无重叠数据)：滚动窗口。</li>
+<li>如果size(1min) &gt; interval（30s），那么就会形成sliding-window(有重叠数据)：正常的滑动窗口<br>
+</li>
+<li>如果size&lt;interval，那么这种窗口将会丢失数据。比如每5秒钟，统计过去3秒的通过路口汽车的数据，将会漏掉2秒钟的数据。</li>
+</ul>
+<p>因此，通过窗口的划分标准和窗口属性进行组合，可以得到四种基本的窗口：</p>
+<p>time-tumbling-window：无重叠数据的时间窗口，设置方式举例：timeWindow(Time.seconds(5))---基于时间的滚动窗口</p>
+<p>time-sliding-window：有重叠数据的时间窗口，设置方式举例：timeWindow(Time.seconds(10), Time.seconds(5))---基于时间的滑动窗口</p>
+<p>count-tumbling-window：无重叠数据的数量窗口，设置方式举例：countWindow(5)---基于数量的滚动窗口</p>
+<p>count-sliding-window：有重叠数据的数量窗口，设置方式举例：countWindow(10,5)---基于数量的滑动窗口</p>
+<p>注意：Flink中还支持一个特殊的窗口:会话窗口SessionWindows</p>
+<h4 id="time-windows">Time-Windows</h4>
+<p>对于基于时间来进行数据划分的TimeWindow，可以根据窗口实现原理的不同分成三类：滚动窗口(Tumbling Window)、滑动窗口(Sliding Window)和会话窗口(Session Window)。</p>
+<p><img src="/2021/05/13/Flink06_WindowAndTime/image-20210513195510260.png" alt="image-20210513195510260" style="zoom:67%;"></p>
+<p>滚动窗口将数据依据固定的窗口长度对数据进行切分，窗口内的数据不重复。</p>
+<p><img src="/2021/05/13/Flink06_WindowAndTime/image-20210513195540682.png" alt="image-20210513195540682" style="zoom:67%;"></p>
+<p>滑动窗口的窗口长度大于滑动的间隔，因此窗口内会产生重复的数据。</p>
+<p><img src="/2021/05/13/Flink06_WindowAndTime/image-20210513195913227.png" alt="image-20210513195913227" style="zoom: 58%;"></p>
+<p>Session窗口在一个固定的时间周期内不再收到元素，即非活动间隔产生，那个这个窗口就会关闭。</p>
+<p>使用窗口对数据进行统计的案例：</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.apache.flink.api.java.tuple.<span class="type">Tuple</span></span><br><span class="line"><span class="keyword">import</span> org.apache.flink.streaming.api.<span class="type">TimeCharacteristic</span></span><br><span class="line"><span class="keyword">import</span> org.apache.flink.streaming.api.scala.&#123;<span class="type">AllWindowedStream</span>, <span class="type">DataStream</span>, <span class="type">StreamExecutionEnvironment</span>, <span class="type">WindowedStream</span>&#125;</span><br><span class="line"><span class="keyword">import</span> org.apache.flink.streaming.api.windowing.assigners.&#123;<span class="type">EventTimeSessionWindows</span>, <span class="type">SlidingEventTimeWindows</span>, <span class="type">TumblingEventTimeWindows</span>&#125;</span><br><span class="line"><span class="keyword">import</span> org.apache.flink.streaming.api.windowing.time.<span class="type">Time</span></span><br><span class="line"><span class="keyword">import</span> org.apache.flink.streaming.api.windowing.windows.<span class="type">TimeWindow</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">发送内容</span></span><br><span class="line"><span class="comment">路灯编号,通过的数量</span></span><br><span class="line"><span class="comment">9,3</span></span><br><span class="line"><span class="comment">9,2</span></span><br><span class="line"><span class="comment">9,7</span></span><br><span class="line"><span class="comment">4,9</span></span><br><span class="line"><span class="comment">2,6</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">需求</span></span><br><span class="line"><span class="comment">每5秒钟统计一次，在这过去的5秒钟内，各个路口通过红绿灯汽车的数量--滚动窗口</span></span><br><span class="line"><span class="comment">每5秒钟统计一次，在这过去的10秒钟内，各个路口通过红绿灯汽车的数量--滑动窗口</span></span><br><span class="line"><span class="comment">在30秒内无数据接入则触发窗口计算--会话窗口(需要事件时间支持):</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">object</span> <span class="title">StreamingTimeWindow</span> </span>&#123;</span><br><span class="line">  <span class="comment">//样例类CarWC(信号灯id,数量)</span></span><br><span class="line">  <span class="keyword">case</span> <span class="class"><span class="keyword">class</span> <span class="title">CarWc</span>(<span class="params">sensorId: <span class="type">Int</span>, carCnt: <span class="type">Int</span></span>)</span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class">  <span class="title">def</span> <span class="title">main</span>(<span class="params">args: <span class="type">Array</span>[<span class="type">String</span>]</span>)</span>: <span class="type">Unit</span> = &#123;</span><br><span class="line">    <span class="comment">//1.准备环境</span></span><br><span class="line">    <span class="keyword">val</span> env = <span class="type">StreamExecutionEnvironment</span>.getExecutionEnvironment</span><br><span class="line">    <span class="comment">//2.接收数据</span></span><br><span class="line">    <span class="keyword">val</span> socketData = env.socketTextStream(<span class="string">&quot;node01&quot;</span>, <span class="number">9999</span>)</span><br><span class="line">    <span class="comment">//3.处理数据socketData-&gt;carWcData</span></span><br><span class="line">    <span class="keyword">import</span> org.apache.flink.api.scala._</span><br><span class="line">    <span class="keyword">val</span> carData: <span class="type">DataStream</span>[<span class="type">CarWc</span>] = socketData.map(line =&gt; &#123;</span><br><span class="line">      <span class="keyword">val</span> arr: <span class="type">Array</span>[<span class="type">String</span>] = line.split(<span class="string">&quot;,&quot;</span>)</span><br><span class="line">      <span class="type">CarWc</span>(arr(<span class="number">0</span>).toInt, arr(<span class="number">1</span>).toInt)</span><br><span class="line">    &#125;)</span><br><span class="line">    <span class="comment">//nokeyed数据</span></span><br><span class="line">    <span class="comment">//val value: AllWindowedStream[CarWc, TimeWindow] = carData.timeWindowAll(Time.seconds(5),Time.seconds(5))</span></span><br><span class="line">    <span class="comment">//keyed数据</span></span><br><span class="line">    <span class="comment">//val value1: WindowedStream[CarWc, Tuple, TimeWindow] = carData.keyBy(0).timeWindow(Time.seconds(5),Time.seconds(5))</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">//4.窗口聚合</span></span><br><span class="line">    <span class="comment">//4.1 滚动窗口</span></span><br><span class="line">    <span class="comment">//每5秒钟统计一次，在这过去的5秒钟内，各个路口通过红绿灯汽车的数量</span></span><br><span class="line">    <span class="comment">//无重叠数据，所以只需要给一个参数即可，每5秒钟统计一下各个路口通过红绿灯汽车的数量</span></span><br><span class="line">    <span class="keyword">val</span> result1: <span class="type">DataStream</span>[<span class="type">CarWc</span>] = carData.keyBy(<span class="number">0</span>)</span><br><span class="line">      <span class="comment">//.timeWindow(Time.seconds(5),Time.seconds(5))</span></span><br><span class="line">      .timeWindow(<span class="type">Time</span>.seconds(<span class="number">5</span>))</span><br><span class="line">      .sum(<span class="number">1</span>)</span><br><span class="line">    result1.print()</span><br><span class="line"></span><br><span class="line">    <span class="comment">//4.2 滑动窗口</span></span><br><span class="line">    <span class="comment">//每5秒钟统计一次，在这过去的10秒钟内，各个路口通过红绿灯汽车的数量。</span></span><br><span class="line">    <span class="keyword">val</span> result2: <span class="type">DataStream</span>[<span class="type">CarWc</span>] = carData.keyBy(<span class="number">0</span>)</span><br><span class="line">      .timeWindow(<span class="type">Time</span>.seconds(<span class="number">10</span>),<span class="type">Time</span>.seconds(<span class="number">5</span>))</span><br><span class="line">      .sum(<span class="number">1</span>)</span><br><span class="line">    result2.print()</span><br><span class="line"></span><br><span class="line">    <span class="comment">//4.3 会话窗口(需要时间事件支持)</span></span><br><span class="line">    <span class="comment">//指定会话超时，即会话之间的时间间隔，是指在规定的时间内如果没有数据活跃接入，则认为窗口结束，触发窗口计算</span></span><br><span class="line">    <span class="comment">// .window(EventTimeSessionWindows.withGap(Time.seconds(30)))</span></span><br><span class="line">    <span class="comment">//如果有时间事件,滚动窗口和滑动窗口也可以使用如下API</span></span><br><span class="line">    <span class="comment">//.window(TumblingEventTimeWindows.of(Time.seconds(5)))</span></span><br><span class="line">    <span class="comment">//.window(SlidingEventTimeWindows.of(Time.seconds(10),Time.seconds(5)))</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">//5.启动执行</span></span><br><span class="line">    env.execute()</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h4 id="count-window">Count-Window</h4>
+<p>对于基于数据个数来进行数据划分的CountWindow，可以根据窗口实现原理的不同分成两类：滚动窗口(Tumbling Window)、滑动窗口(Sliding Window)。</p>
+<p>tumbling-count-window（无重叠数据）按照个数进行统计，比如：对每个路口分别统计，统计在最近5条消息中，各自路口通过的汽车数量，相同的key每出现5次进行统计；即对应的key出现的次数达到5次作为一个窗口，即相同的key出现5次才做一次sum聚合。</p>
+<p>sliding-count-window （有重叠数据）窗口长度大于滑动间隔，比如：对每个路口分别统计，统计在最近5条消息中，各自路口通过的汽车数量，相同的key每出现3次进行统计。</p>
+<p>这里<strong>窗口长度是5，滑动间隔是3，也就是说，每收到3个相同key的数据就计算一次，每一次计算的窗口是这个key里面前后输入的5个范围的元素</strong>（如果只是单纯统计个数的话，最大就是窗口的大小5个）。</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.apache.flink.streaming.api.scala.&#123;<span class="type">StreamExecutionEnvironment</span>, _&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">发送内容</span></span><br><span class="line"><span class="comment">路灯编号,通过的数量</span></span><br><span class="line"><span class="comment">9,3</span></span><br><span class="line"><span class="comment">9,2</span></span><br><span class="line"><span class="comment">9,7</span></span><br><span class="line"><span class="comment">4,9</span></span><br><span class="line"><span class="comment">2,6</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">需求</span></span><br><span class="line"><span class="comment">对每个路口分别统计,统计在最近5条消息中,各自路口通过的汽车数量,相同的key每出现5次进行统计(对应的key出现的次数达到5次作为一个窗口,即相同的key出现5次才做一次sum聚合)。</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">对每个路口分别统计,统计在最近5条消息中,各自路口通过的汽车数量,相同的key每出现3次进行统计。</span></span><br><span class="line"><span class="comment">每收到3个相同key的数据就计算一次，每一次计算的窗口是前后输入的5个范围的元素。</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">object</span> <span class="title">StreamingCountWindow</span> </span>&#123;</span><br><span class="line">  <span class="comment">//样例类CarWC(信号灯id,数量)</span></span><br><span class="line">  <span class="keyword">case</span> <span class="class"><span class="keyword">class</span> <span class="title">CarWc</span>(<span class="params">sensorId: <span class="type">Int</span>, carCnt: <span class="type">Int</span></span>)</span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class">  <span class="title">def</span> <span class="title">main</span>(<span class="params">args: <span class="type">Array</span>[<span class="type">String</span>]</span>)</span>: <span class="type">Unit</span> = &#123;</span><br><span class="line">    <span class="comment">//1.准备环境</span></span><br><span class="line">    <span class="keyword">val</span> env: <span class="type">StreamExecutionEnvironment</span> = <span class="type">StreamExecutionEnvironment</span>.getExecutionEnvironment</span><br><span class="line">    <span class="comment">//2.接收数据</span></span><br><span class="line">    <span class="keyword">val</span> socketData = env.socketTextStream(<span class="string">&quot;node01&quot;</span>, <span class="number">9999</span>)</span><br><span class="line">    <span class="comment">//3.处理数据 socketData-&gt;carWcData</span></span><br><span class="line">    <span class="keyword">val</span> carData: <span class="type">DataStream</span>[<span class="type">CarWc</span>] = socketData.map(line =&gt; &#123;</span><br><span class="line">      <span class="keyword">val</span> arr = line.split(<span class="string">&quot;,&quot;</span>)</span><br><span class="line">      <span class="type">CarWc</span>(arr(<span class="number">0</span>).toInt, arr(<span class="number">1</span>).toInt)</span><br><span class="line">    &#125;)</span><br><span class="line">      </span><br><span class="line">    <span class="comment">//4.窗口聚合</span></span><br><span class="line">    <span class="comment">//4.1对每个路口分别统计,统计在最近5条消息中,各自路口通过的汽车数量,相同的key每出现5次进行统计</span></span><br><span class="line">    <span class="comment">//对应的key出现的次数达到5次作为一个窗口,即相同的key出现5次才做一次sum聚合</span></span><br><span class="line">    carData.keyBy(<span class="number">0</span>)</span><br><span class="line">        .countWindow(<span class="number">5</span>)</span><br><span class="line">        .sum(<span class="number">1</span>)</span><br><span class="line">        <span class="comment">//.print()</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">//4.2对每个路口分别统计,统计在最近5条消息中,各自路口通过的汽车数量,相同的key每出现3次进行统计</span></span><br><span class="line">    carData.keyBy(<span class="number">0</span>)</span><br><span class="line">        .countWindow(<span class="number">5</span>,<span class="number">3</span>)</span><br><span class="line">        .sum(<span class="number">1</span>)</span><br><span class="line">        .print()</span><br><span class="line"></span><br><span class="line">    <span class="comment">//5.启动执行</span></span><br><span class="line">    env.execute()</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>对于sliding-count-window，又比如假设有一个滑动计数窗口，每2个元素计算一次最近4个元素的总和，此时窗口长度为4，滑动间隔为2，那么窗口工作示意图如下所示：</p>
+<p><img src="/2021/05/13/Flink06_WindowAndTime/image-20210513204137999.png" alt="image-20210513204137999" style="zoom:67%;"></p>
+<p>按照上述逻辑实现的字符串相加的示例代码为：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.apache.flink.api.java.tuple.Tuple2;</span><br><span class="line"><span class="keyword">import</span> org.apache.flink.api.java.utils.ParameterTool;</span><br><span class="line"><span class="keyword">import</span> org.apache.flink.api.common.functions.ReduceFunction;</span><br><span class="line"><span class="keyword">import</span> org.apache.flink.streaming.api.datastream.DataStream;</span><br><span class="line"><span class="keyword">import</span> org.apache.flink.streaming.api.datastream.DataStreamSource;</span><br><span class="line"><span class="keyword">import</span> org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;</span><br><span class="line"><span class="keyword">import</span> org.apache.flink.streaming.api.functions.source.RichParallelSourceFunction;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">FlinkCountWindowDemo</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">final</span> ParameterTool params = ParameterTool.fromArgs(args);</span><br><span class="line">        <span class="keyword">final</span> StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();</span><br><span class="line">        env.getConfig().setGlobalJobParameters(params);</span><br><span class="line">        env.setParallelism(<span class="number">1</span>);</span><br><span class="line">        <span class="keyword">final</span> <span class="keyword">int</span> windowSize = params.getInt(<span class="string">&quot;window&quot;</span>, <span class="number">3</span>);</span><br><span class="line">        <span class="keyword">final</span> <span class="keyword">int</span> slideSize = params.getInt(<span class="string">&quot;slide&quot;</span>, <span class="number">2</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// read source data</span></span><br><span class="line">        DataStreamSource&lt;Tuple2&lt;String, String&gt;&gt; inStream = env.addSource(<span class="keyword">new</span> StreamDataSource());</span><br><span class="line"></span><br><span class="line">        <span class="comment">// calculate</span></span><br><span class="line">        DataStream&lt;Tuple2&lt;String, String&gt;&gt; outStream = </span><br><span class="line">        inStream</span><br><span class="line">        .keyBy(<span class="number">0</span>)</span><br><span class="line">        .countWindow(windowSize, slideSize)</span><br><span class="line">        .reduce(</span><br><span class="line">        <span class="keyword">new</span> ReduceFunction&lt;Tuple2&lt;String, String&gt;&gt;() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> Tuple2&lt;String, String&gt; <span class="title">reduce</span><span class="params">(Tuple2&lt;String, String&gt; value1, Tuple2&lt;String, String&gt; value2)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">                  <span class="keyword">return</span> Tuple2.of(value1.f0, value1.f1 + <span class="string">&quot;&quot;</span> + value2.f1);</span><br><span class="line">                                                                   &#125;</span><br><span class="line">                                                               &#125;</span><br><span class="line">                                                           );</span><br><span class="line">        outStream.print();</span><br><span class="line">        env.execute(<span class="string">&quot;WindowWordCount&quot;</span>);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<h3 id="time">Time</h3>
+<h4 id="时间分类">时间分类</h4>
+<p><img src="/2021/05/13/Flink06_WindowAndTime/image-20210513211157290.png" alt="image-20210513211157290" style="zoom:67%;"></p>
+<ul>
+<li><p><strong>EventTime</strong> 事件时间</p>
+<p>事件发生的时间，例如：点击网站上的某个链接的时间，每一条日志都会记录自己的生成时间。</p>
+<p>如果以EventTime为基准来定义时间窗口那将形成EventTimeWindow,要求消息本身就应该携带EventTime。</p></li>
+<li><p><strong>IngestionTime</strong> 摄入时间</p>
+<p>数据进入Flink的时间，即某个Flink节点的source operator接收到数据的时间，例如：某个source消费到kafka中的数据的时间。</p>
+<p>如果以IngesingtTime为基准来定义时间窗口那将形成IngestingTimeWindow，以source的系统时间为准。</p></li>
+<li><p><strong>ProcessingTime</strong> 处理时间</p>
+<p>某个Flink节点执行某个operation的时间，例如：timeWindow处理数据时的系统时间，默认的时间属性就是ProcessingTime</p>
+<p>如果以ProcessingTime基准来定义时间窗口那将形成ProcessingTimeWindow，以operator的系统时间为准。</p></li>
+</ul>
+<p>在Flink的流式处理中，绝大部分的业务都会使用EventTime，一般只在EventTime无法使用时，才会被迫使用ProcessingTime或者IngestionTime。<strong>如果要使用EventTime，那么需要引入EventTime的时间属性</strong>，引入方式如下所示：</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">env.setStreamTimeCharacteristic(<span class="type">TimeCharacteristic</span>.<span class="type">EventTime</span>) <span class="comment">//设置使用事件时间</span></span><br></pre></td></tr></table></figure>
+<h4 id="watermark-水位线">Watermark 水位线</h4>
+<p>Watermarks是一种机制，用来解决数据延迟到达时因为窗口关闭无法计算数据的问题。Watermark需要和窗口机制Window配合起来使用。</p>
+<p>Watermarks本质上是一个时间戳，只能是单项递增的，用来判断究竟哪些窗口需要关闭。</p>
+<h5 id="解决问题">解决问题</h5>
+<h5 id="窗口的开始时间">窗口的开始时间</h5>
+<p>TimeWindow extends Window；TumblingEventTimeWindows调用了TimeWindow 中的getWindowStartWithOffset(timestamp, offset, size)方法，获得窗口的开始时间。</p>
+<blockquote>
+<p>https://github.com/apache/flink/blob/master/flink-streaming-java/src/main/java/org/apache/flink/streaming/api/windowing/assigners/TumblingEventTimeWindows.java</p>
+<p>https://github.com/apache/flink/blob/d241759b89ae3455afae5e434a9384ebdc3c1f5f/flink-streaming-java/src/main/java/org/apache/flink/streaming/api/windowing/windows/TimeWindow.java#L264</p>
+</blockquote>
+<p>TimeWindow类中写明了一个窗口的开始时间的计算方法，其中 timestamp 就是数据的EventTime，windowSize就是窗口的大小。<strong>即窗口的开始时间取决于第一条数据的EventTime</strong>。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Method to get the window start for a timestamp.</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> timestamp epoch millisecond to get the window start.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> offset The offset which window start would be shifted by.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> windowSize The size of the generated windows.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> window start</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">long</span> <span class="title">getWindowStartWithOffset</span><span class="params">(<span class="keyword">long</span> timestamp, <span class="keyword">long</span> offset, <span class="keyword">long</span> windowSize)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> timestamp - (timestamp - offset + windowSize) % windowSize;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>并行度</p>
+<p>窗口开始时间</p>
+<h3 id="参考资料">参考资料</h3>
+<p>https://zhuanlan.zhihu.com/p/342854047 （CountWindow）</p>
+<p>https://blog.csdn.net/xsdxs/article/details/82726031 （CountWindow）</p>
+<p>https://zhuanlan.zhihu.com/p/102325190 （窗口）</p>
+<p>https://blog.csdn.net/xsdxs/article/details/82415450 （窗口开始时间）</p>
+<p>https://www.cnblogs.com/rossiXYZ/p/12286407.html</p>
+<p>https://www.jianshu.com/p/a883262241ef</p>
+<p>https://blog.csdn.net/lmalds/article/details/52704170</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Flink/" rel="tag"># Flink</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/05/09/Flink05_DataStreamAPI/" rel="prev" title="05 Flink DataStream">
+                  <i class="fa fa-chevron-left"></i> 05 Flink DataStream
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">BIOINSu</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+  <script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'none'
+      },
+      options: {
+        renderActions: {
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              const target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3.1.2/es5/tex-mml-chtml.js';
+    script.defer = true;
+    document.head.appendChild(script);
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.typesetClear();
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+
+
+</body>
+</html>

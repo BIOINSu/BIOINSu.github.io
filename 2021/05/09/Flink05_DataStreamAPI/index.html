@@ -29,11 +29,16 @@
 <meta property="og:site_name" content="BIOINSu">
 <meta property="og:description" content="Flink中对无界数据进行计算（流处理）。">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2021/05/09/Flink05_DataStreamAPI/Blog/source/_posts/Flink05_DataStreamAPI/0.png">
+<meta property="og:image" content="http://example.com/2021/05/09/Flink05_DataStreamAPI/Blog/source/_posts/Flink05_DataStreamAPI/1.png">
+<meta property="og:image" content="http://example.com/2021/05/09/Flink05_DataStreamAPI/Blog/source/_posts/Flink05_DataStreamAPI/2.png">
+<meta property="og:image" content="http://example.com/2021/05/09/Flink05_DataStreamAPI/Blog/source_posts/Flink05_DataStreamAPI/3.png">
 <meta property="article:published_time" content="2021-05-09T03:52:17.639Z">
-<meta property="article:modified_time" content="2021-05-09T14:34:38.554Z">
+<meta property="article:modified_time" content="2021-05-11T01:18:58.739Z">
 <meta property="article:author" content="BIOINSu">
 <meta property="article:tag" content="Flink">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2021/05/09/Flink05_DataStreamAPI/Blog/source/_posts/Flink05_DataStreamAPI/0.png">
 
 
 <link rel="canonical" href="http://example.com/2021/05/09/Flink05_DataStreamAPI/">
@@ -200,7 +205,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">36</span>
+          <span class="site-state-item-count">37</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -280,10 +285,16 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2021-05-09 11:52:17 / 修改时间：22:34:38" itemprop="dateCreated datePublished" datetime="2021-05-09T11:52:17+08:00">2021-05-09</time>
+      <time title="创建时间：2021-05-09 11:52:17" itemprop="dateCreated datePublished" datetime="2021-05-09T11:52:17+08:00">2021-05-09</time>
     </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-05-11 09:18:58" itemprop="dateModified" datetime="2021-05-11T09:18:58+08:00">2021-05-11</time>
+      </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
         <i class="far fa-folder"></i>
@@ -343,6 +354,7 @@
 <figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.sql.&#123;<span class="type">Connection</span>, <span class="type">DriverManager</span>, <span class="type">PreparedStatement</span>, <span class="type">ResultSet</span>&#125;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.<span class="type">TimeUnit</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.apache.flink.api.scala._</span><br><span class="line"><span class="keyword">import</span> org.apache.flink.configuration.<span class="type">Configuration</span></span><br><span class="line"><span class="keyword">import</span> org.apache.flink.streaming.api.functions.source.&#123;<span class="type">RichParallelSourceFunction</span>, <span class="type">SourceFunction</span>&#125;</span><br><span class="line"><span class="keyword">import</span> org.apache.flink.streaming.api.scala.&#123;<span class="type">DataStream</span>, <span class="type">StreamExecutionEnvironment</span>&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">演示自定义并行数据源读取mysql</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//定义student 样例类</span></span><br><span class="line"><span class="keyword">case</span> <span class="class"><span class="keyword">class</span> <span class="title">Student</span>(<span class="params">id: <span class="type">Int</span>, name: <span class="type">String</span>, age: <span class="type">Int</span></span>)</span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class"><span class="title">object</span> <span class="title">MysqlRichParallelSource</span> </span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">main</span></span>(args: <span class="type">Array</span>[<span class="type">String</span>]): <span class="type">Unit</span> = &#123;</span><br><span class="line">    <span class="comment">//1 创建一个流处理的运行环境</span></span><br><span class="line">    <span class="keyword">val</span> env: <span class="type">StreamExecutionEnvironment</span> = <span class="type">StreamExecutionEnvironment</span>.getExecutionEnvironment</span><br><span class="line">    <span class="comment">// 2 添加自定义的数据源</span></span><br><span class="line">    <span class="keyword">val</span> stuDs: <span class="type">DataStream</span>[<span class="type">Student</span>] = env.addSource(<span class="keyword">new</span> <span class="type">MysqlRichParalleleSource</span>).setParallelism(<span class="number">1</span>)</span><br><span class="line">    <span class="comment">//3 打印数据</span></span><br><span class="line">    stuDs.print()</span><br><span class="line">    <span class="comment">//4 启动</span></span><br><span class="line">    env.execute()</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 2自定义mysql并行数据源</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MysqlRichParalleleSource</span> <span class="keyword">extends</span> <span class="title">RichParallelSourceFunction</span>[<span class="type">Student</span>] </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> ps: <span class="type">PreparedStatement</span> = <span class="literal">null</span></span><br><span class="line">  <span class="keyword">var</span> connection: <span class="type">Connection</span> = <span class="literal">null</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">//2.1 开启mysql连接</span></span><br><span class="line">  <span class="keyword">override</span> <span class="function"><span class="keyword">def</span> <span class="title">open</span></span>(parameters: <span class="type">Configuration</span>): <span class="type">Unit</span> = &#123;</span><br><span class="line">    <span class="comment">//驱动方式</span></span><br><span class="line">    connection = <span class="type">DriverManager</span>.getConnection(<span class="string">&quot;jdbc:mysql://node1:3306/test&quot;</span>, <span class="string">&quot;root&quot;</span>, <span class="string">&quot;123456&quot;</span>)</span><br><span class="line">    <span class="comment">//准备sql语句查询表中全部数据</span></span><br><span class="line">    <span class="keyword">var</span> sql = <span class="string">&quot;select id ,name,age from t_student&quot;</span>;</span><br><span class="line">    <span class="comment">//准备执行语句对象</span></span><br><span class="line">    ps = connection.prepareStatement(sql)</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">//2.3 释放资源，关闭连接</span></span><br><span class="line">  <span class="keyword">override</span> <span class="function"><span class="keyword">def</span> <span class="title">close</span></span>(): <span class="type">Unit</span> = &#123;</span><br><span class="line">    <span class="keyword">if</span> (connection != <span class="literal">null</span>) &#123;</span><br><span class="line">      connection.close()</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (ps != <span class="literal">null</span>) ps.close()</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  <span class="keyword">var</span> isRunning = <span class="literal">true</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">// 2.2 读取mysql数据</span></span><br><span class="line">  <span class="keyword">override</span> <span class="function"><span class="keyword">def</span> <span class="title">run</span></span>(ctx: <span class="type">SourceFunction</span>.<span class="type">SourceContext</span>[<span class="type">Student</span>]): <span class="type">Unit</span> = &#123;</span><br><span class="line">    <span class="keyword">while</span> (isRunning) &#123;</span><br><span class="line">      <span class="comment">//读取mysql中的数据</span></span><br><span class="line">      <span class="keyword">val</span> result: <span class="type">ResultSet</span> = ps.executeQuery()</span><br><span class="line">      <span class="keyword">while</span> (result.next()) &#123;</span><br><span class="line">        <span class="keyword">val</span> userId = result.getInt(<span class="string">&quot;id&quot;</span>)</span><br><span class="line">        <span class="keyword">val</span> name = result.getString(<span class="string">&quot;name&quot;</span>)</span><br><span class="line">        <span class="keyword">val</span> age = result.getInt(<span class="string">&quot;age&quot;</span>)</span><br><span class="line">        <span class="comment">//收集并发送</span></span><br><span class="line">        ctx.collect(<span class="type">Student</span>(userId, name, age))</span><br><span class="line"></span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="comment">//休眠5s,执行一次</span></span><br><span class="line">      <span class="type">TimeUnit</span>.<span class="type">SECONDS</span>.sleep(<span class="number">5</span>)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">//取消方法</span></span><br><span class="line">  <span class="keyword">override</span> <span class="function"><span class="keyword">def</span> <span class="title">cancel</span></span>(): <span class="type">Unit</span> = &#123;</span><br><span class="line">    isRunning = <span class="literal">false</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h5 id="kafka数据源">Kafka数据源</h5>
 <p>Flink提供了基于Kafka的数据源实现类FlinkKafkaConsumer011等 ，可以通过addSource添加该Kafka数据源。FlinkKafkaConsumer011等实现类最终是实现了RichParallelSourceFunction接口。</p>
+<p><img src="/2021/05/09/Flink05_DataStreamAPI/Blog\source\_posts\Flink05_DataStreamAPI\0.png" style="zoom: 50%;"></p>
 <p>FlinkKafkaConsumer等集成了Flink的检查点机制，可提供一次性处理语义。为实现这一目标，Flink并不完全依赖Kafka的消费者群体偏移跟踪，而是在内部实现了跟踪和检查这些偏移的机制。</p>
 <ul>
 <li><p>构造函数</p>
@@ -353,6 +365,8 @@
 <p>作用：对kafka里获取的二进制数据进行反序列化</p>
 <p>反序列化Schema类型(接口)：DeserialzationSchema(只反序列化value)、KeyedDeserializationSchema(反序列化key和value)</p>
 <p>FlinkKafkaConsumer需要知道如何将kafka中的二进制数据转换成Java/Scala对象，这两个接口定义了该转换模式，从kafka获取的每条消息都会通过其中的方法T deserialize(byte[] message)进行反序列化处理。接口源码为：</p>
+<p><img src="/2021/05/09/Flink05_DataStreamAPI/Blog\source\_posts\Flink05_DataStreamAPI\1.png" style="zoom: 54%;"></p>
+<p><img src="/2021/05/09/Flink05_DataStreamAPI/Blog\source\_posts\Flink05_DataStreamAPI\2.png" style="zoom:50%;"></p>
 <p>常用的反序列化Schema：</p>
 <table>
 <colgroup>
@@ -422,7 +436,8 @@
 <li><p>setStartFromSpecificOffsets</p>
 <p>从每个分区指定的偏移量读取。</p>
 <p>注意 1：如果使用者需要读取在提供的偏移量映射中没有指定偏移量的分区，则它将回退到setStartFromGroupOffsets()该特定分区的默认组偏移行为。 注意 2：当作业从故障中自动恢复或使用保存点手动恢复时，这些起始位置配置方法不会影响起始位置。在恢复时，每个Kafka分区的起始位置由存储在保存点或检查点中的偏移量确定。</p>
-<p>下面的示例将消费者配置为从主题“myTopic”的分区0,1和2的指定偏移量开始读取消息。偏移值应该是消费者应为每个分区读取的下一条记录的位置：</p></li>
+<p>下面的示例将消费者配置为从主题“myTopic”的分区0,1和2的指定偏移量开始读取消息。偏移值应该是消费者应为每个分区读取的下一条记录的位置：</p>
+<p><img src="/2021/05/09/Flink05_DataStreamAPI/Blog\source_posts\Flink05_DataStreamAPI\3.png"></p></li>
 <li><p>setStartFromTimestamp</p>
 <p>允许用户从指定的时间戳消费Kafka中的数据，指定一个时间戳即可，单位毫秒。从时间戳消费者忽略Zookeeper / Kafka代理中任何提交的组偏移量。消费者将查找时间戳大于或等于的最早偏移量到Kafka的特定时间戳。如果没有这样的偏移量，消费者将使用从kafka读取数据的最新偏移量。</p></li>
 </ul></li>
@@ -504,6 +519,9 @@
                 </a>
             </div>
             <div class="post-nav-item">
+                <a href="/2021/05/13/Flink06_WindowAndTime/" rel="next" title="Flink四大基石：窗口与时间">
+                  Flink四大基石：窗口与时间 <i class="fa fa-chevron-right"></i>
+                </a>
             </div>
           </div>
     </footer>
