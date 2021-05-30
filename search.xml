@@ -736,66 +736,6 @@
       </tags>
   </entry>
   <entry>
-    <title>MySQL窗口函数</title>
-    <url>/2021/04/13/MySQL_%E7%AA%97%E5%8F%A3/</url>
-    <content><![CDATA[<p>窗口指的是记录的集合。窗口函数也就是在满足某种条件的记录集合上执行的特殊函数。</p>
-<a id="more"></a>
-<h4 id="基本用法">基本用法</h4>
-<blockquote>
-<p>函数名 OVER (子句)</p>
-</blockquote>
-<p>函数名部分即表示窗口函数。</p>
-<p>over关键字用来指定函数执行的窗口范围，若后面括号中什么都不写，则窗口函数基于所有行进行计算；如果不为空，则支持以下4中语法来设置窗口：</p>
-<ul>
-<li><p><code>PARTITION BY</code> 子句：窗口按照哪些字段进行分组，窗口函数在不同的分组上分别执行；</p></li>
-<li><p><code>ORDER BY</code>子句：按照哪些字段进行排序，窗口函数将按照排序后的记录顺序进行编号；</p></li>
-<li><p><code>FRAME</code>子句：FRAME是当前分区的一个子集，子句用来定义子集的规则，通常用来作为滑动窗口使用</p></li>
-<li><p>window_name：给窗口指定一个别名。如果SQL中涉及的窗口较多，采用别名可以看起来更清晰易读；</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    <span class="built_in">rank</span> ( ) <span class="keyword">over</span> w1 </span><br><span class="line"><span class="keyword">FROM</span></span><br><span class="line">    employee <span class="keyword">window</span> w1 <span class="keyword">AS</span> ( <span class="keyword">PARTITION</span> <span class="keyword">BY</span> Company <span class="keyword">ORDER</span> <span class="keyword">BY</span> Salary <span class="keyword">DESC</span> )</span><br><span class="line">    </span><br><span class="line"># <span class="keyword">from</span> <span class="keyword">table</span>后面加了一个关键字<span class="keyword">WINDOW</span>，后面跟了一个子句，这样在<span class="keyword">select</span>中就可以使用这个w1作为窗口了。</span><br></pre></td></tr></table></figure></li>
-</ul>
-<h4 id="窗口函数">窗口函数</h4>
-<p>窗口函数，在某些记录的集合上执行的函数。</p>
-<h5 id="序号函数">序号函数</h5>
-<p>row_number()/rank()/dense_rank()</p>
-<p>作用：显示分区中的当前行号（排名是需要通过<code>ORDER BY</code>子句实现的）</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span>,</span><br><span class="line">   <span class="built_in">rank</span>() <span class="keyword">over</span> (<span class="keyword">order</span> <span class="keyword">by</span> 成绩 <span class="keyword">desc</span>) <span class="keyword">as</span> ranking,</span><br><span class="line">   <span class="built_in">dense_rank</span>() <span class="keyword">over</span> (<span class="keyword">order</span> <span class="keyword">by</span> 成绩 <span class="keyword">desc</span>) <span class="keyword">as</span> dese_rank,</span><br><span class="line">   <span class="built_in">row_number</span>() <span class="keyword">over</span> (<span class="keyword">order</span> <span class="keyword">by</span> 成绩 <span class="keyword">desc</span>) <span class="keyword">as</span> row_num</span><br><span class="line"><span class="keyword">from</span> 班级;</span><br></pre></td></tr></table></figure>
-<p><img src="/2021/04/13/MySQL_%E7%AA%97%E5%8F%A3/0.png" style="zoom:67%;"></p>
-<ul>
-<li><p>rank函数：如果有并列名次的行，会占用下一名次的位置。比如正常排名是1，2，3，4，但是现在前3名是并列的名次，结果是：1，1，1，4。</p></li>
-<li><p>dense_rank函数：如果有并列名次的行，不占用下一名次的位置。比如正常排名是1，2，3，4，但是现在前3名是并列的名次，结果是：1，1，1，2。</p></li>
-<li><p>row_number函数：不考虑并列名次的情况。比如前3名是并列的名次，排名是正常的1，2，3，4。</p></li>
-</ul>
-<h5 id="分布函数">分布函数</h5>
-<p>percent_rank()/cume_dist()</p>
-<p>percent_rank()</p>
-<p>用途：和之前的RANK()函数相关，每行按照公式进行计算：(rank - 1) / (rows - 1)</p>
-<p>其中，rank为RANK()函数产生的序号，rows为当前窗口的记录总行数该函数可以用来计算分位数。</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    <span class="built_in">percent_rank</span> ( ) <span class="keyword">over</span> ( <span class="keyword">PARTITION</span> <span class="keyword">BY</span> Company <span class="keyword">ORDER</span> <span class="keyword">BY</span> Salary <span class="keyword">DESC</span> ),</span><br><span class="line">    Company,</span><br><span class="line">    Salary </span><br><span class="line"><span class="keyword">FROM</span></span><br><span class="line">    employee </span><br><span class="line"><span class="keyword">WHERE</span></span><br><span class="line">    Company <span class="operator">=</span> <span class="string">&#x27;Microsoft&#x27;</span></span><br></pre></td></tr></table></figure>
-<p><img src="/2021/04/13/MySQL_%E7%AA%97%E5%8F%A3/1.png" style="zoom:67%;"></p>
-<p>cume_dist()</p>
-<p>用途：分组内小于等于当前rank值的行数/分组内总行数。</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    <span class="built_in">cume_dist</span> ( ) <span class="keyword">over</span> ( <span class="keyword">PARTITION</span> <span class="keyword">BY</span> Company <span class="keyword">ORDER</span> <span class="keyword">BY</span> Salary <span class="keyword">DESC</span> ),</span><br><span class="line">    Company,</span><br><span class="line">    Salary </span><br><span class="line"><span class="keyword">FROM</span></span><br><span class="line">    employee </span><br><span class="line"><span class="keyword">WHERE</span></span><br><span class="line">    Company <span class="operator">=</span> <span class="string">&#x27;Microsoft&#x27;</span></span><br></pre></td></tr></table></figure>
-<p><img src="/2021/04/13/MySQL_%E7%AA%97%E5%8F%A3/2.png" style="zoom:67%;"></p>
-<h5 id="聚合函数">聚合函数</h5>
-<p>sum/avg/max/min/count</p>
-<p>用途：在窗口中每条记录动态应用聚合函数(sum/avg/max/min/count)，可以动态计算在指定的窗口内的各种聚合函数值。</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    <span class="built_in">avg</span>( Salary ) <span class="keyword">over</span> ( <span class="keyword">PARTITION</span> <span class="keyword">BY</span> Company <span class="keyword">ORDER</span> <span class="keyword">BY</span> Salary <span class="keyword">DESC</span> ),</span><br><span class="line">    Company,</span><br><span class="line">    Salary </span><br><span class="line"><span class="keyword">FROM</span></span><br><span class="line">    employee </span><br><span class="line"><span class="keyword">WHERE</span></span><br><span class="line">    Company <span class="operator">=</span> <span class="string">&#x27;Microsoft&#x27;</span></span><br></pre></td></tr></table></figure>
-<p>按照分组的每一行，求累计的平均值。根据over子句分组之后，挨个行进行select，并执行over前面的函数，因为over子句已经把记录变成了符合条件的一些行集，所以select的方式就改变了。</p>
-<p><img src="/2021/04/13/MySQL_%E7%AA%97%E5%8F%A3/3.png" style="zoom:67%;"></p>
-<h4 id="参考资料">参考资料</h4>
-<p>https://leetcode-cn.com/problems/department-top-three-salaries/solution/tu-jie-sqlmian-shi-ti-jing-dian-topnwen-ti-by-houz/</p>
-<p>https://www.jianshu.com/p/e5c5bfb1e28b</p>
-]]></content>
-      <categories>
-        <category>数据库</category>
-        <category>MySQL</category>
-      </categories>
-      <tags>
-        <tag>数据库</tag>
-        <tag>MySQL</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>树结构</title>
     <url>/2021/04/17/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E6%A0%91/</url>
     <content><![CDATA[<p>B树、B+树、红黑树、满二叉树、完全二叉树</p>
@@ -966,46 +906,6 @@
       <tags>
         <tag>数据结构与算法</tag>
         <tag>算法</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>MySQL SQL</title>
-    <url>/2021/04/17/MySQL_SQL/</url>
-    <content><![CDATA[<p>SQL 是用于访问和处理数据库的标准的计算机语言。</p>
-<a id="more"></a>
-<h3 id="函数">函数</h3>
-<h4 id="lfet-join函数">LFET JOIN函数</h4>
-<p>on和where的区别：</p>
-<p>where 是在两个表join完成后，再附上where条件。</p>
-<p>而 and 则是在表连接前过滤A表或B表里面哪些记录符合连接条件。它会保留左表的全部记录。</p>
-<h4 id="limit-offset函数">LIMIT OFFSET函数</h4>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#选择排名第二高的工资</span><br><span class="line">select</span><br><span class="line">ifnull(</span><br><span class="line">(</span><br><span class="line">    select distinct Salary from Employee order by Salary desc limit 1 offset 1</span><br><span class="line">)</span><br><span class="line">,</span><br><span class="line">null</span><br><span class="line">)</span><br><span class="line">as SecondHighestSalary</span><br></pre></td></tr></table></figure>
-<h4 id="窗口函数">窗口函数</h4>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#每个部门里面工资前三高的员工</span><br><span class="line">select d.name as department, a.name as employee, a.salary as salary</span><br><span class="line">from</span><br><span class="line">(</span><br><span class="line">    #利用排名函数 dense_rank() 获得分区下的排名</span><br><span class="line">    select *, dense_rank() over( partition by departmentid order by salary desc) as t</span><br><span class="line">    from Employee</span><br><span class="line">)</span><br><span class="line">as a </span><br><span class="line">inner join department as d # 用部门id连接</span><br><span class="line">on a.DepartmentId &#x3D; d.Id </span><br><span class="line">where t &lt;&#x3D; 3 #选择排名高的</span><br></pre></td></tr></table></figure>
-<h4 id="case-when">CASE WHEN</h4>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="keyword">distinct</span> <span class="type">Date</span>,</span><br><span class="line"><span class="built_in">sum</span>(<span class="keyword">case</span> <span class="keyword">Result</span> <span class="keyword">when</span> <span class="string">&#x27;胜&#x27;</span> <span class="keyword">then</span> <span class="number">1</span> <span class="keyword">else</span> <span class="number">0</span> <span class="keyword">end</span>) <span class="keyword">as</span> <span class="string">&#x27;胜&#x27;</span>,</span><br><span class="line"><span class="built_in">sum</span>(<span class="keyword">case</span> <span class="keyword">Result</span> <span class="keyword">when</span> <span class="string">&#x27;负&#x27;</span> <span class="keyword">then</span> <span class="number">1</span> <span class="keyword">else</span> <span class="number">0</span> <span class="keyword">end</span>) <span class="keyword">as</span> <span class="string">&#x27;负&#x27;</span></span><br><span class="line"><span class="keyword">from</span> test</span><br><span class="line"><span class="keyword">group</span> <span class="keyword">by</span> <span class="type">date</span></span><br></pre></td></tr></table></figure>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    STUDENT_NAME,</span><br><span class="line">    (<span class="keyword">CASE</span> <span class="keyword">WHEN</span> score <span class="operator">&lt;</span> <span class="number">60</span> <span class="keyword">THEN</span> <span class="string">&#x27;不及格&#x27;</span></span><br><span class="line">        <span class="keyword">WHEN</span> score <span class="operator">&gt;=</span> <span class="number">60</span> <span class="keyword">AND</span> score <span class="operator">&lt;</span> <span class="number">80</span> <span class="keyword">THEN</span> <span class="string">&#x27;及格&#x27;</span></span><br><span class="line">        <span class="keyword">WHEN</span> score <span class="operator">&gt;=</span> <span class="number">80</span> <span class="keyword">THEN</span> <span class="string">&#x27;优秀&#x27;</span></span><br><span class="line">        <span class="keyword">WHEN</span> score <span class="keyword">IS</span> <span class="keyword">NULL</span> <span class="keyword">THEN</span> <span class="string">&#x27;缺席考试&#x27;</span></span><br><span class="line">        <span class="keyword">ELSE</span> <span class="string">&#x27;异常&#x27;</span> <span class="keyword">END</span>) <span class="keyword">AS</span> REMARK</span><br><span class="line"><span class="keyword">FROM</span></span><br><span class="line">    <span class="keyword">TABLE</span></span><br></pre></td></tr></table></figure>
-<h3 id="面试">面试</h3>
-<h4 id="查询连续登录用户">查询连续登录用户</h4>
-<p>1、因为每天用户登录次数可能不止一次，所以需要先将用户每天的登录日期去重。</p>
-<p>2、再用row_number() over(partition by _ order by _)函数将用户id分组，按照登陆时间进行排序。</p>
-<p>3、计算登录日期减去第二步骤得到的结果值，用户连续登陆情况下，每次相减的结果都相同。</p>
-<p>4、按照id和日期分组并求和，筛选大于等于7的即为连续7天登陆的用户。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># id, date</span><br><span class="line"># 用户ID，用户登录时间</span><br><span class="line"></span><br><span class="line">#最后先按照id和结果列进行 group by，然后统计结果，旋转连续天数大于7的用户id</span><br><span class="line">select id,count(*) from </span><br><span class="line">(</span><br><span class="line">    #date函数仅返回日期部分，不返回时间部分，结果列表示  用户连续登陆情况下，每次相减的结果都相同</span><br><span class="line">    select *,date(日期)-cum as 结果 from </span><br><span class="line">    (</span><br><span class="line">        #按照用户分组，按照时间排序, cum是排名</span><br><span class="line">        select *,row_number() over(PARTITION by id order by 日期) as cum from </span><br><span class="line">        (</span><br><span class="line">            #给时间去重</span><br><span class="line">            select DISTINCT date(date) as 日期,id from orde) a </span><br><span class="line">    )b</span><br><span class="line">)c GROUP BY id,结果 having count(*)&gt;&#x3D;7;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<h4 id="计算用户在线峰值">计算用户在线峰值</h4>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#(timestampe:String, uid:Int, logtype:Int)</span><br><span class="line">#时间戳 用户ID 上线下线状态(-1下线，1上线)</span><br><span class="line"></span><br><span class="line">select</span><br><span class="line">    max(max_users)</span><br><span class="line">from </span><br><span class="line">(</span><br><span class="line">    select</span><br><span class="line">        sum(logtype) over(order by &#96;timestampe&#96;) as max_users #排序后第一行到本行的和，就统计了当前时刻究竟有多少人在线</span><br><span class="line">    from</span><br><span class="line">    (</span><br><span class="line">        select</span><br><span class="line">            uid,</span><br><span class="line">            unix_timestamp(timestampe) as &#96;timestampe&#96;, #unix_timestamp 自&#39;1970-01-01 00:00:00&#39;的到当前时间的秒数差</span><br><span class="line">            logtype</span><br><span class="line">        from</span><br><span class="line">            mytable</span><br><span class="line">    ) as a  #将登录时间和登出时间多列成多行</span><br><span class="line">)as b</span><br></pre></td></tr></table></figure>
-<h4 id="前n个阅读量最高的文章">前N个阅读量最高的文章</h4>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#给定用户id，文章id，阅读时间</span><br><span class="line">select 文章id, count(*) as 阅读量</span><br><span class="line">from biao</span><br><span class="line">group by 文章id</span><br><span class="line">order by 阅读量 desc</span><br><span class="line">limit 5</span><br></pre></td></tr></table></figure>
-<h3 id="参考资料">参考资料</h3>
-<p>https://www.codeleading.com/article/5399898432/ （在线峰值）</p>
-]]></content>
-      <categories>
-        <category>数据库</category>
-        <category>MySQL</category>
-      </categories>
-      <tags>
-        <tag>数据库</tag>
-        <tag>MySQL</tag>
       </tags>
   </entry>
   <entry>
@@ -3273,6 +3173,106 @@
       </categories>
       <tags>
         <tag>Flink</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>常用SQL</title>
+    <url>/2021/04/17/SQL_SQL/</url>
+    <content><![CDATA[<p>SQL 是用于访问和处理数据库的标准的计算机语言。</p>
+<a id="more"></a>
+<h3 id="函数">函数</h3>
+<h4 id="lfet-join函数">LFET JOIN函数</h4>
+<p>on和where的区别：</p>
+<p>where 是在两个表join完成后，再附上where条件。</p>
+<p>而 and 则是在表连接前过滤A表或B表里面哪些记录符合连接条件。它会保留左表的全部记录。</p>
+<h4 id="limit-offset函数">LIMIT OFFSET函数</h4>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#选择排名第二高的工资</span><br><span class="line">select</span><br><span class="line">ifnull(</span><br><span class="line">(</span><br><span class="line">    select distinct Salary from Employee order by Salary desc limit 1 offset 1</span><br><span class="line">)</span><br><span class="line">,</span><br><span class="line">null</span><br><span class="line">)</span><br><span class="line">as SecondHighestSalary</span><br></pre></td></tr></table></figure>
+<h4 id="窗口函数">窗口函数</h4>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#每个部门里面工资前三高的员工</span><br><span class="line">select d.name as department, a.name as employee, a.salary as salary</span><br><span class="line">from</span><br><span class="line">(</span><br><span class="line">    #利用排名函数 dense_rank() 获得分区下的排名</span><br><span class="line">    select *, dense_rank() over( partition by departmentid order by salary desc) as t</span><br><span class="line">    from Employee</span><br><span class="line">)</span><br><span class="line">as a </span><br><span class="line">inner join department as d # 用部门id连接</span><br><span class="line">on a.DepartmentId &#x3D; d.Id </span><br><span class="line">where t &lt;&#x3D; 3 #选择排名高的</span><br></pre></td></tr></table></figure>
+<h4 id="case-when">CASE WHEN</h4>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="keyword">distinct</span> <span class="type">Date</span>,</span><br><span class="line"><span class="built_in">sum</span>(<span class="keyword">case</span> <span class="keyword">Result</span> <span class="keyword">when</span> <span class="string">&#x27;胜&#x27;</span> <span class="keyword">then</span> <span class="number">1</span> <span class="keyword">else</span> <span class="number">0</span> <span class="keyword">end</span>) <span class="keyword">as</span> <span class="string">&#x27;胜&#x27;</span>,</span><br><span class="line"><span class="built_in">sum</span>(<span class="keyword">case</span> <span class="keyword">Result</span> <span class="keyword">when</span> <span class="string">&#x27;负&#x27;</span> <span class="keyword">then</span> <span class="number">1</span> <span class="keyword">else</span> <span class="number">0</span> <span class="keyword">end</span>) <span class="keyword">as</span> <span class="string">&#x27;负&#x27;</span></span><br><span class="line"><span class="keyword">from</span> test</span><br><span class="line"><span class="keyword">group</span> <span class="keyword">by</span> <span class="type">date</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    STUDENT_NAME,</span><br><span class="line">    (<span class="keyword">CASE</span> <span class="keyword">WHEN</span> score <span class="operator">&lt;</span> <span class="number">60</span> <span class="keyword">THEN</span> <span class="string">&#x27;不及格&#x27;</span></span><br><span class="line">        <span class="keyword">WHEN</span> score <span class="operator">&gt;=</span> <span class="number">60</span> <span class="keyword">AND</span> score <span class="operator">&lt;</span> <span class="number">80</span> <span class="keyword">THEN</span> <span class="string">&#x27;及格&#x27;</span></span><br><span class="line">        <span class="keyword">WHEN</span> score <span class="operator">&gt;=</span> <span class="number">80</span> <span class="keyword">THEN</span> <span class="string">&#x27;优秀&#x27;</span></span><br><span class="line">        <span class="keyword">WHEN</span> score <span class="keyword">IS</span> <span class="keyword">NULL</span> <span class="keyword">THEN</span> <span class="string">&#x27;缺席考试&#x27;</span></span><br><span class="line">        <span class="keyword">ELSE</span> <span class="string">&#x27;异常&#x27;</span> <span class="keyword">END</span>) <span class="keyword">AS</span> REMARK</span><br><span class="line"><span class="keyword">FROM</span></span><br><span class="line">    <span class="keyword">TABLE</span></span><br></pre></td></tr></table></figure>
+<h3 id="面试">面试</h3>
+<h4 id="查询连续登录用户">查询连续登录用户</h4>
+<p>1、因为每天用户登录次数可能不止一次，所以需要先将用户每天的登录日期去重。</p>
+<p>2、再用row_number() over(partition by _ order by _)函数将用户id分组，按照登陆时间进行排序。</p>
+<p>3、计算登录日期减去第二步骤得到的结果值，用户连续登陆情况下，每次相减的结果都相同。</p>
+<p>4、按照id和日期分组并求和，筛选大于等于7的即为连续7天登陆的用户。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># id, date</span><br><span class="line"># 用户ID，用户登录时间</span><br><span class="line"></span><br><span class="line">#最后先按照id和结果列进行 group by，然后统计结果，旋转连续天数大于7的用户id</span><br><span class="line">select id,count(*) from </span><br><span class="line">(</span><br><span class="line">    #date函数仅返回日期部分，不返回时间部分，结果列表示  用户连续登陆情况下，每次相减的结果都相同</span><br><span class="line">    select *,date(日期)-cum as 结果 from </span><br><span class="line">    (</span><br><span class="line">        #按照用户分组，按照时间排序, cum是排名</span><br><span class="line">        select *,row_number() over(PARTITION by id order by 日期) as cum from </span><br><span class="line">        (</span><br><span class="line">            #给时间去重</span><br><span class="line">            select DISTINCT date(date) as 日期,id from orde) a </span><br><span class="line">    )b</span><br><span class="line">)c GROUP BY id,结果 having count(*)&gt;&#x3D;7;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h4 id="计算用户在线峰值">计算用户在线峰值</h4>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#(timestampe:String, uid:Int, logtype:Int)</span><br><span class="line">#时间戳 用户ID 上线下线状态(-1下线，1上线)</span><br><span class="line"></span><br><span class="line">select</span><br><span class="line">    max(max_users)</span><br><span class="line">from </span><br><span class="line">(</span><br><span class="line">    select</span><br><span class="line">        sum(logtype) over(order by &#96;timestampe&#96;) as max_users #排序后第一行到本行的和，就统计了当前时刻究竟有多少人在线</span><br><span class="line">    from</span><br><span class="line">    (</span><br><span class="line">        select</span><br><span class="line">            uid,</span><br><span class="line">            unix_timestamp(timestampe) as &#96;timestampe&#96;, #unix_timestamp 自&#39;1970-01-01 00:00:00&#39;的到当前时间的秒数差</span><br><span class="line">            logtype</span><br><span class="line">        from</span><br><span class="line">            mytable</span><br><span class="line">    ) as a  #将登录时间和登出时间多列成多行</span><br><span class="line">)as b</span><br></pre></td></tr></table></figure>
+<h4 id="前n个阅读量最高的文章">前N个阅读量最高的文章</h4>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#给定用户id，文章id，阅读时间</span><br><span class="line">select 文章id, count(*) as 阅读量</span><br><span class="line">from biao</span><br><span class="line">group by 文章id</span><br><span class="line">order by 阅读量 desc</span><br><span class="line">limit 5</span><br></pre></td></tr></table></figure>
+<h3 id="参考资料">参考资料</h3>
+<p>https://www.codeleading.com/article/5399898432/ （在线峰值）</p>
+]]></content>
+      <categories>
+        <category>数据库</category>
+        <category>SQL</category>
+      </categories>
+      <tags>
+        <tag>数据库</tag>
+        <tag>SQL</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>SQL窗口函数</title>
+    <url>/2021/04/13/SQL_%E7%AA%97%E5%8F%A3/</url>
+    <content><![CDATA[<p>窗口指的是记录的集合。窗口函数也就是在满足某种条件的记录集合上执行的特殊函数。</p>
+<a id="more"></a>
+<h4 id="基本用法">基本用法</h4>
+<blockquote>
+<p>函数名 OVER (子句)</p>
+</blockquote>
+<p>函数名部分即表示窗口函数。</p>
+<p>over关键字用来指定函数执行的窗口范围，若后面括号中什么都不写，则窗口函数基于所有行进行计算；如果不为空，则支持以下4中语法来设置窗口：</p>
+<ul>
+<li><p><code>PARTITION BY</code> 子句：窗口按照哪些字段进行分组，窗口函数在不同的分组上分别执行；</p></li>
+<li><p><code>ORDER BY</code>子句：按照哪些字段进行排序，窗口函数将按照排序后的记录顺序进行编号；</p></li>
+<li><p><code>FRAME</code>子句：FRAME是当前分区的一个子集，子句用来定义子集的规则，通常用来作为滑动窗口使用</p></li>
+<li><p>window_name：给窗口指定一个别名。如果SQL中涉及的窗口较多，采用别名可以看起来更清晰易读；</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    <span class="built_in">rank</span> ( ) <span class="keyword">over</span> w1 </span><br><span class="line"><span class="keyword">FROM</span></span><br><span class="line">    employee <span class="keyword">window</span> w1 <span class="keyword">AS</span> ( <span class="keyword">PARTITION</span> <span class="keyword">BY</span> Company <span class="keyword">ORDER</span> <span class="keyword">BY</span> Salary <span class="keyword">DESC</span> )</span><br><span class="line">    </span><br><span class="line"># <span class="keyword">from</span> <span class="keyword">table</span>后面加了一个关键字<span class="keyword">WINDOW</span>，后面跟了一个子句，这样在<span class="keyword">select</span>中就可以使用这个w1作为窗口了。</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h4 id="窗口函数">窗口函数</h4>
+<p>窗口函数，在某些记录的集合上执行的函数。</p>
+<h5 id="序号函数">序号函数</h5>
+<p>row_number()/rank()/dense_rank()</p>
+<p>作用：显示分区中的当前行号（排名是需要通过<code>ORDER BY</code>子句实现的）</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span>,</span><br><span class="line">   <span class="built_in">rank</span>() <span class="keyword">over</span> (<span class="keyword">order</span> <span class="keyword">by</span> 成绩 <span class="keyword">desc</span>) <span class="keyword">as</span> ranking,</span><br><span class="line">   <span class="built_in">dense_rank</span>() <span class="keyword">over</span> (<span class="keyword">order</span> <span class="keyword">by</span> 成绩 <span class="keyword">desc</span>) <span class="keyword">as</span> dese_rank,</span><br><span class="line">   <span class="built_in">row_number</span>() <span class="keyword">over</span> (<span class="keyword">order</span> <span class="keyword">by</span> 成绩 <span class="keyword">desc</span>) <span class="keyword">as</span> row_num</span><br><span class="line"><span class="keyword">from</span> 班级;</span><br></pre></td></tr></table></figure>
+<p><img src="/2021/04/13/SQL_%E7%AA%97%E5%8F%A3/0.png" style="zoom:67%;"></p>
+<ul>
+<li><p>rank函数：如果有并列名次的行，会占用下一名次的位置。比如正常排名是1，2，3，4，但是现在前3名是并列的名次，结果是：1，1，1，4。</p></li>
+<li><p>dense_rank函数：如果有并列名次的行，不占用下一名次的位置。比如正常排名是1，2，3，4，但是现在前3名是并列的名次，结果是：1，1，1，2。</p></li>
+<li><p>row_number函数：不考虑并列名次的情况。比如前3名是并列的名次，排名是正常的1，2，3，4。</p></li>
+</ul>
+<h5 id="分布函数">分布函数</h5>
+<p>percent_rank()/cume_dist()</p>
+<p>percent_rank()</p>
+<p>用途：和之前的RANK()函数相关，每行按照公式进行计算：(rank - 1) / (rows - 1)</p>
+<p>其中，rank为RANK()函数产生的序号，rows为当前窗口的记录总行数该函数可以用来计算分位数。</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    <span class="built_in">percent_rank</span> ( ) <span class="keyword">over</span> ( <span class="keyword">PARTITION</span> <span class="keyword">BY</span> Company <span class="keyword">ORDER</span> <span class="keyword">BY</span> Salary <span class="keyword">DESC</span> ),</span><br><span class="line">    Company,</span><br><span class="line">    Salary </span><br><span class="line"><span class="keyword">FROM</span></span><br><span class="line">    employee </span><br><span class="line"><span class="keyword">WHERE</span></span><br><span class="line">    Company <span class="operator">=</span> <span class="string">&#x27;Microsoft&#x27;</span></span><br></pre></td></tr></table></figure>
+<p><img src="/2021/04/13/SQL_%E7%AA%97%E5%8F%A3/1.png" style="zoom:67%;"></p>
+<p>cume_dist()</p>
+<p>用途：分组内小于等于当前rank值的行数/分组内总行数。</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    <span class="built_in">cume_dist</span> ( ) <span class="keyword">over</span> ( <span class="keyword">PARTITION</span> <span class="keyword">BY</span> Company <span class="keyword">ORDER</span> <span class="keyword">BY</span> Salary <span class="keyword">DESC</span> ),</span><br><span class="line">    Company,</span><br><span class="line">    Salary </span><br><span class="line"><span class="keyword">FROM</span></span><br><span class="line">    employee </span><br><span class="line"><span class="keyword">WHERE</span></span><br><span class="line">    Company <span class="operator">=</span> <span class="string">&#x27;Microsoft&#x27;</span></span><br></pre></td></tr></table></figure>
+<p><img src="/2021/04/13/SQL_%E7%AA%97%E5%8F%A3/2.png" style="zoom:67%;"></p>
+<h5 id="聚合函数">聚合函数</h5>
+<p>sum/avg/max/min/count</p>
+<p>用途：在窗口中每条记录动态应用聚合函数(sum/avg/max/min/count)，可以动态计算在指定的窗口内的各种聚合函数值。</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    <span class="built_in">avg</span>( Salary ) <span class="keyword">over</span> ( <span class="keyword">PARTITION</span> <span class="keyword">BY</span> Company <span class="keyword">ORDER</span> <span class="keyword">BY</span> Salary <span class="keyword">DESC</span> ),</span><br><span class="line">    Company,</span><br><span class="line">    Salary </span><br><span class="line"><span class="keyword">FROM</span></span><br><span class="line">    employee </span><br><span class="line"><span class="keyword">WHERE</span></span><br><span class="line">    Company <span class="operator">=</span> <span class="string">&#x27;Microsoft&#x27;</span></span><br></pre></td></tr></table></figure>
+<p>按照分组的每一行，求累计的平均值。根据over子句分组之后，挨个行进行select，并执行over前面的函数，因为over子句已经把记录变成了符合条件的一些行集，所以select的方式就改变了。</p>
+<p><img src="/2021/04/13/SQL_%E7%AA%97%E5%8F%A3/3.png" style="zoom:67%;"></p>
+<h4 id="参考资料">参考资料</h4>
+<p>https://leetcode-cn.com/problems/department-top-three-salaries/solution/tu-jie-sqlmian-shi-ti-jing-dian-topnwen-ti-by-houz/</p>
+<p>https://www.jianshu.com/p/e5c5bfb1e28b</p>
+]]></content>
+      <categories>
+        <category>数据库</category>
+        <category>SQL</category>
+      </categories>
+      <tags>
+        <tag>数据库</tag>
+        <tag>SQL</tag>
       </tags>
   </entry>
 </search>
