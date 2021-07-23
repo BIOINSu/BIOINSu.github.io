@@ -2482,133 +2482,6 @@
       </tags>
   </entry>
   <entry>
-    <title>数据仓库与数据库</title>
-    <url>/2021/05/03/%E6%95%B0%E6%8D%AE%E5%BA%93_%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93/</url>
-    <content><![CDATA[<p>数据仓库，英文名称为Data Warehouse，可简写为DW或DWH，是一种用于报告和数据分析的系统，被认为是商业智慧（BI，Business Intelligence）的核心组件。 数据仓库将一个或多个数据源的数据集成到中央存储库中，将当前和历史数据存储在一起，用于创建分析报告。 存储在仓库中的数据从运行系统（例如营销或销售）上传。</p>
-<a id="more"></a>
-<h3 id="数据仓库与数据库">数据仓库与数据库</h3>
-<p>数据库 Database (Oracle, Mysql)主要用于事务处理，数据仓库 Data Warehouse (Hive)主要用于数据分析。用途上的不同决定了这两种架构的特点不同。</p>
-<p>数据库(Database)的特点是：</p>
-<ul>
-<li>相对复杂的表格结构，存储结构相对紧致，少冗余数据。</li>
-<li>读和写都有优化。</li>
-<li>相对简单的read/write query，单次作用于相对的少量数据。</li>
-</ul>
-<p>数据仓库(Datawarehouse)的特点是：</p>
-<ul>
-<li>相对简单的(Denormalized)表格结构，存储结构相对松散，多冗余数据。</li>
-<li>一般只是读优化。</li>
-<li>相对复杂的read query，单次作用于相对大量的数据（历史数据）。</li>
-</ul>
-<p>用图书表格系统举例子，可以从如下方面看出两者的区别。</p>
-<h4 id="表结构">表结构</h4>
-<p>如下表示数据库(Database)的表结构。这里有六张表，分别记录了作者，图书，图书种类，发行商以及他们之间的关系。可以看出每张表都相对紧致，冗余的数据较少。</p>
-<p><img src="/2021/05/03/%E6%95%B0%E6%8D%AE%E5%BA%93_%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93/0.png" style="zoom:50%;"></p>
-<p>如下表示数据仓库(Data Warehouse)的表结构。需要对原始表格进行Denormalization。数据仓库中仅剩余一张表格。</p>
-<blockquote>
-<p>Denormalization是一种策略，用于已经预先Normalized的数据库上以提高性能。Denormalization尝试通过增加数据的冗余副本或对数据进行分组来提高数据库的读取性能，但以牺牲一些写入性能为代价。</p>
-</blockquote>
-<p><img src="/2021/05/03/%E6%95%B0%E6%8D%AE%E5%BA%93_%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93/1.png" style="zoom:50%;"></p>
-<p>Denormalization可以通过对数据库中的表格执行如下的SQL语句脚本实现：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">-- Denormalization Script -- </span><br><span class="line">select </span><br><span class="line">b.id,</span><br><span class="line">b.title,</span><br><span class="line">b.copyright,</span><br><span class="line">b.isbn,</span><br><span class="line">g.genre,</span><br><span class="line">a.firstname as AuthorFirstName,</span><br><span class="line">a.lastname as AuthorLastName,</span><br><span class="line">a.dateofbirth,</span><br><span class="line">a.gender,</span><br><span class="line">p.name as PublisherName</span><br><span class="line">from BOOKS b</span><br><span class="line">left join GENRE g on b.genre &#x3D; g.id</span><br><span class="line">left join AUTHOR_BOOK_MAP abm on b.id &#x3D; abm.bookid</span><br><span class="line">left join AUTHORS a on a.id &#x3D; abm.authorid</span><br><span class="line">left join PUBLISHER_BOOK_MAP pbm on b.id &#x3D; pbm.bookid</span><br><span class="line">left join PUBLISHER p on p.id &#x3D; pbm.publisherid;</span><br></pre></td></tr></table></figure>
-<h4 id="存储空间">存储空间</h4>
-<p>很明显，因为在Denormalization的过程中，如果数据库主表和次表不是一对一的关系，那么最终数据仓库主表或者次表一定会出现重复的数据。所以从存储空间角度讲，相比于数据库紧密的存储结构，数据仓库则存在大量冗余重复的数据。</p>
-<p>数据库(Database)表单存储紧凑：</p>
-<p><img src="/2021/05/03/%E6%95%B0%E6%8D%AE%E5%BA%93_%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93/2.png" style="zoom: 67%;"></p>
-<p>数据仓库(Datawarehouse)表单里有大量冗余：</p>
-<p><img src="/2021/05/03/%E6%95%B0%E6%8D%AE%E5%BA%93_%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93/3.png" style="zoom:67%;"></p>
-<h4 id="读写优化">读写优化</h4>
-<h5 id="基本读read操作对比">基本读(Read)操作对比</h5>
-<p>如下所示的两种查询，一个是找一本书（Primary Key）的信息，另一个是找一位作者（Non-Key）所有的作品信息。</p>
-<p><img src="/2021/05/03/%E6%95%B0%E6%8D%AE%E5%BA%93_%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93/4.png" style="zoom:67%;"></p>
-<p>由于数据库需要利用表之间的关联才能找到所有需要的数据，在<strong>效率上会相对低下</strong>。相比之下数据仓库把这些关联关系转化成重复数据记录到同一张表上了，查询效率相对就会较高。数据仓库相当于牺牲了空间换取了查询效率。</p>
-<p>此外，在数据库里面写这段Query的时候，<strong>需要了解表单的结构与他们之间的关系</strong>，这对于做数据报告或者数据分析非常不友好，尤其是在表单结构很复杂的时候（比如表单使用了逻辑树的储存结构）。这时候数据仓库简单明了的Denormalized表单结构就对于生成数据报告就非常有优势了。</p>
-<p>并且，由于数据报告和数据分析常常涉及到大规模的查询，这些<strong>查询很可能会占用很高的CPU资源</strong>，从而可能影响到数据库的常规读写操作，因为数据库常常是Single-Instance的（接下来会提到）；这一点上数据仓库的Multi-instances的结构就不会有太多这个问题。</p>
-<h5 id="大数据读read操作对比">大数据读(Read)操作对比</h5>
-<p><img src="/2021/05/03/%E6%95%B0%E6%8D%AE%E5%BA%93_%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93/5.png" style="zoom: 50%;"></p>
-<p>当数据量非常大的时候，特定条件下的数据仓库的读优化所带来的优势可以全面超越数据库。大部分的数据库都是Single-instance的，而数据仓库则是Multi-instances的<strong>分布式系统</strong>。数据仓库在分配储存的节点的时候是根据PrimaryKey/PartitionKey来分配的，查询的时候不仅<strong>根据查询键的值来搜索对应节点位置</strong>，同时<strong>进行大量的并行查询</strong>，可以极大提升查询的性能。</p>
-<p>但是，并不是所有的读操作，数据仓库一直都有优势。比如在如下两种情况时，数据仓库的读表现并不如数据库：</p>
-<p>1、在对小量数据进行读取操作的时候，由于数据仓库要进行寻找数据所在的节点位置之类的预运算，整体效率上反倒不如数据库。</p>
-<p>2、如果读取操作的目标不是主键(PrimaryKey)或者分区键(PartitionKey)，那么数据仓库的查询也需要进行全局扫描，效率上就不好说是否胜过数据库了。</p>
-<p>这两点也是为什么现在即使有像Amazon Redshift这般强大的Data Warehouse应用，SQL Database仍然无法被取代的一部分主要原因。</p>
-<h5 id="写write操作">写(Write)操作</h5>
-<p>多数情况下，数据仓库不太会进行精确的写操作。因为冗余行数太多，有时候只是改一个很小的字段，也会修改大量的行数。而对于数据库来说，由于其紧凑的表格结构，写操作就可以非常精细有效了。比如需要修改《Java Complete》这本书的版权，从1999改到2002，数据库里面只需要该一行，而数据仓库里面需要改5行。</p>
-<p><img src="/2021/05/03/%E6%95%B0%E6%8D%AE%E5%BA%93_%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93/6.png"></p>
-<p>数据仓库的写操作都是整段(表)刷新或者整段数据插入, 这也和它做数据分析的用途有关系。由于数据仓库的整表刷新和分布式储存的特质，我们可以通过把PartitionKey设置成数据创建/更新的时间，然后记录一段时间内的历史数据。这对于数据分析以及利用数据进行决策都有重要意义。</p>
-<h3 id="数据仓库与数据库结合">数据仓库与数据库结合</h3>
-<p>可以通过将两者的架构结合发挥出两者的优势。</p>
-<p>通常的软件架构简化一下就是用户通过API和数据库交互。</p>
-<p><img src="/2021/05/03/%E6%95%B0%E6%8D%AE%E5%BA%93_%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93/7.png" style="zoom:55%;"></p>
-<p>这里如果要直接在数据库上做数据分析，数据监控等等任务的话，会有以下几个问题：</p>
-<p>1、数据分析通常涉及大量数据查询，可能会<strong>占用太多CPU</strong>从而影响软件的基本功能。</p>
-<p>2、数据库的表单结构通常比较复杂，<strong>需要数据分析人员对DB结构有深入的了解</strong>。</p>
-<p>3、数据库在进行<strong>大量数据查询的时候效率较低</strong>。</p>
-<p>4、开放数据库访问<strong>权限</strong>（即便只是读权限），尤其是给外组人员，会有安全隐患。</p>
-<p>为了解决以上四个问题，我们可以通过利用脚本，每隔一段时间把数据库里面的所有数据Denormalize到数据仓库里面，在数据仓库里面进行数据分析。根据之前提到的数据仓库的所有的特性（独立不影响业务，表结构简单，读数据速度快，相对安全），这四个问题都可以得到很好的解决。</p>
-<p><img src="/2021/05/03/%E6%95%B0%E6%8D%AE%E5%BA%93_%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93/8.png" style="zoom: 50%;"></p>
-<p>但是这里还是有一个小问题。如果有很多不同的组需要共享这个Data Warehouse，那么同样他们的脚本可能会相互影响。这里引入一下数据目录(Data Catalog)的概念来解决这个问题。</p>
-<blockquote>
-<p>数据目录是一种元数据管理工具，旨在帮助公司查找和管理存储在其各个系统中的大量数据（包括表、文件和数据库） 。</p>
-</blockquote>
-<p>通过数据目录储存元数据，然后发布出去让不同组的数据仓库都可以同步这个数据。这样，每个不同组的数据仓库都拿到了同样的Denormalized数据，但是却相互独立开了。</p>
-<p><img src="/2021/05/03/%E6%95%B0%E6%8D%AE%E5%BA%93_%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93/9.png" style="zoom: 33%;"></p>
-<h3 id="总结">总结</h3>
-<table>
-<colgroup>
-<col style="width: 9%">
-<col style="width: 45%">
-<col style="width: 45%">
-</colgroup>
-<thead>
-<tr class="header">
-<th></th>
-<th>数据库</th>
-<th>数据仓库</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>作用</td>
-<td>主要用于事务处理（增删改）。</td>
-<td>主要用于数据分析。</td>
-</tr>
-<tr class="even">
-<td>表格结构</td>
-<td>一个存储的主题通常由多张表格及其之间的关系（Schema）组成。</td>
-<td>一个存储的主题可以由一张表格形成，它里面包含了大量冗余的数据（Denormalization增加数据的冗余副本）。</td>
-</tr>
-<tr class="odd">
-<td>存储空间</td>
-<td>表格存储紧凑。</td>
-<td>表格存在冗余。</td>
-</tr>
-<tr class="even">
-<td>基本读操作</td>
-<td>1、需要利用表之间的关联才能找到所有需要的数据，在<strong>效率上会相对低下</strong>。2、需要<strong>了解表格的结构与他们之间的关系</strong>进行查询。3、Single-Instance的数据库在执行大规模查询时<strong>占用大量CPU资源</strong>。</td>
-<td>1、数据仓库包含<strong>大量冗余数据</strong>，可以不用对多个表格进行关联就能查询到数据。2、Denormalized策略使得<strong>不需要理解表格之间的关系</strong>就可以进行查询。3、数据仓库通常是<strong>分布式存储</strong>的，可以通过分布式计算框架操作数据。</td>
-</tr>
-<tr class="odd">
-<td>大规模读操作</td>
-<td>基于Single-Instance的数据库在执行大规模查询时不能并行查找，效率低下。</td>
-<td>基于分布式存储系统和分布式计算框架的数据仓库在面临大规模查询时可以进行并行查找，效率较高。（小量数据查询、查询目标非主键/分区键时，无法保证效率）</td>
-</tr>
-<tr class="even">
-<td>写操作</td>
-<td>更新数据时仅涉及少量的行。</td>
-<td>由于数据是冗余存储的，更新数据时涉及到大量的行更新。</td>
-</tr>
-<tr class="odd">
-<td>两者结合</td>
-<td>每隔一段时间把数据库里面的所有数据Denormalize到数据仓库里面，在数据仓库里面进行数据分析。</td>
-<td>不同数据仓库通过订阅数据目录中的元数据信息来获取Denormalized之后的数据。</td>
-</tr>
-</tbody>
-</table>
-<h3 id="参考资料">参考资料</h3>
-<p>转载自： https://www.zhihu.com/question/20623931/answer/750367153</p>
-]]></content>
-  </entry>
-  <entry>
     <title>02 Flink架构体系</title>
     <url>/2021/05/05/Flink02_%E6%9E%B6%E6%9E%84%E4%BD%93%E7%B3%BB/</url>
     <content><![CDATA[<p>介绍Flink的架构组件，编程模型（支持的API类型），任务的提交流程，程序的流程，并行度以及槽。</p>
@@ -3502,6 +3375,23 @@
       <tags>
         <tag>数据库</tag>
         <tag>数据仓库</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>分布式</title>
+    <url>/2021/07/23/%E9%9D%A2%E8%AF%95_%E5%88%86%E5%B8%83%E5%BC%8F/</url>
+    <content><![CDATA[<a id="more"></a>
+<h3 id="分布式锁">分布式锁</h3>
+<p>https://blog.csdn.net/wuzhiwei549/article/details/80692278</p>
+<h3 id="分布式事务">分布式事务</h3>
+<p>https://zhuanlan.zhihu.com/p/183753774</p>
+<h3 id="参考资料">参考资料</h3>
+]]></content>
+      <categories>
+        <category>面试</category>
+      </categories>
+      <tags>
+        <tag>面试</tag>
       </tags>
   </entry>
 </search>
