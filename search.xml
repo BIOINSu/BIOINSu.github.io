@@ -3394,4 +3394,186 @@
         <tag>面试</tag>
       </tags>
   </entry>
+  <entry>
+    <title>0725 拼多多笔试</title>
+    <url>/2021/07/25/%E7%AC%94%E8%AF%95_0725%E6%8B%BC%E5%A4%9A%E5%A4%9A/</url>
+    <content><![CDATA[<h2 id="一">一</h2>
+<p><img src="/2021/07/25/%E7%AC%94%E8%AF%95_0725%E6%8B%BC%E5%A4%9A%E5%A4%9A/image-20210725220515830.png" alt="image-20210725220515830" style="zoom: 67%;"></p>
+<a id="more"></a>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">本题是仿照覆盖区间问题，暴力法也可以过</span><br><span class="line">思路一：</span><br><span class="line"><span class="number">1</span>、按照开始的位置排序</span><br><span class="line"><span class="number">2</span>、判断下一个是不是在上一个里面</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//输入组成二维数组</span></span><br><span class="line">        <span class="keyword">int</span>[][] nums = <span class="keyword">new</span> <span class="keyword">int</span>[][]&#123;&#123;<span class="number">1</span>,<span class="number">3</span>&#125;,&#123;<span class="number">4</span>,<span class="number">5</span>&#125;,&#123;<span class="number">7</span>,<span class="number">10</span>&#125;,&#123;<span class="number">13</span>,<span class="number">18</span>&#125;&#125;;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//根据线段的起始点排序</span></span><br><span class="line">        Arrays.sort(nums, <span class="keyword">new</span> Comparator&lt;<span class="keyword">int</span>[]&gt;() &#123;</span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compare</span><span class="params">(<span class="keyword">int</span>[] a, <span class="keyword">int</span>[] b)</span></span>&#123;</span><br><span class="line">                <span class="keyword">if</span>(a[<span class="number">0</span>]==b[<span class="number">0</span>])&#123;</span><br><span class="line">                    <span class="keyword">return</span> a[<span class="number">1</span>] - b[<span class="number">1</span>];</span><br><span class="line">                &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">                    <span class="keyword">return</span> a[<span class="number">0</span>] - b[<span class="number">0</span>];</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//判断前一个线段是否包含当前线段</span></span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">1</span>;i&lt;nums.length; i++)&#123;</span><br><span class="line">            <span class="comment">//包含则输出并返回</span></span><br><span class="line">            <span class="keyword">if</span>( nums[i][<span class="number">1</span>] &lt;= nums[i-<span class="number">1</span>][<span class="number">1</span>] )&#123;</span><br><span class="line">                System.out.println(<span class="string">&quot;true&quot;</span>);</span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//不包含输出false</span></span><br><span class="line">        System.out.println(<span class="string">&quot;false&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">思路二：</span><br><span class="line">直接暴力</span><br></pre></td></tr></table></figure>
+<h2 id="二">二</h2>
+<p><img src="/2021/07/25/%E7%AC%94%E8%AF%95_0725%E6%8B%BC%E5%A4%9A%E5%A4%9A/image-20210725220631616.png" alt="image-20210725220631616" style="zoom: 67%;"></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">* 模拟法，注意是牌多的人赢</span></span><br><span class="line"><span class="comment">* 注意每轮获胜后，放下牌需要再次判断是不是再次获胜，不能直接到下一个人发牌。</span></span><br><span class="line"><span class="comment">*</span></span><br><span class="line"><span class="comment">* https://www.nowcoder.com/discuss/690459?type=post&amp;order=create&amp;pos=&amp;page=1&amp;ncTraceId=&amp;channel=-1&amp;source_id=search_post_nctrack</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span></span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//当有重复牌出现</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">winIt</span><span class="params">(ArrayList&lt;Integer&gt; list,HashMap&lt;Integer,Integer&gt; where,<span class="keyword">int</span>[] win,<span class="keyword">int</span> person,<span class="keyword">int</span> put)</span></span>&#123;</span><br><span class="line">        <span class="comment">//获得重复牌下标</span></span><br><span class="line">        <span class="keyword">int</span> index=where.get(put);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//累加它的筹码</span></span><br><span class="line">        win[person]+=list.size()-index;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//移走这些牌</span></span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=list.size()-<span class="number">1</span>;i&gt;=index;i--)&#123;</span><br><span class="line">            <span class="comment">//删除记录的下标，注意不单只删除那个重复的，所有中间的都要删除</span></span><br><span class="line">            where.remove(list.get(i));</span><br><span class="line">            <span class="comment">//在牌局中删除牌</span></span><br><span class="line">            list.remove(i);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line"><span class="comment">//        int[] arr = &#123;1,2,3&#125;;</span></span><br><span class="line"><span class="comment">//        List&lt;Integer&gt; collect = Arrays.stream(arr).boxed().collect(Collectors.toList());</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">//两者手中的牌</span></span><br><span class="line">        List&lt;Integer&gt; person1 = Arrays.stream(<span class="keyword">new</span> <span class="keyword">int</span>[ &#123;<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>,<span class="number">8</span>,<span class="number">7</span>&#125;).boxed().collect(Collectors.toList());</span><br><span class="line">        List&lt;Integer&gt; person2 = Arrays.stream(<span class="keyword">new</span> <span class="keyword">int</span>[]&#123;<span class="number">8</span>,<span class="number">25</span>,<span class="number">12</span>,<span class="number">1</span>,<span class="number">4</span>,<span class="number">6</span>,<span class="number">10</span>&#125;).boxed().collect(Collectors.toList());</span><br><span class="line"></span><br><span class="line">        <span class="comment">//牌局</span></span><br><span class="line">        ArrayList&lt;Integer&gt; list=<span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line"></span><br><span class="line">        <span class="comment">//记录每个牌的位置</span></span><br><span class="line">        HashMap&lt;Integer,Integer&gt; where=<span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line"></span><br><span class="line">        <span class="comment">//两者剩余的牌的下标，只需要用index即可，出过的牌就没了</span></span><br><span class="line">        <span class="keyword">int</span> index1=<span class="number">0</span>;</span><br><span class="line">        <span class="keyword">int</span> index2=<span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//记录获胜的筹码</span></span><br><span class="line">        <span class="keyword">int</span>[] win=<span class="keyword">new</span> <span class="keyword">int</span>[<span class="number">2</span>];</span><br><span class="line"></span><br><span class="line">        <span class="comment">//当两者都还有牌</span></span><br><span class="line">        <span class="keyword">while</span>(index1&lt;person1.size() || index2&lt;person2.size())&#123;</span><br><span class="line"></span><br><span class="line">            <span class="comment">//person1有牌</span></span><br><span class="line">            <span class="keyword">if</span>(index1&lt;person1.size())&#123;</span><br><span class="line">                <span class="comment">//拿到牌</span></span><br><span class="line">                <span class="keyword">int</span> put1=person1.get(index1);</span><br><span class="line">                index1++;</span><br><span class="line">                <span class="comment">//放入牌局</span></span><br><span class="line">                list.add(put1);</span><br><span class="line">                <span class="comment">//有重复牌</span></span><br><span class="line">                <span class="keyword">while</span>(where.get(put1)!=<span class="keyword">null</span>)&#123;</span><br><span class="line">                    <span class="comment">//累加筹码并从牌局中删除牌</span></span><br><span class="line">                    winIt(list,where,win,<span class="number">0</span>,put1);</span><br><span class="line">                    <span class="comment">//是否有牌可出</span></span><br><span class="line">                    <span class="keyword">if</span>(index1&gt;=person1.size())</span><br><span class="line">                        <span class="keyword">break</span>;</span><br><span class="line">                    <span class="comment">//出牌</span></span><br><span class="line">                    put1=person1.get(index1);</span><br><span class="line">                    index1++;</span><br><span class="line">                    list.add(put1);</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="comment">//记录下标</span></span><br><span class="line">                where.put(put1,list.size()-<span class="number">1</span>);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="comment">//person2重复上述过程</span></span><br><span class="line">            <span class="keyword">if</span>(index2&lt;person2.size())&#123;</span><br><span class="line">                <span class="keyword">int</span> put2=person2.get(index2);</span><br><span class="line">                index2++;</span><br><span class="line">                list.add(put2);</span><br><span class="line">                <span class="keyword">while</span>(where.get(put2)!=<span class="keyword">null</span>)&#123;</span><br><span class="line">                    winIt(list,where,win,<span class="number">1</span>,put2);</span><br><span class="line">                    <span class="keyword">if</span>(index2&gt;=person2.size()) <span class="keyword">break</span>;</span><br><span class="line">                    put2=person2.get(index2);</span><br><span class="line">                    index2++;</span><br><span class="line">                    list.add(put2);</span><br><span class="line">                &#125;</span><br><span class="line">                where.put(put2,list.size()-<span class="number">1</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//遍历剩余牌局中的牌，按奇数偶数累加</span></span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;list.size();i++)&#123;</span><br><span class="line">            <span class="keyword">if</span>(list.get(i)%<span class="number">2</span>==<span class="number">1</span>)</span><br><span class="line">                win[<span class="number">0</span>]++;</span><br><span class="line">            <span class="keyword">else</span></span><br><span class="line">                win[<span class="number">1</span>]++;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//输出结果</span></span><br><span class="line">        System.out.println(win[<span class="number">0</span>]+<span class="string">&quot; &quot;</span>+win[<span class="number">1</span>]);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="三">三</h2>
+<p><img src="/2021/07/25/%E7%AC%94%E8%AF%95_0725%E6%8B%BC%E5%A4%9A%E5%A4%9A/image-20210725220754513.png" alt="image-20210725220754513" style="zoom: 67%;"></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">*  看 Q能否写成 （C^n）*A+m*B</span></span><br><span class="line"><span class="comment">*  Q = （C^n）*A+m*B</span></span><br><span class="line"><span class="comment">* </span></span><br><span class="line"><span class="comment">*https://www.nowcoder.com/discuss/690445?type=post&amp;order=time&amp;pos=&amp;page=1&amp;ncTraceId=&amp;channel=-1&amp;source_id=search_post_nctrack</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span></span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">can</span><span class="params">(<span class="keyword">int</span> A, <span class="keyword">int</span> B, <span class="keyword">int</span> C, <span class="keyword">int</span> Q)</span></span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(C == <span class="number">1</span>)&#123;</span><br><span class="line">            <span class="keyword">return</span> (Q-A)%B==<span class="number">0</span>;</span><br><span class="line">        &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">            <span class="keyword">int</span> temp_C = <span class="number">1</span>;</span><br><span class="line">            <span class="keyword">while</span>( temp_C*A &lt;= Q )&#123;     <span class="comment">//如果 A*C 比Q小</span></span><br><span class="line">                <span class="keyword">if</span>((Q-temp_C*A)%B==<span class="number">0</span>)   <span class="comment">//如果Q能被拆开，则成功</span></span><br><span class="line">                    <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">                temp_C = temp_C*C; <span class="comment">//否则继续递增C</span></span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        System.out.println( can(<span class="number">2</span>,<span class="number">3</span>,<span class="number">2</span>,<span class="number">10</span>) );</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="四">四</h2>
+<p><img src="/2021/07/25/%E7%AC%94%E8%AF%95_0725%E6%8B%BC%E5%A4%9A%E5%A4%9A/image-20210725221050444.png" alt="image-20210725221050444" style="zoom: 67%;"></p>
+<p>例如：0 4 0 0 0 0 0 0 0 0：</p>
+<p>输出：121（解释：因为有4个1，最大组成 11 * 11 = 121）</p>
+<p>例如：2 3 0 1 0 0 0 0 0 0：</p>
+<p>输出：34100（解释：1个3，2个0，三个1 最大组成3100 * 11 = 34100）</p>
+<p><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">* 乘积最大的规律是：大数尽可能排在高位，两个两位数的差尽可能小。</span></span><br><span class="line"><span class="comment">* 最后必然是2个数相乘。</span></span><br><span class="line"><span class="comment">* 高位必须放前面，所以从后往前遍历。</span></span><br><span class="line"><span class="comment">* 然后每个数组优先给2个乘数中较小的那个（也就是数字长度更短的那个，长度相等情况下是较小的那个），来保证两数在满足大数字在前的前提下尽可能接近些。</span></span><br><span class="line"><span class="comment">*</span></span><br><span class="line"><span class="comment">* https://www.nowcoder.com/discuss/690459?type=post&amp;order=create&amp;pos=&amp;page=1&amp;ncTraceId=&amp;channel=-1&amp;source_id=search_post_nctrack</span></span><br><span class="line"><span class="comment">* */</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span></span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//模拟数字</span></span><br><span class="line">        <span class="keyword">int</span>[] arr=<span class="keyword">new</span> <span class="keyword">int</span>[]&#123;<span class="number">2</span>,<span class="number">3</span>,<span class="number">0</span>,<span class="number">1</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>&#125;;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//最终都会成为两个数的乘积，所以仅需要考虑两个数乘积什么时候最大</span></span><br><span class="line">        ArrayList&lt;Integer&gt; left=<span class="keyword">new</span> ArrayList();</span><br><span class="line">        ArrayList&lt;Integer&gt; right=<span class="keyword">new</span> ArrayList();</span><br><span class="line"></span><br><span class="line">        <span class="comment">//分配数字给两个乘数</span></span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">9</span>;i&gt;=<span class="number">0</span>;i--)&#123;</span><br><span class="line">            <span class="keyword">while</span>(arr[i]&gt;<span class="number">0</span>)&#123;</span><br><span class="line">                <span class="comment">//把最大的数字给左边的最高位</span></span><br><span class="line">                <span class="keyword">if</span>(left.size()==<span class="number">0</span>)&#123;</span><br><span class="line">                    left.add(i);</span><br><span class="line">                    arr[i]--;</span><br><span class="line">                    <span class="keyword">continue</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="comment">//其次给右边数的最高位</span></span><br><span class="line">                <span class="keyword">if</span>(right.size()==<span class="number">0</span>)&#123;</span><br><span class="line">                    right.add(i);</span><br><span class="line">                    arr[i]--;</span><br><span class="line">                    <span class="keyword">continue</span>;</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                <span class="comment">//如果左边数的长度比较长，那么就把数字给右边的数</span></span><br><span class="line">                <span class="keyword">if</span>(checkIt(left,right))&#123;</span><br><span class="line">                    right.add(i);</span><br><span class="line">                    arr[i]--;</span><br><span class="line">                &#125;<span class="keyword">else</span>&#123; <span class="comment">// 反之</span></span><br><span class="line">                    left.add(i);</span><br><span class="line">                    arr[i]--;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//最终获得结果</span></span><br><span class="line">        getResult(left,right);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">checkIt</span><span class="params">(ArrayList&lt;Integer&gt; left,ArrayList&lt;Integer&gt; right)</span></span>&#123;</span><br><span class="line">        <span class="comment">//如果左边的数比较长则返回true，数字给到右边</span></span><br><span class="line">        <span class="keyword">if</span>(left.size()&gt;right.size()) <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">        <span class="keyword">if</span>(right.size()&gt;left.size()) <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//如果两个长度相等</span></span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;left.size();i++)&#123;</span><br><span class="line">            <span class="keyword">if</span>(left.get(i).equals(right.get(i))) <span class="keyword">continue</span>;</span><br><span class="line">            <span class="keyword">return</span> left.get(i) &gt; right.get(i); <span class="comment">//左边数的数字比较大则返回true，数字会给到右边</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//数字全部相等也返回true，数字给到右边</span></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//ArrayList转换成字符，然后再转成数字，最后使用大整数乘法</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">getResult</span><span class="params">(ArrayList&lt;Integer&gt; left,ArrayList&lt;Integer&gt; right)</span></span>&#123;</span><br><span class="line">        BigInteger l1=<span class="keyword">new</span> BigInteger(getString(left));</span><br><span class="line">        BigInteger l2=<span class="keyword">new</span> BigInteger(getString(right));</span><br><span class="line">        BigInteger ret=l1.multiply(l2);</span><br><span class="line">        System.out.println(ret);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//ArrayList转换成字符</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">getString</span><span class="params">(ArrayList&lt;Integer&gt; arr)</span></span>&#123;</span><br><span class="line">        StringBuilder ret=<span class="keyword">new</span> StringBuilder();</span><br><span class="line">        <span class="keyword">for</span>(Integer e:arr)&#123;</span><br><span class="line">            ret.append(e);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> ret.toString();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+]]></content>
+      <categories>
+        <category>笔试</category>
+      </categories>
+      <tags>
+        <tag>笔试</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Spark面试题</title>
+    <url>/2021/07/24/%E9%9D%A2%E8%AF%95_Spark/</url>
+    <content><![CDATA[<a id="more"></a>
+<p><strong>spark 中一个worker有多少executor ？</strong></p>
+<p>最直接的方式worker上有多少个cpu core就克制配置多少个executor，当然可以根据cpu的性能、每个做调整。跑在yarn上也一样，根据container来，container一般也是根据cpu core来计算数量的。</p>
+<p><strong>spark提交参数含义</strong></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">spark-submit</span><br><span class="line">--master yarn </span><br><span class="line">--deploy-mode client </span><br><span class="line">--class com.practiceSpark.jar</span><br><span class="line">--executor-memory 10G </span><br><span class="line">--num-executors 20 </span><br><span class="line">--executor-cores 2 </span><br><span class="line">--driver-memory 8g </span><br><span class="line">--queue spark </span><br><span class="line">--conf spark.driver.maxResultSize=6G </span><br><span class="line">--conf spark.network.timeout=300 </span><br><span class="line">--conf spark.executor.heartbeatInterval=30 </span><br><span class="line">-conf spark.task.maxFailures=4 </span><br><span class="line">--conf spark.speculation=<span class="literal">true</span> </span><br><span class="line">--conf spark.shuffle.service.enabled=<span class="literal">true</span> </span><br><span class="line">--conf spark.executor.memoryOverhead=8g  </span><br></pre></td></tr></table></figure>
+<table>
+<thead>
+<tr class="header">
+<th>参数</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>--master</td>
+<td>master 的地址，提交任务到哪里执行，例如 spark://host:port, yarn, local</td>
+</tr>
+<tr class="even">
+<td>--deploy-mode</td>
+<td>在本地 (client) 启动 driver 或在 cluster 上启动，默认是 client</td>
+</tr>
+<tr class="odd">
+<td>--class</td>
+<td>应用程序的主类，仅针对 java 或 scala 应用</td>
+</tr>
+<tr class="even">
+<td>--name</td>
+<td>应用程序的名称</td>
+</tr>
+<tr class="odd">
+<td>--packages</td>
+<td>包含在driver 和executor 的 classpath 中的 jar 的 maven 坐标</td>
+</tr>
+<tr class="even">
+<td>--driver-memory</td>
+<td>Driver内存，默认 1G</td>
+</tr>
+<tr class="odd">
+<td>--driver-cores</td>
+<td>Driver 的核数，默认是1。在 yarn 或者 standalone 下使用</td>
+</tr>
+<tr class="even">
+<td>--executor-memory</td>
+<td>每个 executor 的内存，默认是1G</td>
+</tr>
+<tr class="odd">
+<td>--executor-core</td>
+<td>每个 executor 的核数。在yarn或者standalone下使用</td>
+</tr>
+<tr class="even">
+<td>--conf PROP=VALUE</td>
+<td>指定 spark 配置属性的值，</td>
+</tr>
+</tbody>
+</table>
+<p><strong>spark执行页面关注什么</strong></p>
+<p>代表executors页面</p>
+<p>这里可以看到执行者申请使用的内存以及shuffle中input和output等数据。比较常用了，一方面通过它可以看出来每个excutor是否发生了数据倾斜，另一方面可以具体分析目前的应用是否产生了大量的shuffle，是否可以通过数据的本地性或者减小数据的传输来减少shuffle的数据量。</p>
+<p><img src="/2021/07/24/%E9%9D%A2%E8%AF%95_Spark/image-20210724152629279.png" alt="image-20210724152629279" style="zoom:67%;"></p>
+<blockquote>
+<p>其他UI界面</p>
+<p>https://blog.csdn.net/u013013024/article/details/73498508</p>
+</blockquote>
+<p><strong>spark类型推断</strong></p>
+<p>在spark中，假如需要将读取的数据集，转换成表格的形式，使得它能够支持SQL，那么需要知道这个表的schema，即表结构，有两种方式能够实现这样的操作：</p>
+<p>1、通过反射推断出Schema：即定义case class样例类，从指定的地址创建RDD后，将RDD中的数据映射乘case class，通过隐式转换转成DF。</p>
+<p>2、通过StructType直接指定Schema：通过StructType直接指定每个字段的Schema,相当于是表的描述信息，在createDataFrame中传入这个StructType，将RDD转为数据表</p>
+<p><strong>spark中两个表join不产生shuffle</strong></p>
+<p>当两个rdd分区数和分区方式一样时做join就不会产生shuffle，因为分区数和分区方式一样的时候，相同Key的数据都在同一个机器上，发生join操作时可以在本机上执行，不需要数据迁移，所以不会发生shuffle。</p>
+<p>（在join之前给两个RDD增加groupByKey()算子，发生shuffle）</p>
+<p><strong>参考资料</strong></p>
+<p>https://www.cnblogs.com/hexu105/p/8182472.html （spark执行页面）</p>
+<p>https://blog.csdn.net/tototuzuoquan/article/details/74936717（自动推断）</p>
+]]></content>
+      <categories>
+        <category>大数据</category>
+        <category>海量数据</category>
+      </categories>
+      <tags>
+        <tag>其他</tag>
+        <tag>面试</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title></title>
+    <url>/2021/07/24/%E9%9D%A2%E8%AF%95_Hive/</url>
+    <content><![CDATA[<p>Hive数据倾斜</p>
+<p><strong>Hive中order by，sort by，distribute by，cluster by的区别</strong></p>
+<p>order by：会对输入做全局排序，因此只有一个Reducer，导致当输入规模较大时，消耗较长的计算时间。</p>
+<p>sort by：不是全局排序，其在数据进入reducer前完成排序，因此，如果用sort by进行排序，并且设置mapred.reduce.tasks&gt;1，则sort by只会保证每个reducer的输出有序，并不保证全局有序。对输出的数据再执行归并排序，即可得到全部结果。</p>
+<p>distribute by：根据字段的hash值和reducer的个数进行模除后，余数相同的分到一个区。将具有相同字段的map输出分发到一个reduce节点上做处理。</p>
+<p>cluster by：如果 distribute by 和 sort by 中所用的列相同，就可以缩写为 cluster by。</p>
+<a id="more"></a>
+<p><strong>Hive内部表和外部表的区别</strong></p>
+<table>
+<colgroup>
+<col style="width: 6%">
+<col style="width: 46%">
+<col style="width: 46%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>内部表（默认）</th>
+<th>外部表</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>修饰符</td>
+<td>无</td>
+<td>external</td>
+</tr>
+<tr class="even">
+<td>管理者</td>
+<td>Hive</td>
+<td>HDFS</td>
+</tr>
+<tr class="odd">
+<td>删除结果</td>
+<td>删除内部表会直接删除元数据（metadata）及存储数据</td>
+<td>删除外部表仅仅会删除元数据，HDFS上的文件并不会被删除</td>
+</tr>
+<tr class="even">
+<td>存储位置</td>
+<td>hive.metastore.warehouse.dir指定，默认认：/user/hive/warehouse</td>
+<td>由建表语句LOCATION参数指定，如果没有指定则Hive将在HDFS上的/user/hive/warehouse文件夹下以外部表的表名创建一个文件夹，并将属于这个表的数据存放在这里</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Hive join原理</strong></p>
+<p>Reduce Join</p>
+<p>Map阶段：为了构造Key-Value型数据，以on 条件中的字段为 key（on中有多个字段，则将其组合后作为key），以select 或者 where 中用到的字段为value；同时在 value 中还会包含表的 Tag 信息，用于标明此 value 对应哪个表。</p>
+<p>Shuffle 阶段：将数据根据Key进行hash，传送到不同的reducer中，相同Key的数据在同一个reducer中（同一个reducer中的key却不一定相同）。</p>
+<p>Reduce阶段：对相同Key值的这些数据，根据select语句进行处理，把来自不同表的数据进行组合。</p>
+<p><img src="/2021/07/24/%E9%9D%A2%E8%AF%95_Hive/image-20210724120435658.png" alt="image-20210724120435658" style="zoom:67%;"></p>
+<p>Map Join</p>
+<p>适用于大表连接小表的场景。</p>
+<p>前提：小表在每个mapper上有完整的拷贝，常使用Distributed Cache将小表分发到各个节点上</p>
+<p>Map Join把小表全部读入内存中，在Map阶段直接用大表的部分数据和内存中小表数据做连接，直接输出结果，没有shuffle和reduce的阶段，因此有多少个mapper就有多少个结果文件。</p>
+<h3 id="参考资料">参考资料</h3>
+]]></content>
+      <categories>
+        <category>大数据</category>
+        <category>海量数据</category>
+      </categories>
+      <tags>
+        <tag>其他</tag>
+        <tag>面试</tag>
+      </tags>
+  </entry>
 </search>
