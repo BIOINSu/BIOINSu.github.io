@@ -275,7 +275,7 @@
       <span class="post-meta-item-text">发表于</span>
       
 
-      <time title="创建时间：2021-07-29 07:18:40 / 修改时间：08:59:55" itemprop="dateCreated datePublished" datetime="2021-07-29T07:18:40+08:00">2021-07-29</time>
+      <time title="创建时间：2021-07-29 07:18:40 / 修改时间：09:26:22" itemprop="dateCreated datePublished" datetime="2021-07-29T07:18:40+08:00">2021-07-29</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -352,202 +352,14 @@
 </tr>
 </tbody>
 </table>
-<h4 id="为什么要使用-kafka">为什么要使用 kafka？</h4>
-<p>1、缓冲：上游数据流量暴增，kafka在中间可以起到一个缓冲的作用，把消息暂存在kafka中，下游服务就可以按照自己的处理速度处理数据。</p>
-<p>2、解耦：解耦重要业务，提高扩展能力（需求不确定的时候）</p>
-<p>3、冗余：将一个消息提供给多个topic，被不同业务使用</p>
-<p>4、健壮：缓存消息，防止消费者挂掉丢失消息</p>
-<p>5、异步：缓存消息，需要的时候再处理消息</p>
-<h4 id="kafka的数据可靠性怎么保证">kafka的数据可靠性怎么保证</h4>
-<p>ack机制。</p>
-<p>为保证producer发送的数据，能可靠的发送到指定的topic，topic的每个partition收到producer发送的数据后，都需要向producer发送ack（acknowledgement确认收到），如果producer收到ack，就会进行下一轮的发送，否则重新发送数据。</p>
-<h4 id="ack应答机制">ack应答机制</h4>
-<p>Kafka提供三种可靠性级别，根据对可靠性和延迟的要求进行权衡。acks参数配置：</p>
-<ul>
-<li>0：producer不等待broker的ack，<strong>最低的延迟</strong>，<strong>broker一接收到还没有写入磁盘</strong>就已经返回，当broker故障时有可能丢失数据。</li>
-<li>1：producer等待broker的ack，<strong>partition的leader落盘成功后返回ack</strong>，如果在follower同步成功之前leader故障，那么follower将会丢失数据。</li>
-<li>-1（all）：producer等待broker的ack，<strong>partition的leader和follower全部落盘成功后才返回ack</strong>。但是如果在follower同步完成后，broker发送ack之前，leader发生故障，那么会造成数据重复。</li>
-</ul>
-<h4 id="exactly-once语义pidseq">Exactly Once语义（&lt;PID,Seq&gt;）</h4>
-<p>将服务器的ACK级别设置为-1，可以保证Producer到Server之间不会丢失数据，即At Least Once语义。将服务器ACK级别设置为0，可以保证生产者每条消息只会被发送一次，即At Most Once语义。</p>
-<p>At Least Once可以保证数据不丢失，但是不能保证数据不重复；</p>
-<p>At Most Once可以保证数据不重复，但是不能保证数据不丢失。</p>
-<blockquote>
-<p>但是，对于一些非常重要的信息，比如说交易数据，下游数据消费者要求数据既不重复也不丢失，即Exactly Once语义。在0.11版本以前的Kafka，对此是无能为力的，只能保证数据不丢失，再在下游消费者对数据做全局去重。对于多个下游应用的情况，每个都需要单独做全局去重，这就对性能造成了很大影响。</p>
-</blockquote>
-<p>0.11版本的Kafka，引入了一项重大特性：幂等性。</p>
-<p><strong>幂等性就是指Producer不论向Server发送多少次重复数据，Server端都只会持久化一条</strong>。开启幂等性enable.idempotence=true。</p>
-<p>因此，At Least Once（数据重复） + 幂等性（仅持久化一条） = Exactly Once（数据不重复且不丢失）</p>
-<p><strong>Exactly Once的语义就是保证Producer的每条消息不会丢失且仅被持久化一条。</strong></p>
-<p>Kafka的幂等性实现其实就是将原来下游需要做的去重放在了数据上游。开启幂等性的Producer在初始化的时候会被分配一个PID，发往同一Partition的消息会附带Sequence Number。而Broker端会<strong>对&lt; PID, Partition, SeqNumber&gt;做缓存</strong>，当具有相同主键的消息提交时，Broker只会持久化一条。</p>
-<p>但是PID重启就会变化，同时不同的Partition也具有不同主键，所以幂等性无法保证跨分区跨会话的Exactly Once。</p>
-<blockquote>
-<p>流式计算中怎么Exactly Once语义？以flink为例</p>
-<p>1、souce：</p>
-<p>使用执行ExactlyOnce的数据源，比如kafka等。</p>
-<p>内部使用FlinkKafakConsumer，并开启CheckPoint，<strong>偏移量会保存到StateBackend中</strong>，并且默认会将偏移量写入到topic中去，即 _ consumer_offsets Flink设置CheckepointingModel.EXACTLY_ONCE</p>
-<p>2、sink</p>
-<p>存储系统支持幂等性：如Redis,Hbase,ES等</p>
-<p>存储系统不支持幂等性：需要支持事务(预写式日志或者两阶段提交)，两阶段提交可参考Flink集成的kafka sink的实现。</p>
-</blockquote>
-<h4 id="kafka为什么速度会快">Kafka为什么速度会快？</h4>
-<p>kafka使用的是磁盘存储。</p>
-<p>1、顺序写入：因为硬盘每次读写都会先寻址再写入，其中寻址是是耗时的。所以硬盘在顺序I/O的时候能够减少耗时。因此为了提高读写硬盘的速度，Kafka就是使用顺序I/O。</p>
-<p>2、高效文件存储设计：<strong>数据文件分段以及每个段内建立索引</strong>。</p>
-<blockquote>
-<p>数据文件分段：Kafka把topic中一个parition大文件分成多个小文件段，通过多个小文件段，就容易定期清除或删除已经消费完文件，减少磁盘占用。</p>
-<p>比如有100条Message，它们的offset是从0到99。假设将数据文件分成5段，第一段为0-19，第二段为20-39，以此类推，每段放在一个单独的数据文件里面，数据文件以该段中 小的offset命名。这样在查找指定offset的Message的时候，用二分查找就可以定位到该Message在哪个段中。</p>
-<p>建立索引：为了避免顺序扫描才能找到对应offset的Message，进一步提高查找的效率，Kafka为每个分段后的数据文件建立了索引文件，文件名与数据文件的名字是一样的，只是文件扩展名为.index</p>
-</blockquote>
-<p>3、Memory Mapped Files（内存映射文件）：64位操作系统中一般可以表示20G的数据文件，它的工作原理是<strong>直接利用操作系统的Page来实现文件到物理内存的直接映射。完成映射之后你对物理内存的操作会被同步到硬盘上</strong>。</p>
-<h4 id="副本数据同步策略">副本数据同步策略</h4>
-<p>副本数包含leader和follower，全部follower完成同步才发送ack。</p>
-<blockquote>
-<p>Producer 只将该消息发送到该 Partition 的Leader。Leader 会将该消息写入其本地 Log。每个 Follower都从 Leader pull 数据。这种方式上，Follower 存储的数据顺序与 Leader 保持一致。Follower 在收到该消息并写入其Log 后，向 Leader 发送 ACK。一旦 Leader 收到了 ISR 中的所有 Replica 的 ACK，该消息就被认为已经 commit 了，Leader 将增加 HW(HighWatermark)并且向 Producer 发送ACK。</p>
-</blockquote>
-<p>有两个方案对比如下：</p>
-<p>半数以上follower完成同步，就发送ack（优点：延迟低；缺点：选举新的leader时，容忍n台节点的故障，需要2n+1个副本）</p>
-<p>全部follower完成同步，才发送ack（优点：选举新的leader时，容忍n台节点的故障，需要n+1个副本；缺点：延迟高）</p>
-<p>kafka采用零拷贝技术优化数据传输，因此网络延迟对kafka的影响较小，所以选择全部follower完成同步，才发送ack。</p>
-<blockquote>
-<p>https://blog.csdn.net/qq_43437122/article/details/108359748</p>
-<p>假设有5台机器，现在存在一个topic为A，它有一个分区。5台机器最多容忍4台机器故障（如果全故障那你的Kafka Cluster不就凉了?），现在假设有4台机器故障，只有1台机器健康。</p>
-<p>全同步策略：由于是全部follower完成同步，才发送ack，所以topic A 分区下的5个副本（leader + fllower）分别位于这5台机器上，那么那台没有故障的机器（也就是broker）的副本（fllower，假设此时leader故障）就会成为leader继续工作。也即是全同步策略下，容忍n台节点故障，需要n+1个副本。</p>
-<p>半数同步策略：现在是4（n）台机器发生了故障，副本数为5（n+1），由于是半数机制，所以topic A 分区下的副本数只要存在3个（leader + flllower）broker就会发送ack。可是此时四台节点故障，<strong>Kafka集群里面只有三个副本，这就不能保证没故障的节点存在topic A 分区下的副本</strong>。副本数应设置为9个（2n+1）。如果副本数为9，topic A分区下副本数量为5时broker才会发送ack， 这<strong>就保证了每个节点都存在topic A 分区下的一个副本</strong>，此时如果4台节点故障（假设leader故障），那台没故障的机器就会成为leader继续工作。也即是半同步策略下，容忍n台节点故障，需要2n+1个副本。</p>
-</blockquote>
-<h4 id="isr">ISR</h4>
-<p>in-sync replica set (ISR)，意为和leader保持同步的follower集合。</p>
-<blockquote>
-<p>问题产生原因：如果采用全部完成同步，才发送ack的副本的同步策略的话，若所有follower都开始同步数据，但有一个follower，因为某种故障，迟迟不能与leader进行同步，那leader就要一直等下去，直到它完成同步，才能发送ack。这个问题怎么解决呢？</p>
-</blockquote>
-<p>当ISR中的follower完成数据的同步之后，leader就会给follower发送ack。如果follower长时间未向leader同步数据，则该follower将被踢出ISR，该时间阈值由replica.lag.time.max.ms参数设定。Leader发生故障之后，就会从ISR中选举新的leader。</p>
-<h4 id="故障处理">故障处理</h4>
-<p>LEO（Log End Offset）：指的是每个副本最大的offset。</p>
-<p>HW（High Watermark）：指的是消费者能见到的最大的offset，ISR队列中最小的LEO。</p>
-<p>HW之前的数据才会对Consumer可见，所以出现故障的时候，Consumer从HW处继续消费消息，就不会产生重复消费消息的问题。</p>
-<p><img src="/2021/07/29/%E9%9D%A2%E8%AF%95_MQ/image-20210729080554829.png" alt="image-20210729080554829" style="zoom: 50%;"></p>
-<h4 id="kafka事务">kafka事务</h4>
-<p>Kafka从0.11版本开始引入了事务支持。事务可以保证Kafka在Exactly Once语义的基础上，生产和消费可以跨分区和会话，要么全部成功，要么全部失败。</p>
-<ul>
-<li>Producer端事务</li>
-</ul>
-<p>为了实现跨分区跨会话的事务，需要引入一个<strong>全局唯一的Transaction ID，并将Producer获得的PID和Transaction ID绑定</strong>。这样当Producer重启后就可以通过正在进行的Transaction ID获得原来的PID。</p>
-<p>为了管理Transaction，Kafka引入了一个新的组件Transaction Coordinator。Producer就是通过和Transaction Coordinator交互获得Transaction ID对应的任务状态。Transaction Coordinator还负责将事务所有写入Kafka的一个内部Topic，这样即使整个服务重启，由于事务状态得到保存，进行中的事务状态可以得到恢复，从而继续进行。</p>
-<ul>
-<li>Consumer端事务</li>
-</ul>
-<p>对于Consumer而言，事务的保证就会相对较弱，尤其无法保证Commit的信息被精确消费。这是由于Consumer可以通过offset访问任意信息，而且不同的Segment File生命周期不同，同一事务的消息可能会出现重启后被删除的情况。</p>
-<h4 id="kafka为什么不支持读写分离"><strong>Kafka为什么不支持读写分离？</strong></h4>
-<p>在 Kafka 中，生产者写入消息、消费者读取消息的操作都是与 leader 副本进行交互的，从 而实现的是一种主写主读的生产消费模型。</p>
-<p>Kafka 并不支持主写从读，因为主写从读有 2 个很明显的缺点:</p>
-<p>1、数据一致性问题：数据从主节点转到从节点必然会有一个<strong>延时的时间窗口</strong>，这个时间 窗口会导致主从节点之间的数据不一致。某一时刻，在主节点和从节点中 A 数据的值都为 X， 之后将主节点中 A 的值修改为 Y，那么在这个变更通知到从节点之前，应用读取从节点中的 A 数据的值并不为最新的 Y，由此便产生了数据不一致的问题。</p>
-<p>2、延时问题：类似 Redis 这种组件，数据从写入主节点到同步至从节点中的过程需要经历 网络→主节点内存→网络→从节点内存 这几个阶段，整个过程会耗费一定的时间。而在 Kafka 中，主从同步会比 Redis 更加耗时，它需要经历 网络→主节点内存→<strong>主节点磁盘</strong>→网络→从节 点内存→从节点磁盘 这几个阶段。</p>
-<p>对延时敏感的应用而言，主写从读的功能并不太适用。</p>
-<h4 id="kafka的消费分区分配策略负载均衡">kafka的消费分区分配策略（负载均衡）</h4>
-<p>一个consumer group中有多个consumer，一个topic有多个partition，所以必然会涉及到partition的分配问题，即确定哪个partition由哪个consumer来消费。</p>
-<p>Kafka有三种分配策略，一是RoundRobin，一是Range。高版本还有一个StickyAssignor策略。</p>
-<p>将分区的所有权从一个消费者移到另一个消费者称为重新平衡（rebalance）。当以下事件（消费者增加或减少）发生时，Kafka 将会进行一次分区分配：</p>
-<ul>
-<li><p>同一个 Consumer Group 内新增消费者。</p></li>
-<li><p>消费者离开当前所属的Consumer Group，包括shuts down或crashes。</p></li>
-</ul>
-<p><strong>Range</strong></p>
-<p>用<strong>partition数除以消费者线程的总数</strong>来决定每个消费者线程消费几个partition，每一个消费者都能获得尽可能多的分区。</p>
-<p>首先对同一个Topic里面的分区按照序号进行排序，并对消费者按照字母顺序进行排序。然后用Partitions分区的个数除以消费者线程的总数来决定每个消费者线程消费几个分区。如果除不尽，那么前面几个消费者线程将会多消费一个分区。</p>
-<p>假设n=分区数/消费者数量，m=分区数%消费者数量，那么前m个消费者每个分配n+1个分区，后面的（消费者数量-m）个消费者每个分配n个分区。</p>
-<blockquote>
-<p>假如有10个分区，3个消费者线程，把分区按照序号排列</p>
-<p>0，1，2，3，4，5，6，7，8，9</p>
-<p>消费者线程为</p>
-<p>C1-0，C2-0，C2-1</p>
-<p>在例子里面，有10个分区，3个消费者线程，10/3 = 3，而且除除不尽，那么消费者线程C1-0将会多消费一个分区，所以最后分区分配的结果看起来是这样的：</p>
-<p>C1-0：0，1，2，3</p>
-<p>C2-0：4，5，6</p>
-<p>C2-1：7，8，9</p>
-<p>假如有两个主题T1,T2，分别有10个分区，最后的分配结果将会是这样：</p>
-<p>C1-0：T1（0，1，2，3） T2（0，1，2，3）</p>
-<p>C2-0：T1（4，5，6） T2（4，5，6）</p>
-<p>C2-1：T1（7，8，9） T2（7，8，9）</p>
-</blockquote>
-<p><strong>RoundRobinAssignor</strong></p>
-<p>将消费组内所有消费者以及消费者所订阅的所有topic的partition按照字典序排序，然后<strong>通过轮询方式</strong>逐个将分区以此分配给每个消费者，即先排序后轮询分配。</p>
-<p>前提是：</p>
-<p>1、同一个消费者组里面的所有消费者的num.streams（线程数）必须相等。</p>
-<p>2、每个消费者订阅的主题必须相同。</p>
-<blockquote>
-<p>假如按照 hashCode 排序完的topic-partitions组依次为</p>
-<p>T1-5, T1-3, T1-0, T1-8, T1-2, T1-1, T1-4, T1-7, T1-6, T1-9</p>
-<p>我们的消费者线程排序为</p>
-<p>C1-0, C1-1, C2-0, C2-1</p>
-<p>最后分区分配的结果为轮询分配的结果：</p>
-<p>C1-0 将消费 T1-5, T1-2, T1-6 分区</p>
-<p>C1-1 将消费 T1-3, T1-1, T1-9 分区</p>
-<p>C2-0 将消费 T1-0, T1-4 分区</p>
-<p>C2-1 将消费 T1-8, T1-7 分区</p>
-</blockquote>
-<p><strong>StickyAssignor</strong></p>
-<p>Kafka从0.11.x版本开始引入这种分配策略，他主要解决当某个消费者离开的时候再分配的问题。</p>
-<p>1、分区的分配要尽可能的均匀，分配给消费者者的主题分区数最多相差一个</p>
-<p>2、<strong>分区的分配尽可能的与上次分配的保持相同</strong></p>
-<p>3、当两者发生冲突时，第一个目标优先于第二个目标。</p>
-<blockquote>
-<p>原因是：</p>
-<p>如果发生分区重分配，那么对于同一个分区而言有可能之前的消费者和新指派的消费者不是同一个，对于之前消费者进行到一半的处理还要在新指派的消费者中再次复现一遍，这显然很浪费系统资源。StickyAssignor策略如同其名称中的“sticky”一样，让分配策略具备一定的“粘性”，尽可能地让前后两次分配相同，进而减少系统资源的损耗以及其它异常情况的发生。</p>
-</blockquote>
-<p>所有消费者订阅所有主题的案例：</p>
-<blockquote>
-<p>假设消费组内有3个消费者</p>
-<p>C0、C1、C2</p>
-<p>它们都订阅了4个主题：</p>
-<p>t0、t1、t2、t3</p>
-<p>并且每个主题有2个分区，也就是说整个消费组订阅了</p>
-<p>t0p0、t0p1、t1p0、t1p1、t2p0、t2p1、t3p0、t3p1这8个分区</p>
-<p>最终的分配结果如下：</p>
-<p>消费者C0：t0p0、t1p1、t3p0</p>
-<p>消费者C1：t0p1、t2p0、t3p1</p>
-<p>消费者C2：t1p0、t2p1</p>
-<p>这样初看上去似乎与采用RoundRobinAssignor策略所分配的结果相同</p>
-<p>此时<strong>假设消费者C1脱离了消费组</strong>，那么消费组就会执行再平衡操作，进而消费分区会重新分配。如果采用RoundRobinAssignor策略，那么此时的分配结果如下：</p>
-<p>消费者C0：t0p0、t1p0、t2p0、t3p0</p>
-<p>消费者C2：t0p1、t1p1、t2p1、t3p1</p>
-<p>如分配结果所示，RoundRobinAssignor策略会按照消费者C0和C2进行重新轮询分配。而如果此时使用的是StickyAssignor策略，那么分配结果为：</p>
-<p>消费者C0：t0p0、t1p1、t3p0、t2p0</p>
-<p>消费者C2：t1p0、t2p1、t0p1、t3p1</p>
-<p>可以看到分配结果中<strong>保留了上一次分配中对于消费者C0和C2的所有分配结果，并将原来消费者C1的“负担”分配给了剩余的两个消费者C0和C2</strong>，最终C0和C2的分配还保持了均衡。</p>
-</blockquote>
-<p>消费者订阅不同主题的案例：</p>
-<blockquote>
-<p>消费组内有3个消费者：</p>
-<p>C0、C1、C2</p>
-<p>集群中有3个主题：</p>
-<p>t0、t1、t2</p>
-<p>这3个主题分别有</p>
-<p>1、2、3个分区</p>
-<p>也就是说集群中有</p>
-<p>t0p0、t1p0、t1p1、t2p0、t2p1、t2p2这6个分区</p>
-<p>消费者C0订阅了主题t0</p>
-<p>消费者C1订阅了主题t0和t1</p>
-<p>消费者C2订阅了主题t0、t1和t2</p>
-<p>如果此时采用RoundRobinAssignor策略：</p>
-<p>消费者C0：t0p0</p>
-<p>消费者C1：t1p0</p>
-<p>消费者C2：t1p1、t2p0、t2p1、t2p2</p>
-<p>如果此时采用的是StickyAssignor策略：</p>
-<p>消费者C0：t0p0</p>
-<p>消费者C1：t1p0、t1p1 （每个消费者分区数最多相差1个，C1和C2都订t1，因此不能都分给C2）</p>
-<p>消费者C2：t2p0、t2p1、t2p2</p>
-<p>此时消费者C0脱离了消费组，那么RoundRobinAssignor策略的分配结果为：</p>
-<p>消费者C1：t0p0、t1p1</p>
-<p>消费者C2：t1p0、t2p0、t2p1、t2p2</p>
-<p>StickyAssignor策略，那么分配结果为：</p>
-<p>消费者C1：t1p0、t1p1、t0p0</p>
-<p>消费者C2：t2p0、t2p1、t2p2</p>
-<p>可以看到StickyAssignor策略保留了消费者C1和C2中原有的5个分区的分配：</p>
-<p>t1p0、t1p1、t2p0、t2p1、t2p2。</p>
-</blockquote>
-<h4 id="参考资料">参考资料</h4>
-<p>https://mp.weixin.qq.com/s/ftkzB36cZ5b-D1go_87fXQ</p>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/07/29/%E9%9D%A2%E8%AF%95_MQ/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
