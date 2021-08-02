@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.3.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/maze.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/maze.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/maze.png">
+  <link rel="mask-icon" href="/images/maze.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","images":"/images","scheme":"Mist","version":"8.2.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false}};
+  </script>
+<meta name="description" content="DML（Data Manipulation Language）数据操作语言用于定义数据的基本操作，SQL中处理数据等操作统称为数据操纵语言，简而言之就是实现了基本的“增删改查”操作。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hive DML">
+<meta property="og:url" content="http://example.com/2021/07/25/Hive_DML/index.html">
+<meta property="og:site_name" content="BIOINSu">
+<meta property="og:description" content="DML（Data Manipulation Language）数据操作语言用于定义数据的基本操作，SQL中处理数据等操作统称为数据操纵语言，简而言之就是实现了基本的“增删改查”操作。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2021/07/25/Hive_DML/image-20210725172512400.png">
+<meta property="og:image" content="http://example.com/2021/07/25/Hive_DML/image-20210725175046839.png">
+<meta property="og:image" content="http://example.com/2021/07/25/Hive_DML/image-20210725175112816.png">
+<meta property="og:image" content="http://example.com/2021/07/25/Hive_DML/image-20210725161008715.png">
+<meta property="og:image" content="http://example.com/2021/07/25/Hive_DML/image-20210725180419051.png">
+<meta property="og:image" content="http://example.com/2021/07/25/Hive_DML/image-20210725182147657.png">
+<meta property="og:image" content="http://example.com/2021/07/25/Hive_DML/image-20210725182126594.png">
+<meta property="og:image" content="http://example.com/2021/07/25/Hive_DML/image-20210725182207003.png">
+<meta property="og:image" content="http://example.com/2021/07/25/Hive_DML/image-20210725182238798.png">
+<meta property="og:image" content="http://example.com/2021/07/25/Hive_DML/image-20210725182550180.png">
+<meta property="og:image" content="http://example.com/2021/07/25/Hive_DML/image-20210726003928854.png">
+<meta property="og:image" content="http://example.com/2021/07/25/Hive_DML/image-20210726005046850.png">
+<meta property="og:image" content="http://example.com/2021/07/25/Hive_DML/image-20210726005212922.png">
+<meta property="og:image" content="http://example.com/2021/07/25/Hive_DML/image-20210726005345737.png">
+<meta property="og:image" content="http://example.com/2021/07/25/Hive_DML/image-20210726005430913.png">
+<meta property="og:image" content="http://example.com/2021/07/25/Hive_DML/image-20210726005514782.png">
+<meta property="og:image" content="http://example.com/2021/07/25/Hive_DML/image-20210726005548550.png">
+<meta property="og:image" content="http://example.com/2021/07/25/Hive_DML/image-20210726005716904.png">
+<meta property="og:image" content="http://example.com/2021/07/25/Hive_DML/image-20210726005755307.png">
+<meta property="article:published_time" content="2021-07-25T09:23:22.687Z">
+<meta property="article:modified_time" content="2021-08-01T15:14:26.152Z">
+<meta property="article:author" content="BIOINSu">
+<meta property="article:tag" content="Hive">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2021/07/25/Hive_DML/image-20210725172512400.png">
+
+
+<link rel="canonical" href="http://example.com/2021/07/25/Hive_DML/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+<title>Hive DML | BIOINSu</title>
+  
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BIOINSu</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#load"><span class="nav-number">1.</span> <span class="nav-text">load</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E7%A1%80"><span class="nav-number">1.1.</span> <span class="nav-text">基础</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%AD%E6%B3%95"><span class="nav-number">1.2.</span> <span class="nav-text">语法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#filepath"><span class="nav-number">1.2.1.</span> <span class="nav-text">filepath</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#local"><span class="nav-number">1.2.2.</span> <span class="nav-text">local</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A1%88%E4%BE%8B"><span class="nav-number">1.2.3.</span> <span class="nav-text">案例</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B0%E7%89%B9%E6%80%A7"><span class="nav-number">1.3.</span> <span class="nav-text">3.0 新特性</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#insert-select"><span class="nav-number">2.</span> <span class="nav-text">insert + select</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E7%A1%80-1"><span class="nav-number">2.1.</span> <span class="nav-text">基础</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%AD%E6%B3%95-1"><span class="nav-number">2.2.</span> <span class="nav-text">语法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%9A%E9%87%8D%E6%8F%92%E5%85%A5"><span class="nav-number">2.3.</span> <span class="nav-text">多重插入</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E5%88%86%E5%8C%BA%E6%8F%92%E5%85%A5"><span class="nav-number">2.4.</span> <span class="nav-text">动态分区插入</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#insert-directory"><span class="nav-number">3.</span> <span class="nav-text">insert + directory</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E7%A1%80-2"><span class="nav-number">3.1.</span> <span class="nav-text">基础</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%AD%E6%B3%95-2"><span class="nav-number">3.2.</span> <span class="nav-text">语法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#hive%E4%BA%8B%E5%8A%A1updatedelete"><span class="nav-number">4.</span> <span class="nav-text">Hive事务（update&#x2F;delete）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">4.1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B1%80%E9%99%90"><span class="nav-number">4.2.</span> <span class="nav-text">局限</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%9F%E7%90%86"><span class="nav-number">4.3.</span> <span class="nav-text">原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A1%88%E4%BE%8B-1"><span class="nav-number">4.4.</span> <span class="nav-text">案例</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#select"><span class="nav-number">5.</span> <span class="nav-text">select</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E8%AF%AD%E6%B3%95"><span class="nav-number">5.1.</span> <span class="nav-text">基本语法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A1%88%E4%BE%8B-2"><span class="nav-number">5.2.</span> <span class="nav-text">案例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%AB%98%E9%98%B6%E6%9F%A5%E8%AF%A2"><span class="nav-number">5.3.</span> <span class="nav-text">高阶查询</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8E%92%E5%BA%8F"><span class="nav-number">5.3.1.</span> <span class="nav-text">排序</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#union"><span class="nav-number">5.3.2.</span> <span class="nav-text">union</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AD%90%E6%9F%A5%E8%AF%A2"><span class="nav-number">5.3.3.</span> <span class="nav-text">子查询</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#cte"><span class="nav-number">6.</span> <span class="nav-text">CTE</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#join"><span class="nav-number">7.</span> <span class="nav-text">join</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E7%A1%80-3"><span class="nav-number">7.1.</span> <span class="nav-text">基础</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%AD%E6%B3%95-3"><span class="nav-number">7.2.</span> <span class="nav-text">语法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%84%E7%A7%8Djoin"><span class="nav-number">7.3.</span> <span class="nav-text">各种JOIN</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#inner-join"><span class="nav-number">7.3.1.</span> <span class="nav-text">inner join</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#left-join"><span class="nav-number">7.3.2.</span> <span class="nav-text">left join</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#right-join"><span class="nav-number">7.3.3.</span> <span class="nav-text">right join</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#full-outer-join"><span class="nav-number">7.3.4.</span> <span class="nav-text">full outer join</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#left-semi-join"><span class="nav-number">7.3.5.</span> <span class="nav-text">left semi join</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#cross-join%E7%AC%9B%E5%8D%A1%E5%B0%94%E7%A7%AF"><span class="nav-number">7.3.6.</span> <span class="nav-text">cross join（笛卡尔积）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9"><span class="nav-number">7.4.</span> <span class="nav-text">注意事项</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">BIOINSu</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">47</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">31</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">35</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/BIOINSu" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;BIOINSu" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/25/Hive_DML/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BIOINSu">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BIOINSu">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Hive DML
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-07-25 17:23:22" itemprop="dateCreated datePublished" datetime="2021-07-25T17:23:22+08:00">2021-07-25</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-08-01 23:14:26" itemprop="dateModified" datetime="2021-08-01T23:14:26+08:00">2021-08-01</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Hive/" itemprop="url" rel="index"><span itemprop="name">Hive</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>DML（Data Manipulation Language）数据操作语言用于定义数据的基本操作，SQL中处理数据等操作统称为数据操纵语言，简而言之就是实现了基本的“增删改查”操作。</p>
+<a id="more"></a>
+<h2 id="load">load</h2>
+<h3 id="基础">基础</h3>
+<p>当在Hive中创建好表之后，就会在HDFS上创建一个与之对应的文件夹，要想让hive的表和结构化的数据文件产生映射，就需要把文件移到到表对应的文件夹下面，当然，可以在建表的时候使用location语句指定数据文件的路径。但是不管路径在哪里，必须把数据文件移动到对应的路径下面。</p>
+<p>最原始暴力直接的方式就是使用hadoop fs –put等方式将数据移动到路径下面。</p>
+<p>Hive官方推荐<strong>使用Load命令将数据加载到表中</strong>。</p>
+<h3 id="语法">语法</h3>
+<p>在将数据load加载到表中时，Hive不会进行任何转换。</p>
+<p><strong>加载操作是将数据文件移动到与Hive表对应的位置的纯复制/移动操作</strong>。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">LOAD DATA [LOCAL] INPATH &#39;filepath&#39; [OVERWRITE] INTO TABLE tablename [PARTITION (partcol1&#x3D;val1, partcol2&#x3D;val2 ...)]</span><br><span class="line"></span><br><span class="line">LOAD DATA [LOCAL] INPATH &#39;filepath&#39; [OVERWRITE] INTO TABLE tablename [PARTITION (partcol1&#x3D;val1, partcol2&#x3D;val2 ...)] [INPUTFORMAT &#39;inputformat&#39; SERDE &#39;serde&#39;] (3.0 or later)</span><br></pre></td></tr></table></figure>
+<h4 id="filepath">filepath</h4>
+<p>filepath表示的待移动数据的路径，可以引用一个文件（在这种情况下，Hive将文件移动到表中），也可以是一个目录（在这种情况下，Hive将把该目录中的所有文件移动到表中）。</p>
+<p>相对路径，例如：project/data1</p>
+<p>绝对路径，例如：/user/hive/project/data1</p>
+<p>具有schema的完整URI，例如：hdfs://namenode:9000/user/hive/project/data1</p>
+<h4 id="local">local</h4>
+<p>如果指定了LOCAL， <strong>load命令将在本地文件系统中查找文件路径</strong>。如果指定了相对路径，它将相对于用户的当前工作目录进行解释。用户也可以为本地文件指定完整的URI-例如：file:///user/hive/project/data1。</p>
+<p>注意，如果对HiveServer2服务运行此命令。这里的本地文件系统指的是Hiveserver2<strong>服务所在机器的本地Linux文件系统</strong>，<strong>不是Hive客户端所在的本地文件系统</strong>。</p>
+<p>如果没有指定LOCAL关键字，如果filepath指向的是一个完整的URI，hive会直接使用这个URI。 否则如果没有指定schema或者authority，Hive会使用在hadoop配置文件中定义的schema 和 authority，即参数fs.default.name指定（不出意外，都是HDFS）。</p>
+<p><strong>overwrite</strong></p>
+<p>如果使用了OVERWRITE关键字，则目标表（或者分区）中的内容会被删除，然后再将 filepath 指向的文件/目录中的内容添加到表/分区中。</p>
+<h4 id="案例">案例</h4>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">-- ------Load Data From Local FS or HDFS------</span><br><span class="line">-- step1:建表</span><br><span class="line">-- 建表student_local 用于演示从本地加载数据</span><br><span class="line">create table student_local(</span><br><span class="line">    num int,name string,sex string,age int,dept string) </span><br><span class="line">    row format delimited fields terminated by &#39;,&#39;;</span><br><span class="line"></span><br><span class="line">-- 建表student_HDFS  用于演示从HDFS加载数据</span><br><span class="line">create external table student_HDFS(</span><br><span class="line">    num int,name string,sex string,age int,dept string) </span><br><span class="line">    row format delimited fields terminated by &#39;,&#39;;</span><br><span class="line"></span><br><span class="line">-- 建表student_HDFS_p 用于演示从HDFS加载数据到分区表</span><br><span class="line">create table student_HDFS_p(</span><br><span class="line">    num int,name string,sex string,age int,dept string) </span><br><span class="line">    partitioned by(country string) </span><br><span class="line">    row format delimited fields terminated by &#39;,&#39;;</span><br><span class="line"></span><br><span class="line">-- 建议使用beeline客户端 可以显示出加载过程日志信息</span><br><span class="line">-- step2:加载数据</span><br><span class="line">-- 从本地加载数据  数据位于HS2（node1）本地文件系统  本质是hadoop fs -put上传操作</span><br><span class="line">LOAD DATA LOCAL INPATH &#39;&#x2F;root&#x2F;hivedata&#x2F;students.txt&#39; INTO TABLE student_local;</span><br><span class="line"></span><br><span class="line">-- 从HDFS加载数据  数据位于HDFS文件系统根目录下  本质是hadoop fs -mv 移动操作</span><br><span class="line">-- 先把数据上传到HDFS上  hadoop fs -put &#x2F;root&#x2F;hivedata&#x2F;students.txt &#x2F;</span><br><span class="line">LOAD DATA INPATH &#39;&#x2F;students.txt&#39; INTO TABLE student_HDFS;</span><br><span class="line"></span><br><span class="line">-- --从HDFS加载数据到分区表中并制定分区  数据位于HDFS文件系统根目录下</span><br><span class="line">-- 先把数据上传到HDFS上 hadoop fs -put &#x2F;root&#x2F;hivedata&#x2F;students.txt &#x2F;</span><br><span class="line">LOAD DATA INPATH &#39;&#x2F;students.txt&#39; INTO TABLE student_HDFS_p partition(country &#x3D;&quot;CHina&quot;);</span><br></pre></td></tr></table></figure>
+<h3 id="新特性">3.0 新特性</h3>
+<p>Hive 3.0及更高版本中，除了移动复制操作之外，还支持其他加载操作，因为Hive在内部在某些场合下会将加载重写为INSERT AS SELECT。</p>
+<p>比如，如果表具有分区，则load命令没有指定分区，则将load转换为INSERT AS SELECT，并<strong>假定最后一组列为分区列</strong>。如果文件不符合预期的架构，它将引发错误。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">-- -----hive 3.0 load命令新特性------------------</span><br><span class="line">CREATE TABLE if not exists tab1 (col1 int, col2 int)</span><br><span class="line">PARTITIONED BY (col3 int)</span><br><span class="line">row format delimited fields terminated by &#39;,&#39;;</span><br><span class="line"></span><br><span class="line">LOAD DATA LOCAL INPATH &#39;&#x2F;root&#x2F;hivedata&#x2F;tab1.txt&#39; INTO TABLE tab1;</span><br><span class="line"></span><br><span class="line">-- tab1.txt内容如下</span><br><span class="line">11,22,1</span><br><span class="line">33,44,2</span><br></pre></td></tr></table></figure>
+<p>本来加载的时候没有指定分区，语句是报错的，但是文件的格式符合表的结构，前两个是col1,col2,最后一个是分区字段col3，则此时会将load语句转换成为insert as select语句。</p>
+<p>在Hive3.0中，还支持使用inputformat、SerDe指定任何Hive输入格式，例如文本，ORC等。</p>
+<h2 id="insert-select">insert + select</h2>
+<h3 id="基础-1">基础</h3>
+<p>Hive中insert主要是结合select查询语句使用，<strong>将查询结果插入到表中</strong>。</p>
+<h3 id="语法-1">语法</h3>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">INSERT OVERWRITE TABLE tablename1 </span><br><span class="line">[PARTITION (partcol1&#x3D;val1, partcol2&#x3D;val2 ...) [IF NOT EXISTS]] select_statement1 FROM from_statement;</span><br><span class="line"></span><br><span class="line">INSERT INTO TABLE tablename1 </span><br><span class="line">[PARTITION (partcol1&#x3D;val1, partcol2&#x3D;val2 ...)] select_statement1 FROM from_statement;</span><br></pre></td></tr></table></figure>
+<p>INSERT OVERWRITE将覆盖表或分区中的任何现有数据。</p>
+<p>需要保证查询结果列的数目和需要插入数据表格的列数目一致。如果查询出来的数据类型和插入表格对应的列数据类型不一致，将会进行转换，但是不能保证转换一定成功，转换失败的数据将会为NULL。</p>
+<p>案例：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">-- step1:创建一张源表student</span><br><span class="line">drop table if exists student;</span><br><span class="line">create table student(</span><br><span class="line">    num int,name string,sex string,age int,dept string)</span><br><span class="line">row format delimited</span><br><span class="line">fields terminated by &#39;,&#39;;</span><br><span class="line"></span><br><span class="line">-- 加载数据</span><br><span class="line">load data local inpath &#39;&#x2F;root&#x2F;hivedata&#x2F;students.txt&#39; into table student;</span><br><span class="line"></span><br><span class="line">-- step2：创建一张目标表  只有两个字段</span><br><span class="line">create table student_from_insert(sno int,sname string);</span><br><span class="line"></span><br><span class="line">-- 使用insert+select插入数据到新表中</span><br><span class="line">insert into table student_from_insert select num,name from student;</span><br><span class="line"></span><br><span class="line">select * from student_insert1;</span><br></pre></td></tr></table></figure>
+<h3 id="多重插入">多重插入</h3>
+<p>从一个表中，写多个查询逻辑，并将结果输出到多个不同表（分区）：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">-- ----------multiple inserts----------------------</span><br><span class="line">-- 当前库下已有一张表student</span><br><span class="line">select * from student;</span><br><span class="line"></span><br><span class="line">-- 创建两张新表</span><br><span class="line">create table student_insert1(sno int);</span><br><span class="line">create table student_insert2(sname string);</span><br><span class="line"></span><br><span class="line">-- 多重插入</span><br><span class="line">from student</span><br><span class="line">insert overwrite table student_insert1</span><br><span class="line">select num</span><br><span class="line">insert overwrite table student_insert2</span><br><span class="line">select name;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h3 id="动态分区插入">动态分区插入</h3>
+<p>对于分区表的数据导入加载，最常见最基础的是通过load命令加载数据。假如说现在有全球224个国家的人员名单（每个国家名单单独一个文件），导入数据到分区表中，不同国家不同分区，不可能使用load语法导入224次。</p>
+<p>为此，Hive提供了动态分区插入的语法。</p>
+<p>所谓动态分区插入指的是：<strong>分区的值是由后续的select查询语句的结果来动态确定的。根据查询结果自动分区</strong>。</p>
+<p>配置参数</p>
+<table>
+<colgroup>
+<col style="width: 32%">
+<col style="width: 6%">
+<col style="width: 61%">
+</colgroup>
+<tbody>
+<tr class="odd">
+<td>hive.exec.dynamic.partition</td>
+<td>true</td>
+<td>需要设置true为启用动态分区插入</td>
+</tr>
+<tr class="even">
+<td>hive.exec.dynamic.partition.mode</td>
+<td>strict</td>
+<td>在strict模式下，用户必须至少指定一个静态分区，以防用户意外覆盖所有分区；在nonstrict模式下，允许所有分区都是动态的</td>
+</tr>
+</tbody>
+</table>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">FROM page_view_stg pvs</span><br><span class="line">INSERT OVERWRITE TABLE page_view PARTITION(dt&#x3D;&#39;2008-06-08&#39;, country)</span><br><span class="line">SELECT pvs.viewTime, pvs.userid, pvs.page_url, pvs.referrer_url, null, null, pvs.ip, pvs.cnt</span><br><span class="line"></span><br><span class="line">-- 在这里，country分区将由SELECT子句（即pvs.cnt）的最后一列动态创建。</span><br><span class="line">-- 而dt分区是手动指定写死的。</span><br><span class="line">-- 如果是nonstrict模式下，dt分区也可以动态创建。</span><br></pre></td></tr></table></figure>
+<p>案例：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">-- 动态分区插入</span><br><span class="line">-- 1、首先设置动态分区模式为非严格模式 默认已经开启了动态分区功能</span><br><span class="line">set hive.exec.dynamic.partition &#x3D; true;</span><br><span class="line">set hive.exec.dynamic.partition.mode &#x3D; nonstrict;</span><br><span class="line"></span><br><span class="line">-- 2、当前库下已有一张表student</span><br><span class="line">select * from student;</span><br><span class="line"></span><br><span class="line">-- 3、创建分区表 以sdept作为分区字段</span><br><span class="line">-- 注意：分区字段名不能和表中的字段名重复。</span><br><span class="line">create table student_partition(</span><br><span class="line">    Sno int,Sname string,Sex string,Sage int) </span><br><span class="line">partitioned by(Sdept string);</span><br><span class="line"></span><br><span class="line">-- 4、执行动态分区插入操作</span><br><span class="line">insert into table student_partition partition(Sdept)</span><br><span class="line">select Sno,Sname,Sex,Sage,Sdept from student;</span><br><span class="line">-- 其中，Sno,Sname,Sex,Sage作为表的字段内容插入表中</span><br><span class="line">-- Sdept作为分区字段值</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>执行结果如下，可以发现实现了自动分区：</p>
+<figure>
+<img src="/2021/07/25/Hive_DML/image-20210725172512400.png" alt="image-20210725172512400"><figcaption aria-hidden="true">image-20210725172512400</figcaption>
+</figure>
+<h2 id="insert-directory">insert + directory</h2>
+<h3 id="基础-2">基础</h3>
+<p>Hive支持将select查询的结果导出成文件存放在文件系统中。</p>
+<h3 id="语法-2">语法</h3>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">-- 标准语法:</span><br><span class="line">INSERT OVERWRITE [LOCAL] DIRECTORY directory1</span><br><span class="line">[ROW FORMAT row_format] </span><br><span class="line">[STORED AS file_format] (Note: Only available starting with Hive 0.11.0)</span><br><span class="line">SELECT ... FROM ...</span><br><span class="line"></span><br><span class="line">-- Hive extension (multiple inserts):</span><br><span class="line">FROM from_statement</span><br><span class="line">INSERT OVERWRITE [LOCAL] DIRECTORY directory1 select_statement1</span><br><span class="line">[INSERT OVERWRITE [LOCAL] DIRECTORY directory2 select_statement2] ...</span><br><span class="line"></span><br><span class="line">--row_format</span><br><span class="line">: DELIMITED [FIELDS TERMINATED BY char [ESCAPED BY char]] [COLLECTION ITEMS TERMINATED BY char]</span><br><span class="line">[MAP KEYS TERMINATED BY char] [LINES TERMINATED BY char]</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>注意，<strong>导出操作是一个OVERWRITE覆盖操作，慎重</strong>。</p>
+<p>目录可以是完整的URI。如果未指定scheme或Authority，则Hive将使用hadoop配置变量fs.default.name中的方案和Authority，该变量指定Namenode URI。</p>
+<p>如果使用LOCAL关键字，则Hive会将数据写入本地文件系统上的目录。</p>
+<p>写入文件系统的数据被序列化为文本，列之间用^ A隔开，行之间用换行符隔开。如果任何列都不是原始类型，那么这些列将序列化为JSON格式。也可以在导出的时候指定分隔符换行符和文件格式。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">-- 当前库下已有一张表student</span><br><span class="line">select * from student;</span><br><span class="line"></span><br><span class="line">-- 1、导出查询结果到HDFS指定目录下</span><br><span class="line">insert overwrite directory &#39;&#x2F;tmp&#x2F;hive_export&#x2F;e1&#39; select * from student;</span><br><span class="line"></span><br><span class="line">-- 2、导出时指定分隔符和文件存储格式</span><br><span class="line">insert overwrite directory &#39;&#x2F;tmp&#x2F;hive_export&#x2F;e2&#39; </span><br><span class="line">row format delimited fields terminated by &#39;,&#39;</span><br><span class="line">stored as orc</span><br><span class="line">select * from student;</span><br><span class="line"></span><br><span class="line">-- 3、导出数据到本地文件系统指定目录下</span><br><span class="line">insert overwrite local directory &#39;&#x2F;root&#x2F;hive_export&#x2F;e1&#39;</span><br><span class="line">select * from student;</span><br></pre></td></tr></table></figure>
+<p>导出结果：</p>
+<figure>
+<img src="/2021/07/25/Hive_DML/image-20210725175046839.png" alt="image-20210725175046839"><figcaption aria-hidden="true">image-20210725175046839</figcaption>
+</figure>
+<p>文件格式：</p>
+<p><img src="/2021/07/25/Hive_DML/image-20210725175112816.png" alt="image-20210725175112816" style="zoom:67%;"></p>
+<h2 id="hive事务updatedelete">Hive事务（update/delete）</h2>
+<h3 id="背景">背景</h3>
+<p>Hive本身从设计之初时，就是不支持事务的，因为<strong>Hive的核心目标是将已经存在的结构化数据文件映射成为表</strong>，<strong>然后提供基于表的SQL分析处理</strong>，是一款面向分析的工具。且映射的数据通常存储于HDFS上，而HDFS是不支持随机修改文件数据的。</p>
+<p>这个定位就意味着在早期的Hive的SQL语法中是没有update，delete操作的，也就没有所谓的事务支持了，因为都是select查询分析操作。</p>
+<p>从Hive0.14版本开始，具有ACID语义的事务已添加到Hive中，以解决以下场景下遇到的问题：</p>
+<p>1、流式传输数据。使用如Apache Flume或Apache Kafka之类的工具将数据流式传输到Hadoop集群中。虽然这些工具可以每秒数百行或更多行的速度写入数据，但是Hive只能每隔15分钟到一个小时添加一次分区。频繁添加分区会很快导致表中大量的分区。因此通常使用这些工具将数据流式传输到现有分区中，但是这会使读者感到脏读（也就是说，他们将在开始查询后看到写入的数据），并将许多小文件留在目录中，这将给NameNode带来压力。<strong>通过事务功能，允许读者获得一致的数据视图并避免过多的文件</strong>。</p>
+<p>2、尺寸变化缓慢。在典型的星型模式数据仓库中，维度表随时间缓慢变化。例如，零售商将开设新商店，需要将其添加到商店表中，或者现有商店可能会更改其平方英尺或某些其他跟踪的特征。这些更改导致插入单个记录或更新 记录（取决于所选策略）。</p>
+<p>3、数据重述。有时发现收集的数据不正确，需要更正。从Hive 0.14开始，可以通过INSERT，UPDATE和 DELETE支持这些用例 。</p>
+<h3 id="局限">局限</h3>
+<p>虽然Hive支持了具有ACID语义的事务，但是在使用起来，并没有像在MySQL中使用那样方便，有很多局限性。原因很简单，毕竟Hive的设计目标不是为了支持事务操作，而是支持分析操作，且最终基于HDFS的底层存储机制使得文件的增加删除修改操作需要动一些小心思。具体限制如下：</p>
+<p>1、尚不支持BEGIN，COMMIT和ROLLBACK。所有语言操作都是自动提交的。</p>
+<p>2、仅支持ORC文件格式（STORED AS ORC）。</p>
+<p>3、默认情况下事务配置为关闭。需要配置参数开启使用。</p>
+<p>4、表必须是分桶表（Bucketed）才可以使用事务功能。</p>
+<p>5、表<strong>参数transactional必须为true</strong>；</p>
+<p>6、外部表不能成为ACID表，不允许从非ACID会话读取/写入ACID表。</p>
+<h3 id="原理">原理</h3>
+<h3 id="案例-1">案例</h3>
+<p>如果不做任何配置修改，直接针对Hive中已有的表进行Update、Delete、Insert操作，可以发现，只有insert语句可以执行，Update和Delete操作会报错。Insert插入操作能够成功的原因在于，底层是直接把数据写在一个新的文件中的。</p>
+<figure>
+<img src="/2021/07/25/Hive_DML/image-20210725161008715.png" alt="image-20210725161008715"><figcaption aria-hidden="true">image-20210725161008715</figcaption>
+</figure>
+<p>事务案例：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">-- Hive中事务表的创建使用</span><br><span class="line">-- 1、开启事务配置（可以使用set设置当前session生效 也可以配置在hive-site.xml中）</span><br><span class="line">set hive.support.concurrency &#x3D; true; --Hive是否支持并发</span><br><span class="line">set hive.enforce.bucketing &#x3D; true; --从Hive2.0开始不再需要  是否开启分桶功能</span><br><span class="line">set hive.exec.dynamic.partition.mode &#x3D; nonstrict; --动态分区模式  非严格</span><br><span class="line">set hive.txn.manager &#x3D; org.apache.hadoop.hive.ql.lockmgr.DbTxnManager; --</span><br><span class="line">set hive.compactor.initiator.on &#x3D; true; --是否在Metastore实例上运行启动线程和清理线程</span><br><span class="line">set hive.compactor.worker.threads &#x3D; 1; --在此metastore实例上运行多少个压缩程序工作线程。</span><br><span class="line"></span><br><span class="line">-- 2、创建Hive事务表</span><br><span class="line">create table trans_student(</span><br><span class="line">    id int,</span><br><span class="line">    name String,</span><br><span class="line">    age int</span><br><span class="line">)clustered by (id) into 2 buckets stored as orc TBLPROPERTIES(&#39;transactional&#39;&#x3D;&#39;true&#39;);</span><br><span class="line"></span><br><span class="line">-- 3、针对事务表进行insert update delete操作</span><br><span class="line">insert into trans_student (id, name, age)</span><br><span class="line">values (1,&quot;allen&quot;,18);</span><br><span class="line"></span><br><span class="line">update trans_student</span><br><span class="line">set age &#x3D; 20</span><br><span class="line">where id &#x3D; 1;</span><br><span class="line"></span><br><span class="line">delete from trans_student where id &#x3D;1;</span><br><span class="line"></span><br><span class="line">select * from trans_student;</span><br></pre></td></tr></table></figure>
+<h2 id="select">select</h2>
+<h3 id="基本语法">基本语法</h3>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[<span class="keyword">WITH</span> CommonTableExpression (, CommonTableExpression)<span class="operator">*</span>] </span><br><span class="line"><span class="keyword">SELECT</span> [<span class="keyword">ALL</span> <span class="operator">|</span> <span class="keyword">DISTINCT</span>] select_expr, select_expr, ...</span><br><span class="line">  <span class="keyword">FROM</span> table_reference</span><br><span class="line">  [<span class="keyword">WHERE</span> where_condition]</span><br><span class="line">  [<span class="keyword">GROUP</span> <span class="keyword">BY</span> col_list]</span><br><span class="line">  [<span class="keyword">ORDER</span> <span class="keyword">BY</span> col_list]</span><br><span class="line">  [CLUSTER <span class="keyword">BY</span> col_list</span><br><span class="line">    <span class="operator">|</span> [DISTRIBUTE <span class="keyword">BY</span> col_list] [SORT <span class="keyword">BY</span> col_list]</span><br><span class="line">  ]</span><br><span class="line"> [LIMIT [<span class="keyword">offset</span>,] <span class="keyword">rows</span>]</span><br></pre></td></tr></table></figure>
+<p>查询的输入。它可以是普通物理表，视图，join查询结果或子查询结果。表名和列名不区分大小写。</p>
+<p>每个select_expr表示要检索的列。必须至少有一个 select_expr。</p>
+<p>ALL和DISTINCT选项指定是否应返回重复的行。如果没有给出这些选项，则默认值为ALL（返回所有匹配的行）。DISTINCT指定从结果集中删除重复的行。</p>
+<p>WHERE条件是一个布尔表达式。在WHERE表达式中，可以使用Hive支持的任何函数和运算符，但聚合函数除外。</p>
+<p>为什么不能在where子句中使用聚合函数？因为聚合函数要使用它的前提是结果集已经确定。而where子句还处于“确定”结果集的过程中，因而不能使用聚合函数。</p>
+<p>GROUP BY 语句用于聚合函数，根据一个或多个字段对结果集进行分组。需要注意的是，<strong>出现在select_expr中的字段：要么是GROUP BY分组的字段；要么是被聚合函数应用的字段</strong>。原因很简单，避免出现一个字段多个值的歧义。比如基于category进行分组，相同颜色的分在同一组中，在select_expr中，如果出现category字段，则没有问题，因为同一组中category值一样，但是返回day就有问题了，day的结果不一样。</p>
+<p>HAVING，WHERE关键字无法与聚合函数一起使用。HAVING子句可以让我们筛选分组后的各组数据,并且可以在Having中使用聚合函数，因为此时where，group by已经执行结束，结果集已经确定。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">-- 先where分组前过滤（此处是分区裁剪），再进行group by分组（含聚合）， 分组后每个分组结果集确定 再使用having过滤</span><br><span class="line">select state,sum(deaths)</span><br><span class="line">from t_usa_covid19_p</span><br><span class="line">where count_date &#x3D; &quot;2021-01-28&quot;</span><br><span class="line">group by state</span><br><span class="line">having sum(deaths) &gt; 10000;</span><br><span class="line"></span><br><span class="line">-- 这样写更好 即在group by的时候聚合函数已经作用得出结果 having直接引用结果过滤 不需要再单独计算一次了</span><br><span class="line">select state,sum(deaths) as cnts</span><br><span class="line">from t_usa_covid19_p</span><br><span class="line">where count_date &#x3D; &quot;2021-01-28&quot;</span><br><span class="line">group by state</span><br><span class="line">having cnts&gt; 10000;</span><br></pre></td></tr></table></figure>
+<p>having与where的区别: 1、having是在分组后对数据进行过滤；where是在分组前对数据进行过滤 2、having后面可以使用聚合函数；where后面不可以使用聚合</p>
+<p>LIMIT子句可用于约束SELECT语句返回的行数。LIMIT接受一个或两个数字参数，这两个参数都必须是非负整数常量。第一个参数指定要返回的第一行的偏移量（从 Hive 2.0.0开始），第二个参数指定要返回的最大行数。当给出单个参数时，它代表最大行数，并且偏移量默认为0。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">-- 返回结果集的前5条</span><br><span class="line">select * from t_usa_covid19_p</span><br><span class="line">where count_date &#x3D; &quot;2021-01-28&quot;</span><br><span class="line">  and state &#x3D;&quot;California&quot;</span><br><span class="line">limit 5;</span><br><span class="line"></span><br><span class="line">-- 返回结果集从第1行开始 共3行</span><br><span class="line">select * from t_usa_covid19_p</span><br><span class="line">where count_date &#x3D; &quot;2021-01-28&quot;</span><br><span class="line">  and state &#x3D;&quot;California&quot;</span><br><span class="line">limit 2,3; -- 注意 第一个参数偏移量是从0开始的</span><br></pre></td></tr></table></figure>
+<h3 id="案例-2">案例</h3>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">-- step1:创建普通表t_usa_covid19</span><br><span class="line">drop table itcast.t_usa_covid19;</span><br><span class="line">CREATE TABLE itcast.t_usa_covid19(</span><br><span class="line">       count_date string,</span><br><span class="line">       county string,</span><br><span class="line">       state string,</span><br><span class="line">       fips int,</span><br><span class="line">       cases int,</span><br><span class="line">       deaths int)</span><br><span class="line">row format delimited fields terminated by &quot;,&quot;;</span><br><span class="line">-- 将源数据load加载到t_usa_covid19表对应的路径下</span><br><span class="line">load data local inpath &#39;&#x2F;root&#x2F;hivedata&#x2F;us-covid19-counties.dat&#39; into table t_usa_covid19;</span><br><span class="line"></span><br><span class="line">-- step2:创建一张分区表 基于count_date日期,state州进行分区</span><br><span class="line">CREATE TABLE itcast.t_usa_covid19_p(</span><br><span class="line">     county string,</span><br><span class="line">     fips int,</span><br><span class="line">     cases int,</span><br><span class="line">     deaths int)</span><br><span class="line">partitioned by(count_date string,state string)</span><br><span class="line">row format delimited fields terminated by &quot;,&quot;;</span><br><span class="line"></span><br><span class="line">-- step3:使用动态分区插入将数据导入t_usa_covid19_p中</span><br><span class="line">set hive.exec.dynamic.partition.mode &#x3D; nonstrict;</span><br><span class="line"></span><br><span class="line">insert into table t_usa_covid19_p partition (count_date,state)</span><br><span class="line">select county,fips,cases,deaths,count_date,state from t_usa_covid19;</span><br></pre></td></tr></table></figure>
+<p>查询结果：</p>
+<p><img src="/2021/07/25/Hive_DML/image-20210725180419051.png" alt="image-20210725180419051" style="zoom:67%;"></p>
+<p>通常，SELECT查询将扫描整个表（所谓的全表扫描）。如果使用PARTITIONED BY子句创建的分区表，则在查询时可以指定分区查询，减少全表扫描，也叫做分区裁剪。</p>
+<p>所谓分区裁剪指的是：对分区表进行查询时，会检查WHERE子句或JOIN中的ON子句中是否存在对分区字段的过滤，如果存在，则<strong>仅访问查询符合条件的分区，即裁剪掉没必要访问的分区</strong>。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">-- 找出来自加州，累计死亡人数大于1000的县 state字段就是分区字段 进行分区裁剪 避免全表扫描</span><br><span class="line">select * from t_usa_covid19_p where state &#x3D;&quot;California&quot; and deaths &gt; 1000;</span><br><span class="line"></span><br><span class="line">-- 多分区裁剪</span><br><span class="line">select * from t_usa_covid19_p where count_date &#x3D; &quot;2021-01-28&quot; and state &#x3D;&quot;California&quot; and deaths &gt; 1000;</span><br></pre></td></tr></table></figure>
+<h3 id="高阶查询">高阶查询</h3>
+<h4 id="排序">排序</h4>
+<p>Hive SQL中的CLUSTER BY语法可以指定根据后面的字段将数据分组，每组内再根据这个字段正序排序（<strong>不允许指定倒序</strong>），概况起来就是：根据同一个字段，分且排序。</p>
+<p>分组的规则hash散列。hash_func(col_name) % reduce task nums</p>
+<p>分为几组取决于reduce task的个数。下面在Hive beeline客户端中针对student表为例：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">-- cluster by</span><br><span class="line">select * from student;</span><br><span class="line">-- 不指定reduce task个数</span><br><span class="line">-- 日志显示：Number of reduce tasks not specified. Estimated from input data size: 1</span><br><span class="line">select * from student cluster by sno;</span><br><span class="line"></span><br><span class="line">-- 手动设置reduce task个数</span><br><span class="line">set mapreduce.job.reduces &#x3D;2;</span><br><span class="line">select * from student cluster by sno;</span><br></pre></td></tr></table></figure>
+<p>默认情况下，reduce task的个数由Hive在编译期间自己决定：</p>
+<figure>
+<img src="/2021/07/25/Hive_DML/image-20210725182147657.png" alt="image-20210725182147657"><figcaption aria-hidden="true">image-20210725182147657</figcaption>
+</figure>
+<p>手动设置reduce task个数：</p>
+<figure>
+<img src="/2021/07/25/Hive_DML/image-20210725182126594.png" alt="image-20210725182126594"><figcaption aria-hidden="true">image-20210725182126594</figcaption>
+</figure>
+<figure>
+<img src="/2021/07/25/Hive_DML/image-20210725182207003.png" alt="image-20210725182207003"><figcaption aria-hidden="true">image-20210725182207003</figcaption>
+</figure>
+<p>执行结果如下：分为两个部分，每个部分内正序排序：</p>
+<p><img src="/2021/07/25/Hive_DML/image-20210725182238798.png" alt="image-20210725182238798" style="zoom:80%;"></p>
+<p>因为CLUSTER BY不允许指定倒序，因此若有倒序的需求则需要采用其他方法。</p>
+<p>DISTRIBUTE BY +SORT BY就相当于把cluster by的功能一分为二：DISTRIBUTE BY负责分，SORT BY负责分组内排序，并且可以是不同的字段。如果DISTRIBUTE BY +SORT BY的字段一样，可以得出下列结论：CLUSTER BY=DISTRIBUTE BY +SORT BY（字段一样）</p>
+<p>案例，把学生表数据根据性别分为两个部分，每个分组内根据年龄的倒序排序：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select * from student distribute by sex sort by sage desc;</span><br></pre></td></tr></table></figure>
+<figure>
+<img src="/2021/07/25/Hive_DML/image-20210725182550180.png" alt="image-20210725182550180"><figcaption aria-hidden="true">image-20210725182550180</figcaption>
+</figure>
+<p>总结：</p>
+<ul>
+<li>order by会对输入做全局排序，因此只有一个reducer，会导致当输入规模较大时，需要较长的计算时间。</li>
+<li>sort by不是全局排序，其在数据进入reducer前完成排序。因此，如果用sort by进行排序，并且设置mapred.reduce.tasks&gt;1，则sort by只保证每个reducer的输出有序，不保证全局有序。</li>
+<li>distribute by(字段)根据指定字段将数据分到不同的reducer，分发算法是hash散列。</li>
+<li>cluster by(字段) 除了具有Distribute by的功能外，还会对该字段进行排序。如果distribute和sort的字段是同一个时，此时，cluster by = distribute by + sort by</li>
+</ul>
+<h4 id="union">union</h4>
+<p>UNION用于将来自多个SELECT语句的结果合并为一个结果集。</p>
+<p>每个select_statement返回的<strong>列的数量和名称必须相同</strong>。</p>
+<p>语法如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">select_statement </span><br><span class="line">UNION [ALL | DISTINCT] select_statement </span><br><span class="line">UNION [ALL | DISTINCT] select_statement ...</span><br><span class="line"></span><br><span class="line">-- union</span><br><span class="line">-- 使用DISTINCT关键字与使用UNION默认值效果一样，都会删除重复行。</span><br><span class="line">select num,name from student_local</span><br><span class="line">UNION</span><br><span class="line">select num,name from student_hdfs;</span><br><span class="line">-- 和上面一样</span><br><span class="line">select num,name from student_local</span><br><span class="line">UNION DISTINCT</span><br><span class="line">select num,name from student_hdfs;</span><br><span class="line"></span><br><span class="line">-- 使用ALL关键字会保留重复行。</span><br><span class="line">select num,name from student_local</span><br><span class="line">UNION ALL</span><br><span class="line">select num,name from student_hdfs;</span><br><span class="line"></span><br><span class="line">-- 如果要将ORDER BY，SORT BY，CLUSTER BY，DISTRIBUTE BY或LIMIT应用于单个SELECT</span><br><span class="line">-- 请将子句放在括住SELECT的括号内</span><br><span class="line">SELECT sno,sname FROM (select sno,sname from student_local LIMIT 2) subq1</span><br><span class="line">UNION</span><br><span class="line">SELECT sno,sname FROM (select sno,sname from student_hdfs LIMIT 3) subq2</span><br><span class="line"></span><br><span class="line">-- 如果要将ORDER BY，SORT BY，CLUSTER BY，DISTRIBUTE BY或LIMIT子句应用于整个UNION结果</span><br><span class="line">-- 请将ORDER BY，SORT BY，CLUSTER BY，DISTRIBUTE BY或LIMIT放在最后一个之后。</span><br><span class="line">select sno,sname from student_local</span><br><span class="line">UNION</span><br><span class="line">select sno,sname from student_hdfs</span><br><span class="line">order by sno desc;</span><br></pre></td></tr></table></figure>
+<p>使用DISTINCT关键字与只使用UNION默认值效果一样，都会删除重复行。使用ALL关键字，不会删除重复行，结果集包括所有SELECT语句的匹配行（包括重复行）。</p>
+<h4 id="子查询">子查询</h4>
+<p>在Hive0.12版本，仅在FROM子句中支持子查询。<strong>必须要给子查询一个名称</strong>，<strong>因为FROM子句中的每个表都必须有一个名称</strong>。在Hive0.12版本，仅在FROM子句中支持子查询。而且必须要给子查询一个名称，因为FROM子句中的每个表都必须有一个名称。Hive 0.13.0和更高版本中的子查询名称之前可以包含可选关键字“ AS” 。</p>
+<p>子查询返回结果中的列必须具有唯一的名称。子查询返回结果中的列在外部查询中可用，就像真实表的列一样。子查询也可以是带有UNION的查询表达式。Hive支持任意级别的子查询，也就是所谓的嵌套子查询。</p>
+<p>从Hive 0.13开始，WHERE子句支持某些类型的子查询。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">-- where子句中子查询（Subqueries）</span><br><span class="line">-- 不相关子查询，相当于IN、NOT IN,子查询只能选择一个列。</span><br><span class="line">-- （1）执行子查询，其结果不被显示，而是传递给外部查询，作为外部查询的条件使用。</span><br><span class="line">-- （2）执行外部查询，并显示整个结果。　　</span><br><span class="line">SELECT *</span><br><span class="line">FROM student_hdfs</span><br><span class="line">WHERE student_hdfs.num IN (select num from student_local limit 2);</span><br><span class="line"></span><br><span class="line">-- 相关子查询，指EXISTS和NOT EXISTS子查询</span><br><span class="line">-- 子查询的WHERE子句中支持对父查询的引用</span><br><span class="line">SELECT A</span><br><span class="line">FROM T1</span><br><span class="line">WHERE EXISTS (SELECT B FROM T2 WHERE T1.X &#x3D; T2.Y);</span><br></pre></td></tr></table></figure>
+<h2 id="cte">CTE</h2>
+<p>Common Table Expressions（CTE），即公用表表达式（CTE）是一个临时结果集，该结果集是从WITH子句中指定的简单查询派生而来的，该查询紧接在SELECT或INSERT关键字之前。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line">--选择语句中的CTE</span><br><span class="line">with q1 as (select sno,sname,sage from student where sno &#x3D; 95002)</span><br><span class="line">select *</span><br><span class="line">from q1;</span><br><span class="line"></span><br><span class="line">-- from风格</span><br><span class="line">with q1 as (select sno,sname,sage from student where sno &#x3D; 95002)</span><br><span class="line">from q1</span><br><span class="line">select *;</span><br><span class="line"></span><br><span class="line">-- chaining CTEs 链式</span><br><span class="line">with q1 as ( select * from student where sno &#x3D; 95002),</span><br><span class="line">     q2 as ( select sno,sname,sage from q1)</span><br><span class="line">select * from (select sno from q2) a;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">-- union案例</span><br><span class="line">with q1 as (select * from student where sno &#x3D; 95002),</span><br><span class="line">     q2 as (select * from student where sno &#x3D; 95004)</span><br><span class="line">select * from q1 union all select * from q2;</span><br><span class="line"></span><br><span class="line">-- 视图，CTAS和插入语句中的CTE</span><br><span class="line">-- insert</span><br><span class="line">create table s1 like student;</span><br><span class="line"></span><br><span class="line">with q1 as ( select * from student where sno &#x3D; 95002)</span><br><span class="line">from q1</span><br><span class="line">insert overwrite table s1</span><br><span class="line">select *;</span><br><span class="line"></span><br><span class="line">select * from s1;</span><br><span class="line"></span><br><span class="line">-- ctas</span><br><span class="line">create table s2 as</span><br><span class="line">with q1 as ( select * from student where sno &#x3D; 95002)</span><br><span class="line">select * from q1;</span><br><span class="line"></span><br><span class="line">-- view</span><br><span class="line">create view v1 as</span><br><span class="line">with q1 as ( select * from student where sno &#x3D; 95002)</span><br><span class="line">select * from q1;</span><br><span class="line"></span><br><span class="line">select * from v1;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="join">join</h2>
+<h3 id="基础-3">基础</h3>
+<p>根据数据库的三范式设计要求，<strong>通常不会设计一张大表把所有类型的数据都放在一起，而是不同类型的数据设计不同的表存储</strong>。比如在设计一个订单数据表的时候，可以将客户编号作为一个外键和订单表建立相应的关系。而不可以在订单表中添加关于客户其它信息（比如姓名、所属公司等）的字段。</p>
+<p><img src="/2021/07/25/Hive_DML/image-20210726003928854.png" alt="image-20210726003928854" style="zoom:50%;"></p>
+<p>在这种情况下，有时需要基于多张表查询才能得到最终完整的结果，SQL中<strong>join语法的出现是用于根据两个或多个表中的字段之间的关系，从这些表中共同组合查询数据</strong>，因此有时为了得到完整的结果，我们就需要执行 join。</p>
+<p>Hive作为面向分析的数据仓库软件，为了更好的支持数据分析的功能丰富，也实现了join的语法，整体上来看和RDBMS中的join语法类似，只不过在某些点有自己的特色。需要特别注意。</p>
+<h3 id="语法-3">语法</h3>
+<p>在Hive中，当下版本3.1.2总共支持6种join语法。分别是：</p>
+<p>inner join（内连接）、left join（左连接）、right join（右连接）、full outer join（全外连接）、left semi join（左半开连接）、cross join（交叉连接，也叫做笛卡尔乘积）。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">table_reference [INNER] JOIN table_factor [join_condition]</span><br><span class="line"> | table_reference &#123;LEFT|RIGHT|FULL&#125; [OUTER] JOIN table_reference join_condition</span><br><span class="line"> | table_reference LEFT SEMI JOIN table_reference join_condition</span><br><span class="line"> | table_reference CROSS JOIN table_reference [join_condition] (as of Hive 0.10</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>JOIN默认就是INNER JOIN。</p>
+<p>table_reference：是join查询中使用的表名，也可以是子查询别名（查询结果当成表参与join）。</p>
+<p>table_factor：与table_reference相同,是联接查询中使用的表名,也可以是子查询别名。</p>
+<p>join_condition：join查询关联的条件， 如果在两个以上的表上需要连接，则使用AND关键字。</p>
+<p>从Hive 0.13.0开始，支持隐式联接表示法（请参阅HIVE-5558）。这允许FROM子句连接以逗号分隔</p>
+<p>的表列表，而省略JOIN关键字。例如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">SELECT *</span><br><span class="line">FROM table1 t1, table2 t2, table3 t3</span><br><span class="line">WHERE t1.id &#x3D; t2.id AND t2.id &#x3D; t3.id AND t1.zipcode &#x3D; &#39;02535&#39;;</span><br></pre></td></tr></table></figure>
+<p>Hive 2.2.0开始，支持ON子句中的复杂表达式，<strong>支持不相等连接</strong>（请参阅HIVE-15211和HIVE-15251）。<strong>在此之前，Hive不支持非等值联接条件</strong>。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">SELECT a.* FROM a JOIN b ON (a.id &#x3D; b.id)</span><br><span class="line">SELECT a.* FROM a JOIN b ON (a.id &#x3D; b.id AND a.department &#x3D; b.department)</span><br><span class="line">SELECT a.* FROM a LEFT OUTER JOIN b ON (a.id &lt;&gt; b.id)</span><br></pre></td></tr></table></figure>
+<h3 id="各种join">各种JOIN</h3>
+<h4 id="inner-join">inner join</h4>
+<p>内连接是最常见的一种连接，它也被称为普通连接，而关系模型提出者E.FCodd（埃德加•科德）最早称之为自然连接。其中inner可以省略。inner join == join 等价于早期的连接语法。</p>
+<p>内连接，只有进行连接的两个表中都存在与连接条件相匹配的数据才会被留下来。</p>
+<p><img src="/2021/07/25/Hive_DML/image-20210726005046850.png" alt="image-20210726005046850" style="zoom: 33%;"></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">-- 1、inner join</span><br><span class="line">select e.id,e.name,e_a.city,e_a.street</span><br><span class="line">from employee e </span><br><span class="line">inner join employee_address e_a</span><br><span class="line">on e.id &#x3D;e_a.id;</span><br><span class="line"></span><br><span class="line">-- 等价于 inner join&#x3D;join</span><br><span class="line">select e.id,e.name,e_a.city,e_a.street</span><br><span class="line">from employee e </span><br><span class="line">join employee_address e_a</span><br><span class="line">on e.id &#x3D;e_a.id;</span><br><span class="line"></span><br><span class="line">-- 等价于 隐式连接表示法</span><br><span class="line">select e.id,e.name,e_a.city,e_a.street</span><br><span class="line">from employee e , employee_address e_a</span><br><span class="line">where e.id &#x3D;e_a.id;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p><img src="/2021/07/25/Hive_DML/image-20210726005212922.png" alt="image-20210726005212922" style="zoom: 67%;"></p>
+<h4 id="left-join">left join</h4>
+<p>left join中文叫做是左外连接(Left Outer Jion)或者左连接，其中outer可以省略，left outer join是早期的写法。</p>
+<p>left join的核心就在于left左。左指的是join关键字左边的表，简称左表。</p>
+<p>join时以左表的全部数据为准，右边与之关联；左表数据全部返回，右表关联上的显示返回，关联不上的显示null返回。</p>
+<p><img src="/2021/07/25/Hive_DML/image-20210726005345737.png" alt="image-20210726005345737" style="zoom: 33%;"></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">-- 2、left join</span><br><span class="line">select e.id,e.name,e_conn.phno,e_conn.email</span><br><span class="line">from employee e left join employee_connection e_conn</span><br><span class="line">on e.id &#x3D;e_conn.id;</span><br><span class="line"></span><br><span class="line">-- 等价于 left outer join</span><br><span class="line">select e.id,e.name,e_conn.phno,e_conn.email</span><br><span class="line">from employee e left outer join  employee_connection e_conn</span><br><span class="line">on e.id &#x3D;e_conn.id;</span><br></pre></td></tr></table></figure>
+<p><img src="/2021/07/25/Hive_DML/image-20210726005430913.png" alt="image-20210726005430913" style="zoom:67%;"></p>
+<h4 id="right-join">right join</h4>
+<p>right join中文叫做是右外连接(Right Outer Jion)或者右连接，其中outer可以省略。</p>
+<p>right join的核心就在于Right右。右指的是join关键字右边的表，简称右表。</p>
+<p>join时以右表的全部数据为准，左边与之关联；右表数据全部返回，左表关联上的显示返回，关联不上的显示null返回。</p>
+<p>很明显，right join和left join之间很相似，重点在于以哪边为准，也就是一个方向的问题。</p>
+<p><img src="/2021/07/25/Hive_DML/image-20210726005514782.png" alt="image-20210726005514782" style="zoom:33%;"></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">-- 3、right join</span><br><span class="line">select e.id,e.name,e_conn.phno,e_conn.email</span><br><span class="line">from employee e right join employee_connection e_conn</span><br><span class="line">on e.id &#x3D;e_conn.id;</span><br><span class="line"></span><br><span class="line">-- 等价于 right outer join</span><br><span class="line">select e.id,e.name,e_conn.phno,e_conn.email</span><br><span class="line">from employee e right outer join employee_connection e_conn</span><br><span class="line">on e.id &#x3D;e_conn.id;</span><br></pre></td></tr></table></figure>
+<p><img src="/2021/07/25/Hive_DML/image-20210726005548550.png" alt="image-20210726005548550" style="zoom:67%;"></p>
+<h4 id="full-outer-join">full outer join</h4>
+<p>full outer join 等价 full join ,中文叫做全外连接或者外连接。</p>
+<p>包含左、右两个表的全部行，不管另外一边的表中是否存在与它们匹配的行。它等价于对这两个数据集合分别进行左外连接和右外连接，然后再使用消去重复行的操作将上述两个结果集合并为一个结果集。</p>
+<p><img src="/2021/07/25/Hive_DML/image-20210726005716904.png" alt="image-20210726005716904" style="zoom:33%;"></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">-- 4、full outer join</span><br><span class="line">select e.id,e.name,e_a.city,e_a.street</span><br><span class="line">from employee e full outer join employee_address e_a</span><br><span class="line">on e.id &#x3D;e_a.id;</span><br><span class="line"></span><br><span class="line">-- 等价于</span><br><span class="line">select e.id,e.name,e_a.city,e_a.street</span><br><span class="line">from employee e full  join employee_address e_a</span><br><span class="line">on e.id &#x3D;e_a.id;</span><br></pre></td></tr></table></figure>
+<p><img src="/2021/07/25/Hive_DML/image-20210726005755307.png" alt="image-20210726005755307" style="zoom:67%;"></p>
+<h4 id="left-semi-join">left semi join</h4>
+<p>左半开连接（LEFT SEMI JOIN）会返回左边表的记录，前提是其记录对于右边的表满足ON语句中的判定条件。</p>
+<p>从效果上来看即inner join之后只返回左表的结果。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">-- 5、left semi join</span><br><span class="line">select *</span><br><span class="line">from employee e left semi join employee_address e_addr</span><br><span class="line">on e.id &#x3D;e_addr.id;</span><br><span class="line"></span><br><span class="line">-- 相当于 inner join 只不过效率高一些</span><br><span class="line">select e.*</span><br><span class="line">from employee e inner join employee_address e_addr</span><br><span class="line">on e.id &#x3D;e_addr.id;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h4 id="cross-join笛卡尔积">cross join（笛卡尔积）</h4>
+<p>交叉连接cross join，将会返回被连接的两个表的笛卡尔积，返回结果的行数等于两个表行数的乘积。对于大表来说，cross join慎用。</p>
+<p>在HiveSQL语法中，cross join 后面可以跟where子句进行过滤，或者on条件过滤。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">-- 6、cross join</span><br><span class="line">-- 下列A、B、C 执行结果相同，但是效率不一样：</span><br><span class="line">-- A:</span><br><span class="line">select a.*,b.* from employee a,employee_address b where a.id&#x3D;b.id;</span><br><span class="line">-- B:</span><br><span class="line">select * from employee a cross join employee_address b on a.id&#x3D;b.id;</span><br><span class="line">select * from employee a cross join employee_address b where a.id&#x3D;b.id;</span><br><span class="line"></span><br><span class="line">-- C:</span><br><span class="line">select * from employee a inner join employee_address b on a.id&#x3D;b.id;</span><br><span class="line"></span><br><span class="line">-- 一般不建议使用方法A和B，因为如果有WHERE子句的话，往往会先进行笛卡尔积返回数据然后才根据WHERE条件从中选择。</span><br><span class="line">-- 因此，如果两个表太大，将会非常非常慢，不建议使用。</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h3 id="注意事项">注意事项</h3>
+<p>1、允许使用复杂的on联接表达式</p>
+<p>2、同一查询中可以连接2个以上的表（！？多表关联原理）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">SELECT a.val, b.val, c.val </span><br><span class="line">FROM </span><br><span class="line">a JOIN b ON (a.key &#x3D; b.key1) </span><br><span class="line">JOIN c ON (c.key &#x3D; b.key2)</span><br></pre></td></tr></table></figure>
+<p>3、如果每个表在联接子句中使用相同的列，则Hive将多个表上的联接转换为单个MR作业</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">SELECT a.val, b.val, c.val </span><br><span class="line">FROM a JOIN b ON (a.key &#x3D; b.key1) </span><br><span class="line">JOIN c ON (c.key &#x3D; b.key1)</span><br><span class="line">-- 由于联接中仅涉及b的key1列，因此被转换为1个MR作业来执行</span><br><span class="line"></span><br><span class="line">SELECT a.val, b.val, c.val </span><br><span class="line">FROM a JOIN b ON (a.key &#x3D; b.key1) </span><br><span class="line">JOIN c ON (c.key &#x3D; b.key2)</span><br><span class="line">-- 会转换为两个MR作业，因为在第一个连接条件中使用了b中的key1列，而在第二个连接条件中使用了b中的key2列。第一个map &#x2F; reduce作业将a与b联接在一起，然后将结果与c联接到第二个map &#x2F; reduce作业中。</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>4、join时的最后一个表会通过reducer流式传输，并在其中缓存之前的其他表，因此，将大表放置在最后有助于减少reducer阶段缓存数据所需要的内存</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">SELECT a.val, b.val, c.val </span><br><span class="line">FROM a JOIN b ON (a.key &#x3D; b.key1) </span><br><span class="line">JOIN c ON (c.key &#x3D; b.key1)</span><br><span class="line">-- 由于联接中仅涉及b的key1列，因此被转换为1个MR作业来执行，并且表a和b的键的特定值的值被缓存在reducer的内存中。然后，对于从c中检索的每一行，将使用缓存的行来计算联接。</span><br><span class="line"></span><br><span class="line">SELECT a.val, b.val, c.val </span><br><span class="line">FROM a JOIN b ON (a.key &#x3D; b.key1) </span><br><span class="line">JOIN c ON (c.key &#x3D; b.key2)</span><br><span class="line">-- 计算涉及两个MR作业。其中的第一个将a与b连接起来，并缓存a的值，同时在reducer中流式传输b的值。在第二个MR作业中，将缓存第一个连接的结果，同时将c的值通过reducer流式传输。</span><br></pre></td></tr></table></figure>
+<p>5、在join的时候，可以通过语法STREAMTABLE提示指定要流式传输的表。如果省略STREAMTABLE提示，则Hive将流式传输最右边的表。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">SELECT &#x2F;*+ STREAMTABLE(a) *&#x2F; a.val, b.val, c.val </span><br><span class="line">FROM a JOIN b ON (a.key &#x3D; b.key1) </span><br><span class="line">JOIN c ON (c.key &#x3D; b.key1)</span><br><span class="line">-- a,b,c三个表都在一个MR作业中联接，并且表b和c的键的特定值的值被缓存在reducer的内存中。然后，对于从a中检索到的每一行，将使用缓存的行来计算联接。如果省略STREAMTABLE提示，则Hive将流式传输最右边的表。</span><br></pre></td></tr></table></figure>
+<p>6、如果除一个要连接的表之外的所有表都很小，则可以将其作为仅map作业执行（即map端join）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">SELECT &#x2F;*+ MAPJOIN(b) *&#x2F; a.key, a.value </span><br><span class="line">FROM a JOIN b ON a.key &#x3D; b.key</span><br><span class="line">-- 不需要reducer。对于A的每个Mapper，B都会被完全读取。限制是不能执行FULL &#x2F; RIGHT OUTER JOIN b。</span><br></pre></td></tr></table></figure>
+<p>7、join在where条件之前进行。（执行顺序？？）</p>
+<p>多表关联和join的执行顺序</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Hive/" rel="tag"># Hive</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/07/24/%E9%9D%A2%E8%AF%95_Spark/" rel="prev" title="Spark">
+                  <i class="fa fa-chevron-left"></i> Spark
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/07/25/%E7%AC%94%E8%AF%95_0725%E6%8B%BC%E5%A4%9A%E5%A4%9A/" rel="next" title="0725 拼多多笔试">
+                  0725 拼多多笔试 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">BIOINSu</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+  <script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'none'
+      },
+      options: {
+        renderActions: {
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              const target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3.1.2/es5/tex-mml-chtml.js';
+    script.defer = true;
+    document.head.appendChild(script);
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.typesetClear();
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+
+
+</body>
+</html>

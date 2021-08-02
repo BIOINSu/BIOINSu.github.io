@@ -3935,4 +3935,491 @@
         <tag>Java基础</tag>
       </tags>
   </entry>
+  <entry>
+    <title>海量小文件问题</title>
+    <url>/2021/08/02/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E6%B5%B7%E9%87%8F%E5%B0%8F%E6%96%87%E4%BB%B6%E9%97%AE%E9%A2%98/</url>
+    <content><![CDATA[<table>
+<colgroup>
+<col style="width: 5%">
+<col style="width: 35%">
+<col style="width: 23%">
+<col style="width: 35%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>Hadoop</th>
+<th>Hive</th>
+<th>Spark</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>小文件来源</td>
+<td>数据源有大量小文件；reducer太多，每个都生成小文件</td>
+<td>Hive分区表的每个分区数据量很小</td>
+<td>sparkstreaming在每个batch结束后都会重新打开一个新的文件作为输出，因此每个batch下的每个分区生成大量小文件</td>
+</tr>
+<tr class="even">
+<td>解决方案</td>
+<td>1、在数据源处就合并小文件</td>
+<td>1、配置map前合并和reduce后合并小文件</td>
+<td>1、增加batch大小</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>2、定期运行一个MR任务，读取某一个文件夹中的所有小文件，并通过减少reduce的数量将它们重写为较少数量的大文件</td>
+<td>2、使用HAR归档文件</td>
+<td>2、通过coalesce和repartition减少分区数量</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>3、SequenceFile将数据以KV的形式序列化到文件中，MR任务只需要为每个block启动一个map任务，并且保留文件名</td>
+<td>3、减少分区表中的分区数量</td>
+<td>3、自定义合并脚本</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>4、使用Hbase进行数据存储，将数据抽取过程从生成大量小HDFS文件更改为以逐条记录写入到HBase表</td>
+<td>4、数据压缩，通过序列化存储方式存储数据</td>
+<td>4、通过foreach输出类追加小文件</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>5、CombineFileInputFormat是Hadoop提供的抽象类，在MR读取时合并小文件。合并的文件不会持久化到磁盘</td>
+<td></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>6、自己编写特定的程序通过输出类来追加到现有的小文件</td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td>7、NameNode中通过Hadoop Archive(HAR)和联邦机制解决内存不足的问题</td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<a id="more"></a>
+<h3 id="问题概述">问题概述</h3>
+<p>海量小文件（LSOF，lots of small files）问题，使得分布式系统在在元数据管理、存储效率、访问的性能等方面面临巨大的挑战。</p>
+<p>存储磁盘最适合顺序的大文件I/O读写模式，非常不适合随机的小文件I/O读写模式（顺序读写，避免寻址），这是磁盘文件系统在海量小文件应用下性能表现不佳的根本原因。磁盘文件系统的设计大多都侧重于大文件，包括元数据管理、数据布局和I/O访问流程，另外VFS系统调用机制也非常不利于海量小文件，这些软件层面的机制和实现加剧了小文件读写的性能问题。</p>
+<p>Hadoop中的海量小文件问题，核心问题是它需要把文件meta信息缓存在内存里，这个内存只能是单机的，所以变成了一个很大的瓶颈。虽然后面HDFS一直尝试解决这个问题，比如引入联邦制等，但是也变相的引入了复杂性。</p>
+<h3 id="存储系统性能衡量">存储系统性能衡量</h3>
+<p>IOPS (Input/Output Per Second) 即每秒的输入输出量 (或读写次数) ，是衡量存储系统性能的主要指标之一。IOPS是指单位时间内系统能处理的I/O请求数量，一般以每秒处理的I/O请求数量为单位，I/O请求通常为读或写数据操作请求。随机读写频繁的应用，如OLTP(OnlineTransaction Processing)，IOPS是关键衡量指标。</p>
+<p>数据吞吐量(Throughput)，指单位时间内可以成功传输的数据数量。对于大量顺序读写的应用，如VOD(VideoOn Demand)，则更关注吞吐量指标。</p>
+<p>对于LOSF而言，IOPS/OPS是关键性能衡量指标。</p>
+<h3 id="小文件过多引起的问题">小文件过多引起的问题</h3>
+<h4 id="元数据管理低效"><strong>元数据管理低效</strong></h4>
+<p>磁盘文件系统中，目录项(dentry)、索引节点(inode)和数据(data)保存在存储介质的不同位置上。因此，访问一个文件需要经历至少3次独立的访问。这样，并发的小文件访问就转变成了大量的随机访问，而这种访问对于广泛使用的磁盘来说是非常低效的。</p>
+<p>同时，文件系统通常采用Hash树、B+树或B*树来组织和索引目录，这种方法不能在数以亿计的大目录中很好的扩展，海量目录下检索效率会明显下降。正是由于单个目录元数据组织能力的低效，文件系统使用者通常被鼓励把文件分散在多层次的目录中以提高性能。然而，这种方法会进一步加大路径查询的开销。</p>
+<h4 id="数据布局低效"><strong>数据布局低效</strong></h4>
+<p>磁盘文件系统使用块来组织磁盘数据，并在inode中使用多级指针或hash树来索引文件数据块。数据块通常比较小，一般为1KB、2KB或4KB。当文件需要存储数据时，文件系统根据预定的策略分配数据块，分配策略会综合考虑数据局部性、存储空间利用效率等因素，通常会优先考虑大文件I/O带宽。</p>
+<p>对于大文件，数据块会尽量进行连续分配，具有比较好的空间局部性。</p>
+<p>对于小文件，尤其是大文件和小文件混合存储或者经过大量删除和修改后，数据块分配的随机性会进一步加剧，数据块可能零散分布在磁盘上的不同位置，并且会造成<strong>大量的磁盘碎片</strong>(包括内部碎片和外部碎片)，不仅造成<strong>访问性能下降</strong>（寻址随机访问），还导致大量磁盘空间浪费。</p>
+<p>对于特别小的小文件，比如小于4KB，<strong>inode与数据分开存储</strong>，这种数据布局也没有充分利用空间局部性，导致随机I/O访问，目前已经有文件系统实现了data in inode。</p>
+<h4 id="io访问流程复杂">I/O访问流程复杂</h4>
+<p>Linux等操作系统采用VFS或类似机制来抽象文件系统的实现，提供标准统一访问接口和流程，它提供通用的Cache机制，处理文件系统相关的所有系统调用，与具体文件系统和其他内核组件(如内存管理)交互。VFS可以屏蔽底层文件系统实现细节，简化文件系统设计，实现对不同文件系统支持的扩展。</p>
+<p>VFS通用模型中有涉及四种数据类型：超级块对象(superblock object)、索引结点对象(inode object)、文件对象(file object)和目录项对象(dentry object)，进程在进行I/O访问过程中需要频繁与它们交互(如下图所示)。</p>
+<p><img src="/2021/08/02/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E6%B5%B7%E9%87%8F%E5%B0%8F%E6%96%87%E4%BB%B6%E9%97%AE%E9%A2%98/image-20210801234410484.png" alt="image-20210801234410484" style="zoom:67%;"></p>
+<p>对于小文件的I/O访问过程，读写数据量比较小，这些流程太过复杂，系统调用开销太大，尤其是其中的<strong>open()操作占用了大部分的操作时间</strong>。当面对海量小文件并发访问，<strong>读写之前的准备工作</strong>占用了绝大部分系统时间，有效磁盘服务时间非常低，从而导致小I/O性能极度低下。</p>
+<p>对于大多数分布式文件系统而言，通常将元数据与数据两者独立开来，即控制流与数据流进行分离，从而获得更高的系统扩展性和I/O并发性。数据和I/O访问负载被分散到多个物理独立的存储节点，从而实现系统的高扩展性和高性能，每个节点使用磁盘文件系统管理数据，比如XFS、EXT4、XFS等。</p>
+<p>因此，相对于磁盘文件系统而言，每个节点的小文件问题是相同的。由于分布式的架构，分布式文件系统中的网络通信、元数据服务MDC、Cache管理、数据布局和I/O访问模式等都会对IOPS/OPS性能产生影响，进一步加剧小文件问题。</p>
+<h3 id="解决方案小文件合并">解决方案：小文件合并</h3>
+<p>小文件合并存储是目前优化LOSF问题最为成功的策略，已经被包括Facebook Haystack和淘宝TFS在内多个分布式存储系统采用。它通过<strong>多个逻辑文件共享同一个物理文件</strong>，将多个小文件合并存储到一个大文件中，实现高效的小文件存储。</p>
+<p>（1）首先减少了大量元数据，提高了元数据的检索和查询效率，降低了文件读写的 I/O 操作延时。</p>
+<p>（2）其次将可能连续访问的小文件一同合并存储，增加了文件之间的局部性，将原本小文件间的随机访问变为了顺序访问，大大提高了性能。</p>
+<p>（3）同时，合并存储能够有效的减少小文件存储时所产生的磁盘碎片问题，提高了磁盘的利用率。</p>
+<p>（4）最后，合并之后小文件的访问流程也有了很大的变化，由原来许多的open操作转变为了seek操作，定位到大文件具体的位置即可。</p>
+<p>小文件合并存储，本质上是大文件加上索引文件，相当于一个微型文件系统。这种机制对于WORM(Write Once Read Many)模式的分布式存储系统非常适合，而不适合允许改写和删除的存储系统。（1）因为文件改写和删除操作，<strong>会造成大文件内部的碎片空洞</strong>，如果进行空间管理并在合适时候执行碎片整理，实现比较复杂而且产生额外开销。（2）如果不对碎片进行处理，采用追加写的方式，一方面会浪费存储容量，另一方面又会破坏数据局部性，增加数据分布的随机性，导致读性能下降。（3）此外，如果支持随机读写，大小文件如何统一处理，小文件增长成大文件，大文件退化为小文件，这些问题都是在实际处理时面临的挑战。</p>
+<h3 id="hadoop小文件">Hadoop小文件</h3>
+<h4 id="小文件来源">小文件来源</h4>
+<p>一个Hadoop集群中存在小文件的可能原因如下：</p>
+<p><strong>1.流式任务（如spark streaming/flink等实时计算框架）</strong></p>
+<p>在做数据处理时，无论是纯实时还是基于batch的准实时，在小的时间窗口内都可能产生大量的小文件。此外对于Spark任务如果过度并行化，每个分区一个文件，产生的文件也可能会增多</p>
+<p><strong>2.Hive分区表的过度分区</strong></p>
+<p>这里的过度分区是指Hive分区表的每个分区数据量很小（比如小于HDFS block size）的Hive表。那么Hive Metastore Server调用开销会随着表拥有的分区数量而增加，影响性能。此时，要衡量数据量重新进行表结构设计（如减少分区粒度）。</p>
+<p><strong>3.数据源有大量小文件，未做处理直接迁移到Hadoop集群。</strong></p>
+<p><strong>4.对于计算引擎处理任务，以MR为例。</strong></p>
+<p>大量的map和reduce task存在。在HDFS上生成的文件基本上与map数量（对于Map-Only作业）或reduce数量（对于MR作业）成正比。此外，MR任务如果未设置合理的reduce数或者未做限制，每个reduce都会生成一个独立的文件。对于数据倾斜，导致大部分的数据都shuffle到一个或几个reduce，然后其他的reduce都会处理较小的数据量并输出小文件。</p>
+<p>对于Spark任务，过度并行化也是导致小文件过多的原因之一。</p>
+<p>在Spark作业中，根据写任务中提到的分区数量，每个分区会写一个新文件。这类似于MapReduce框架中的每个reduce任务都会创建一个新文件。Spark分区越多，写入的文件就越多。控制分区的数量来减少小文件的生成。</p>
+<h4 id="发现小文件的方式">发现小文件的方式</h4>
+<p>NameNode存储了所有与文件相关的元数据，所以它将整个命名空间保存在内存中，而fsimage是NameNode的本地本机文件系统中的持久化记录。因此，我们可以通过分析fsimage来找出文件的元信息。fsimage中可用的字段有：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">Path, Replication, ModificationTime, AccessTime, PreferredBlockSize, BlocksCount, FileSize, NSQUOTA, DSQUOTA, Permission, UserName, GroupName</span><br></pre></td></tr></table></figure>
+<p>1、通过hdfs oiv命令解析fsimage</p>
+<p>拷贝Namenode数据目录下的fsimage文件到其他目录，然后执行：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">hdfs oiv -p Delimited -delimiter <span class="string">&quot;|&quot;</span> -t /tmp/tmpdir/ -i fsimage_copy_file -o fsimage_deal.out</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>2、使用fsck命令扫描当前的HDFS目录并保存扫描后的信息。但是不建议在生产环境使用fsck命令，因为它会带来额外的开销，可能影响集群的稳定性。</p>
+<h4 id="hadoop小文件合并策略和方式">Hadoop小文件合并策略和方式</h4>
+<p>Hadoop中的小文件一般是指明显小于HDFS的block size（默认128M，一般整数倍配置如256M）的文件。但需要注意，HDFS上的有些小文件是不可避免的，比如jar、临时缓存文件等。但当小文件数量变的"海量"，以至于Hadoop集群中存储了大量的小文件，就需要对小文件进行处理，而处理的目标是让文件大小尽可能接近HDFS的block size大小或者整数倍。</p>
+<h4 id="namenode中的小文件问题">NameNode中的小文件问题</h4>
+<p>每个block的元数据都需要加载到NameNode的内存中，这导致一个Hadoop集群在NameNode中存储的对象是有上限的，并且对象太多会带来启动时间较长以及网络延迟的问题。常见的有两种解决方案：</p>
+<p>1、减少集群的NameNode中的对象数量</p>
+<p>2、以某种方式让NameNode使用更多的内存，但不会导致较长的启动时间</p>
+<ul>
+<li><p>Hadoop Archive(HAR)</p>
+<p>（本质上应该是一种多级目录）</p>
+<p>Hadoop archive files通过将许多小文件打包到更大的HAR文件中来缓解NameNode内存问题，类似于Linux上的TAR文件。这样可以让NameNode只处理单个HAR文件，而不是数十个或数百个小文件。可以使用har://前缀而不是hdfs://来访问HAR文件中的文件。HAR文件是基于HDFS中已有的文件创建的。因此，HAR文件不仅可以合并从数据源抽取到HDFS中的数据，也可以合并通过正常的MR处理创建的数据。HAR文件可以独立的用于解决小文件问题，除了HDFS没有其他的依赖。</p>
+<p><img src="/2021/08/02/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E6%B5%B7%E9%87%8F%E5%B0%8F%E6%96%87%E4%BB%B6%E9%97%AE%E9%A2%98/image-20210802085228880.png" alt="image-20210802085228880" style="zoom:67%;"></p>
+<p>虽然HAR文件减少了NameNode中小文件对内存的占用，但访问HAR文件内容性能可能会更低。<strong>HAR文件仍然随机存储在磁盘上，并且读取HAR内的文件需要访问两个索引 - 一个用于NameNode找到HAR文件本身，一个用于在HAR文件内找到小文件的位置</strong>。在HAR中读取文件实际上可能比读取存储在HDFS上的相同文件慢。<strong>MapReduce作业的性能同样会受到影响，因为它仍旧会为每个HAR文件中的每个文件启动一个map任务</strong>。</p>
+<p>所以这里我们需要有一个权衡，HAR文件可以解决NameNode内存问题，但同时会降低读取性能。如果你的小文件主要用于存档，并且不经常访问，那么HAR文件是一个很好的解决方案。如果小文件经常要被读取或者处理，那么可能需要重新考虑解决方案。</p></li>
+<li><p>NameNode联邦</p>
+<p>NameNode联邦允许你在一个集群中拥有多个NameNode，每个NameNode都存储元数据对象的子集。这样可以让所有的元数据对象都不止存储在单个机器上，也消除了单个节点的内存限制，因为你可以扩容。这听上去是一个很美丽的方案，但其实它也有局限性。</p>
+<p>NameNode联邦隔离了元数据对象 - <strong>仅仅只有某一个NameNode知道某一个特定的元数据对象在哪里，意思就是说如果你想找到某个文件，你必须知道它是保存在哪个NameNode上的</strong>。如果你的集群中有多个租户和/或隔离的应用程序，那使用NameNode联邦是挺不错的，你可以通过租户或者应用程序来隔离元数据对象。但是，如果要在所有的应用程序之间共享数据，则该方法其实也并不是完美的。</p>
+<p>由于NameNode联邦<strong>并不会改变集群中对象或者块的数量</strong>，所以<strong>它并没有解决MapReduce的性能问题</strong>。相反，联邦会增加Hadoop集群安装和维护的复杂度。所以我们说联邦可以解决小文件问题，倒不如说它提供了一种办法让你“隐藏”小文件。</p></li>
+</ul>
+<h4 id="mapreduce的小文件问题">MapReduce的小文件问题</h4>
+<p>MR性能问题主要是由随机磁盘IO和启动/管理太多的map任务组合引起的。解决方案似乎很明显 - 合并小文件，然而这个事往往说起来容易做起来难。以下讨论一下几种解决方案：</p>
+<p>注：虽然为解决MR的性能问题，但其实同样也是为了解决NameNode的压力，以及解决其他计算引擎比如Impala/Spark的性能问题。</p>
+<p>解决方案：</p>
+<p><strong>1、从数据源处处理</strong></p>
+<p>数据源是否能生成一些大文件，或者从数据源到HDFS的数据抽取过程中进行数据处理合并小文件。如果每小时只抽取10MB的数据，考虑是否改为每天一次，这样创建1个240MB的文件而不是24个10MB的文件。</p>
+<p>缺点：可能无法控制数据源的改动配合或业务对数据抽取间隔的需求，这样小文件问题无法避免，这时可能需要考虑其他的解决方案。</p>
+<p><strong>2、批量文件合并</strong></p>
+<p><strong>定期运行一个MR任务，读取某一个文件夹中的所有小文件，并通过减少reduce的数量将它们重写为较少数量的大文件。</strong></p>
+<p>比如一个文件夹中有1000个文件，你可以在一个MR任务中指定reduce的数量为5，这样1000个输入文件会被合并为5个文件。</p>
+<p>随后进行一些简单的HDFS文件/文件夹操作(将新文件覆盖回原目录)，则可以将NameNode的内存使用减少到200分之1，并且可以提高以后MR或其他计算引擎对同一数据处理的性能。</p>
+<p>这些MR任务运行同样需要集群资源，所以建议调度在生产系统非繁忙时间段执行。同时，应该定期执行这种合并的MR作业，因为小文件随时或者几乎每天都可能产生。</p>
+<p>但这个合并程序需要有额外的逻辑来判断存在大量小文件的目录，或者你自己是知道哪些目录是存在大量小文件的。因为假如某个目录只有3个文件，运行合并作业远不如合并一个500个文件的文件夹的性能优势提升明显。</p>
+<p>检查所有文件夹并确认哪些文件夹中的小文件需要合并，目前主要是通过自定义的脚本或程序，当然一些商业工具也能做，比如Pentaho可以迭代HDFS中的一组文件夹，找到最小合并要求的文件夹。</p>
+<p>缺点：批量合并文件的方法无法保留原始文件名，如果原始文件名对于你了解数据来源非常重要，则批量合并文件的方法也不适用。但一般来说，我们一般只会设计HDFS的各级目录的文件名，而不会细化到每个文件的名字，所以理论来说这种方法问题也不大。</p>
+<p><strong>3、Sequence文件</strong></p>
+<p>SequenceFile是Hadoop API提供的一种二进制文件，它将数据以&lt;key,value&gt;的形式序列化到文件中，这种二进制文件内部使用Hadoop的标准Writable接口实现序列化和反序列化。有如下特点：</p>
+<p><img src="/2021/08/02/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E6%B5%B7%E9%87%8F%E5%B0%8F%E6%96%87%E4%BB%B6%E9%97%AE%E9%A2%98/image-20210802004812454.png" alt="image-20210802004812454" style="zoom: 50%;"></p>
+<p>（1）基于行存储。它与Hadoop API中的MapFile是互相兼容的。Hive中的SequenceFile继承自Hadoop API的SequenceFile，不过它的key为空，使用value存放实际的值，这样是为了避免MR在运行map阶段的排序过程。</p>
+<p>（2）支持三种压缩类型：None、Record、Block。默认采用Record，但是Record压缩率低；一般建议使用Block压缩。</p>
+<p>（3）优势是文件和Hadoop API的MapFile是相互兼容的。</p>
+<p>当需要维护原始文件名时，就可以使用sequence文件。在此解决方案中，文件名作为key保存在sequence文件中，然后文件内容会作为value保存。下图给出将一些小文件存储为sequence文件的示例：</p>
+<figure class="highlight txt"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">------------------------------------------------------------------------------------------------------------</span><br><span class="line">|  Key  |  Value  |  Key  |  Value  |  Key  |  Value</span><br><span class="line">------------------------------------------------------------------------------------------------------------</span><br><span class="line">|  file1.txt  | file1 contents| file2.txt    |file2 contents  | fileN.txt    | fileN contents</span><br><span class="line">------------------------------------------------------------------------------------------------------------</span><br></pre></td></tr></table></figure>
+<p>如果一个sequence文件包含10000个小文件，则同时会包含10000个key在一个文件中。sequence文件支持块压缩，并且是可被拆分的。<strong>这样MR作业在处理这个sequence文件时，只需要为每个128MB的block启动一个map任务，而不是每个小文件启动一个map任务。当你在同时抽取数百个或者数千个小文件，并且需要保留原始文件名时，这是非常不错的方案。</strong></p>
+<p>缺点：如果你一次仅抽取少量的小文件到HDFS，则sequence文件的方法也不太可行，因为sequence文件是不可变的，无法追加。比如3个10MB文件将产生1个30MB的Sequence文件，根据本文前面的定义，这仍然是一个小文件。另外一个问题是如果需要检索sequence文件中的文件名列表则需要遍历整个文件。</p>
+<p>另外一个问题是Hive并不能较好的处理由该方法合并出来的sequence文件。Hive将value中的所有数据视为单行。这样会导致Hive查看这些数据不方便，因为以前小文件中的一行的所有数据也是Hive中的单行，即相当于只有一个字段。同时，Hive没办法访问这种sequence的key，即文件名（可以自定义Hive Serde来解决）</p>
+<p><strong>4、使用Hbase进行数据存储</strong></p>
+<p>解决小文件问题，除了HDFS存储外，当然还可以考虑HBase列式存储。使用HBase可以<strong>将数据抽取过程从生成大量小HDFS文件更改为以逐条记录写入到HBase表</strong>。如果你对数据访问的需求主要是随机查找或者叫点查，则HBase是最好的选择。HBase在架构上就是为快速插入，存储大量数据，单个记录的快速查找以及流式数据处理而设计的。但如果你对数据访问的需求主要是全表扫描，则HBase不是最适合的。</p>
+<p>可以基于HBase的表的数据创建Hive表，但是查询这种Hive表对于不同的查询类型性能会不一样。当查询单行或者范围查找时，Hive on HBase会表现不错，但是如果是全表扫描则效率比较低下，大多数分析查询比如带group by的语句都是全表扫描。</p>
+<p>缺点：使用HBase，可以较好的应对实时数据写入以及实时查询的场景。但是如何分配和平衡HBase与集群上其他的组件的资源使用，以及HBase本身运维都会带来额外的运维管理成本。另外，HBase的性能主要取决于你的数据访问方式，所以在选择HBase解决小文件问题之前，应该进行仔细调研和设计。</p>
+<p><strong>5、使用CombineFileInputFormat</strong></p>
+<p>CombineFileInputFormat是Hadoop提供的抽象类，<strong>它在MR读取时合并小文件。合并的文件不会持久化到磁盘，它是在一个map任务中合并读取到的这些小文件。好处是MR可以不用为每个小文件启动一个map任务</strong>，而且因为是自带的实现类，你不用额外将小文件先提前合并。</p>
+<p>为了实现这个，需要为不同的文件类型编写Java代码扩展CombineFileInputFormat类。这样实现一个自定义的类后，就可以配置最大的split大小，然后单个map任务会读取小文件并进行合并直到满足这个大小。Hive作业直接配置参数即可实现。</p>
+<p>缺点：这解决了MR作业启动太多map任务的问题，但是因为作业仍然在读取多个小文件，随机磁盘IO依旧是一个问题。另外，CombineFileInputFormat大多数情况下都不会考虑data locality，往往会通过网络从其他节点拉取数据。</p>
+<p>注意以上无论是MR代码实现方式还是Hive，因为合并的文件并不会持久化保存到磁盘，因此CombineFileInputFormat方式并不会缓解NameNode内存管理问题。只是提高MR或者Hive作业的性能。</p>
+<p><strong>6、通过Hive合并小文件</strong></p>
+<p>如果你在使用Hive时因为"create table as"或"insert overwrite"语句输出了小文件，你可以通过设置一些参数来缓解。通过设置这些参数。Hive会在本身的SQL作业执行完毕后会单独起一个MR任务来合并输出的小文件。</p>
+<p>注意这个设置仅对Hive创建的文件生效，比如你使用Sqoop导数到Hive表，或者直接抽数到HDFS等，该方法都不会起作用。</p>
+<p><strong>7、使用Hadoop的文件追加特性</strong></p>
+<p>Hadoop自带的Append特性，即当第一次输出是小文件时，后面的文件输出可以继续追加这些小文件，让小文件变成大文件。</p>
+<p>这听上去是个不错的建议，但其实做起来挺难的。因为MR任务有一个规定，输出结果目录必须是在之前不存在的。所以MR作业肯定无法使用Append特性，由于Sqoop，Pig和Hive都使用了MR，所以这些工具也不支持Append。Flume不支持Append主要是因为它假设经过一段时间比如几秒，多少字节，多少事件数或者不活动的秒数，Flume就会关闭文件而不再打开它。</p>
+<p>因此，需要自己编写特定的程序来追加到现有的文件。另外，当集群中其他应用程序如果正在读取或处理这些需要追加的文件，你就不能使用自定义的MR或者Spark程序来追加这些文件了。所以如果要使用这种方法，最好还是谨慎考虑。</p>
+<h3 id="hive小文件">Hive小文件</h3>
+<h4 id="解决方案">解决方案</h4>
+<p>1、配置输入合并和输出合并小文件</p>
+<p>配置map输入合并</p>
+<p>在执行map任务前进行小文件合并：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">-- 每个Map最大输入大小，决定合并后的文件数</span><br><span class="line"><span class="built_in">set</span> mapred.max.split.size=256000000;</span><br><span class="line">-- 一个节点上split的至少的大小 ，决定了多个data node上的文件是否需要合并</span><br><span class="line"><span class="built_in">set</span> mapred.min.split.size.per.node=100000000;</span><br><span class="line">-- 一个交换机下split的至少的大小，决定了多个交换机上的文件是否需要合并</span><br><span class="line"><span class="built_in">set</span> mapred.min.split.size.per.rack=100000000;</span><br><span class="line">-- 执行Map前进行小文件合并</span><br><span class="line"><span class="built_in">set</span> hive.input.format=org.apache.hadoop.hive.ql.io.CombineHiveInputFormat;</span><br></pre></td></tr></table></figure>
+<p>配置hive结果端合并</p>
+<p>通过设置hive的配置项在执行结束后对结果文件进行合并。hive在对结果文件进行合并时会执行一个额外的map-only脚本，mapper的数量是文件总大小除以size.per.task参数所得的值，触发合并的条件是：根据查询类型不同，相应的mapfiles/mapredfiles参数需要打开；结果文件的平均大小需要大于avgsize参数的值。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">-- 在Map-only的任务结束时合并小文件</span><br><span class="line"><span class="built_in">set</span> hive.merge.mapfiles = <span class="literal">true</span></span><br><span class="line">-- 在Map-Reduce的任务结束时合并小文件</span><br><span class="line"><span class="built_in">set</span> hive.merge.mapredfiles = <span class="literal">true</span></span><br><span class="line">-- 合并文件的大小</span><br><span class="line"><span class="built_in">set</span> hive.merge.size.per.task = 256*1000*1000 </span><br><span class="line">-- 当输出文件的平均大小小于该值时，启动一个独立的map-reduce任务进行文件merge</span><br><span class="line"><span class="built_in">set</span> hive.merge.smallfiles.avgsize=16000000</span><br></pre></td></tr></table></figure>
+<p>2、Hive使用HAR归档文件</p>
+<p>Hadoop的归档文件格式也是解决小文件问题的方式之一。而且hive提供了原生支持：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="built_in">set</span> hive.archive.enabled=<span class="literal">true</span>;</span><br><span class="line"><span class="built_in">set</span> hive.archive.har.parentdir.settable=<span class="literal">true</span>;</span><br><span class="line"><span class="built_in">set</span> har.partfile.size=1099511627776;</span><br><span class="line">ALTER TABLE srcpart ARCHIVE PARTITION(ds= <span class="string">&#x27;2021-02-01&#x27;</span>, hr= <span class="string">&#x27;12&#x27;</span> );</span><br><span class="line">ALTER TABLE srcpart UNARCHIVE PARTITION(ds= <span class="string">&#x27;2021-02-01&#x27;</span>, hr= <span class="string">&#x27;12&#x27;</span> );</span><br></pre></td></tr></table></figure>
+<p>3、数据仓库Hive表分区优化</p>
+<p>数据仓库创建数仓表时，ETL开发人员基于使用习惯和处理的方便性，经常创建多级分区存储数据。但是过多的分区会消耗NameNode大量的资源，而且也会引入小文件的问题。所以对于创建数仓表的分区，要求如下（本质就是尽可能减少分区创建）：</p>
+<p>（1）对于统计数据表、数据量不大的基础表、业务上无累计快照和周期性快照要求的数据表，尽可能的不创建分区，而采用数据合并回写的方式解决。</p>
+<p>（2）对于一些数据量大的表，如果需要创建分区，提高插叙过程中数据的加载速度，尽可能的只做天级分区。而对于埋点数据，这种特大的数据量的，可以采用小时分区。</p>
+<p>（3）对于一些周期快照和累计快照的表，我们尽可能只创建日分区。</p>
+<p>4、对Hive数据进行压缩</p>
+<p>出于对小文件数据治理的目的，建议使用非TexFile的序列化存储方式存储数据。并且如果一张Hive表存在大量的小文件，建议通过以下参数设置压缩：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">set</span> hive.exec.compress.output<span class="operator">=</span><span class="literal">true</span>;</span><br><span class="line"><span class="keyword">set</span> parquet.compression<span class="operator">=</span>snappy;</span><br><span class="line"><span class="keyword">set</span> hive.merge.mapfiles<span class="operator">=</span><span class="literal">true</span>;</span><br><span class="line"><span class="keyword">set</span> hive.merge.mapredfiles<span class="operator">=</span><span class="literal">true</span>; </span><br><span class="line"><span class="keyword">set</span> hive.merge.mapredfiles<span class="operator">=</span><span class="literal">true</span></span><br><span class="line"><span class="keyword">set</span> hive.optiming.sort.dynamic.partition <span class="operator">=</span> <span class="literal">true</span>;</span><br><span class="line"><span class="comment">--256M</span></span><br><span class="line"><span class="keyword">set</span> parquet.blocksize<span class="operator">=</span> <span class="number">268435456</span>;</span><br><span class="line"><span class="comment">--256M</span></span><br><span class="line"><span class="keyword">set</span> dfs.block.size<span class="operator">=</span><span class="number">268435456</span>; </span><br><span class="line"><span class="comment">--128M</span></span><br><span class="line"><span class="keyword">set</span> hive.merge.smallfiles.avgsize<span class="operator">=</span><span class="number">134217728</span>; </span><br><span class="line"><span class="comment">--256M</span></span><br><span class="line"><span class="keyword">set</span> hive.merge.size.per.task <span class="operator">=</span> <span class="number">268435456</span>;</span><br></pre></td></tr></table></figure>
+<h3 id="spark小文件">Spark小文件</h3>
+<h4 id="问题">问题</h4>
+<p>使用sparkstreaming时，如果实时计算结果要写入到HDFS，那么不可避免的会遇到一个问题，那就是<strong>在默认情况下会产生非常多的小文件</strong>，这是由sparkstreaming的微批处理模式和DStream(RDD)的分布式(partition)特性导致的，sparkstreaming为每个partition启动一个独立的线程来处理数据，一旦文件输出到HDFS，那么这个文件流就关闭了，再来一个batch的parttition任务，就再使用一个新的文件流。</p>
+<p>那么假设，一个batch为10s，每个输出的DStream有32个partition，那么一个小时产生的文件数将会达到(3600/10) * 32=11520个之多。众多小文件带来的结果是有大量的文件元信息，比如文件的location、文件大小、block number等需要NameNode来维护，NameNode压力会非常大。</p>
+<p>不管是什么格式的文件，parquet、text、JSON或者Avro，都会遇到这种小文件问题，这里讨论几种处理sparkstreaming小文件的典型方法。</p>
+<h4 id="解决方案-1">解决方案</h4>
+<p><strong>1、增加batch大小</strong></p>
+<p>batch越大，从外部接收的event就越多，内存积累的数据也就越多，那么输出的文件数也就回变少，比如将上面例子中的batch时间从10s增加为100s，那么一个小时的文件数量就会减少到1152个。但是此时延迟会比较大，不适合实时性要求高的场景。</p>
+<p><strong>2、coalesce和repartition</strong></p>
+<p>小文件的基数是：batch_number * partition_number，而第一种方法是减少batch_number，那么这种方法就是减少partition_number了，这个api不细说，就是减少初始的分区个数。看过spark源码的童鞋都知道，对于窄依赖，一个子rdd的partition规则继承父rdd，对于宽依赖(就是那些ByKey操作)，如果没有特殊指定分区个数，也继承自父rdd。那么初始的SourceDstream是几个partiion，最终的输出就是几个partition。</p>
+<p>所以coalesce大法的好处就是，可以在最终要输出的时候，来减少partition个数。</p>
+<p>但是这个方法的缺点也很明显，本来是32个线程在写256M数据，现在可能变成了4个线程在写256M数据，而没有写完成这256M数据，这个batch是不算做结束的。那么一个batch的处理时延必定增长，batch挤压会逐渐增大。</p>
+<p><strong>3、自定义合并脚本</strong></p>
+<p>在sparkstreaming外再启动定时的批处理任务来合并sparkstreaming产生的小文件。需要注意合并任务的时间划分，避免合并正在写入的sparkstreaming文件。</p>
+<p><strong>4、通过foreach输出类追加小文件</strong></p>
+<p>sparkstreaming提供的foreach这个outout类api，可以让我们自定义输出计算结果的方法。那么我们其实也可以利用这个特性，那就是每个batch在要写文件时，并不是去生成一个新的文件流，而是把之前的文件打开。考虑这种方法的可行性，首先，HDFS上的文件不支持修改，但是很多都支持追加，那么每个batch的每个partition就对应一个输出文件，每次都去追加这个partition对应的输出文件，这样也可以实现减少文件数量的目的。这种方法要注意的就是不能无限制的追加，当判断一个文件已经达到某一个阈值时，就要产生一个新的文件进行追加了。</p>
+<h3 id="参考资料">参考资料</h3>
+<p>https://mp.weixin.qq.com/s/Bg70xFG9BIbhzO4tzMfH_A</p>
+]]></content>
+      <categories>
+        <category>大数据</category>
+      </categories>
+      <tags>
+        <tag>大数据</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Hive DML</title>
+    <url>/2021/07/25/Hive_DML/</url>
+    <content><![CDATA[<p>DML（Data Manipulation Language）数据操作语言用于定义数据的基本操作，SQL中处理数据等操作统称为数据操纵语言，简而言之就是实现了基本的“增删改查”操作。</p>
+<a id="more"></a>
+<h2 id="load">load</h2>
+<h3 id="基础">基础</h3>
+<p>当在Hive中创建好表之后，就会在HDFS上创建一个与之对应的文件夹，要想让hive的表和结构化的数据文件产生映射，就需要把文件移到到表对应的文件夹下面，当然，可以在建表的时候使用location语句指定数据文件的路径。但是不管路径在哪里，必须把数据文件移动到对应的路径下面。</p>
+<p>最原始暴力直接的方式就是使用hadoop fs –put等方式将数据移动到路径下面。</p>
+<p>Hive官方推荐<strong>使用Load命令将数据加载到表中</strong>。</p>
+<h3 id="语法">语法</h3>
+<p>在将数据load加载到表中时，Hive不会进行任何转换。</p>
+<p><strong>加载操作是将数据文件移动到与Hive表对应的位置的纯复制/移动操作</strong>。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">LOAD DATA [LOCAL] INPATH &#39;filepath&#39; [OVERWRITE] INTO TABLE tablename [PARTITION (partcol1&#x3D;val1, partcol2&#x3D;val2 ...)]</span><br><span class="line"></span><br><span class="line">LOAD DATA [LOCAL] INPATH &#39;filepath&#39; [OVERWRITE] INTO TABLE tablename [PARTITION (partcol1&#x3D;val1, partcol2&#x3D;val2 ...)] [INPUTFORMAT &#39;inputformat&#39; SERDE &#39;serde&#39;] (3.0 or later)</span><br></pre></td></tr></table></figure>
+<h4 id="filepath">filepath</h4>
+<p>filepath表示的待移动数据的路径，可以引用一个文件（在这种情况下，Hive将文件移动到表中），也可以是一个目录（在这种情况下，Hive将把该目录中的所有文件移动到表中）。</p>
+<p>相对路径，例如：project/data1</p>
+<p>绝对路径，例如：/user/hive/project/data1</p>
+<p>具有schema的完整URI，例如：hdfs://namenode:9000/user/hive/project/data1</p>
+<h4 id="local">local</h4>
+<p>如果指定了LOCAL， <strong>load命令将在本地文件系统中查找文件路径</strong>。如果指定了相对路径，它将相对于用户的当前工作目录进行解释。用户也可以为本地文件指定完整的URI-例如：file:///user/hive/project/data1。</p>
+<p>注意，如果对HiveServer2服务运行此命令。这里的本地文件系统指的是Hiveserver2<strong>服务所在机器的本地Linux文件系统</strong>，<strong>不是Hive客户端所在的本地文件系统</strong>。</p>
+<p>如果没有指定LOCAL关键字，如果filepath指向的是一个完整的URI，hive会直接使用这个URI。 否则如果没有指定schema或者authority，Hive会使用在hadoop配置文件中定义的schema 和 authority，即参数fs.default.name指定（不出意外，都是HDFS）。</p>
+<p><strong>overwrite</strong></p>
+<p>如果使用了OVERWRITE关键字，则目标表（或者分区）中的内容会被删除，然后再将 filepath 指向的文件/目录中的内容添加到表/分区中。</p>
+<h4 id="案例">案例</h4>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">-- ------Load Data From Local FS or HDFS------</span><br><span class="line">-- step1:建表</span><br><span class="line">-- 建表student_local 用于演示从本地加载数据</span><br><span class="line">create table student_local(</span><br><span class="line">    num int,name string,sex string,age int,dept string) </span><br><span class="line">    row format delimited fields terminated by &#39;,&#39;;</span><br><span class="line"></span><br><span class="line">-- 建表student_HDFS  用于演示从HDFS加载数据</span><br><span class="line">create external table student_HDFS(</span><br><span class="line">    num int,name string,sex string,age int,dept string) </span><br><span class="line">    row format delimited fields terminated by &#39;,&#39;;</span><br><span class="line"></span><br><span class="line">-- 建表student_HDFS_p 用于演示从HDFS加载数据到分区表</span><br><span class="line">create table student_HDFS_p(</span><br><span class="line">    num int,name string,sex string,age int,dept string) </span><br><span class="line">    partitioned by(country string) </span><br><span class="line">    row format delimited fields terminated by &#39;,&#39;;</span><br><span class="line"></span><br><span class="line">-- 建议使用beeline客户端 可以显示出加载过程日志信息</span><br><span class="line">-- step2:加载数据</span><br><span class="line">-- 从本地加载数据  数据位于HS2（node1）本地文件系统  本质是hadoop fs -put上传操作</span><br><span class="line">LOAD DATA LOCAL INPATH &#39;&#x2F;root&#x2F;hivedata&#x2F;students.txt&#39; INTO TABLE student_local;</span><br><span class="line"></span><br><span class="line">-- 从HDFS加载数据  数据位于HDFS文件系统根目录下  本质是hadoop fs -mv 移动操作</span><br><span class="line">-- 先把数据上传到HDFS上  hadoop fs -put &#x2F;root&#x2F;hivedata&#x2F;students.txt &#x2F;</span><br><span class="line">LOAD DATA INPATH &#39;&#x2F;students.txt&#39; INTO TABLE student_HDFS;</span><br><span class="line"></span><br><span class="line">-- --从HDFS加载数据到分区表中并制定分区  数据位于HDFS文件系统根目录下</span><br><span class="line">-- 先把数据上传到HDFS上 hadoop fs -put &#x2F;root&#x2F;hivedata&#x2F;students.txt &#x2F;</span><br><span class="line">LOAD DATA INPATH &#39;&#x2F;students.txt&#39; INTO TABLE student_HDFS_p partition(country &#x3D;&quot;CHina&quot;);</span><br></pre></td></tr></table></figure>
+<h3 id="新特性">3.0 新特性</h3>
+<p>Hive 3.0及更高版本中，除了移动复制操作之外，还支持其他加载操作，因为Hive在内部在某些场合下会将加载重写为INSERT AS SELECT。</p>
+<p>比如，如果表具有分区，则load命令没有指定分区，则将load转换为INSERT AS SELECT，并<strong>假定最后一组列为分区列</strong>。如果文件不符合预期的架构，它将引发错误。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">-- -----hive 3.0 load命令新特性------------------</span><br><span class="line">CREATE TABLE if not exists tab1 (col1 int, col2 int)</span><br><span class="line">PARTITIONED BY (col3 int)</span><br><span class="line">row format delimited fields terminated by &#39;,&#39;;</span><br><span class="line"></span><br><span class="line">LOAD DATA LOCAL INPATH &#39;&#x2F;root&#x2F;hivedata&#x2F;tab1.txt&#39; INTO TABLE tab1;</span><br><span class="line"></span><br><span class="line">-- tab1.txt内容如下</span><br><span class="line">11,22,1</span><br><span class="line">33,44,2</span><br></pre></td></tr></table></figure>
+<p>本来加载的时候没有指定分区，语句是报错的，但是文件的格式符合表的结构，前两个是col1,col2,最后一个是分区字段col3，则此时会将load语句转换成为insert as select语句。</p>
+<p>在Hive3.0中，还支持使用inputformat、SerDe指定任何Hive输入格式，例如文本，ORC等。</p>
+<h2 id="insert-select">insert + select</h2>
+<h3 id="基础-1">基础</h3>
+<p>Hive中insert主要是结合select查询语句使用，<strong>将查询结果插入到表中</strong>。</p>
+<h3 id="语法-1">语法</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">INSERT OVERWRITE TABLE tablename1 </span><br><span class="line">[PARTITION (partcol1&#x3D;val1, partcol2&#x3D;val2 ...) [IF NOT EXISTS]] select_statement1 FROM from_statement;</span><br><span class="line"></span><br><span class="line">INSERT INTO TABLE tablename1 </span><br><span class="line">[PARTITION (partcol1&#x3D;val1, partcol2&#x3D;val2 ...)] select_statement1 FROM from_statement;</span><br></pre></td></tr></table></figure>
+<p>INSERT OVERWRITE将覆盖表或分区中的任何现有数据。</p>
+<p>需要保证查询结果列的数目和需要插入数据表格的列数目一致。如果查询出来的数据类型和插入表格对应的列数据类型不一致，将会进行转换，但是不能保证转换一定成功，转换失败的数据将会为NULL。</p>
+<p>案例：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">-- step1:创建一张源表student</span><br><span class="line">drop table if exists student;</span><br><span class="line">create table student(</span><br><span class="line">    num int,name string,sex string,age int,dept string)</span><br><span class="line">row format delimited</span><br><span class="line">fields terminated by &#39;,&#39;;</span><br><span class="line"></span><br><span class="line">-- 加载数据</span><br><span class="line">load data local inpath &#39;&#x2F;root&#x2F;hivedata&#x2F;students.txt&#39; into table student;</span><br><span class="line"></span><br><span class="line">-- step2：创建一张目标表  只有两个字段</span><br><span class="line">create table student_from_insert(sno int,sname string);</span><br><span class="line"></span><br><span class="line">-- 使用insert+select插入数据到新表中</span><br><span class="line">insert into table student_from_insert select num,name from student;</span><br><span class="line"></span><br><span class="line">select * from student_insert1;</span><br></pre></td></tr></table></figure>
+<h3 id="多重插入">多重插入</h3>
+<p>从一个表中，写多个查询逻辑，并将结果输出到多个不同表（分区）：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">-- ----------multiple inserts----------------------</span><br><span class="line">-- 当前库下已有一张表student</span><br><span class="line">select * from student;</span><br><span class="line"></span><br><span class="line">-- 创建两张新表</span><br><span class="line">create table student_insert1(sno int);</span><br><span class="line">create table student_insert2(sname string);</span><br><span class="line"></span><br><span class="line">-- 多重插入</span><br><span class="line">from student</span><br><span class="line">insert overwrite table student_insert1</span><br><span class="line">select num</span><br><span class="line">insert overwrite table student_insert2</span><br><span class="line">select name;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h3 id="动态分区插入">动态分区插入</h3>
+<p>对于分区表的数据导入加载，最常见最基础的是通过load命令加载数据。假如说现在有全球224个国家的人员名单（每个国家名单单独一个文件），导入数据到分区表中，不同国家不同分区，不可能使用load语法导入224次。</p>
+<p>为此，Hive提供了动态分区插入的语法。</p>
+<p>所谓动态分区插入指的是：<strong>分区的值是由后续的select查询语句的结果来动态确定的。根据查询结果自动分区</strong>。</p>
+<p>配置参数</p>
+<table>
+<colgroup>
+<col style="width: 32%">
+<col style="width: 6%">
+<col style="width: 61%">
+</colgroup>
+<tbody>
+<tr class="odd">
+<td>hive.exec.dynamic.partition</td>
+<td>true</td>
+<td>需要设置true为启用动态分区插入</td>
+</tr>
+<tr class="even">
+<td>hive.exec.dynamic.partition.mode</td>
+<td>strict</td>
+<td>在strict模式下，用户必须至少指定一个静态分区，以防用户意外覆盖所有分区；在nonstrict模式下，允许所有分区都是动态的</td>
+</tr>
+</tbody>
+</table>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">FROM page_view_stg pvs</span><br><span class="line">INSERT OVERWRITE TABLE page_view PARTITION(dt&#x3D;&#39;2008-06-08&#39;, country)</span><br><span class="line">SELECT pvs.viewTime, pvs.userid, pvs.page_url, pvs.referrer_url, null, null, pvs.ip, pvs.cnt</span><br><span class="line"></span><br><span class="line">-- 在这里，country分区将由SELECT子句（即pvs.cnt）的最后一列动态创建。</span><br><span class="line">-- 而dt分区是手动指定写死的。</span><br><span class="line">-- 如果是nonstrict模式下，dt分区也可以动态创建。</span><br></pre></td></tr></table></figure>
+<p>案例：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">-- 动态分区插入</span><br><span class="line">-- 1、首先设置动态分区模式为非严格模式 默认已经开启了动态分区功能</span><br><span class="line">set hive.exec.dynamic.partition &#x3D; true;</span><br><span class="line">set hive.exec.dynamic.partition.mode &#x3D; nonstrict;</span><br><span class="line"></span><br><span class="line">-- 2、当前库下已有一张表student</span><br><span class="line">select * from student;</span><br><span class="line"></span><br><span class="line">-- 3、创建分区表 以sdept作为分区字段</span><br><span class="line">-- 注意：分区字段名不能和表中的字段名重复。</span><br><span class="line">create table student_partition(</span><br><span class="line">    Sno int,Sname string,Sex string,Sage int) </span><br><span class="line">partitioned by(Sdept string);</span><br><span class="line"></span><br><span class="line">-- 4、执行动态分区插入操作</span><br><span class="line">insert into table student_partition partition(Sdept)</span><br><span class="line">select Sno,Sname,Sex,Sage,Sdept from student;</span><br><span class="line">-- 其中，Sno,Sname,Sex,Sage作为表的字段内容插入表中</span><br><span class="line">-- Sdept作为分区字段值</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>执行结果如下，可以发现实现了自动分区：</p>
+<figure>
+<img src="/2021/07/25/Hive_DML/image-20210725172512400.png" alt="image-20210725172512400"><figcaption aria-hidden="true">image-20210725172512400</figcaption>
+</figure>
+<h2 id="insert-directory">insert + directory</h2>
+<h3 id="基础-2">基础</h3>
+<p>Hive支持将select查询的结果导出成文件存放在文件系统中。</p>
+<h3 id="语法-2">语法</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">-- 标准语法:</span><br><span class="line">INSERT OVERWRITE [LOCAL] DIRECTORY directory1</span><br><span class="line">[ROW FORMAT row_format] </span><br><span class="line">[STORED AS file_format] (Note: Only available starting with Hive 0.11.0)</span><br><span class="line">SELECT ... FROM ...</span><br><span class="line"></span><br><span class="line">-- Hive extension (multiple inserts):</span><br><span class="line">FROM from_statement</span><br><span class="line">INSERT OVERWRITE [LOCAL] DIRECTORY directory1 select_statement1</span><br><span class="line">[INSERT OVERWRITE [LOCAL] DIRECTORY directory2 select_statement2] ...</span><br><span class="line"></span><br><span class="line">--row_format</span><br><span class="line">: DELIMITED [FIELDS TERMINATED BY char [ESCAPED BY char]] [COLLECTION ITEMS TERMINATED BY char]</span><br><span class="line">[MAP KEYS TERMINATED BY char] [LINES TERMINATED BY char]</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>注意，<strong>导出操作是一个OVERWRITE覆盖操作，慎重</strong>。</p>
+<p>目录可以是完整的URI。如果未指定scheme或Authority，则Hive将使用hadoop配置变量fs.default.name中的方案和Authority，该变量指定Namenode URI。</p>
+<p>如果使用LOCAL关键字，则Hive会将数据写入本地文件系统上的目录。</p>
+<p>写入文件系统的数据被序列化为文本，列之间用^ A隔开，行之间用换行符隔开。如果任何列都不是原始类型，那么这些列将序列化为JSON格式。也可以在导出的时候指定分隔符换行符和文件格式。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">-- 当前库下已有一张表student</span><br><span class="line">select * from student;</span><br><span class="line"></span><br><span class="line">-- 1、导出查询结果到HDFS指定目录下</span><br><span class="line">insert overwrite directory &#39;&#x2F;tmp&#x2F;hive_export&#x2F;e1&#39; select * from student;</span><br><span class="line"></span><br><span class="line">-- 2、导出时指定分隔符和文件存储格式</span><br><span class="line">insert overwrite directory &#39;&#x2F;tmp&#x2F;hive_export&#x2F;e2&#39; </span><br><span class="line">row format delimited fields terminated by &#39;,&#39;</span><br><span class="line">stored as orc</span><br><span class="line">select * from student;</span><br><span class="line"></span><br><span class="line">-- 3、导出数据到本地文件系统指定目录下</span><br><span class="line">insert overwrite local directory &#39;&#x2F;root&#x2F;hive_export&#x2F;e1&#39;</span><br><span class="line">select * from student;</span><br></pre></td></tr></table></figure>
+<p>导出结果：</p>
+<figure>
+<img src="/2021/07/25/Hive_DML/image-20210725175046839.png" alt="image-20210725175046839"><figcaption aria-hidden="true">image-20210725175046839</figcaption>
+</figure>
+<p>文件格式：</p>
+<p><img src="/2021/07/25/Hive_DML/image-20210725175112816.png" alt="image-20210725175112816" style="zoom:67%;"></p>
+<h2 id="hive事务updatedelete">Hive事务（update/delete）</h2>
+<h3 id="背景">背景</h3>
+<p>Hive本身从设计之初时，就是不支持事务的，因为<strong>Hive的核心目标是将已经存在的结构化数据文件映射成为表</strong>，<strong>然后提供基于表的SQL分析处理</strong>，是一款面向分析的工具。且映射的数据通常存储于HDFS上，而HDFS是不支持随机修改文件数据的。</p>
+<p>这个定位就意味着在早期的Hive的SQL语法中是没有update，delete操作的，也就没有所谓的事务支持了，因为都是select查询分析操作。</p>
+<p>从Hive0.14版本开始，具有ACID语义的事务已添加到Hive中，以解决以下场景下遇到的问题：</p>
+<p>1、流式传输数据。使用如Apache Flume或Apache Kafka之类的工具将数据流式传输到Hadoop集群中。虽然这些工具可以每秒数百行或更多行的速度写入数据，但是Hive只能每隔15分钟到一个小时添加一次分区。频繁添加分区会很快导致表中大量的分区。因此通常使用这些工具将数据流式传输到现有分区中，但是这会使读者感到脏读（也就是说，他们将在开始查询后看到写入的数据），并将许多小文件留在目录中，这将给NameNode带来压力。<strong>通过事务功能，允许读者获得一致的数据视图并避免过多的文件</strong>。</p>
+<p>2、尺寸变化缓慢。在典型的星型模式数据仓库中，维度表随时间缓慢变化。例如，零售商将开设新商店，需要将其添加到商店表中，或者现有商店可能会更改其平方英尺或某些其他跟踪的特征。这些更改导致插入单个记录或更新 记录（取决于所选策略）。</p>
+<p>3、数据重述。有时发现收集的数据不正确，需要更正。从Hive 0.14开始，可以通过INSERT，UPDATE和 DELETE支持这些用例 。</p>
+<h3 id="局限">局限</h3>
+<p>虽然Hive支持了具有ACID语义的事务，但是在使用起来，并没有像在MySQL中使用那样方便，有很多局限性。原因很简单，毕竟Hive的设计目标不是为了支持事务操作，而是支持分析操作，且最终基于HDFS的底层存储机制使得文件的增加删除修改操作需要动一些小心思。具体限制如下：</p>
+<p>1、尚不支持BEGIN，COMMIT和ROLLBACK。所有语言操作都是自动提交的。</p>
+<p>2、仅支持ORC文件格式（STORED AS ORC）。</p>
+<p>3、默认情况下事务配置为关闭。需要配置参数开启使用。</p>
+<p>4、表必须是分桶表（Bucketed）才可以使用事务功能。</p>
+<p>5、表<strong>参数transactional必须为true</strong>；</p>
+<p>6、外部表不能成为ACID表，不允许从非ACID会话读取/写入ACID表。</p>
+<h3 id="原理">原理</h3>
+<h3 id="案例-1">案例</h3>
+<p>如果不做任何配置修改，直接针对Hive中已有的表进行Update、Delete、Insert操作，可以发现，只有insert语句可以执行，Update和Delete操作会报错。Insert插入操作能够成功的原因在于，底层是直接把数据写在一个新的文件中的。</p>
+<figure>
+<img src="/2021/07/25/Hive_DML/image-20210725161008715.png" alt="image-20210725161008715"><figcaption aria-hidden="true">image-20210725161008715</figcaption>
+</figure>
+<p>事务案例：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">-- Hive中事务表的创建使用</span><br><span class="line">-- 1、开启事务配置（可以使用set设置当前session生效 也可以配置在hive-site.xml中）</span><br><span class="line">set hive.support.concurrency &#x3D; true; --Hive是否支持并发</span><br><span class="line">set hive.enforce.bucketing &#x3D; true; --从Hive2.0开始不再需要  是否开启分桶功能</span><br><span class="line">set hive.exec.dynamic.partition.mode &#x3D; nonstrict; --动态分区模式  非严格</span><br><span class="line">set hive.txn.manager &#x3D; org.apache.hadoop.hive.ql.lockmgr.DbTxnManager; --</span><br><span class="line">set hive.compactor.initiator.on &#x3D; true; --是否在Metastore实例上运行启动线程和清理线程</span><br><span class="line">set hive.compactor.worker.threads &#x3D; 1; --在此metastore实例上运行多少个压缩程序工作线程。</span><br><span class="line"></span><br><span class="line">-- 2、创建Hive事务表</span><br><span class="line">create table trans_student(</span><br><span class="line">    id int,</span><br><span class="line">    name String,</span><br><span class="line">    age int</span><br><span class="line">)clustered by (id) into 2 buckets stored as orc TBLPROPERTIES(&#39;transactional&#39;&#x3D;&#39;true&#39;);</span><br><span class="line"></span><br><span class="line">-- 3、针对事务表进行insert update delete操作</span><br><span class="line">insert into trans_student (id, name, age)</span><br><span class="line">values (1,&quot;allen&quot;,18);</span><br><span class="line"></span><br><span class="line">update trans_student</span><br><span class="line">set age &#x3D; 20</span><br><span class="line">where id &#x3D; 1;</span><br><span class="line"></span><br><span class="line">delete from trans_student where id &#x3D;1;</span><br><span class="line"></span><br><span class="line">select * from trans_student;</span><br></pre></td></tr></table></figure>
+<h2 id="select">select</h2>
+<h3 id="基本语法">基本语法</h3>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">[<span class="keyword">WITH</span> CommonTableExpression (, CommonTableExpression)<span class="operator">*</span>] </span><br><span class="line"><span class="keyword">SELECT</span> [<span class="keyword">ALL</span> <span class="operator">|</span> <span class="keyword">DISTINCT</span>] select_expr, select_expr, ...</span><br><span class="line">  <span class="keyword">FROM</span> table_reference</span><br><span class="line">  [<span class="keyword">WHERE</span> where_condition]</span><br><span class="line">  [<span class="keyword">GROUP</span> <span class="keyword">BY</span> col_list]</span><br><span class="line">  [<span class="keyword">ORDER</span> <span class="keyword">BY</span> col_list]</span><br><span class="line">  [CLUSTER <span class="keyword">BY</span> col_list</span><br><span class="line">    <span class="operator">|</span> [DISTRIBUTE <span class="keyword">BY</span> col_list] [SORT <span class="keyword">BY</span> col_list]</span><br><span class="line">  ]</span><br><span class="line"> [LIMIT [<span class="keyword">offset</span>,] <span class="keyword">rows</span>]</span><br></pre></td></tr></table></figure>
+<p>查询的输入。它可以是普通物理表，视图，join查询结果或子查询结果。表名和列名不区分大小写。</p>
+<p>每个select_expr表示要检索的列。必须至少有一个 select_expr。</p>
+<p>ALL和DISTINCT选项指定是否应返回重复的行。如果没有给出这些选项，则默认值为ALL（返回所有匹配的行）。DISTINCT指定从结果集中删除重复的行。</p>
+<p>WHERE条件是一个布尔表达式。在WHERE表达式中，可以使用Hive支持的任何函数和运算符，但聚合函数除外。</p>
+<p>为什么不能在where子句中使用聚合函数？因为聚合函数要使用它的前提是结果集已经确定。而where子句还处于“确定”结果集的过程中，因而不能使用聚合函数。</p>
+<p>GROUP BY 语句用于聚合函数，根据一个或多个字段对结果集进行分组。需要注意的是，<strong>出现在select_expr中的字段：要么是GROUP BY分组的字段；要么是被聚合函数应用的字段</strong>。原因很简单，避免出现一个字段多个值的歧义。比如基于category进行分组，相同颜色的分在同一组中，在select_expr中，如果出现category字段，则没有问题，因为同一组中category值一样，但是返回day就有问题了，day的结果不一样。</p>
+<p>HAVING，WHERE关键字无法与聚合函数一起使用。HAVING子句可以让我们筛选分组后的各组数据,并且可以在Having中使用聚合函数，因为此时where，group by已经执行结束，结果集已经确定。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">-- 先where分组前过滤（此处是分区裁剪），再进行group by分组（含聚合）， 分组后每个分组结果集确定 再使用having过滤</span><br><span class="line">select state,sum(deaths)</span><br><span class="line">from t_usa_covid19_p</span><br><span class="line">where count_date &#x3D; &quot;2021-01-28&quot;</span><br><span class="line">group by state</span><br><span class="line">having sum(deaths) &gt; 10000;</span><br><span class="line"></span><br><span class="line">-- 这样写更好 即在group by的时候聚合函数已经作用得出结果 having直接引用结果过滤 不需要再单独计算一次了</span><br><span class="line">select state,sum(deaths) as cnts</span><br><span class="line">from t_usa_covid19_p</span><br><span class="line">where count_date &#x3D; &quot;2021-01-28&quot;</span><br><span class="line">group by state</span><br><span class="line">having cnts&gt; 10000;</span><br></pre></td></tr></table></figure>
+<p>having与where的区别: 1、having是在分组后对数据进行过滤；where是在分组前对数据进行过滤 2、having后面可以使用聚合函数；where后面不可以使用聚合</p>
+<p>LIMIT子句可用于约束SELECT语句返回的行数。LIMIT接受一个或两个数字参数，这两个参数都必须是非负整数常量。第一个参数指定要返回的第一行的偏移量（从 Hive 2.0.0开始），第二个参数指定要返回的最大行数。当给出单个参数时，它代表最大行数，并且偏移量默认为0。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">-- 返回结果集的前5条</span><br><span class="line">select * from t_usa_covid19_p</span><br><span class="line">where count_date &#x3D; &quot;2021-01-28&quot;</span><br><span class="line">  and state &#x3D;&quot;California&quot;</span><br><span class="line">limit 5;</span><br><span class="line"></span><br><span class="line">-- 返回结果集从第1行开始 共3行</span><br><span class="line">select * from t_usa_covid19_p</span><br><span class="line">where count_date &#x3D; &quot;2021-01-28&quot;</span><br><span class="line">  and state &#x3D;&quot;California&quot;</span><br><span class="line">limit 2,3; -- 注意 第一个参数偏移量是从0开始的</span><br></pre></td></tr></table></figure>
+<h3 id="案例-2">案例</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">-- step1:创建普通表t_usa_covid19</span><br><span class="line">drop table itcast.t_usa_covid19;</span><br><span class="line">CREATE TABLE itcast.t_usa_covid19(</span><br><span class="line">       count_date string,</span><br><span class="line">       county string,</span><br><span class="line">       state string,</span><br><span class="line">       fips int,</span><br><span class="line">       cases int,</span><br><span class="line">       deaths int)</span><br><span class="line">row format delimited fields terminated by &quot;,&quot;;</span><br><span class="line">-- 将源数据load加载到t_usa_covid19表对应的路径下</span><br><span class="line">load data local inpath &#39;&#x2F;root&#x2F;hivedata&#x2F;us-covid19-counties.dat&#39; into table t_usa_covid19;</span><br><span class="line"></span><br><span class="line">-- step2:创建一张分区表 基于count_date日期,state州进行分区</span><br><span class="line">CREATE TABLE itcast.t_usa_covid19_p(</span><br><span class="line">     county string,</span><br><span class="line">     fips int,</span><br><span class="line">     cases int,</span><br><span class="line">     deaths int)</span><br><span class="line">partitioned by(count_date string,state string)</span><br><span class="line">row format delimited fields terminated by &quot;,&quot;;</span><br><span class="line"></span><br><span class="line">-- step3:使用动态分区插入将数据导入t_usa_covid19_p中</span><br><span class="line">set hive.exec.dynamic.partition.mode &#x3D; nonstrict;</span><br><span class="line"></span><br><span class="line">insert into table t_usa_covid19_p partition (count_date,state)</span><br><span class="line">select county,fips,cases,deaths,count_date,state from t_usa_covid19;</span><br></pre></td></tr></table></figure>
+<p>查询结果：</p>
+<p><img src="/2021/07/25/Hive_DML/image-20210725180419051.png" alt="image-20210725180419051" style="zoom:67%;"></p>
+<p>通常，SELECT查询将扫描整个表（所谓的全表扫描）。如果使用PARTITIONED BY子句创建的分区表，则在查询时可以指定分区查询，减少全表扫描，也叫做分区裁剪。</p>
+<p>所谓分区裁剪指的是：对分区表进行查询时，会检查WHERE子句或JOIN中的ON子句中是否存在对分区字段的过滤，如果存在，则<strong>仅访问查询符合条件的分区，即裁剪掉没必要访问的分区</strong>。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">-- 找出来自加州，累计死亡人数大于1000的县 state字段就是分区字段 进行分区裁剪 避免全表扫描</span><br><span class="line">select * from t_usa_covid19_p where state &#x3D;&quot;California&quot; and deaths &gt; 1000;</span><br><span class="line"></span><br><span class="line">-- 多分区裁剪</span><br><span class="line">select * from t_usa_covid19_p where count_date &#x3D; &quot;2021-01-28&quot; and state &#x3D;&quot;California&quot; and deaths &gt; 1000;</span><br></pre></td></tr></table></figure>
+<h3 id="高阶查询">高阶查询</h3>
+<h4 id="排序">排序</h4>
+<p>Hive SQL中的CLUSTER BY语法可以指定根据后面的字段将数据分组，每组内再根据这个字段正序排序（<strong>不允许指定倒序</strong>），概况起来就是：根据同一个字段，分且排序。</p>
+<p>分组的规则hash散列。hash_func(col_name) % reduce task nums</p>
+<p>分为几组取决于reduce task的个数。下面在Hive beeline客户端中针对student表为例：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">-- cluster by</span><br><span class="line">select * from student;</span><br><span class="line">-- 不指定reduce task个数</span><br><span class="line">-- 日志显示：Number of reduce tasks not specified. Estimated from input data size: 1</span><br><span class="line">select * from student cluster by sno;</span><br><span class="line"></span><br><span class="line">-- 手动设置reduce task个数</span><br><span class="line">set mapreduce.job.reduces &#x3D;2;</span><br><span class="line">select * from student cluster by sno;</span><br></pre></td></tr></table></figure>
+<p>默认情况下，reduce task的个数由Hive在编译期间自己决定：</p>
+<figure>
+<img src="/2021/07/25/Hive_DML/image-20210725182147657.png" alt="image-20210725182147657"><figcaption aria-hidden="true">image-20210725182147657</figcaption>
+</figure>
+<p>手动设置reduce task个数：</p>
+<figure>
+<img src="/2021/07/25/Hive_DML/image-20210725182126594.png" alt="image-20210725182126594"><figcaption aria-hidden="true">image-20210725182126594</figcaption>
+</figure>
+<figure>
+<img src="/2021/07/25/Hive_DML/image-20210725182207003.png" alt="image-20210725182207003"><figcaption aria-hidden="true">image-20210725182207003</figcaption>
+</figure>
+<p>执行结果如下：分为两个部分，每个部分内正序排序：</p>
+<p><img src="/2021/07/25/Hive_DML/image-20210725182238798.png" alt="image-20210725182238798" style="zoom:80%;"></p>
+<p>因为CLUSTER BY不允许指定倒序，因此若有倒序的需求则需要采用其他方法。</p>
+<p>DISTRIBUTE BY +SORT BY就相当于把cluster by的功能一分为二：DISTRIBUTE BY负责分，SORT BY负责分组内排序，并且可以是不同的字段。如果DISTRIBUTE BY +SORT BY的字段一样，可以得出下列结论：CLUSTER BY=DISTRIBUTE BY +SORT BY（字段一样）</p>
+<p>案例，把学生表数据根据性别分为两个部分，每个分组内根据年龄的倒序排序：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">select * from student distribute by sex sort by sage desc;</span><br></pre></td></tr></table></figure>
+<figure>
+<img src="/2021/07/25/Hive_DML/image-20210725182550180.png" alt="image-20210725182550180"><figcaption aria-hidden="true">image-20210725182550180</figcaption>
+</figure>
+<p>总结：</p>
+<ul>
+<li>order by会对输入做全局排序，因此只有一个reducer，会导致当输入规模较大时，需要较长的计算时间。</li>
+<li>sort by不是全局排序，其在数据进入reducer前完成排序。因此，如果用sort by进行排序，并且设置mapred.reduce.tasks&gt;1，则sort by只保证每个reducer的输出有序，不保证全局有序。</li>
+<li>distribute by(字段)根据指定字段将数据分到不同的reducer，分发算法是hash散列。</li>
+<li>cluster by(字段) 除了具有Distribute by的功能外，还会对该字段进行排序。如果distribute和sort的字段是同一个时，此时，cluster by = distribute by + sort by</li>
+</ul>
+<h4 id="union">union</h4>
+<p>UNION用于将来自多个SELECT语句的结果合并为一个结果集。</p>
+<p>每个select_statement返回的<strong>列的数量和名称必须相同</strong>。</p>
+<p>语法如下：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">select_statement </span><br><span class="line">UNION [ALL | DISTINCT] select_statement </span><br><span class="line">UNION [ALL | DISTINCT] select_statement ...</span><br><span class="line"></span><br><span class="line">-- union</span><br><span class="line">-- 使用DISTINCT关键字与使用UNION默认值效果一样，都会删除重复行。</span><br><span class="line">select num,name from student_local</span><br><span class="line">UNION</span><br><span class="line">select num,name from student_hdfs;</span><br><span class="line">-- 和上面一样</span><br><span class="line">select num,name from student_local</span><br><span class="line">UNION DISTINCT</span><br><span class="line">select num,name from student_hdfs;</span><br><span class="line"></span><br><span class="line">-- 使用ALL关键字会保留重复行。</span><br><span class="line">select num,name from student_local</span><br><span class="line">UNION ALL</span><br><span class="line">select num,name from student_hdfs;</span><br><span class="line"></span><br><span class="line">-- 如果要将ORDER BY，SORT BY，CLUSTER BY，DISTRIBUTE BY或LIMIT应用于单个SELECT</span><br><span class="line">-- 请将子句放在括住SELECT的括号内</span><br><span class="line">SELECT sno,sname FROM (select sno,sname from student_local LIMIT 2) subq1</span><br><span class="line">UNION</span><br><span class="line">SELECT sno,sname FROM (select sno,sname from student_hdfs LIMIT 3) subq2</span><br><span class="line"></span><br><span class="line">-- 如果要将ORDER BY，SORT BY，CLUSTER BY，DISTRIBUTE BY或LIMIT子句应用于整个UNION结果</span><br><span class="line">-- 请将ORDER BY，SORT BY，CLUSTER BY，DISTRIBUTE BY或LIMIT放在最后一个之后。</span><br><span class="line">select sno,sname from student_local</span><br><span class="line">UNION</span><br><span class="line">select sno,sname from student_hdfs</span><br><span class="line">order by sno desc;</span><br></pre></td></tr></table></figure>
+<p>使用DISTINCT关键字与只使用UNION默认值效果一样，都会删除重复行。使用ALL关键字，不会删除重复行，结果集包括所有SELECT语句的匹配行（包括重复行）。</p>
+<h4 id="子查询">子查询</h4>
+<p>在Hive0.12版本，仅在FROM子句中支持子查询。<strong>必须要给子查询一个名称</strong>，<strong>因为FROM子句中的每个表都必须有一个名称</strong>。在Hive0.12版本，仅在FROM子句中支持子查询。而且必须要给子查询一个名称，因为FROM子句中的每个表都必须有一个名称。Hive 0.13.0和更高版本中的子查询名称之前可以包含可选关键字“ AS” 。</p>
+<p>子查询返回结果中的列必须具有唯一的名称。子查询返回结果中的列在外部查询中可用，就像真实表的列一样。子查询也可以是带有UNION的查询表达式。Hive支持任意级别的子查询，也就是所谓的嵌套子查询。</p>
+<p>从Hive 0.13开始，WHERE子句支持某些类型的子查询。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">-- where子句中子查询（Subqueries）</span><br><span class="line">-- 不相关子查询，相当于IN、NOT IN,子查询只能选择一个列。</span><br><span class="line">-- （1）执行子查询，其结果不被显示，而是传递给外部查询，作为外部查询的条件使用。</span><br><span class="line">-- （2）执行外部查询，并显示整个结果。　　</span><br><span class="line">SELECT *</span><br><span class="line">FROM student_hdfs</span><br><span class="line">WHERE student_hdfs.num IN (select num from student_local limit 2);</span><br><span class="line"></span><br><span class="line">-- 相关子查询，指EXISTS和NOT EXISTS子查询</span><br><span class="line">-- 子查询的WHERE子句中支持对父查询的引用</span><br><span class="line">SELECT A</span><br><span class="line">FROM T1</span><br><span class="line">WHERE EXISTS (SELECT B FROM T2 WHERE T1.X &#x3D; T2.Y);</span><br></pre></td></tr></table></figure>
+<h2 id="cte">CTE</h2>
+<p>Common Table Expressions（CTE），即公用表表达式（CTE）是一个临时结果集，该结果集是从WITH子句中指定的简单查询派生而来的，该查询紧接在SELECT或INSERT关键字之前。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">--选择语句中的CTE</span><br><span class="line">with q1 as (select sno,sname,sage from student where sno &#x3D; 95002)</span><br><span class="line">select *</span><br><span class="line">from q1;</span><br><span class="line"></span><br><span class="line">-- from风格</span><br><span class="line">with q1 as (select sno,sname,sage from student where sno &#x3D; 95002)</span><br><span class="line">from q1</span><br><span class="line">select *;</span><br><span class="line"></span><br><span class="line">-- chaining CTEs 链式</span><br><span class="line">with q1 as ( select * from student where sno &#x3D; 95002),</span><br><span class="line">     q2 as ( select sno,sname,sage from q1)</span><br><span class="line">select * from (select sno from q2) a;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">-- union案例</span><br><span class="line">with q1 as (select * from student where sno &#x3D; 95002),</span><br><span class="line">     q2 as (select * from student where sno &#x3D; 95004)</span><br><span class="line">select * from q1 union all select * from q2;</span><br><span class="line"></span><br><span class="line">-- 视图，CTAS和插入语句中的CTE</span><br><span class="line">-- insert</span><br><span class="line">create table s1 like student;</span><br><span class="line"></span><br><span class="line">with q1 as ( select * from student where sno &#x3D; 95002)</span><br><span class="line">from q1</span><br><span class="line">insert overwrite table s1</span><br><span class="line">select *;</span><br><span class="line"></span><br><span class="line">select * from s1;</span><br><span class="line"></span><br><span class="line">-- ctas</span><br><span class="line">create table s2 as</span><br><span class="line">with q1 as ( select * from student where sno &#x3D; 95002)</span><br><span class="line">select * from q1;</span><br><span class="line"></span><br><span class="line">-- view</span><br><span class="line">create view v1 as</span><br><span class="line">with q1 as ( select * from student where sno &#x3D; 95002)</span><br><span class="line">select * from q1;</span><br><span class="line"></span><br><span class="line">select * from v1;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="join">join</h2>
+<h3 id="基础-3">基础</h3>
+<p>根据数据库的三范式设计要求，<strong>通常不会设计一张大表把所有类型的数据都放在一起，而是不同类型的数据设计不同的表存储</strong>。比如在设计一个订单数据表的时候，可以将客户编号作为一个外键和订单表建立相应的关系。而不可以在订单表中添加关于客户其它信息（比如姓名、所属公司等）的字段。</p>
+<p><img src="/2021/07/25/Hive_DML/image-20210726003928854.png" alt="image-20210726003928854" style="zoom:50%;"></p>
+<p>在这种情况下，有时需要基于多张表查询才能得到最终完整的结果，SQL中<strong>join语法的出现是用于根据两个或多个表中的字段之间的关系，从这些表中共同组合查询数据</strong>，因此有时为了得到完整的结果，我们就需要执行 join。</p>
+<p>Hive作为面向分析的数据仓库软件，为了更好的支持数据分析的功能丰富，也实现了join的语法，整体上来看和RDBMS中的join语法类似，只不过在某些点有自己的特色。需要特别注意。</p>
+<h3 id="语法-3">语法</h3>
+<p>在Hive中，当下版本3.1.2总共支持6种join语法。分别是：</p>
+<p>inner join（内连接）、left join（左连接）、right join（右连接）、full outer join（全外连接）、left semi join（左半开连接）、cross join（交叉连接，也叫做笛卡尔乘积）。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">table_reference [INNER] JOIN table_factor [join_condition]</span><br><span class="line"> | table_reference &#123;LEFT|RIGHT|FULL&#125; [OUTER] JOIN table_reference join_condition</span><br><span class="line"> | table_reference LEFT SEMI JOIN table_reference join_condition</span><br><span class="line"> | table_reference CROSS JOIN table_reference [join_condition] (as of Hive 0.10</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>JOIN默认就是INNER JOIN。</p>
+<p>table_reference：是join查询中使用的表名，也可以是子查询别名（查询结果当成表参与join）。</p>
+<p>table_factor：与table_reference相同,是联接查询中使用的表名,也可以是子查询别名。</p>
+<p>join_condition：join查询关联的条件， 如果在两个以上的表上需要连接，则使用AND关键字。</p>
+<p>从Hive 0.13.0开始，支持隐式联接表示法（请参阅HIVE-5558）。这允许FROM子句连接以逗号分隔</p>
+<p>的表列表，而省略JOIN关键字。例如：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">SELECT *</span><br><span class="line">FROM table1 t1, table2 t2, table3 t3</span><br><span class="line">WHERE t1.id &#x3D; t2.id AND t2.id &#x3D; t3.id AND t1.zipcode &#x3D; &#39;02535&#39;;</span><br></pre></td></tr></table></figure>
+<p>Hive 2.2.0开始，支持ON子句中的复杂表达式，<strong>支持不相等连接</strong>（请参阅HIVE-15211和HIVE-15251）。<strong>在此之前，Hive不支持非等值联接条件</strong>。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">SELECT a.* FROM a JOIN b ON (a.id &#x3D; b.id)</span><br><span class="line">SELECT a.* FROM a JOIN b ON (a.id &#x3D; b.id AND a.department &#x3D; b.department)</span><br><span class="line">SELECT a.* FROM a LEFT OUTER JOIN b ON (a.id &lt;&gt; b.id)</span><br></pre></td></tr></table></figure>
+<h3 id="各种join">各种JOIN</h3>
+<h4 id="inner-join">inner join</h4>
+<p>内连接是最常见的一种连接，它也被称为普通连接，而关系模型提出者E.FCodd（埃德加•科德）最早称之为自然连接。其中inner可以省略。inner join == join 等价于早期的连接语法。</p>
+<p>内连接，只有进行连接的两个表中都存在与连接条件相匹配的数据才会被留下来。</p>
+<p><img src="/2021/07/25/Hive_DML/image-20210726005046850.png" alt="image-20210726005046850" style="zoom: 33%;"></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">-- 1、inner join</span><br><span class="line">select e.id,e.name,e_a.city,e_a.street</span><br><span class="line">from employee e </span><br><span class="line">inner join employee_address e_a</span><br><span class="line">on e.id &#x3D;e_a.id;</span><br><span class="line"></span><br><span class="line">-- 等价于 inner join&#x3D;join</span><br><span class="line">select e.id,e.name,e_a.city,e_a.street</span><br><span class="line">from employee e </span><br><span class="line">join employee_address e_a</span><br><span class="line">on e.id &#x3D;e_a.id;</span><br><span class="line"></span><br><span class="line">-- 等价于 隐式连接表示法</span><br><span class="line">select e.id,e.name,e_a.city,e_a.street</span><br><span class="line">from employee e , employee_address e_a</span><br><span class="line">where e.id &#x3D;e_a.id;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p><img src="/2021/07/25/Hive_DML/image-20210726005212922.png" alt="image-20210726005212922" style="zoom: 67%;"></p>
+<h4 id="left-join">left join</h4>
+<p>left join中文叫做是左外连接(Left Outer Jion)或者左连接，其中outer可以省略，left outer join是早期的写法。</p>
+<p>left join的核心就在于left左。左指的是join关键字左边的表，简称左表。</p>
+<p>join时以左表的全部数据为准，右边与之关联；左表数据全部返回，右表关联上的显示返回，关联不上的显示null返回。</p>
+<p><img src="/2021/07/25/Hive_DML/image-20210726005345737.png" alt="image-20210726005345737" style="zoom: 33%;"></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">-- 2、left join</span><br><span class="line">select e.id,e.name,e_conn.phno,e_conn.email</span><br><span class="line">from employee e left join employee_connection e_conn</span><br><span class="line">on e.id &#x3D;e_conn.id;</span><br><span class="line"></span><br><span class="line">-- 等价于 left outer join</span><br><span class="line">select e.id,e.name,e_conn.phno,e_conn.email</span><br><span class="line">from employee e left outer join  employee_connection e_conn</span><br><span class="line">on e.id &#x3D;e_conn.id;</span><br></pre></td></tr></table></figure>
+<p><img src="/2021/07/25/Hive_DML/image-20210726005430913.png" alt="image-20210726005430913" style="zoom:67%;"></p>
+<h4 id="right-join">right join</h4>
+<p>right join中文叫做是右外连接(Right Outer Jion)或者右连接，其中outer可以省略。</p>
+<p>right join的核心就在于Right右。右指的是join关键字右边的表，简称右表。</p>
+<p>join时以右表的全部数据为准，左边与之关联；右表数据全部返回，左表关联上的显示返回，关联不上的显示null返回。</p>
+<p>很明显，right join和left join之间很相似，重点在于以哪边为准，也就是一个方向的问题。</p>
+<p><img src="/2021/07/25/Hive_DML/image-20210726005514782.png" alt="image-20210726005514782" style="zoom:33%;"></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">-- 3、right join</span><br><span class="line">select e.id,e.name,e_conn.phno,e_conn.email</span><br><span class="line">from employee e right join employee_connection e_conn</span><br><span class="line">on e.id &#x3D;e_conn.id;</span><br><span class="line"></span><br><span class="line">-- 等价于 right outer join</span><br><span class="line">select e.id,e.name,e_conn.phno,e_conn.email</span><br><span class="line">from employee e right outer join employee_connection e_conn</span><br><span class="line">on e.id &#x3D;e_conn.id;</span><br></pre></td></tr></table></figure>
+<p><img src="/2021/07/25/Hive_DML/image-20210726005548550.png" alt="image-20210726005548550" style="zoom:67%;"></p>
+<h4 id="full-outer-join">full outer join</h4>
+<p>full outer join 等价 full join ,中文叫做全外连接或者外连接。</p>
+<p>包含左、右两个表的全部行，不管另外一边的表中是否存在与它们匹配的行。它等价于对这两个数据集合分别进行左外连接和右外连接，然后再使用消去重复行的操作将上述两个结果集合并为一个结果集。</p>
+<p><img src="/2021/07/25/Hive_DML/image-20210726005716904.png" alt="image-20210726005716904" style="zoom:33%;"></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">-- 4、full outer join</span><br><span class="line">select e.id,e.name,e_a.city,e_a.street</span><br><span class="line">from employee e full outer join employee_address e_a</span><br><span class="line">on e.id &#x3D;e_a.id;</span><br><span class="line"></span><br><span class="line">-- 等价于</span><br><span class="line">select e.id,e.name,e_a.city,e_a.street</span><br><span class="line">from employee e full  join employee_address e_a</span><br><span class="line">on e.id &#x3D;e_a.id;</span><br></pre></td></tr></table></figure>
+<p><img src="/2021/07/25/Hive_DML/image-20210726005755307.png" alt="image-20210726005755307" style="zoom:67%;"></p>
+<h4 id="left-semi-join">left semi join</h4>
+<p>左半开连接（LEFT SEMI JOIN）会返回左边表的记录，前提是其记录对于右边的表满足ON语句中的判定条件。</p>
+<p>从效果上来看即inner join之后只返回左表的结果。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">-- 5、left semi join</span><br><span class="line">select *</span><br><span class="line">from employee e left semi join employee_address e_addr</span><br><span class="line">on e.id &#x3D;e_addr.id;</span><br><span class="line"></span><br><span class="line">-- 相当于 inner join 只不过效率高一些</span><br><span class="line">select e.*</span><br><span class="line">from employee e inner join employee_address e_addr</span><br><span class="line">on e.id &#x3D;e_addr.id;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h4 id="cross-join笛卡尔积">cross join（笛卡尔积）</h4>
+<p>交叉连接cross join，将会返回被连接的两个表的笛卡尔积，返回结果的行数等于两个表行数的乘积。对于大表来说，cross join慎用。</p>
+<p>在HiveSQL语法中，cross join 后面可以跟where子句进行过滤，或者on条件过滤。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">-- 6、cross join</span><br><span class="line">-- 下列A、B、C 执行结果相同，但是效率不一样：</span><br><span class="line">-- A:</span><br><span class="line">select a.*,b.* from employee a,employee_address b where a.id&#x3D;b.id;</span><br><span class="line">-- B:</span><br><span class="line">select * from employee a cross join employee_address b on a.id&#x3D;b.id;</span><br><span class="line">select * from employee a cross join employee_address b where a.id&#x3D;b.id;</span><br><span class="line"></span><br><span class="line">-- C:</span><br><span class="line">select * from employee a inner join employee_address b on a.id&#x3D;b.id;</span><br><span class="line"></span><br><span class="line">-- 一般不建议使用方法A和B，因为如果有WHERE子句的话，往往会先进行笛卡尔积返回数据然后才根据WHERE条件从中选择。</span><br><span class="line">-- 因此，如果两个表太大，将会非常非常慢，不建议使用。</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h3 id="注意事项">注意事项</h3>
+<p>1、允许使用复杂的on联接表达式</p>
+<p>2、同一查询中可以连接2个以上的表（！？多表关联原理）</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">SELECT a.val, b.val, c.val </span><br><span class="line">FROM </span><br><span class="line">a JOIN b ON (a.key &#x3D; b.key1) </span><br><span class="line">JOIN c ON (c.key &#x3D; b.key2)</span><br></pre></td></tr></table></figure>
+<p>3、如果每个表在联接子句中使用相同的列，则Hive将多个表上的联接转换为单个MR作业</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">SELECT a.val, b.val, c.val </span><br><span class="line">FROM a JOIN b ON (a.key &#x3D; b.key1) </span><br><span class="line">JOIN c ON (c.key &#x3D; b.key1)</span><br><span class="line">-- 由于联接中仅涉及b的key1列，因此被转换为1个MR作业来执行</span><br><span class="line"></span><br><span class="line">SELECT a.val, b.val, c.val </span><br><span class="line">FROM a JOIN b ON (a.key &#x3D; b.key1) </span><br><span class="line">JOIN c ON (c.key &#x3D; b.key2)</span><br><span class="line">-- 会转换为两个MR作业，因为在第一个连接条件中使用了b中的key1列，而在第二个连接条件中使用了b中的key2列。第一个map &#x2F; reduce作业将a与b联接在一起，然后将结果与c联接到第二个map &#x2F; reduce作业中。</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>4、join时的最后一个表会通过reducer流式传输，并在其中缓存之前的其他表，因此，将大表放置在最后有助于减少reducer阶段缓存数据所需要的内存</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">SELECT a.val, b.val, c.val </span><br><span class="line">FROM a JOIN b ON (a.key &#x3D; b.key1) </span><br><span class="line">JOIN c ON (c.key &#x3D; b.key1)</span><br><span class="line">-- 由于联接中仅涉及b的key1列，因此被转换为1个MR作业来执行，并且表a和b的键的特定值的值被缓存在reducer的内存中。然后，对于从c中检索的每一行，将使用缓存的行来计算联接。</span><br><span class="line"></span><br><span class="line">SELECT a.val, b.val, c.val </span><br><span class="line">FROM a JOIN b ON (a.key &#x3D; b.key1) </span><br><span class="line">JOIN c ON (c.key &#x3D; b.key2)</span><br><span class="line">-- 计算涉及两个MR作业。其中的第一个将a与b连接起来，并缓存a的值，同时在reducer中流式传输b的值。在第二个MR作业中，将缓存第一个连接的结果，同时将c的值通过reducer流式传输。</span><br></pre></td></tr></table></figure>
+<p>5、在join的时候，可以通过语法STREAMTABLE提示指定要流式传输的表。如果省略STREAMTABLE提示，则Hive将流式传输最右边的表。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">SELECT &#x2F;*+ STREAMTABLE(a) *&#x2F; a.val, b.val, c.val </span><br><span class="line">FROM a JOIN b ON (a.key &#x3D; b.key1) </span><br><span class="line">JOIN c ON (c.key &#x3D; b.key1)</span><br><span class="line">-- a,b,c三个表都在一个MR作业中联接，并且表b和c的键的特定值的值被缓存在reducer的内存中。然后，对于从a中检索到的每一行，将使用缓存的行来计算联接。如果省略STREAMTABLE提示，则Hive将流式传输最右边的表。</span><br></pre></td></tr></table></figure>
+<p>6、如果除一个要连接的表之外的所有表都很小，则可以将其作为仅map作业执行（即map端join）</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">SELECT &#x2F;*+ MAPJOIN(b) *&#x2F; a.key, a.value </span><br><span class="line">FROM a JOIN b ON a.key &#x3D; b.key</span><br><span class="line">-- 不需要reducer。对于A的每个Mapper，B都会被完全读取。限制是不能执行FULL &#x2F; RIGHT OUTER JOIN b。</span><br></pre></td></tr></table></figure>
+<p>7、join在where条件之前进行。（执行顺序？？）</p>
+<p>多表关联和join的执行顺序</p>
+]]></content>
+      <categories>
+        <category>Hive</category>
+      </categories>
+      <tags>
+        <tag>Hive</tag>
+      </tags>
+  </entry>
 </search>

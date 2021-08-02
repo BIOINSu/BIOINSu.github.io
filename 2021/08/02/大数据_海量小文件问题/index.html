@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.3.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/maze.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/maze.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/maze.png">
+  <link rel="mask-icon" href="/images/maze.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","images":"/images","scheme":"Mist","version":"8.2.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false}};
+  </script>
+<meta name="description" content="Hadoop Hive Spark     小文件来源 数据源有大量小文件；reducer太多，每个都生成小文件 Hive分区表的每个分区数据量很小 sparkstreaming在每个batch结束后都会重新打开一个新的文件作为输出，因此每个batch下的每个分区生成大量小文件   解决方案 1、在数据源处就合并小文件 1、配置">
+<meta property="og:type" content="article">
+<meta property="og:title" content="海量小文件问题">
+<meta property="og:url" content="http://example.com/2021/08/02/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E6%B5%B7%E9%87%8F%E5%B0%8F%E6%96%87%E4%BB%B6%E9%97%AE%E9%A2%98/index.html">
+<meta property="og:site_name" content="BIOINSu">
+<meta property="og:description" content="Hadoop Hive Spark     小文件来源 数据源有大量小文件；reducer太多，每个都生成小文件 Hive分区表的每个分区数据量很小 sparkstreaming在每个batch结束后都会重新打开一个新的文件作为输出，因此每个batch下的每个分区生成大量小文件   解决方案 1、在数据源处就合并小文件 1、配置">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2021/08/02/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E6%B5%B7%E9%87%8F%E5%B0%8F%E6%96%87%E4%BB%B6%E9%97%AE%E9%A2%98/image-20210801234410484.png">
+<meta property="og:image" content="http://example.com/2021/08/02/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E6%B5%B7%E9%87%8F%E5%B0%8F%E6%96%87%E4%BB%B6%E9%97%AE%E9%A2%98/image-20210802085228880.png">
+<meta property="og:image" content="http://example.com/2021/08/02/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E6%B5%B7%E9%87%8F%E5%B0%8F%E6%96%87%E4%BB%B6%E9%97%AE%E9%A2%98/image-20210802004812454.png">
+<meta property="article:published_time" content="2021-08-02T00:55:08.385Z">
+<meta property="article:modified_time" content="2021-08-02T00:53:21.412Z">
+<meta property="article:author" content="BIOINSu">
+<meta property="article:tag" content="大数据">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2021/08/02/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E6%B5%B7%E9%87%8F%E5%B0%8F%E6%96%87%E4%BB%B6%E9%97%AE%E9%A2%98/image-20210801234410484.png">
+
+
+<link rel="canonical" href="http://example.com/2021/08/02/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E6%B5%B7%E9%87%8F%E5%B0%8F%E6%96%87%E4%BB%B6%E9%97%AE%E9%A2%98/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+<title>海量小文件问题 | BIOINSu</title>
+  
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BIOINSu</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%E6%A6%82%E8%BF%B0"><span class="nav-number">1.</span> <span class="nav-text">问题概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%98%E5%82%A8%E7%B3%BB%E7%BB%9F%E6%80%A7%E8%83%BD%E8%A1%A1%E9%87%8F"><span class="nav-number">2.</span> <span class="nav-text">存储系统性能衡量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%8F%E6%96%87%E4%BB%B6%E8%BF%87%E5%A4%9A%E5%BC%95%E8%B5%B7%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">3.</span> <span class="nav-text">小文件过多引起的问题</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%83%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86%E4%BD%8E%E6%95%88"><span class="nav-number">3.1.</span> <span class="nav-text">元数据管理低效</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%B8%83%E5%B1%80%E4%BD%8E%E6%95%88"><span class="nav-number">3.2.</span> <span class="nav-text">数据布局低效</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#io%E8%AE%BF%E9%97%AE%E6%B5%81%E7%A8%8B%E5%A4%8D%E6%9D%82"><span class="nav-number">3.3.</span> <span class="nav-text">I&#x2F;O访问流程复杂</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E5%B0%8F%E6%96%87%E4%BB%B6%E5%90%88%E5%B9%B6"><span class="nav-number">4.</span> <span class="nav-text">解决方案：小文件合并</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#hadoop%E5%B0%8F%E6%96%87%E4%BB%B6"><span class="nav-number">5.</span> <span class="nav-text">Hadoop小文件</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B0%8F%E6%96%87%E4%BB%B6%E6%9D%A5%E6%BA%90"><span class="nav-number">5.1.</span> <span class="nav-text">小文件来源</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8F%91%E7%8E%B0%E5%B0%8F%E6%96%87%E4%BB%B6%E7%9A%84%E6%96%B9%E5%BC%8F"><span class="nav-number">5.2.</span> <span class="nav-text">发现小文件的方式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#hadoop%E5%B0%8F%E6%96%87%E4%BB%B6%E5%90%88%E5%B9%B6%E7%AD%96%E7%95%A5%E5%92%8C%E6%96%B9%E5%BC%8F"><span class="nav-number">5.3.</span> <span class="nav-text">Hadoop小文件合并策略和方式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#namenode%E4%B8%AD%E7%9A%84%E5%B0%8F%E6%96%87%E4%BB%B6%E9%97%AE%E9%A2%98"><span class="nav-number">5.4.</span> <span class="nav-text">NameNode中的小文件问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#mapreduce%E7%9A%84%E5%B0%8F%E6%96%87%E4%BB%B6%E9%97%AE%E9%A2%98"><span class="nav-number">5.5.</span> <span class="nav-text">MapReduce的小文件问题</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#hive%E5%B0%8F%E6%96%87%E4%BB%B6"><span class="nav-number">6.</span> <span class="nav-text">Hive小文件</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="nav-number">6.1.</span> <span class="nav-text">解决方案</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#spark%E5%B0%8F%E6%96%87%E4%BB%B6"><span class="nav-number">7.</span> <span class="nav-text">Spark小文件</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%97%AE%E9%A2%98"><span class="nav-number">7.1.</span> <span class="nav-text">问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88-1"><span class="nav-number">7.2.</span> <span class="nav-text">解决方案</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">8.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">BIOINSu</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">47</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">31</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">35</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/BIOINSu" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;BIOINSu" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/08/02/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E6%B5%B7%E9%87%8F%E5%B0%8F%E6%96%87%E4%BB%B6%E9%97%AE%E9%A2%98/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BIOINSu">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BIOINSu">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          海量小文件问题
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2021-08-02 08:55:08 / 修改时间：08:53:21" itemprop="dateCreated datePublished" datetime="2021-08-02T08:55:08+08:00">2021-08-02</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/" itemprop="url" rel="index"><span itemprop="name">大数据</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <table>
+<colgroup>
+<col style="width: 5%">
+<col style="width: 35%">
+<col style="width: 23%">
+<col style="width: 35%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>Hadoop</th>
+<th>Hive</th>
+<th>Spark</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>小文件来源</td>
+<td>数据源有大量小文件；reducer太多，每个都生成小文件</td>
+<td>Hive分区表的每个分区数据量很小</td>
+<td>sparkstreaming在每个batch结束后都会重新打开一个新的文件作为输出，因此每个batch下的每个分区生成大量小文件</td>
+</tr>
+<tr class="even">
+<td>解决方案</td>
+<td>1、在数据源处就合并小文件</td>
+<td>1、配置map前合并和reduce后合并小文件</td>
+<td>1、增加batch大小</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>2、定期运行一个MR任务，读取某一个文件夹中的所有小文件，并通过减少reduce的数量将它们重写为较少数量的大文件</td>
+<td>2、使用HAR归档文件</td>
+<td>2、通过coalesce和repartition减少分区数量</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>3、SequenceFile将数据以KV的形式序列化到文件中，MR任务只需要为每个block启动一个map任务，并且保留文件名</td>
+<td>3、减少分区表中的分区数量</td>
+<td>3、自定义合并脚本</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>4、使用Hbase进行数据存储，将数据抽取过程从生成大量小HDFS文件更改为以逐条记录写入到HBase表</td>
+<td>4、数据压缩，通过序列化存储方式存储数据</td>
+<td>4、通过foreach输出类追加小文件</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>5、CombineFileInputFormat是Hadoop提供的抽象类，在MR读取时合并小文件。合并的文件不会持久化到磁盘</td>
+<td></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>6、自己编写特定的程序通过输出类来追加到现有的小文件</td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td>7、NameNode中通过Hadoop Archive(HAR)和联邦机制解决内存不足的问题</td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<a id="more"></a>
+<h3 id="问题概述">问题概述</h3>
+<p>海量小文件（LSOF，lots of small files）问题，使得分布式系统在在元数据管理、存储效率、访问的性能等方面面临巨大的挑战。</p>
+<p>存储磁盘最适合顺序的大文件I/O读写模式，非常不适合随机的小文件I/O读写模式（顺序读写，避免寻址），这是磁盘文件系统在海量小文件应用下性能表现不佳的根本原因。磁盘文件系统的设计大多都侧重于大文件，包括元数据管理、数据布局和I/O访问流程，另外VFS系统调用机制也非常不利于海量小文件，这些软件层面的机制和实现加剧了小文件读写的性能问题。</p>
+<p>Hadoop中的海量小文件问题，核心问题是它需要把文件meta信息缓存在内存里，这个内存只能是单机的，所以变成了一个很大的瓶颈。虽然后面HDFS一直尝试解决这个问题，比如引入联邦制等，但是也变相的引入了复杂性。</p>
+<h3 id="存储系统性能衡量">存储系统性能衡量</h3>
+<p>IOPS (Input/Output Per Second) 即每秒的输入输出量 (或读写次数) ，是衡量存储系统性能的主要指标之一。IOPS是指单位时间内系统能处理的I/O请求数量，一般以每秒处理的I/O请求数量为单位，I/O请求通常为读或写数据操作请求。随机读写频繁的应用，如OLTP(OnlineTransaction Processing)，IOPS是关键衡量指标。</p>
+<p>数据吞吐量(Throughput)，指单位时间内可以成功传输的数据数量。对于大量顺序读写的应用，如VOD(VideoOn Demand)，则更关注吞吐量指标。</p>
+<p>对于LOSF而言，IOPS/OPS是关键性能衡量指标。</p>
+<h3 id="小文件过多引起的问题">小文件过多引起的问题</h3>
+<h4 id="元数据管理低效"><strong>元数据管理低效</strong></h4>
+<p>磁盘文件系统中，目录项(dentry)、索引节点(inode)和数据(data)保存在存储介质的不同位置上。因此，访问一个文件需要经历至少3次独立的访问。这样，并发的小文件访问就转变成了大量的随机访问，而这种访问对于广泛使用的磁盘来说是非常低效的。</p>
+<p>同时，文件系统通常采用Hash树、B+树或B*树来组织和索引目录，这种方法不能在数以亿计的大目录中很好的扩展，海量目录下检索效率会明显下降。正是由于单个目录元数据组织能力的低效，文件系统使用者通常被鼓励把文件分散在多层次的目录中以提高性能。然而，这种方法会进一步加大路径查询的开销。</p>
+<h4 id="数据布局低效"><strong>数据布局低效</strong></h4>
+<p>磁盘文件系统使用块来组织磁盘数据，并在inode中使用多级指针或hash树来索引文件数据块。数据块通常比较小，一般为1KB、2KB或4KB。当文件需要存储数据时，文件系统根据预定的策略分配数据块，分配策略会综合考虑数据局部性、存储空间利用效率等因素，通常会优先考虑大文件I/O带宽。</p>
+<p>对于大文件，数据块会尽量进行连续分配，具有比较好的空间局部性。</p>
+<p>对于小文件，尤其是大文件和小文件混合存储或者经过大量删除和修改后，数据块分配的随机性会进一步加剧，数据块可能零散分布在磁盘上的不同位置，并且会造成<strong>大量的磁盘碎片</strong>(包括内部碎片和外部碎片)，不仅造成<strong>访问性能下降</strong>（寻址随机访问），还导致大量磁盘空间浪费。</p>
+<p>对于特别小的小文件，比如小于4KB，<strong>inode与数据分开存储</strong>，这种数据布局也没有充分利用空间局部性，导致随机I/O访问，目前已经有文件系统实现了data in inode。</p>
+<h4 id="io访问流程复杂">I/O访问流程复杂</h4>
+<p>Linux等操作系统采用VFS或类似机制来抽象文件系统的实现，提供标准统一访问接口和流程，它提供通用的Cache机制，处理文件系统相关的所有系统调用，与具体文件系统和其他内核组件(如内存管理)交互。VFS可以屏蔽底层文件系统实现细节，简化文件系统设计，实现对不同文件系统支持的扩展。</p>
+<p>VFS通用模型中有涉及四种数据类型：超级块对象(superblock object)、索引结点对象(inode object)、文件对象(file object)和目录项对象(dentry object)，进程在进行I/O访问过程中需要频繁与它们交互(如下图所示)。</p>
+<p><img src="/2021/08/02/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E6%B5%B7%E9%87%8F%E5%B0%8F%E6%96%87%E4%BB%B6%E9%97%AE%E9%A2%98/image-20210801234410484.png" alt="image-20210801234410484" style="zoom:67%;"></p>
+<p>对于小文件的I/O访问过程，读写数据量比较小，这些流程太过复杂，系统调用开销太大，尤其是其中的<strong>open()操作占用了大部分的操作时间</strong>。当面对海量小文件并发访问，<strong>读写之前的准备工作</strong>占用了绝大部分系统时间，有效磁盘服务时间非常低，从而导致小I/O性能极度低下。</p>
+<p>对于大多数分布式文件系统而言，通常将元数据与数据两者独立开来，即控制流与数据流进行分离，从而获得更高的系统扩展性和I/O并发性。数据和I/O访问负载被分散到多个物理独立的存储节点，从而实现系统的高扩展性和高性能，每个节点使用磁盘文件系统管理数据，比如XFS、EXT4、XFS等。</p>
+<p>因此，相对于磁盘文件系统而言，每个节点的小文件问题是相同的。由于分布式的架构，分布式文件系统中的网络通信、元数据服务MDC、Cache管理、数据布局和I/O访问模式等都会对IOPS/OPS性能产生影响，进一步加剧小文件问题。</p>
+<h3 id="解决方案小文件合并">解决方案：小文件合并</h3>
+<p>小文件合并存储是目前优化LOSF问题最为成功的策略，已经被包括Facebook Haystack和淘宝TFS在内多个分布式存储系统采用。它通过<strong>多个逻辑文件共享同一个物理文件</strong>，将多个小文件合并存储到一个大文件中，实现高效的小文件存储。</p>
+<p>（1）首先减少了大量元数据，提高了元数据的检索和查询效率，降低了文件读写的 I/O 操作延时。</p>
+<p>（2）其次将可能连续访问的小文件一同合并存储，增加了文件之间的局部性，将原本小文件间的随机访问变为了顺序访问，大大提高了性能。</p>
+<p>（3）同时，合并存储能够有效的减少小文件存储时所产生的磁盘碎片问题，提高了磁盘的利用率。</p>
+<p>（4）最后，合并之后小文件的访问流程也有了很大的变化，由原来许多的open操作转变为了seek操作，定位到大文件具体的位置即可。</p>
+<p>小文件合并存储，本质上是大文件加上索引文件，相当于一个微型文件系统。这种机制对于WORM(Write Once Read Many)模式的分布式存储系统非常适合，而不适合允许改写和删除的存储系统。（1）因为文件改写和删除操作，<strong>会造成大文件内部的碎片空洞</strong>，如果进行空间管理并在合适时候执行碎片整理，实现比较复杂而且产生额外开销。（2）如果不对碎片进行处理，采用追加写的方式，一方面会浪费存储容量，另一方面又会破坏数据局部性，增加数据分布的随机性，导致读性能下降。（3）此外，如果支持随机读写，大小文件如何统一处理，小文件增长成大文件，大文件退化为小文件，这些问题都是在实际处理时面临的挑战。</p>
+<h3 id="hadoop小文件">Hadoop小文件</h3>
+<h4 id="小文件来源">小文件来源</h4>
+<p>一个Hadoop集群中存在小文件的可能原因如下：</p>
+<p><strong>1.流式任务（如spark streaming/flink等实时计算框架）</strong></p>
+<p>在做数据处理时，无论是纯实时还是基于batch的准实时，在小的时间窗口内都可能产生大量的小文件。此外对于Spark任务如果过度并行化，每个分区一个文件，产生的文件也可能会增多</p>
+<p><strong>2.Hive分区表的过度分区</strong></p>
+<p>这里的过度分区是指Hive分区表的每个分区数据量很小（比如小于HDFS block size）的Hive表。那么Hive Metastore Server调用开销会随着表拥有的分区数量而增加，影响性能。此时，要衡量数据量重新进行表结构设计（如减少分区粒度）。</p>
+<p><strong>3.数据源有大量小文件，未做处理直接迁移到Hadoop集群。</strong></p>
+<p><strong>4.对于计算引擎处理任务，以MR为例。</strong></p>
+<p>大量的map和reduce task存在。在HDFS上生成的文件基本上与map数量（对于Map-Only作业）或reduce数量（对于MR作业）成正比。此外，MR任务如果未设置合理的reduce数或者未做限制，每个reduce都会生成一个独立的文件。对于数据倾斜，导致大部分的数据都shuffle到一个或几个reduce，然后其他的reduce都会处理较小的数据量并输出小文件。</p>
+<p>对于Spark任务，过度并行化也是导致小文件过多的原因之一。</p>
+<p>在Spark作业中，根据写任务中提到的分区数量，每个分区会写一个新文件。这类似于MapReduce框架中的每个reduce任务都会创建一个新文件。Spark分区越多，写入的文件就越多。控制分区的数量来减少小文件的生成。</p>
+<h4 id="发现小文件的方式">发现小文件的方式</h4>
+<p>NameNode存储了所有与文件相关的元数据，所以它将整个命名空间保存在内存中，而fsimage是NameNode的本地本机文件系统中的持久化记录。因此，我们可以通过分析fsimage来找出文件的元信息。fsimage中可用的字段有：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Path, Replication, ModificationTime, AccessTime, PreferredBlockSize, BlocksCount, FileSize, NSQUOTA, DSQUOTA, Permission, UserName, GroupName</span><br></pre></td></tr></table></figure>
+<p>1、通过hdfs oiv命令解析fsimage</p>
+<p>拷贝Namenode数据目录下的fsimage文件到其他目录，然后执行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">hdfs oiv -p Delimited -delimiter <span class="string">&quot;|&quot;</span> -t /tmp/tmpdir/ -i fsimage_copy_file -o fsimage_deal.out</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>2、使用fsck命令扫描当前的HDFS目录并保存扫描后的信息。但是不建议在生产环境使用fsck命令，因为它会带来额外的开销，可能影响集群的稳定性。</p>
+<h4 id="hadoop小文件合并策略和方式">Hadoop小文件合并策略和方式</h4>
+<p>Hadoop中的小文件一般是指明显小于HDFS的block size（默认128M，一般整数倍配置如256M）的文件。但需要注意，HDFS上的有些小文件是不可避免的，比如jar、临时缓存文件等。但当小文件数量变的"海量"，以至于Hadoop集群中存储了大量的小文件，就需要对小文件进行处理，而处理的目标是让文件大小尽可能接近HDFS的block size大小或者整数倍。</p>
+<h4 id="namenode中的小文件问题">NameNode中的小文件问题</h4>
+<p>每个block的元数据都需要加载到NameNode的内存中，这导致一个Hadoop集群在NameNode中存储的对象是有上限的，并且对象太多会带来启动时间较长以及网络延迟的问题。常见的有两种解决方案：</p>
+<p>1、减少集群的NameNode中的对象数量</p>
+<p>2、以某种方式让NameNode使用更多的内存，但不会导致较长的启动时间</p>
+<ul>
+<li><p>Hadoop Archive(HAR)</p>
+<p>（本质上应该是一种多级目录）</p>
+<p>Hadoop archive files通过将许多小文件打包到更大的HAR文件中来缓解NameNode内存问题，类似于Linux上的TAR文件。这样可以让NameNode只处理单个HAR文件，而不是数十个或数百个小文件。可以使用har://前缀而不是hdfs://来访问HAR文件中的文件。HAR文件是基于HDFS中已有的文件创建的。因此，HAR文件不仅可以合并从数据源抽取到HDFS中的数据，也可以合并通过正常的MR处理创建的数据。HAR文件可以独立的用于解决小文件问题，除了HDFS没有其他的依赖。</p>
+<p><img src="/2021/08/02/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E6%B5%B7%E9%87%8F%E5%B0%8F%E6%96%87%E4%BB%B6%E9%97%AE%E9%A2%98/image-20210802085228880.png" alt="image-20210802085228880" style="zoom:67%;"></p>
+<p>虽然HAR文件减少了NameNode中小文件对内存的占用，但访问HAR文件内容性能可能会更低。<strong>HAR文件仍然随机存储在磁盘上，并且读取HAR内的文件需要访问两个索引 - 一个用于NameNode找到HAR文件本身，一个用于在HAR文件内找到小文件的位置</strong>。在HAR中读取文件实际上可能比读取存储在HDFS上的相同文件慢。<strong>MapReduce作业的性能同样会受到影响，因为它仍旧会为每个HAR文件中的每个文件启动一个map任务</strong>。</p>
+<p>所以这里我们需要有一个权衡，HAR文件可以解决NameNode内存问题，但同时会降低读取性能。如果你的小文件主要用于存档，并且不经常访问，那么HAR文件是一个很好的解决方案。如果小文件经常要被读取或者处理，那么可能需要重新考虑解决方案。</p></li>
+<li><p>NameNode联邦</p>
+<p>NameNode联邦允许你在一个集群中拥有多个NameNode，每个NameNode都存储元数据对象的子集。这样可以让所有的元数据对象都不止存储在单个机器上，也消除了单个节点的内存限制，因为你可以扩容。这听上去是一个很美丽的方案，但其实它也有局限性。</p>
+<p>NameNode联邦隔离了元数据对象 - <strong>仅仅只有某一个NameNode知道某一个特定的元数据对象在哪里，意思就是说如果你想找到某个文件，你必须知道它是保存在哪个NameNode上的</strong>。如果你的集群中有多个租户和/或隔离的应用程序，那使用NameNode联邦是挺不错的，你可以通过租户或者应用程序来隔离元数据对象。但是，如果要在所有的应用程序之间共享数据，则该方法其实也并不是完美的。</p>
+<p>由于NameNode联邦<strong>并不会改变集群中对象或者块的数量</strong>，所以<strong>它并没有解决MapReduce的性能问题</strong>。相反，联邦会增加Hadoop集群安装和维护的复杂度。所以我们说联邦可以解决小文件问题，倒不如说它提供了一种办法让你“隐藏”小文件。</p></li>
+</ul>
+<h4 id="mapreduce的小文件问题">MapReduce的小文件问题</h4>
+<p>MR性能问题主要是由随机磁盘IO和启动/管理太多的map任务组合引起的。解决方案似乎很明显 - 合并小文件，然而这个事往往说起来容易做起来难。以下讨论一下几种解决方案：</p>
+<p>注：虽然为解决MR的性能问题，但其实同样也是为了解决NameNode的压力，以及解决其他计算引擎比如Impala/Spark的性能问题。</p>
+<p>解决方案：</p>
+<p><strong>1、从数据源处处理</strong></p>
+<p>数据源是否能生成一些大文件，或者从数据源到HDFS的数据抽取过程中进行数据处理合并小文件。如果每小时只抽取10MB的数据，考虑是否改为每天一次，这样创建1个240MB的文件而不是24个10MB的文件。</p>
+<p>缺点：可能无法控制数据源的改动配合或业务对数据抽取间隔的需求，这样小文件问题无法避免，这时可能需要考虑其他的解决方案。</p>
+<p><strong>2、批量文件合并</strong></p>
+<p><strong>定期运行一个MR任务，读取某一个文件夹中的所有小文件，并通过减少reduce的数量将它们重写为较少数量的大文件。</strong></p>
+<p>比如一个文件夹中有1000个文件，你可以在一个MR任务中指定reduce的数量为5，这样1000个输入文件会被合并为5个文件。</p>
+<p>随后进行一些简单的HDFS文件/文件夹操作(将新文件覆盖回原目录)，则可以将NameNode的内存使用减少到200分之1，并且可以提高以后MR或其他计算引擎对同一数据处理的性能。</p>
+<p>这些MR任务运行同样需要集群资源，所以建议调度在生产系统非繁忙时间段执行。同时，应该定期执行这种合并的MR作业，因为小文件随时或者几乎每天都可能产生。</p>
+<p>但这个合并程序需要有额外的逻辑来判断存在大量小文件的目录，或者你自己是知道哪些目录是存在大量小文件的。因为假如某个目录只有3个文件，运行合并作业远不如合并一个500个文件的文件夹的性能优势提升明显。</p>
+<p>检查所有文件夹并确认哪些文件夹中的小文件需要合并，目前主要是通过自定义的脚本或程序，当然一些商业工具也能做，比如Pentaho可以迭代HDFS中的一组文件夹，找到最小合并要求的文件夹。</p>
+<p>缺点：批量合并文件的方法无法保留原始文件名，如果原始文件名对于你了解数据来源非常重要，则批量合并文件的方法也不适用。但一般来说，我们一般只会设计HDFS的各级目录的文件名，而不会细化到每个文件的名字，所以理论来说这种方法问题也不大。</p>
+<p><strong>3、Sequence文件</strong></p>
+<p>SequenceFile是Hadoop API提供的一种二进制文件，它将数据以&lt;key,value&gt;的形式序列化到文件中，这种二进制文件内部使用Hadoop的标准Writable接口实现序列化和反序列化。有如下特点：</p>
+<p><img src="/2021/08/02/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E6%B5%B7%E9%87%8F%E5%B0%8F%E6%96%87%E4%BB%B6%E9%97%AE%E9%A2%98/image-20210802004812454.png" alt="image-20210802004812454" style="zoom: 50%;"></p>
+<p>（1）基于行存储。它与Hadoop API中的MapFile是互相兼容的。Hive中的SequenceFile继承自Hadoop API的SequenceFile，不过它的key为空，使用value存放实际的值，这样是为了避免MR在运行map阶段的排序过程。</p>
+<p>（2）支持三种压缩类型：None、Record、Block。默认采用Record，但是Record压缩率低；一般建议使用Block压缩。</p>
+<p>（3）优势是文件和Hadoop API的MapFile是相互兼容的。</p>
+<p>当需要维护原始文件名时，就可以使用sequence文件。在此解决方案中，文件名作为key保存在sequence文件中，然后文件内容会作为value保存。下图给出将一些小文件存储为sequence文件的示例：</p>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">------------------------------------------------------------------------------------------------------------</span><br><span class="line">|  Key  |  Value  |  Key  |  Value  |  Key  |  Value</span><br><span class="line">------------------------------------------------------------------------------------------------------------</span><br><span class="line">|  file1.txt  | file1 contents| file2.txt    |file2 contents  | fileN.txt    | fileN contents</span><br><span class="line">------------------------------------------------------------------------------------------------------------</span><br></pre></td></tr></table></figure>
+<p>如果一个sequence文件包含10000个小文件，则同时会包含10000个key在一个文件中。sequence文件支持块压缩，并且是可被拆分的。<strong>这样MR作业在处理这个sequence文件时，只需要为每个128MB的block启动一个map任务，而不是每个小文件启动一个map任务。当你在同时抽取数百个或者数千个小文件，并且需要保留原始文件名时，这是非常不错的方案。</strong></p>
+<p>缺点：如果你一次仅抽取少量的小文件到HDFS，则sequence文件的方法也不太可行，因为sequence文件是不可变的，无法追加。比如3个10MB文件将产生1个30MB的Sequence文件，根据本文前面的定义，这仍然是一个小文件。另外一个问题是如果需要检索sequence文件中的文件名列表则需要遍历整个文件。</p>
+<p>另外一个问题是Hive并不能较好的处理由该方法合并出来的sequence文件。Hive将value中的所有数据视为单行。这样会导致Hive查看这些数据不方便，因为以前小文件中的一行的所有数据也是Hive中的单行，即相当于只有一个字段。同时，Hive没办法访问这种sequence的key，即文件名（可以自定义Hive Serde来解决）</p>
+<p><strong>4、使用Hbase进行数据存储</strong></p>
+<p>解决小文件问题，除了HDFS存储外，当然还可以考虑HBase列式存储。使用HBase可以<strong>将数据抽取过程从生成大量小HDFS文件更改为以逐条记录写入到HBase表</strong>。如果你对数据访问的需求主要是随机查找或者叫点查，则HBase是最好的选择。HBase在架构上就是为快速插入，存储大量数据，单个记录的快速查找以及流式数据处理而设计的。但如果你对数据访问的需求主要是全表扫描，则HBase不是最适合的。</p>
+<p>可以基于HBase的表的数据创建Hive表，但是查询这种Hive表对于不同的查询类型性能会不一样。当查询单行或者范围查找时，Hive on HBase会表现不错，但是如果是全表扫描则效率比较低下，大多数分析查询比如带group by的语句都是全表扫描。</p>
+<p>缺点：使用HBase，可以较好的应对实时数据写入以及实时查询的场景。但是如何分配和平衡HBase与集群上其他的组件的资源使用，以及HBase本身运维都会带来额外的运维管理成本。另外，HBase的性能主要取决于你的数据访问方式，所以在选择HBase解决小文件问题之前，应该进行仔细调研和设计。</p>
+<p><strong>5、使用CombineFileInputFormat</strong></p>
+<p>CombineFileInputFormat是Hadoop提供的抽象类，<strong>它在MR读取时合并小文件。合并的文件不会持久化到磁盘，它是在一个map任务中合并读取到的这些小文件。好处是MR可以不用为每个小文件启动一个map任务</strong>，而且因为是自带的实现类，你不用额外将小文件先提前合并。</p>
+<p>为了实现这个，需要为不同的文件类型编写Java代码扩展CombineFileInputFormat类。这样实现一个自定义的类后，就可以配置最大的split大小，然后单个map任务会读取小文件并进行合并直到满足这个大小。Hive作业直接配置参数即可实现。</p>
+<p>缺点：这解决了MR作业启动太多map任务的问题，但是因为作业仍然在读取多个小文件，随机磁盘IO依旧是一个问题。另外，CombineFileInputFormat大多数情况下都不会考虑data locality，往往会通过网络从其他节点拉取数据。</p>
+<p>注意以上无论是MR代码实现方式还是Hive，因为合并的文件并不会持久化保存到磁盘，因此CombineFileInputFormat方式并不会缓解NameNode内存管理问题。只是提高MR或者Hive作业的性能。</p>
+<p><strong>6、通过Hive合并小文件</strong></p>
+<p>如果你在使用Hive时因为"create table as"或"insert overwrite"语句输出了小文件，你可以通过设置一些参数来缓解。通过设置这些参数。Hive会在本身的SQL作业执行完毕后会单独起一个MR任务来合并输出的小文件。</p>
+<p>注意这个设置仅对Hive创建的文件生效，比如你使用Sqoop导数到Hive表，或者直接抽数到HDFS等，该方法都不会起作用。</p>
+<p><strong>7、使用Hadoop的文件追加特性</strong></p>
+<p>Hadoop自带的Append特性，即当第一次输出是小文件时，后面的文件输出可以继续追加这些小文件，让小文件变成大文件。</p>
+<p>这听上去是个不错的建议，但其实做起来挺难的。因为MR任务有一个规定，输出结果目录必须是在之前不存在的。所以MR作业肯定无法使用Append特性，由于Sqoop，Pig和Hive都使用了MR，所以这些工具也不支持Append。Flume不支持Append主要是因为它假设经过一段时间比如几秒，多少字节，多少事件数或者不活动的秒数，Flume就会关闭文件而不再打开它。</p>
+<p>因此，需要自己编写特定的程序来追加到现有的文件。另外，当集群中其他应用程序如果正在读取或处理这些需要追加的文件，你就不能使用自定义的MR或者Spark程序来追加这些文件了。所以如果要使用这种方法，最好还是谨慎考虑。</p>
+<h3 id="hive小文件">Hive小文件</h3>
+<h4 id="解决方案">解决方案</h4>
+<p>1、配置输入合并和输出合并小文件</p>
+<p>配置map输入合并</p>
+<p>在执行map任务前进行小文件合并：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">-- 每个Map最大输入大小，决定合并后的文件数</span><br><span class="line"><span class="built_in">set</span> mapred.max.split.size=256000000;</span><br><span class="line">-- 一个节点上split的至少的大小 ，决定了多个data node上的文件是否需要合并</span><br><span class="line"><span class="built_in">set</span> mapred.min.split.size.per.node=100000000;</span><br><span class="line">-- 一个交换机下split的至少的大小，决定了多个交换机上的文件是否需要合并</span><br><span class="line"><span class="built_in">set</span> mapred.min.split.size.per.rack=100000000;</span><br><span class="line">-- 执行Map前进行小文件合并</span><br><span class="line"><span class="built_in">set</span> hive.input.format=org.apache.hadoop.hive.ql.io.CombineHiveInputFormat;</span><br></pre></td></tr></table></figure>
+<p>配置hive结果端合并</p>
+<p>通过设置hive的配置项在执行结束后对结果文件进行合并。hive在对结果文件进行合并时会执行一个额外的map-only脚本，mapper的数量是文件总大小除以size.per.task参数所得的值，触发合并的条件是：根据查询类型不同，相应的mapfiles/mapredfiles参数需要打开；结果文件的平均大小需要大于avgsize参数的值。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">-- 在Map-only的任务结束时合并小文件</span><br><span class="line"><span class="built_in">set</span> hive.merge.mapfiles = <span class="literal">true</span></span><br><span class="line">-- 在Map-Reduce的任务结束时合并小文件</span><br><span class="line"><span class="built_in">set</span> hive.merge.mapredfiles = <span class="literal">true</span></span><br><span class="line">-- 合并文件的大小</span><br><span class="line"><span class="built_in">set</span> hive.merge.size.per.task = 256*1000*1000 </span><br><span class="line">-- 当输出文件的平均大小小于该值时，启动一个独立的map-reduce任务进行文件merge</span><br><span class="line"><span class="built_in">set</span> hive.merge.smallfiles.avgsize=16000000</span><br></pre></td></tr></table></figure>
+<p>2、Hive使用HAR归档文件</p>
+<p>Hadoop的归档文件格式也是解决小文件问题的方式之一。而且hive提供了原生支持：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="built_in">set</span> hive.archive.enabled=<span class="literal">true</span>;</span><br><span class="line"><span class="built_in">set</span> hive.archive.har.parentdir.settable=<span class="literal">true</span>;</span><br><span class="line"><span class="built_in">set</span> har.partfile.size=1099511627776;</span><br><span class="line">ALTER TABLE srcpart ARCHIVE PARTITION(ds= <span class="string">&#x27;2021-02-01&#x27;</span>, hr= <span class="string">&#x27;12&#x27;</span> );</span><br><span class="line">ALTER TABLE srcpart UNARCHIVE PARTITION(ds= <span class="string">&#x27;2021-02-01&#x27;</span>, hr= <span class="string">&#x27;12&#x27;</span> );</span><br></pre></td></tr></table></figure>
+<p>3、数据仓库Hive表分区优化</p>
+<p>数据仓库创建数仓表时，ETL开发人员基于使用习惯和处理的方便性，经常创建多级分区存储数据。但是过多的分区会消耗NameNode大量的资源，而且也会引入小文件的问题。所以对于创建数仓表的分区，要求如下（本质就是尽可能减少分区创建）：</p>
+<p>（1）对于统计数据表、数据量不大的基础表、业务上无累计快照和周期性快照要求的数据表，尽可能的不创建分区，而采用数据合并回写的方式解决。</p>
+<p>（2）对于一些数据量大的表，如果需要创建分区，提高插叙过程中数据的加载速度，尽可能的只做天级分区。而对于埋点数据，这种特大的数据量的，可以采用小时分区。</p>
+<p>（3）对于一些周期快照和累计快照的表，我们尽可能只创建日分区。</p>
+<p>4、对Hive数据进行压缩</p>
+<p>出于对小文件数据治理的目的，建议使用非TexFile的序列化存储方式存储数据。并且如果一张Hive表存在大量的小文件，建议通过以下参数设置压缩：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">set</span> hive.exec.compress.output<span class="operator">=</span><span class="literal">true</span>;</span><br><span class="line"><span class="keyword">set</span> parquet.compression<span class="operator">=</span>snappy;</span><br><span class="line"><span class="keyword">set</span> hive.merge.mapfiles<span class="operator">=</span><span class="literal">true</span>;</span><br><span class="line"><span class="keyword">set</span> hive.merge.mapredfiles<span class="operator">=</span><span class="literal">true</span>; </span><br><span class="line"><span class="keyword">set</span> hive.merge.mapredfiles<span class="operator">=</span><span class="literal">true</span></span><br><span class="line"><span class="keyword">set</span> hive.optiming.sort.dynamic.partition <span class="operator">=</span> <span class="literal">true</span>;</span><br><span class="line"><span class="comment">--256M</span></span><br><span class="line"><span class="keyword">set</span> parquet.blocksize<span class="operator">=</span> <span class="number">268435456</span>;</span><br><span class="line"><span class="comment">--256M</span></span><br><span class="line"><span class="keyword">set</span> dfs.block.size<span class="operator">=</span><span class="number">268435456</span>; </span><br><span class="line"><span class="comment">--128M</span></span><br><span class="line"><span class="keyword">set</span> hive.merge.smallfiles.avgsize<span class="operator">=</span><span class="number">134217728</span>; </span><br><span class="line"><span class="comment">--256M</span></span><br><span class="line"><span class="keyword">set</span> hive.merge.size.per.task <span class="operator">=</span> <span class="number">268435456</span>;</span><br></pre></td></tr></table></figure>
+<h3 id="spark小文件">Spark小文件</h3>
+<h4 id="问题">问题</h4>
+<p>使用sparkstreaming时，如果实时计算结果要写入到HDFS，那么不可避免的会遇到一个问题，那就是<strong>在默认情况下会产生非常多的小文件</strong>，这是由sparkstreaming的微批处理模式和DStream(RDD)的分布式(partition)特性导致的，sparkstreaming为每个partition启动一个独立的线程来处理数据，一旦文件输出到HDFS，那么这个文件流就关闭了，再来一个batch的parttition任务，就再使用一个新的文件流。</p>
+<p>那么假设，一个batch为10s，每个输出的DStream有32个partition，那么一个小时产生的文件数将会达到(3600/10) * 32=11520个之多。众多小文件带来的结果是有大量的文件元信息，比如文件的location、文件大小、block number等需要NameNode来维护，NameNode压力会非常大。</p>
+<p>不管是什么格式的文件，parquet、text、JSON或者Avro，都会遇到这种小文件问题，这里讨论几种处理sparkstreaming小文件的典型方法。</p>
+<h4 id="解决方案-1">解决方案</h4>
+<p><strong>1、增加batch大小</strong></p>
+<p>batch越大，从外部接收的event就越多，内存积累的数据也就越多，那么输出的文件数也就回变少，比如将上面例子中的batch时间从10s增加为100s，那么一个小时的文件数量就会减少到1152个。但是此时延迟会比较大，不适合实时性要求高的场景。</p>
+<p><strong>2、coalesce和repartition</strong></p>
+<p>小文件的基数是：batch_number * partition_number，而第一种方法是减少batch_number，那么这种方法就是减少partition_number了，这个api不细说，就是减少初始的分区个数。看过spark源码的童鞋都知道，对于窄依赖，一个子rdd的partition规则继承父rdd，对于宽依赖(就是那些ByKey操作)，如果没有特殊指定分区个数，也继承自父rdd。那么初始的SourceDstream是几个partiion，最终的输出就是几个partition。</p>
+<p>所以coalesce大法的好处就是，可以在最终要输出的时候，来减少partition个数。</p>
+<p>但是这个方法的缺点也很明显，本来是32个线程在写256M数据，现在可能变成了4个线程在写256M数据，而没有写完成这256M数据，这个batch是不算做结束的。那么一个batch的处理时延必定增长，batch挤压会逐渐增大。</p>
+<p><strong>3、自定义合并脚本</strong></p>
+<p>在sparkstreaming外再启动定时的批处理任务来合并sparkstreaming产生的小文件。需要注意合并任务的时间划分，避免合并正在写入的sparkstreaming文件。</p>
+<p><strong>4、通过foreach输出类追加小文件</strong></p>
+<p>sparkstreaming提供的foreach这个outout类api，可以让我们自定义输出计算结果的方法。那么我们其实也可以利用这个特性，那就是每个batch在要写文件时，并不是去生成一个新的文件流，而是把之前的文件打开。考虑这种方法的可行性，首先，HDFS上的文件不支持修改，但是很多都支持追加，那么每个batch的每个partition就对应一个输出文件，每次都去追加这个partition对应的输出文件，这样也可以实现减少文件数量的目的。这种方法要注意的就是不能无限制的追加，当判断一个文件已经达到某一个阈值时，就要产生一个新的文件进行追加了。</p>
+<h3 id="参考资料">参考资料</h3>
+<p>https://mp.weixin.qq.com/s/Bg70xFG9BIbhzO4tzMfH_A</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/" rel="tag"># 大数据</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/08/01/Java_ComparableAndComparator/" rel="prev" title="Java中Comparable和Comparator">
+                  <i class="fa fa-chevron-left"></i> Java中Comparable和Comparator
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">BIOINSu</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+  <script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'none'
+      },
+      options: {
+        renderActions: {
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              const target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3.1.2/es5/tex-mml-chtml.js';
+    script.defer = true;
+    document.head.appendChild(script);
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.typesetClear();
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+
+
+</body>
+</html>
