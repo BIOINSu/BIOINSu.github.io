@@ -3188,11 +3188,9 @@
 <p>https://cloud.tencent.com/developer/article/1396891</p>
 ]]></content>
       <categories>
-        <category>数据库</category>
         <category>数据仓库</category>
       </categories>
       <tags>
-        <tag>数据库</tag>
         <tag>数据仓库</tag>
       </tags>
   </entry>
@@ -3323,11 +3321,9 @@
 <p>转载自： https://www.zhihu.com/question/20623931/answer/750367153</p>
 ]]></content>
       <categories>
-        <category>数据库</category>
         <category>数据仓库</category>
       </categories>
       <tags>
-        <tag>数据库</tag>
         <tag>数据仓库</tag>
       </tags>
   </entry>
@@ -4648,6 +4644,103 @@
       </categories>
       <tags>
         <tag>Hive</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>OLTP与OLAP</title>
+    <url>/2021/08/03/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93_OLTP%E4%B8%8EOLAP/</url>
+    <content><![CDATA[<table>
+<colgroup>
+<col style="width: 7%">
+<col style="width: 46%">
+<col style="width: 46%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>OLTP(Online Transaction Processing)</th>
+<th>OLAT(Online Analytical Processing)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>概念</td>
+<td>在线事务处理，是一种数据处理的概念</td>
+<td>在线分析处理，是一种数据处理的概念</td>
+</tr>
+<tr class="even">
+<td>操作目的</td>
+<td>查询、改变数据</td>
+<td>分析规律、预测趋势</td>
+</tr>
+<tr class="odd">
+<td>操作对象</td>
+<td>数据库</td>
+<td>数据仓库</td>
+</tr>
+<tr class="even">
+<td>操作数据量</td>
+<td>一般仅一两张表。（数据量小）<br>点查为主，返回的是记录本身或该记录的多个列。即使是范围查询，基本上也会通过limit来限制返回的记录数。</td>
+<td>对多张表的数据进行count()、sum()和avg()等聚合方法<br>从大量数据中找出规律。<br>表中单条记录本身并不是查询所关心的，比较典型的特点包括有聚合类算子、涉及多表Join。</td>
+</tr>
+<tr class="odd">
+<td>数据模型</td>
+<td>实体-关系模型（ER）</td>
+<td>星型或雪花</td>
+</tr>
+<tr class="even">
+<td>数据时效</td>
+<td>当前数据</td>
+<td>当前以及历史</td>
+</tr>
+<tr class="odd">
+<td>数据操作</td>
+<td>DDL、DML</td>
+<td>一般不支持更新和删除</td>
+</tr>
+<tr class="even">
+<td>性能要求</td>
+<td>高吞吐、低延迟</td>
+<td>性能要求相对较低</td>
+</tr>
+<tr class="odd">
+<td>业务类型</td>
+<td>查询、支付、转账</td>
+<td>统计报表</td>
+</tr>
+</tbody>
+</table>
+<a id="more"></a>
+]]></content>
+      <categories>
+        <category>数据仓库</category>
+      </categories>
+      <tags>
+        <tag>数据仓库</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>数据建模</title>
+    <url>/2021/08/03/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93_%E6%95%B0%E6%8D%AE%E5%BB%BA%E6%A8%A1/</url>
+    <content><![CDATA[<h3 id="基本概念">基本概念</h3>
+<h4 id="事实表">事实表</h4>
+<p>事实表（Fact Table）用来记录具体事件，包含了每个事件的具体要素，以及具体发生的事情。<strong>也就是每一条数据记录了发生的一件事情</strong>。例子中就通过一条事实表记录说明了某个地方（地域ID）的某人（用户ID）在某个时间（时间ID）通过某种方式（支付ID）买了某产品（产品ID）。</p>
+<p><img src="/2021/08/03/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93_%E6%95%B0%E6%8D%AE%E5%BB%BA%E6%A8%A1/image-20210803085511700.png" alt="image-20210803085511700" style="zoom:67%;"></p>
+<a id="more"></a>
+<h4 id="维度表">维度表</h4>
+<p>维度表（Dimension Table ）是依赖事实表而存在的，没有事实表数据，维度表也就没有存在的意义。每个维度表都是对事实表中的每个列/字段进行展开描述。</p>
+<p>比如事实表中的用户ID，就可以进一步展开成一张维度表，记录该用户ID实体的用户名、联系信息、地址信息、年龄、性别和注册方式等等。</p>
+<p><img src="/2021/08/03/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93_%E6%95%B0%E6%8D%AE%E5%BB%BA%E6%A8%A1/image-20210803085631465.png" alt="image-20210803085631465" style="zoom:67%;"></p>
+<h4 id="事实表与维度表">事实表与维度表</h4>
+<p>事实表的增删改操作相比维度表更为频繁，模型建立后，维度表中的数据保持相对稳定。商品销售行为是一直在发生的，而用户注册和产品更新不总是随时有的。再说到地域和支付方式，那就更少变化了。</p>
+<p><img src="/2021/08/03/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93_%E6%95%B0%E6%8D%AE%E5%BB%BA%E6%A8%A1/image-20210803085828180.png" alt="image-20210803085828180" style="zoom:50%;"></p>
+<p>通过事实表和维度表组织起来的数仓多维数据模型（上图为星型模型），相比原本分散在数据库等各处的数据，能够有更有目的更高效的查询效率，比如可以查询汇总地域维度中某个省的商品销售情况，也可以通过时间维度分析每个季度的某类商品销售趋势。<strong>将多个维度表跟事实表进行不同程度的关联，可以展开得到各种各样的分析结果</strong>，满足商品运营等数据使用者的不同需求。</p>
+]]></content>
+      <categories>
+        <category>数据仓库</category>
+      </categories>
+      <tags>
+        <tag>数据仓库</tag>
       </tags>
   </entry>
 </search>

@@ -22,21 +22,21 @@
     var NexT = window.NexT || {};
     var CONFIG = {"hostname":"example.com","root":"/","images":"/images","scheme":"Mist","version":"8.2.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false}};
   </script>
-<meta name="description" content="分布式锁 https:&#x2F;&#x2F;blog.csdn.net&#x2F;wuzhiwei549&#x2F;article&#x2F;details&#x2F;80692278 分布式事务 https:&#x2F;&#x2F;zhuanlan.zhihu.com&#x2F;p&#x2F;183753774 参考资料">
+<meta name="description" content="OLTP(Online Transaction Processing) OLAT(Online Analytical Processing)     概念 在线事务处理，是一种数据处理的概念 在线分析处理，是一种数据处理的概念   操作目的 查询、改变数据 分析规律、预测趋势   操作对象 数据库 数据仓库   操作数据">
 <meta property="og:type" content="article">
-<meta property="og:title" content="分布式">
-<meta property="og:url" content="http://example.com/2021/07/23/%E9%9D%A2%E8%AF%95_%E5%88%86%E5%B8%83%E5%BC%8F/index.html">
+<meta property="og:title" content="OLTP与OLAP">
+<meta property="og:url" content="http://example.com/2021/08/03/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93_OLTP%E4%B8%8EOLAP/index.html">
 <meta property="og:site_name" content="BIOINSu">
-<meta property="og:description" content="分布式锁 https:&#x2F;&#x2F;blog.csdn.net&#x2F;wuzhiwei549&#x2F;article&#x2F;details&#x2F;80692278 分布式事务 https:&#x2F;&#x2F;zhuanlan.zhihu.com&#x2F;p&#x2F;183753774 参考资料">
+<meta property="og:description" content="OLTP(Online Transaction Processing) OLAT(Online Analytical Processing)     概念 在线事务处理，是一种数据处理的概念 在线分析处理，是一种数据处理的概念   操作目的 查询、改变数据 分析规律、预测趋势   操作对象 数据库 数据仓库   操作数据">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2021-07-23T00:54:19.252Z">
-<meta property="article:modified_time" content="2021-07-23T00:54:04.148Z">
+<meta property="article:published_time" content="2021-08-03T00:50:42.115Z">
+<meta property="article:modified_time" content="2021-08-03T00:50:32.660Z">
 <meta property="article:author" content="BIOINSu">
-<meta property="article:tag" content="面试">
+<meta property="article:tag" content="数据仓库">
 <meta name="twitter:card" content="summary">
 
 
-<link rel="canonical" href="http://example.com/2021/07/23/%E9%9D%A2%E8%AF%95_%E5%88%86%E5%B8%83%E5%BC%8F/">
+<link rel="canonical" href="http://example.com/2021/08/03/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93_OLTP%E4%B8%8EOLAP/">
 
 
 <script class="page-configurations">
@@ -48,7 +48,7 @@
     lang   : 'zh-CN'
   };
 </script>
-<title>分布式 | BIOINSu</title>
+<title>OLTP与OLAP | BIOINSu</title>
   
 
 
@@ -173,7 +173,7 @@
 
   <aside class="sidebar">
 
-    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+    <div class="sidebar-inner sidebar-overview-active">
       <ul class="sidebar-nav">
         <li class="sidebar-nav-toc">
           文章目录
@@ -186,7 +186,6 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81"><span class="nav-number">1.</span> <span class="nav-text">分布式锁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1"><span class="nav-number">2.</span> <span class="nav-text">分布式事务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">3.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -257,7 +256,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/23/%E9%9D%A2%E8%AF%95_%E5%88%86%E5%B8%83%E5%BC%8F/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/08/03/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93_OLTP%E4%B8%8EOLAP/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -270,7 +269,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          分布式
+          OLTP与OLAP
         </h1>
 
         <div class="post-meta-container">
@@ -282,7 +281,7 @@
       <span class="post-meta-item-text">发表于</span>
       
 
-      <time title="创建时间：2021-07-23 08:54:19 / 修改时间：08:54:04" itemprop="dateCreated datePublished" datetime="2021-07-23T08:54:19+08:00">2021-07-23</time>
+      <time title="创建时间：2021-08-03 08:50:42 / 修改时间：08:50:32" itemprop="dateCreated datePublished" datetime="2021-08-03T08:50:42+08:00">2021-08-03</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -290,7 +289,7 @@
       </span>
       <span class="post-meta-item-text">分类于</span>
         <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E9%9D%A2%E8%AF%95/" itemprop="url" rel="index"><span itemprop="name">面试</span></a>
+          <a href="/categories/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93/" itemprop="url" rel="index"><span itemprop="name">数据仓库</span></a>
         </span>
     </span>
 
@@ -304,12 +303,68 @@
     
     
     <div class="post-body" itemprop="articleBody">
-        <a id="more"></a>
-<h3 id="分布式锁">分布式锁</h3>
-<p>https://blog.csdn.net/wuzhiwei549/article/details/80692278</p>
-<h3 id="分布式事务">分布式事务</h3>
-<p>https://zhuanlan.zhihu.com/p/183753774</p>
-<h3 id="参考资料">参考资料</h3>
+        <table>
+<colgroup>
+<col style="width: 7%">
+<col style="width: 46%">
+<col style="width: 46%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>OLTP(Online Transaction Processing)</th>
+<th>OLAT(Online Analytical Processing)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>概念</td>
+<td>在线事务处理，是一种数据处理的概念</td>
+<td>在线分析处理，是一种数据处理的概念</td>
+</tr>
+<tr class="even">
+<td>操作目的</td>
+<td>查询、改变数据</td>
+<td>分析规律、预测趋势</td>
+</tr>
+<tr class="odd">
+<td>操作对象</td>
+<td>数据库</td>
+<td>数据仓库</td>
+</tr>
+<tr class="even">
+<td>操作数据量</td>
+<td>一般仅一两张表。（数据量小）<br>点查为主，返回的是记录本身或该记录的多个列。即使是范围查询，基本上也会通过limit来限制返回的记录数。</td>
+<td>对多张表的数据进行count()、sum()和avg()等聚合方法<br>从大量数据中找出规律。<br>表中单条记录本身并不是查询所关心的，比较典型的特点包括有聚合类算子、涉及多表Join。</td>
+</tr>
+<tr class="odd">
+<td>数据模型</td>
+<td>实体-关系模型（ER）</td>
+<td>星型或雪花</td>
+</tr>
+<tr class="even">
+<td>数据时效</td>
+<td>当前数据</td>
+<td>当前以及历史</td>
+</tr>
+<tr class="odd">
+<td>数据操作</td>
+<td>DDL、DML</td>
+<td>一般不支持更新和删除</td>
+</tr>
+<tr class="even">
+<td>性能要求</td>
+<td>高吞吐、低延迟</td>
+<td>性能要求相对较低</td>
+</tr>
+<tr class="odd">
+<td>业务类型</td>
+<td>查询、支付、转账</td>
+<td>统计报表</td>
+</tr>
+</tbody>
+</table>
+<a id="more"></a>
 
     </div>
 
@@ -319,20 +374,20 @@
 
     <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/%E9%9D%A2%E8%AF%95/" rel="tag"># 面试</a>
+              <a href="/tags/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93/" rel="tag"># 数据仓库</a>
           </div>
 
         
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/2021/07/11/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93_%E6%95%B0%E4%BB%93%E5%88%86%E5%B1%82/" rel="prev" title="数据仓库分层">
-                  <i class="fa fa-chevron-left"></i> 数据仓库分层
+                <a href="/2021/08/02/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E6%B5%B7%E9%87%8F%E5%B0%8F%E6%96%87%E4%BB%B6%E9%97%AE%E9%A2%98/" rel="prev" title="海量小文件问题">
+                  <i class="fa fa-chevron-left"></i> 海量小文件问题
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/2021/07/24/%E9%9D%A2%E8%AF%95_Hive/" rel="next" title="Hive">
-                  Hive <i class="fa fa-chevron-right"></i>
+                <a href="/2021/08/03/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93_%E6%95%B0%E6%8D%AE%E5%BB%BA%E6%A8%A1/" rel="next" title="数据建模">
+                  数据建模 <i class="fa fa-chevron-right"></i>
                 </a>
             </div>
           </div>
