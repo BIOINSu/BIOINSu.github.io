@@ -281,7 +281,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-08-12 09:22:12" itemprop="dateModified" datetime="2021-08-12T09:22:12+08:00">2021-08-12</time>
+        <time title="修改时间：2021-08-12 09:36:17" itemprop="dateModified" datetime="2021-08-12T09:36:17+08:00">2021-08-12</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -303,106 +303,16 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <a id="more"></a>
-<h3 id="实习">实习</h3>
+          <h3 id="实习">实习</h3>
 <p>整个系统的SLA是多少</p>
-<p>存储的数据量？</p>
-<p>大概5亿行数据，200G左右，宽表约150个字段</p>
-<h3 id="大数据框架">大数据框架</h3>
-<h4 id="yarn">Yarn</h4>
-<h5 id="yarn的执行流程">Yarn的执行流程？</h5>
-<p>Yarn是一个资源调度平台，负责为运算程序（MapReduce）分配服务器运算资源。</p>
-<p>ResourceManager：总的管理器</p>
-<ul>
-<li><p>处理客户端的请求</p></li>
-<li><p>启动监控 ApplicationMaster</p></li>
-<li><p>监控 NodeManager</p></li>
-<li><p>资源分配调度</p></li>
-</ul>
-<p>ApplicationMaster：单个Job的管理器</p>
-<ul>
-<li>为应用程序申请资源，分配给任务</li>
-<li>负责任务的监控与容错</li>
-<li>需要与 NM 通信：启动/停止 task，task 是运行在 container 里面，AM 也是运行在 container 里面</li>
-</ul>
-<p>NodeManager：单个节点的管理器</p>
-<ul>
-<li>管理单个节点的资源、任务</li>
-<li>处理来自ResourceManager的请求：启动 Container</li>
-<li>ApplicationMaster的命令：启动task</li>
-<li>定时向RM汇报本节点的资源情况</li>
-</ul>
-<p>Container：资源抽象</p>
-<ul>
-<li>封装了如内存、cpu、磁盘、网络等资源</li>
-</ul>
-<blockquote>
-<p>YARN 的基本思想是将资源管理和作业调度/监控的功能分解为单独的守护进程。这个包括 2 个部分，一个全局的资源调度 ResourceManager（RM）和针对每个应用程序的ApplicationMaster（AM）</p>
-</blockquote>
-<p>1、开启ApplicationMaster，计算并申请所需资源：</p>
-<p>Client向yarn提交job，首先找ResourceManager分配资源，ResourceManager开启一个Container，在Container中运行一个Application Manager</p>
-<p>Application Manager找一台NodeManager启动ApplicationMaster，计算任务所需的计算资源，然后向Application Manager（Yarn）申请运行任务所需的资源</p>
-<p>2、AM将资源分发给NM，执行计算</p>
-<p>Resource scheduler将资源封装发给ApplicationMaster，ApplicationMaster将获取到的资源分配给各个NodeManager，启动Container执行任务</p>
-<p>3、结果反馈</p>
-<p>将执行结果反馈给ApplicationMaster，ApplicationMaster将任务执行的结果反馈Application Manager</p>
-<h5 id="applicationmaster做了什么">ApplicationMaster做了什么</h5>
-<h5 id="nodemanager-的重启过程">NodeManager 的重启过程</h5>
-<h5 id="yarn的心跳机制">Yarn的心跳机制</h5>
-<h4 id="spark">Spark</h4>
-<h5 id="spark的内存管理机制">spark的内存管理机制</h5>
-<p>Spark1.6之后引入统一内存管理机制，与静态内存管理的区别在于存储内存和执行内存共享同一块空间，可以动态占用对方的空闲区域。</p>
-<p>总的内存可以分为：</p>
-<ul>
-<li>堆内存
-<ul>
-<li>存储内存：缓存RDD数据和广播变量的数据</li>
-<li>执行内存：缓存shuffle操作（reduce by、join）产生的中间数据</li>
-<li>系统保留内存：作为存储内存和执行内存的缓冲区，防止OOM</li>
-<li>其他内存：用户自定义数据结构及Spark元数据</li>
-</ul></li>
-<li>堆外内存
-<ul>
-<li>存储内存</li>
-<li>执行内存</li>
-</ul></li>
-</ul>
-<h5 id="spark的副本机制">Spark的副本机制？</h5>
-<p>副本的作用是在数据丢失的情况下依然保持服务可用。</p>
-<p>Spark防止数据丢之的机制是血统容错机制和Checkpoint机制。通过用父RDD再次执行相应操作得到现有RDD。</p>
-<p>一般来说，在已经有RDD容错机制的情况下，没有必要再牺牲内存设计RDD副本容错机制。</p>
-<p>但是，在执行缓存的情况下，可以产生副本，向persist方法中传入StorageLevel参数，可以实现不同的缓存级别。其中DISK_ONLY_2、MEMORY_ONLY_2、MEMORY_ONLY_SER_2、MEMORY_AND_DISK_SER_2缓存级别，可以是实现缓存副本数为2，即将所有数据都复制一份副本，并发送到其他节点上。</p>
-<h3 id="hbase">Hbase</h3>
-<h5 id="描述一下hbase的架构">描述一下Hbase的架构？</h5>
-<ul>
-<li>Master：建表、删表、移动Region、合并等操作(HBase中即使Master宕机了，集群依然可以正常地运行，依然可以存储和删除数据)</li>
-<li>RegionServer:服务器上的一个服务，真正存储数据的节点，客户端可以直接从这里获取数据
-<ul>
-<li>Region：一个RegionServer中有多个Region，Region就是一段数据的集合，每一个Region都有起始rowkey和结束rowkey，代表了它所存储的row范围。一个Region对应了一张表。
-<ul>
-<li>Store：在一个Region内部，包括多个store，其中一个store对应一个列族。如果一个表中有N个列族，那么它对应的每一个region中有N个store。</li>
-<li>MemStore：不是为了加快写速度，而是按照Row Key对这个列族中的数据进行排序（LSM树）</li>
-<li>HFile：存储在硬盘上的文件，真正被持久化到硬盘上</li>
-</ul></li>
-<li>WAL：修改并不直接写入到数据库文件中，而是写入到另外一个称为 WAL 的文件中；如果事务失败，WAL 中的记录会被忽略，撤销修改；如果事务成功，它将在随后的某个时间被写回到数据库文件中，提交修改。</li>
-<li>BlockCache：读数据时进行缓存</li>
-</ul></li>
-<li>ZooKeeper：管理了HBase所有RegionServer的信息，具体的数据段存放在哪个RegionServer上；客户端先和zk通信才能获取数据；取数据所需要的元数据表hbase:meata的位置存储在zk上</li>
-</ul>
-<h3 id="sql">SQL</h3>
-<p>整个系统的SLA是多少 存储的数据量</p>
-<p>yarn的整个执行流程 am做了什么 yarn的心跳机制</p>
-<p>node manager 的重启过程</p>
-<p>spark的内存管理机制 DD</p>
-<p>sql分别有哪些连接</p>
-<p>sql是怎么转为map reduce执行的</p>
-<p>Hfile是怎么存储文件的</p>
-<p>LSM是什么？英文全程是什么？</p>
-<p>spark的副本机制？ DD</p>
-<p>HdFS宕机，断点续传功能</p>
-<p>连续n天登陆 新用户表和旧用户表，怎么判断新用户在旧用户表中出现？（where条件？）</p>
-<p>hbase介绍</p>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/08/11/%E9%9D%A2%E8%AF%95_0808%E5%AD%97%E8%8A%82%E4%B8%80%E9%9D%A2/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -441,7 +351,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/08/08/%E9%9D%A2%E8%AF%95_0807%E8%99%BE%E7%9A%AE%E4%B8%80%E9%9D%A2/" class="post-title-link" itemprop="url">分布式</a>
+          <a href="/2021/08/08/%E9%9D%A2%E8%AF%95_0807%E8%99%BE%E7%9A%AE%E4%B8%80%E9%9D%A2/" class="post-title-link" itemprop="url">0807虾皮</a>
         </h2>
 
         <div class="post-meta-container">
@@ -459,7 +369,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-08-12 09:22:50" itemprop="dateModified" datetime="2021-08-12T09:22:50+08:00">2021-08-12</time>
+        <time title="修改时间：2021-08-12 09:36:01" itemprop="dateModified" datetime="2021-08-12T09:36:01+08:00">2021-08-12</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -481,164 +391,16 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <a id="more"></a>
-<h3 id="实习">实习</h3>
+          <h3 id="实习">实习</h3>
 <p>根据简历上的实习经历问实习的工作内容是什么，描述一下过程，然后问有什么有意思的事情（就是问难点）。</p>
-<h3 id="大数据框架">大数据框架</h3>
-<h4 id="spark">Spark</h4>
-<h5 id="怎么理解rdd"><strong>怎么理解RDD？</strong></h5>
-<p>RDD，即弹性分布式数据集（从五大特性去回答）。</p>
-<p>首先，RDD是一个由多个分区组成的的列表；一般一个hdfs里的块会加载为一个分区。</p>
-<p>然后RDD的每个分区上都有函数应用，用来实现RDD之间的转换。</p>
-<p>同时，RDD会记录它的依赖关系，也就是这个RDD是怎么生成的，便于容错时进行重新计算。</p>
-<p>最后，RDD还具有重分区的能力和数据本地性的特点。</p>
-<blockquote>
-<p>重分区：如果RDD里面存的数据是key-value形式，则可以传递一个自定义的Partitioner进行重新分区。</p>
-<p>数据本地性：Spark在进行任务调度的时候，会尽可能地将计算任务分配到数据块的存储位置。</p>
-</blockquote>
-<h5 id="怎么理解rdd是弹性的">怎么理解RDD是弹性的？</h5>
-<ul>
-<li><h5 id="自动进行内存和磁盘数据存储的切换">自动进行内存和磁盘数据存储的切换</h5>
-<p>Spark会优先把数据放到内存中，如果内存实在放不下，会放到磁盘里面，不但能计算内存放下的数据，也能计算内存放不下的数据。</p></li>
-<li><p>RDD具有容错机制</p>
-<p>基于血统的容错机制，是RDD会记录它的依赖关系，当节点崩溃时可以分配另外的节点，根据血统信息重新运算得出结果。</p>
-<p>基于Checkpoint的容错机制，建立检查点，斩断RDD的依赖链（删除依赖信息）将中间结果存储在可靠的存储引擎中。</p></li>
-<li><p>分区数的变化</p>
-<p>可以对RDD进行重分区来改变RDD的分区数。</p></li>
-</ul>
-<h5 id="懒加载是什么">懒加载是什么？</h5>
-<p>Transformation 操作是延迟计算的，也就是说从一个 RDD 转换生成另一个 RDD 的转换操作不是马上执行，需要等到有 Acion 操作的时候才会真正触发运算。Transformation返回的数据类型是一个RDD。</p>
-<p>Action 算子会触发 Spark 提交作业（Job），并将数据输出 Spark系统。Action返回的类型是一个其他的数据类型。</p>
-<blockquote>
-<p>为什么？</p>
-<p>Transformation操作主要是对每个RDD中的元素进行处理并生成新的RDD；而Action则主要是对RDD进行最后的操作，比如遍历、reduce、保存到文件等（虽然最终可能还是保存到一个新的RDD上，但至少从设计上是具备输出能力的），并可以返回结果给Driver程序。</p>
-<p>这样因为Transformation肯定不会输出（中间结果保存在内存），Spark就设定了惰性机制，当没有出现action操作的时候，所有RDD转换操作不会执行，程序会为其生成DAG，直到遇到Action才触发。</p>
-<p>这样做的好处时有利于加强并行计算，减少中间结果。比如程序里进行了大量的转换操作，最后才reduce并输出，前面转换操作就可以生成DAG后，不同stage并行计算，甚至可能复用中间结果提高计算效率。这是为了spark的优化机制服务的。</p>
-</blockquote>
-<h5 id="transformation算子和action算子都有哪些">transformation算子和action算子都有哪些？</h5>
-<ul>
-<li><p>tranformation</p>
-<p>map、flatMap、filter、reduceByKey、combineByKey</p></li>
-<li><p>action</p>
-<p>collect、count、saveAsTextFile、countByKey、foreach</p></li>
-</ul>
-<h5 id="cachepersist和懒加载的关系">cache、persist？和懒加载的关系？</h5>
-<p>数据在第一次Action 操作时进行计算，并缓存在节点的内存中，在该数据上的其他Transformation 和 Action 操作将直接使用内存中的数据。这样会让以后的操作计算速度加快。</p>
-<blockquote>
-<p>在 shuffle 操作中（例如 reduceByKey），即便是用户没有调用 persist 方法，Spark 也会自动缓存部分中间数据。这么做的目的是，在 shuffle 的过程中某个节点运行失败时，不需要重新计算所有的输入数据。如果用户想多次使用某个 RDD，强烈推荐在该 RDD 上调用 persist 方法。</p>
-</blockquote>
-<p>cache就是调用了persist(StorageLevel.MEMORY_ONLY)，默认将数据缓存到内存中，内存不足时将从新计算。</p>
-<h5 id="缓存级别">缓存级别？</h5>
-<p>是否使用磁盘缓存、是否使用内存缓存、缓存前是否先序列化、是否需要有副本。</p>
-<blockquote>
-<p>序列化机制允许将实现序列化的Java对象转化为字节序列进行存储。</p>
-<p>序列化的优势在于节省很多空间，反序列化的优势在于速度快。</p>
-</blockquote>
-<p><img src="/2021/08/08/%E9%9D%A2%E8%AF%95_0807%E8%99%BE%E7%9A%AE%E4%B8%80%E9%9D%A2/image-20210812080054947.png" alt="image-20210812080054947" style="zoom: 67%;"></p>
-<h5 id="改变rdd的分区数">改变RDD的分区数？</h5>
-<ul>
-<li><p>创建RDD时可以指定分区数</p>
-<blockquote>
-<p>//通过本地集合创建的，通过第二个参数指定了分区数量</p>
-<p>val rdd1 = sc.parallelize(1 to 100, 6)</p>
-<p>//读取 HDFS 中文件创建的, 同样通过第二个参数指定了分区数, 因为是从 HDFS 中读取文件, 所以最终的分区数是由 Hadoop 的 InputFormat 来指定的</p>
-<p>val rdd2 = sc.textFile("hdfs:///dataset/wordcount.txt", 6)</p>
-</blockquote></li>
-<li><p>coalesce()方法和repartition()方法能够改变分区的数量</p>
-<p>repartition()方法就是coalesce()方法中shuffle参数为true的情况。（默认是false）</p>
-<p>如果传入的参数大于现有的分区数目，而shuffle为false，RDD的分区数不变，也就是说不经过shuffle，是无法将RDDde分区数变多的。</p>
-<blockquote>
-<p>假设RDD有N = 1000个分区，需要重新划分M个分区：</p>
-<p>N = 1000 &lt; M = 5000: 利用HashPartitioner函数将数据重新分区为5000个，这时需要将shuffle设置为true。因为重分区前后相当于宽依赖，会发生shuffle过程，此时可以使用coalesce(shuffle=true)，或者直接使用repartition()。</p>
-<p>N = 1000 &gt; M = 100，并此时两者相差不多，那么就可以将N = 1000个分区中的每10个分区合并成一个新的分区，最终合并为M = 100个分区，这是前后是窄依赖关系，可以使用coalesce(shuffle=false)。</p>
-<p>如果 N = 1000 &gt; M = 1，此时两者相差悬殊:，这时如果将shuffle设置为false，父子RDD是窄依赖关系，他们同处在一个Stage中，就可能造成Spark程序的并行度不够（每一个分区分配一个task执行，一个Task频繁在不同分区之间切换），从而影响性能，M = 1的时候，为了使coalesce之前的操作有更好的并行度，可以将shuffle设置为true。</p>
-</blockquote></li>
-</ul>
-<h5 id="怎么划分stage">怎么划分stage？</h5>
-<p>根据父子RDD之间是否是宽依赖的关系判断，也就是判断是否发生了shuffle操作。</p>
-<p>查看算子生成的 RDD，并调用RDD对应的getDependence方法观察是否是ShuffleDependency。</p>
-<h3 id="hbase">Hbase</h3>
-<h5 id="描述一下hbase的架构">描述一下Hbase的架构？</h5>
-<ul>
-<li>Master：建表、删表、移动Region、合并等操作(HBase中即使Master宕机了，集群依然可以正常地运行，依然可以存储和删除数据)</li>
-<li>RegionServer:服务器上的一个服务，真正存储数据的节点，客户端可以直接从这里获取数据
-<ul>
-<li>Region：一个RegionServer中有多个Region，Region就是一段数据的集合，每一个Region都有起始rowkey和结束rowkey，代表了它所存储的row范围。一个Region对应了一张表。
-<ul>
-<li>Store：在一个Region内部，包括多个store，其中一个store对应一个列族。如果一个表中有N个列族，那么它对应的每一个region中有N个store。</li>
-<li>MemStore：不是为了加快写速度，而是按照Row Key对这个列族中的数据进行排序（LSM树）</li>
-<li>HFile：存储在硬盘上的文件，真正被持久化到硬盘上</li>
-</ul></li>
-<li>WAL：修改并不直接写入到数据库文件中，而是写入到另外一个称为 WAL 的文件中；如果事务失败，WAL 中的记录会被忽略，撤销修改；如果事务成功，它将在随后的某个时间被写回到数据库文件中，提交修改。</li>
-<li>BlockCache：读数据时进行缓存</li>
-</ul></li>
-<li>ZooKeeper：管理了HBase所有RegionServer的信息，具体的数据段存放在哪个RegionServer上；客户端先和zk通信才能获取数据；取数据所需要的元数据表hbase:meata的位置存储在zk上</li>
-</ul>
-<h5 id="rowkey设计需要注意什么问题">RowKey设计需要注意什么问题？</h5>
-<p>RowKey本质上就是用来定位一条记录的多个字段的集合。</p>
-<ul>
-<li><p>长度原则：RowKey设计不宜过长，最好不超过16字节，避免给MenmStore和Hfile中的存储带来压力</p></li>
-<li><p>唯一原则：必须在设计上保证RowKey的唯一性。由于在HBase中数据存储是Key-Value形式，若向HBase中同一张表插入相同RowKey的数据，则原先存在的数据会被新的数据覆盖。</p></li>
-<li><p>排序原则：HBase的RowKey是按照ASCII有序排序的，因此我们在设计RowKey的时候要充分利用这点。</p></li>
-<li><p>散列原则：设计的RowKey应均匀的分布在各个HBase节点上。</p></li>
-</ul>
-<h3 id="数据库">数据库</h3>
-<h5 id="数据库索引有什么了解">数据库索引有什么了解？</h5>
-<p>B+树：磁盘访问代价、范围查询、查询稳定性</p>
-<h5 id="索引设计需要注意什么问题原问题是有些字段需要排序这些字段怎么设计索引">索引设计需要注意什么问题？（原问题是有些字段需要排序，这些字段怎么设计索引）</h5>
-<p>在需要排序的字段上建立索引，就可以实现利用索引对排序的优化，因为索引本身就是经过排序的。</p>
-<h3 id="数仓">数仓</h3>
-<h4 id="oltp和olap的区别">OLTP和OLAP的区别？</h4>
-<p>两者都是数据处理的一种概念。</p>
-<table>
-<colgroup>
-<col style="width: 7%">
-<col style="width: 46%">
-<col style="width: 46%">
-</colgroup>
-<thead>
-<tr class="header">
-<th></th>
-<th>OLTP</th>
-<th>OLAP</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>操作目的</td>
-<td>查询、改变数据</td>
-<td>分析规律、预测趋势</td>
-</tr>
-<tr class="even">
-<td>操作对象</td>
-<td>数据库</td>
-<td>数据仓库</td>
-</tr>
-<tr class="odd">
-<td>操作数据量</td>
-<td>一般仅一两张表。（数据量小） 点查为主，返回的是记录本身或该记录的多个列。即使是范围查询，基本上也会通过limit来限制返回的记录数。</td>
-<td>对多张表的数据进行count()、sum()和avg()等聚合方法 从大量数据中找出规律。 表中单条记录本身并不是查询所关心的，比较典型的特点包括有聚合类算子、涉及多表Join。</td>
-</tr>
-<tr class="even">
-<td>数据模型</td>
-<td>实体-关系模型（ER）</td>
-<td>星型或雪花</td>
-</tr>
-<tr class="odd">
-<td>延时</td>
-<td>低</td>
-<td>高</td>
-</tr>
-</tbody>
-</table>
-<h4 id="两者分别对应了哪些数据库">两者分别对应了哪些数据库？</h4>
-<p>OLAP：Hive、SparkSQL、ClickHouse</p>
-<p>OLTP：MySQL、Oracle、PostgreSQL</p>
-<h3 id="java基础">Java基础</h3>
-<p>1、== 和 equals的区别？</p>
-<p>2、描述一下HashMap的结构？</p>
-<p>3、Java有哪些集合？</p>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/08/08/%E9%9D%A2%E8%AF%95_0807%E8%99%BE%E7%9A%AE%E4%B8%80%E9%9D%A2/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 

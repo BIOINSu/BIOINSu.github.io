@@ -4744,11 +4744,11 @@
       </tags>
   </entry>
   <entry>
-    <title>分布式</title>
+    <title>0807虾皮</title>
     <url>/2021/08/08/%E9%9D%A2%E8%AF%95_0807%E8%99%BE%E7%9A%AE%E4%B8%80%E9%9D%A2/</url>
-    <content><![CDATA[<a id="more"></a>
-<h3 id="实习">实习</h3>
+    <content><![CDATA[<h3 id="实习">实习</h3>
 <p>根据简历上的实习经历问实习的工作内容是什么，描述一下过程，然后问有什么有意思的事情（就是问难点）。</p>
+<a id="more"></a>
 <h3 id="大数据框架">大数据框架</h3>
 <h4 id="spark">Spark</h4>
 <h5 id="怎么理解rdd"><strong>怎么理解RDD？</strong></h5>
@@ -4914,9 +4914,9 @@
   <entry>
     <title>0808字节</title>
     <url>/2021/08/11/%E9%9D%A2%E8%AF%95_0808%E5%AD%97%E8%8A%82%E4%B8%80%E9%9D%A2/</url>
-    <content><![CDATA[<a id="more"></a>
-<h3 id="实习">实习</h3>
+    <content><![CDATA[<h3 id="实习">实习</h3>
 <p>整个系统的SLA是多少</p>
+<a id="more"></a>
 <p>存储的数据量？</p>
 <p>大概5亿行数据，200G左右，宽表约150个字段</p>
 <h3 id="大数据框架">大数据框架</h3>
