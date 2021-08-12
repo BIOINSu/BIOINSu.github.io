@@ -194,7 +194,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">51</span>
+          <span class="site-state-item-count">52</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -250,6 +250,184 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/08/11/%E9%9D%A2%E8%AF%95_0808%E5%AD%97%E8%8A%82%E4%B8%80%E9%9D%A2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BIOINSu">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BIOINSu">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/08/11/%E9%9D%A2%E8%AF%95_0808%E5%AD%97%E8%8A%82%E4%B8%80%E9%9D%A2/" class="post-title-link" itemprop="url">0808字节</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-08-11 22:23:55" itemprop="dateCreated datePublished" datetime="2021-08-11T22:23:55+08:00">2021-08-11</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-08-12 09:22:12" itemprop="dateModified" datetime="2021-08-12T09:22:12+08:00">2021-08-12</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E9%9D%A2%E8%AF%95/" itemprop="url" rel="index"><span itemprop="name">面试</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <a id="more"></a>
+<h3 id="实习">实习</h3>
+<p>整个系统的SLA是多少</p>
+<p>存储的数据量？</p>
+<p>大概5亿行数据，200G左右，宽表约150个字段</p>
+<h3 id="大数据框架">大数据框架</h3>
+<h4 id="yarn">Yarn</h4>
+<h5 id="yarn的执行流程">Yarn的执行流程？</h5>
+<p>Yarn是一个资源调度平台，负责为运算程序（MapReduce）分配服务器运算资源。</p>
+<p>ResourceManager：总的管理器</p>
+<ul>
+<li><p>处理客户端的请求</p></li>
+<li><p>启动监控 ApplicationMaster</p></li>
+<li><p>监控 NodeManager</p></li>
+<li><p>资源分配调度</p></li>
+</ul>
+<p>ApplicationMaster：单个Job的管理器</p>
+<ul>
+<li>为应用程序申请资源，分配给任务</li>
+<li>负责任务的监控与容错</li>
+<li>需要与 NM 通信：启动/停止 task，task 是运行在 container 里面，AM 也是运行在 container 里面</li>
+</ul>
+<p>NodeManager：单个节点的管理器</p>
+<ul>
+<li>管理单个节点的资源、任务</li>
+<li>处理来自ResourceManager的请求：启动 Container</li>
+<li>ApplicationMaster的命令：启动task</li>
+<li>定时向RM汇报本节点的资源情况</li>
+</ul>
+<p>Container：资源抽象</p>
+<ul>
+<li>封装了如内存、cpu、磁盘、网络等资源</li>
+</ul>
+<blockquote>
+<p>YARN 的基本思想是将资源管理和作业调度/监控的功能分解为单独的守护进程。这个包括 2 个部分，一个全局的资源调度 ResourceManager（RM）和针对每个应用程序的ApplicationMaster（AM）</p>
+</blockquote>
+<p>1、开启ApplicationMaster，计算并申请所需资源：</p>
+<p>Client向yarn提交job，首先找ResourceManager分配资源，ResourceManager开启一个Container，在Container中运行一个Application Manager</p>
+<p>Application Manager找一台NodeManager启动ApplicationMaster，计算任务所需的计算资源，然后向Application Manager（Yarn）申请运行任务所需的资源</p>
+<p>2、AM将资源分发给NM，执行计算</p>
+<p>Resource scheduler将资源封装发给ApplicationMaster，ApplicationMaster将获取到的资源分配给各个NodeManager，启动Container执行任务</p>
+<p>3、结果反馈</p>
+<p>将执行结果反馈给ApplicationMaster，ApplicationMaster将任务执行的结果反馈Application Manager</p>
+<h5 id="applicationmaster做了什么">ApplicationMaster做了什么</h5>
+<h5 id="nodemanager-的重启过程">NodeManager 的重启过程</h5>
+<h5 id="yarn的心跳机制">Yarn的心跳机制</h5>
+<h4 id="spark">Spark</h4>
+<h5 id="spark的内存管理机制">spark的内存管理机制</h5>
+<p>Spark1.6之后引入统一内存管理机制，与静态内存管理的区别在于存储内存和执行内存共享同一块空间，可以动态占用对方的空闲区域。</p>
+<p>总的内存可以分为：</p>
+<ul>
+<li>堆内存
+<ul>
+<li>存储内存：缓存RDD数据和广播变量的数据</li>
+<li>执行内存：缓存shuffle操作（reduce by、join）产生的中间数据</li>
+<li>系统保留内存：作为存储内存和执行内存的缓冲区，防止OOM</li>
+<li>其他内存：用户自定义数据结构及Spark元数据</li>
+</ul></li>
+<li>堆外内存
+<ul>
+<li>存储内存</li>
+<li>执行内存</li>
+</ul></li>
+</ul>
+<h5 id="spark的副本机制">Spark的副本机制？</h5>
+<p>副本的作用是在数据丢失的情况下依然保持服务可用。</p>
+<p>Spark防止数据丢之的机制是血统容错机制和Checkpoint机制。通过用父RDD再次执行相应操作得到现有RDD。</p>
+<p>一般来说，在已经有RDD容错机制的情况下，没有必要再牺牲内存设计RDD副本容错机制。</p>
+<p>但是，在执行缓存的情况下，可以产生副本，向persist方法中传入StorageLevel参数，可以实现不同的缓存级别。其中DISK_ONLY_2、MEMORY_ONLY_2、MEMORY_ONLY_SER_2、MEMORY_AND_DISK_SER_2缓存级别，可以是实现缓存副本数为2，即将所有数据都复制一份副本，并发送到其他节点上。</p>
+<h3 id="hbase">Hbase</h3>
+<h5 id="描述一下hbase的架构">描述一下Hbase的架构？</h5>
+<ul>
+<li>Master：建表、删表、移动Region、合并等操作(HBase中即使Master宕机了，集群依然可以正常地运行，依然可以存储和删除数据)</li>
+<li>RegionServer:服务器上的一个服务，真正存储数据的节点，客户端可以直接从这里获取数据
+<ul>
+<li>Region：一个RegionServer中有多个Region，Region就是一段数据的集合，每一个Region都有起始rowkey和结束rowkey，代表了它所存储的row范围。一个Region对应了一张表。
+<ul>
+<li>Store：在一个Region内部，包括多个store，其中一个store对应一个列族。如果一个表中有N个列族，那么它对应的每一个region中有N个store。</li>
+<li>MemStore：不是为了加快写速度，而是按照Row Key对这个列族中的数据进行排序（LSM树）</li>
+<li>HFile：存储在硬盘上的文件，真正被持久化到硬盘上</li>
+</ul></li>
+<li>WAL：修改并不直接写入到数据库文件中，而是写入到另外一个称为 WAL 的文件中；如果事务失败，WAL 中的记录会被忽略，撤销修改；如果事务成功，它将在随后的某个时间被写回到数据库文件中，提交修改。</li>
+<li>BlockCache：读数据时进行缓存</li>
+</ul></li>
+<li>ZooKeeper：管理了HBase所有RegionServer的信息，具体的数据段存放在哪个RegionServer上；客户端先和zk通信才能获取数据；取数据所需要的元数据表hbase:meata的位置存储在zk上</li>
+</ul>
+<h3 id="sql">SQL</h3>
+<p>整个系统的SLA是多少 存储的数据量</p>
+<p>yarn的整个执行流程 am做了什么 yarn的心跳机制</p>
+<p>node manager 的重启过程</p>
+<p>spark的内存管理机制 DD</p>
+<p>sql分别有哪些连接</p>
+<p>sql是怎么转为map reduce执行的</p>
+<p>Hfile是怎么存储文件的</p>
+<p>LSM是什么？英文全程是什么？</p>
+<p>spark的副本机制？ DD</p>
+<p>HdFS宕机，断点续传功能</p>
+<p>连续n天登陆 新用户表和旧用户表，怎么判断新用户在旧用户表中出现？（where条件？）</p>
+<p>hbase介绍</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
     <link itemprop="mainEntityOfPage" href="http://example.com/2021/08/08/%E9%9D%A2%E8%AF%95_0807%E8%99%BE%E7%9A%AE%E4%B8%80%E9%9D%A2/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -281,7 +459,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-08-11 09:11:08" itemprop="dateModified" datetime="2021-08-11T09:11:08+08:00">2021-08-11</time>
+        <time title="修改时间：2021-08-12 09:22:50" itemprop="dateModified" datetime="2021-08-12T09:22:50+08:00">2021-08-12</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -356,6 +534,7 @@
 <p>序列化机制允许将实现序列化的Java对象转化为字节序列进行存储。</p>
 <p>序列化的优势在于节省很多空间，反序列化的优势在于速度快。</p>
 </blockquote>
+<p><img src="/2021/08/08/%E9%9D%A2%E8%AF%95_0807%E8%99%BE%E7%9A%AE%E4%B8%80%E9%9D%A2/image-20210812080054947.png" alt="image-20210812080054947" style="zoom: 67%;"></p>
 <h5 id="改变rdd的分区数">改变RDD的分区数？</h5>
 <ul>
 <li><p>创建RDD时可以指定分区数</p>
@@ -1352,93 +1531,6 @@
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2021/07/25/Hive_DML/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/25/Hive_DDL/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="BIOINSu">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BIOINSu">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/07/25/Hive_DDL/" class="post-title-link" itemprop="url">Hive DDL</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-07-25 09:58:25" itemprop="dateCreated datePublished" datetime="2021-07-25T09:58:25+08:00">2021-07-25</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-08-02 08:59:18" itemprop="dateModified" datetime="2021-08-02T08:59:18+08:00">2021-08-02</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/Hive/" itemprop="url" rel="index"><span itemprop="name">Hive</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>数据定义语言 (Data Definition Language, DDL)，是SQL语言集中对数据库内部的对象结构进行创建，删除，修改等的操作语言，这些数据库对象包括<strong>database（schema）、table、view、index</strong>等。核心语法由<strong>CREATE、ALTER与DROP</strong>三个所组成。DDL并不涉及表内部数据的操作。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/07/25/Hive_DDL/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
