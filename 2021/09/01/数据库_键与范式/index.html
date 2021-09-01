@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.3.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/maze.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/maze.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/maze.png">
+  <link rel="mask-icon" href="/images/maze.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","images":"/images","scheme":"Mist","version":"8.2.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false}};
+  </script>
+<meta name="description" content="总结    概念 解释     键 指的是关系型数据库中一张表的某些字段   超键 在关系表中能唯一标识一行数据的字段集   候选键 不含有多余字段的超键被称为候选键，同样能够唯一决定一条数据   主键 用户选择的被用来唯一标识一行数据的的候选键被称为主键   范式 关系型数据库表需要满足的一些约束条件被称为范式。   一范式 字段不可">
+<meta property="og:type" content="article">
+<meta property="og:title" content="数据库中键和范式">
+<meta property="og:url" content="http://example.com/2021/09/01/%E6%95%B0%E6%8D%AE%E5%BA%93_%E9%94%AE%E4%B8%8E%E8%8C%83%E5%BC%8F/index.html">
+<meta property="og:site_name" content="BIOINSu">
+<meta property="og:description" content="总结    概念 解释     键 指的是关系型数据库中一张表的某些字段   超键 在关系表中能唯一标识一行数据的字段集   候选键 不含有多余字段的超键被称为候选键，同样能够唯一决定一条数据   主键 用户选择的被用来唯一标识一行数据的的候选键被称为主键   范式 关系型数据库表需要满足的一些约束条件被称为范式。   一范式 字段不可">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-09-01T12:21:32.221Z">
+<meta property="article:modified_time" content="2021-09-01T12:21:26.901Z">
+<meta property="article:author" content="BIOINSu">
+<meta property="article:tag" content="数据库">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://example.com/2021/09/01/%E6%95%B0%E6%8D%AE%E5%BA%93_%E9%94%AE%E4%B8%8E%E8%8C%83%E5%BC%8F/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+<title>数据库中键和范式 | BIOINSu</title>
+  
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BIOINSu</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">1.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%94%AE"><span class="nav-number">2.</span> <span class="nav-text">键</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%8C%83%E5%BC%8F"><span class="nav-number">3.</span> <span class="nav-text">范式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%80%E8%8C%83%E5%BC%8F"><span class="nav-number">3.1.</span> <span class="nav-text">一范式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%8C%E8%8C%83%E5%BC%8F"><span class="nav-number">3.2.</span> <span class="nav-text">二范式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%89%E8%8C%83%E5%BC%8F"><span class="nav-number">3.3.</span> <span class="nav-text">三范式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#bcnf"><span class="nav-number">3.4.</span> <span class="nav-text">BCNF</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%8C%83%E5%BC%8F%E7%9A%84%E4%BC%98%E7%BC%BA%E7%82%B9"><span class="nav-number">3.5.</span> <span class="nav-text">范式的优缺点</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">4.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">BIOINSu</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">54</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">31</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">35</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/BIOINSu" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;BIOINSu" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/09/01/%E6%95%B0%E6%8D%AE%E5%BA%93_%E9%94%AE%E4%B8%8E%E8%8C%83%E5%BC%8F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BIOINSu">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BIOINSu">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          数据库中键和范式
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2021-09-01 20:21:32 / 修改时间：20:21:26" itemprop="dateCreated datePublished" datetime="2021-09-01T20:21:32+08:00">2021-09-01</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/" itemprop="url" rel="index"><span itemprop="name">数据库</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h3 id="总结">总结</h3>
+<table>
+<thead>
+<tr class="header">
+<th>概念</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>键</td>
+<td>指的是关系型数据库中一张表的某些字段</td>
+</tr>
+<tr class="even">
+<td>超键</td>
+<td>在关系表中能唯一标识一行数据的字段集</td>
+</tr>
+<tr class="odd">
+<td>候选键</td>
+<td>不含有多余字段的超键被称为候选键，同样能够唯一决定一条数据</td>
+</tr>
+<tr class="even">
+<td>主键</td>
+<td>用户选择的被用来唯一标识一行数据的的候选键被称为主键</td>
+</tr>
+<tr class="odd">
+<td>范式</td>
+<td>关系型数据库表需要满足的一些约束条件被称为范式。</td>
+</tr>
+<tr class="even">
+<td>一范式</td>
+<td>字段不可再分</td>
+</tr>
+<tr class="odd">
+<td>二范式</td>
+<td>非主键字段全部依赖于主键（消除部份依赖）</td>
+</tr>
+<tr class="even">
+<td>三范式</td>
+<td>非主键字段之间无依赖关系（消除传递依赖）</td>
+</tr>
+<tr class="odd">
+<td>BCNF</td>
+<td>主键字段之间无依赖关系</td>
+</tr>
+<tr class="even">
+<td>范式优点</td>
+<td>消除冗余、异常</td>
+</tr>
+<tr class="odd">
+<td>范式缺点</td>
+<td>关联表增加查询复杂度，降低数据库查询性能</td>
+</tr>
+</tbody>
+</table>
+<a id="more"></a>
+<h3 id="键">键</h3>
+<p>例如有如下字段：</p>
+<p>身份证、姓名、性别、年龄</p>
+<p><strong>超键</strong>(super key)：在关系中能唯一标识一行数据的字段集称为关系模式的超键</p>
+<p>身份证 唯一，所以是一个超键 姓名 唯一，所以是一个超键 （姓名，性别）唯一，所以是一个超键 （姓名，性别，年龄）唯一，所以是一个超键</p>
+<p>即超键能够唯一决定一条数据，但可能不是最小唯一的</p>
+<p><strong>候选键</strong>(candidate key)：不含有多余字段的超键称为候选键</p>
+<p>身份证唯一，而且没有多余属性，所以是一个候选键 姓名唯一，而且没有多余属性，所以是一个候选键</p>
+<p>即候选键是没有多余属性的超键，候选键同样能够唯一决定一条数据</p>
+<p><strong>主键</strong>(primary key)：用户选择的被用来唯一标识一行数据的的候选键被称为主键</p>
+<p>考虑输入查询方便性，可以选择 身份证 为主键 也可以 考虑习惯 选择 姓名 为主键</p>
+<p>即主键是选中的一个候选键</p>
+<h3 id="范式">范式</h3>
+<p>范式来自英文Normal form，简称NF。</p>
+<p>要想设计—个好的关系，必须使关系满足一定的约束条件，此约束已经形成了规范，分成几个等级，一级比一级要求严格。</p>
+<p>满足这些规范的数据库是简洁的、结构明晰的，同时，不会发生插入(insert)、删除(delete)和更新(update)操作异常。</p>
+<h4 id="一范式">一范式</h4>
+<p>字段不可再分。</p>
+<p>反例：</p>
+<table>
+<thead>
+<tr class="header">
+<th>Contact</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Email:kkkk@ee.net,phone:222456</td>
+</tr>
+<tr class="even">
+<td>email:kkk@fff.net phone:123455</td>
+</tr>
+</tbody>
+</table>
+<p>问题：</p>
+<p>contact字段可以再分，不符合第一范式。</p>
+<p>正例：</p>
+<table>
+<thead>
+<tr class="header">
+<th>Email</th>
+<th>Phone</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Email:kkkk@ee.net</td>
+<td>222456</td>
+</tr>
+<tr class="even">
+<td>email:kkk@fff.net</td>
+<td>123455</td>
+</tr>
+</tbody>
+</table>
+<h4 id="二范式">二范式</h4>
+<p>非主键字段全部依赖于主键。</p>
+<p>反例：</p>
+<p>选课关系表，主键为（学号，课程名称），可以发现这能唯一地标识一条数据</p>
+<table>
+<thead>
+<tr class="header">
+<th>学号</th>
+<th>课程名称</th>
+<th>姓名</th>
+<th>年龄</th>
+<th>成绩</th>
+<th>学分</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>01</td>
+<td>语文</td>
+<td>小明</td>
+<td>15</td>
+<td>92</td>
+<td>3</td>
+</tr>
+<tr class="even">
+<td>02</td>
+<td>数学</td>
+<td>小王</td>
+<td>16</td>
+<td>98</td>
+<td>4</td>
+</tr>
+</tbody>
+</table>
+<p>问题：</p>
+<p>不满足第二范式，因为存在如下决定关系：</p>
+<p>（课程名称） → （学分）</p>
+<p>（学号） → （姓名, 年龄）</p>
+<p>造成问题有：</p>
+<ol type="1">
+<li>数据冗余：</li>
+</ol>
+<p>同一门课程由n个学生选修，"学分"就重复n-1次；同一个学生选修了m门课程，姓名和年龄就重复了m-1次。</p>
+<ol start="2" type="1">
+<li>更新异常：</li>
+</ol>
+<p>若调整了某门课程的学分，数据表中所有行的"学分"值都要更新，否则会出现同一门课程学分不同的情况。</p>
+<ol start="3" type="1">
+<li>插入异常：</li>
+</ol>
+<p>假设要开设一门新的课程，暂时还没有人选修。这样，由于还没有"学号"关键字，课程名称和学分也无法记录入数据库。</p>
+<ol start="4" type="1">
+<li>删除异常：</li>
+</ol>
+<p>假设一批学生已经完成课程的选修，需要从数据库表中删除这些记录。但与此同时，课程名称和学分信息也被删除了。很显然，这也会导致插入异常。</p>
+<p>正例：</p>
+<p>把选课关系表拆分为三个表：</p>
+<p>学生表：</p>
+<table>
+<thead>
+<tr class="header">
+<th>学号</th>
+<th>姓名</th>
+<th>年龄</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>02</td>
+<td>小王</td>
+<td>16</td>
+</tr>
+</tbody>
+</table>
+<p>课程表：</p>
+<table>
+<thead>
+<tr class="header">
+<th>课程名称</th>
+<th>学分</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>数学</td>
+<td>4</td>
+</tr>
+</tbody>
+</table>
+<p>选课关系表：</p>
+<table>
+<thead>
+<tr class="header">
+<th>学号</th>
+<th>课程名称</th>
+<th>成绩</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>02</td>
+<td>数学</td>
+<td>98</td>
+</tr>
+</tbody>
+</table>
+<p>学生：Student(学号, 姓名, 年龄)； 课程：Course(课程名称, 学分)； 选课关系：SelectCourse(学号, 课程名称, 成绩)。</p>
+<p>这样的数据库表是符合第二范式的， 消除了数据冗余、更新异常、插入异常和删除异常。</p>
+<h4 id="三范式">三范式</h4>
+<p>非主键字段之间无依赖关系。（没有传递依赖）</p>
+<p>反例：</p>
+<table>
+<thead>
+<tr class="header">
+<th>学号</th>
+<th>姓名</th>
+<th>奖学金等级</th>
+<th>奖学金</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>01</td>
+<td>小明</td>
+<td>优秀</td>
+<td>1800.00</td>
+</tr>
+</tbody>
+</table>
+<p>问题：</p>
+<p>主键是学号，奖学金依赖于奖学金等级，因此不满足三范式</p>
+<p>正例：</p>
+<p>学生表</p>
+<table>
+<thead>
+<tr class="header">
+<th>学号</th>
+<th>姓名</th>
+<th>等级</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>01</td>
+<td>小明</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<p>奖学金等级表</p>
+<table>
+<thead>
+<tr class="header">
+<th>等级</th>
+<th>奖学金等级</th>
+<th>奖学金</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>优秀</td>
+<td>1800.00</td>
+</tr>
+</tbody>
+</table>
+<h4 id="bcnf">BCNF</h4>
+<p>主键字段之间无依赖关系。</p>
+<p>反例：</p>
+<table>
+<thead>
+<tr class="header">
+<th>仓库ID</th>
+<th>商品ID</th>
+<th>管理员ID</th>
+<th>商品数量</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>001</td>
+<td>20130104</td>
+<td>1</td>
+<td>200</td>
+</tr>
+</tbody>
+</table>
+<p>主键是</p>
+<p>(仓库ID, 商品ID) →(管理员ID, 数量)</p>
+<p>或</p>
+<p>(管理员ID, 商品ID) → (仓库ID, 数量)</p>
+<p>(仓库ID, 商品ID)和(管理员ID,商品ID)都是候选键，都可以唯一决定一条数据。</p>
+<p>问题：</p>
+<p>但是，存在关键字段决定关键字段情况，即主键字段之间存在依赖关系。</p>
+<p>(仓库ID) → (管理员ID)</p>
+<p>(管理员ID) → (仓库ID)</p>
+<ol type="1">
+<li>删除异常：</li>
+</ol>
+<p>当仓库被清空后，所有"存储物品ID"和"数量"信息被删除的同时，"仓库ID"和"管理员ID"信息也被删除了。</p>
+<ol start="2" type="1">
+<li>插入异常：</li>
+</ol>
+<p>当仓库没有存储任何物品时，无法给仓库分配管理员。</p>
+<ol start="3" type="1">
+<li>更新异常：</li>
+</ol>
+<p>如果仓库换了管理员，则表中所有行的管理员ID都要修改。</p>
+<p>正例：</p>
+<p>仓库管理表：</p>
+<table>
+<thead>
+<tr class="header">
+<th>仓库ID</th>
+<th>商品ID</th>
+<th>商品数量</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>001</td>
+<td>20130104</td>
+<td>200</td>
+</tr>
+</tbody>
+</table>
+<p>仓库表：</p>
+<table>
+<thead>
+<tr class="header">
+<th>仓库ID</th>
+<th>管理员ID</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>001</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<h4 id="范式的优缺点">范式的优缺点</h4>
+<p>优点：</p>
+<p>1、降低数据冗余度，节省磁盘存储空间</p>
+<p>2、防止一些插入、删除、更新异常操作。</p>
+<p>缺点：</p>
+<p>应用的范式等级越高，则表越多。表多会带来很多问题：</p>
+<p>1、查询时要连接多个表，增加了查询的复杂度。</p>
+<p>2、查询时需要连接多个表，降低了数据库查询性能。</p>
+<p>而现在的情况，磁盘空间成本基本可以忽略不计，所以数据冗余所造成的问题也并不是应用数据库范式的理由。因此，并不是应用的范式越高越好，要看实际情况而定。第三范式已经很大程度上减少了数据冗余，并且减少了造成插入异常，更新异常，和删除异常了。所以大多数情况应用到第三范式已经足够，在一定情况下第二范式也是可以的。</p>
+<h3 id="参考资料">参考资料</h3>
+<p>https://www.jianshu.com/p/a78faaf59e49</p>
+<p>https://blog.csdn.net/xuxurui007/article/details/7738330</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag"># 数据库</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/08/14/Flink07_CheckpointAndState/" rel="prev" title="07 Flink四大基石：检查点与状态">
+                  <i class="fa fa-chevron-left"></i> 07 Flink四大基石：检查点与状态
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">BIOINSu</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+  <script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'none'
+      },
+      options: {
+        renderActions: {
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              const target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3.1.2/es5/tex-mml-chtml.js';
+    script.defer = true;
+    document.head.appendChild(script);
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.typesetClear();
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+
+
+</body>
+</html>
