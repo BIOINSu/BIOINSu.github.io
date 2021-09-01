@@ -22,22 +22,21 @@
     var NexT = window.NexT || {};
     var CONFIG = {"hostname":"example.com","root":"/","images":"/images","scheme":"Mist","version":"8.2.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false}};
   </script>
-<meta name="description" content="计算机网络传输层 TCP异常断开、TCP 粘包拆包">
+<meta name="description" content="Java跨平台 Java跨平台通过Java虚拟机（JVM）实现。Java源代码会被编译为.class文件，JVM负责把.class字节码文件解释成各个操作系统所能够识别的指令并执行，JVM本身是和操作系统有关的，因此通过JVM实现跨平台执行。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="计算机网络传输层">
-<meta property="og:url" content="http://example.com/2021/04/13/%E8%AE%A1%E7%BD%91_%E4%BC%A0%E8%BE%93%E5%B1%82/index.html">
+<meta property="og:title" content="Java从编译到执行">
+<meta property="og:url" content="http://example.com/2021/09/01/Java_%E7%BC%96%E8%AF%91%E4%B8%8E%E6%89%A7%E8%A1%8C/index.html">
 <meta property="og:site_name" content="BIOINSu">
-<meta property="og:description" content="计算机网络传输层 TCP异常断开、TCP 粘包拆包">
+<meta property="og:description" content="Java跨平台 Java跨平台通过Java虚拟机（JVM）实现。Java源代码会被编译为.class文件，JVM负责把.class字节码文件解释成各个操作系统所能够识别的指令并执行，JVM本身是和操作系统有关的，因此通过JVM实现跨平台执行。">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2021-04-13T14:35:19.285Z">
-<meta property="article:modified_time" content="2021-04-14T02:13:07.176Z">
+<meta property="article:published_time" content="2021-09-01T12:41:55.190Z">
+<meta property="article:modified_time" content="2021-09-01T14:27:19.517Z">
 <meta property="article:author" content="BIOINSu">
-<meta property="article:tag" content="计算机网络">
-<meta property="article:tag" content="传输层">
+<meta property="article:tag" content="Java">
 <meta name="twitter:card" content="summary">
 
 
-<link rel="canonical" href="http://example.com/2021/04/13/%E8%AE%A1%E7%BD%91_%E4%BC%A0%E8%BE%93%E5%B1%82/">
+<link rel="canonical" href="http://example.com/2021/09/01/Java_%E7%BC%96%E8%AF%91%E4%B8%8E%E6%89%A7%E8%A1%8C/">
 
 
 <script class="page-configurations">
@@ -49,7 +48,7 @@
     lang   : 'zh-CN'
   };
 </script>
-<title>计算机网络传输层 | BIOINSu</title>
+<title>Java从编译到执行 | BIOINSu</title>
   
 
 
@@ -187,7 +186,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C%E4%BC%A0%E8%BE%93%E5%B1%82"><span class="nav-number">1.</span> <span class="nav-text">计算机网络传输层</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#tcp%E5%BC%82%E5%B8%B8%E6%96%AD%E5%BC%80"><span class="nav-number">1.1.</span> <span class="nav-text">TCP异常断开</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%BF%9B%E7%A8%8B%E7%BB%88%E6%AD%A2"><span class="nav-number">1.1.1.</span> <span class="nav-text">服务器进程终止</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E5%99%A8%E4%B8%BB%E6%9C%BA%E5%B4%A9%E6%BA%83"><span class="nav-number">1.1.2.</span> <span class="nav-text">服务器主机崩溃</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E5%99%A8%E4%B8%BB%E6%9C%BA%E5%B4%A9%E6%BA%83%E5%90%8E%E9%87%8D%E5%90%AF"><span class="nav-number">1.1.3.</span> <span class="nav-text">服务器主机崩溃后重启</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E5%99%A8%E4%B8%BB%E6%9C%BA%E5%85%B3%E6%9C%BA"><span class="nav-number">1.1.4.</span> <span class="nav-text">服务器主机关机</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tcp-%E7%B2%98%E5%8C%85%E6%8B%86%E5%8C%85"><span class="nav-number">1.2.</span> <span class="nav-text">TCP 粘包、拆包</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">1.3.</span> <span class="nav-text">参考资料</span></a></li></ol></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#java%E8%B7%A8%E5%B9%B3%E5%8F%B0"><span class="nav-number">1.</span> <span class="nav-text">Java跨平台</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#java%E4%BB%8E%E7%BC%96%E8%AF%91%E5%88%B0%E6%89%A7%E8%A1%8C"><span class="nav-number">2.</span> <span class="nav-text">Java从编译到执行</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BC%96%E8%AF%91"><span class="nav-number">2.1.</span> <span class="nav-text">编译</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8A%A0%E8%BD%BD"><span class="nav-number">2.2.</span> <span class="nav-text">加载</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A7%A3%E9%87%8A"><span class="nav-number">2.3.</span> <span class="nav-text">解释</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%89%A7%E8%A1%8C"><span class="nav-number">2.4.</span> <span class="nav-text">执行</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#javac%E9%80%9F%E5%BA%A6%E6%AF%94%E8%BE%83"><span class="nav-number">3.</span> <span class="nav-text">Java&#x2F;C++速度比较</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">4.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -258,7 +257,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/04/13/%E8%AE%A1%E7%BD%91_%E4%BC%A0%E8%BE%93%E5%B1%82/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/09/01/Java_%E7%BC%96%E8%AF%91%E4%B8%8E%E6%89%A7%E8%A1%8C/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -271,7 +270,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          计算机网络传输层
+          Java从编译到执行
         </h1>
 
         <div class="post-meta-container">
@@ -281,27 +280,17 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
+      
 
-      <time title="创建时间：2021-04-13 22:35:19" itemprop="dateCreated datePublished" datetime="2021-04-13T22:35:19+08:00">2021-04-13</time>
+      <time title="创建时间：2021-09-01 20:41:55 / 修改时间：22:27:19" itemprop="dateCreated datePublished" datetime="2021-09-01T20:41:55+08:00">2021-09-01</time>
     </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-04-14 10:13:07" itemprop="dateModified" datetime="2021-04-14T10:13:07+08:00">2021-04-14</time>
-      </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
         <i class="far fa-folder"></i>
       </span>
       <span class="post-meta-item-text">分类于</span>
         <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/" itemprop="url" rel="index"><span itemprop="name">计算机网络</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E4%BC%A0%E8%BE%93%E5%B1%82/" itemprop="url" rel="index"><span itemprop="name">传输层</span></a>
+          <a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
         </span>
     </span>
 
@@ -315,61 +304,41 @@
     
     
     <div class="post-body" itemprop="articleBody">
-        <h3 id="计算机网络传输层">计算机网络传输层</h3>
-<p>TCP异常断开、TCP 粘包拆包</p>
+        <h3 id="java跨平台">Java跨平台</h3>
+<p>Java跨平台通过Java虚拟机（JVM）实现。Java源代码会被编译为.class文件，JVM负责把.class字节码文件解释成各个操作系统所能够识别的指令并执行，JVM本身是和操作系统有关的，因此通过JVM实现跨平台执行。</p>
 <a id="more"></a>
-<h4 id="tcp异常断开">TCP异常断开</h4>
-<h5 id="服务器进程终止">服务器进程终止</h5>
-<p>当服务器TCP接收到来自客户的数据时，既然先前打开那个套接口的进程已经终止，于是响应一个RST报文。</p>
-<h5 id="服务器主机崩溃">服务器主机崩溃</h5>
-<p>当服务器主机崩溃时，它不能发送任何东西，客户端TCP持续重传数据，试图从服务器上接受一个ACK。</p>
+<h3 id="java从编译到执行">Java从编译到执行</h3>
+<p>Java源码到执行的过程，从JVM的角度看可以总结为四个步骤：编译-&gt;加载-&gt;解释-&gt;执行。</p>
+<h4 id="编译">编译</h4>
+<p>将源码编译成JVM可以解释的class文件。</p>
+<p>Java源代码文件经过 语法分析、语义分析、注解处理，最后生成.class字节码文件。</p>
+<h4 id="加载">加载</h4>
+<p>将编译后的class文件加载到JVM中。</p>
+<p>加载又可以细分步骤为：加载-&gt;连接-&gt;初始化。</p>
 <ul>
-<li>假设服务器已崩溃，从而对客户的数据分节根本没有响应，当客户端TCP最终放弃时，返回客户进程一个错误ETIMEDOUT。</li>
-<li>如果某个中间路由器判定服务器主机已不可达，从而响应以一个“destination unreachable”，那么所返回的错误是EHOSTUNREACH或ENETUNREACH。</li>
-</ul>
-<p>为了快速检测出服务器已经不可达，有如下解决方案：</p>
+<li>加载：把.class文件加载至JVM。查找并加载类的二进制数据，在JVM堆中创建一个java.lang.Class类的对象，并将类相关的信息存储在JVM方法区中。
 <ul>
-<li><p>给客户端设置一个超时时间，当超过这个时间后服务器还未响应数据时即认为服务器已经崩溃。</p></li>
-<li><p>心跳检测机制，给双方设置一个守护进程，定期发送心跳检测数据包，另一方需要进行回应。</p></li>
-<li><p>在Linux Socket编程中，开启SO_KEEPALIVE参数。</p>
-<blockquote>
-<p>SO_KEEPALIVE的过程？</p>
-<p>1、如果通信两端超过2个小时没有交换数据，那么开启keep-alive的一端会自动发一个keep-alive包给对端。 2、如果对端正常的回应ACK包，那么一切都没问题，再等个2小时后发包(如果这两个小时仍然没有数据交换)。 3、如果对端回应RST包，表明对端程序崩溃或重启，这边socket产生ECONNRESET错误，并且关闭。 4、如果对端一直没回应，这边会每75秒再发包给对端，总共发8次共11分钟15秒。最后socket产生 ETIMEDOUT 错误，并且关闭。或者收到ICMP错误，表明主机不可到达，则会产生 EHOSTUNREACH 错误。</p>
-<p>SO_KEEPALIVE和心跳机制的区别？</p>
-<p>SO_KEEPALIVE是实现在传输层的TCP协议，心跳实现在应用层实现，本质没有任何区别，但应用层需要自己来定义心跳包格式。</p>
-</blockquote></li>
-</ul>
-<h5 id="服务器主机崩溃后重启">服务器主机崩溃后重启</h5>
-<p>当服务器主机崩溃后重启时，它的TCP丢失了崩溃前的所有连接信息，因此服务器TCP对于所收到的来自客户的数据响应以一个RST，客户端进程返回ECONNRESET错误。</p>
-<h5 id="服务器主机关机">服务器主机关机</h5>
-<p>Unix系统关机时，init进程通常先给所有进程发送SIGTERM信号（该信号可被捕获），再等待一段固定的时间（一般在5~20秒之间），然后给所有仍在运行的进程发送SIGKILL信号（该信号不能被捕获）。</p>
-<p>这么做是留给所有运行中的进程一小段时间来清除和终止。</p>
-<p>如果不捕获SIGTERM信号并终止，服务器将由SIGKILL信号终止。当服务器进程终止时，它的所有打开着的描述字都被关闭，随后发生的步骤与服务器主机崩溃一样。</p>
-<h4 id="tcp-粘包拆包">TCP 粘包、拆包</h4>
-<p>产生的原因：</p>
+<li>加载时机：为了节省内存开销，不会一次性把所有类都加载至JVM，而是等到有需要的时候才进行加载。（比如new和反射等等）</li>
+<li>加载发生：.class文件通过类加载器加载到JVM，为了防止内存中出现多个同样的字节码，使用双亲委派机制加载类。</li>
+<li>加载规则：JDK中的本地方法一般由根加载器（Bootstrap Loader）加载，JDK中内部实现的扩展类一般由扩展类加载器加载，而程序中的类文件则由系统类加载器加载。</li>
+</ul></li>
+<li>连接：对.class的信息进行验证，为类的静态变量分配内存空间并对其赋默认值。连接里又可以细化为：验证、准备、解析。
 <ul>
-<li><p>粘包</p>
-<p>1、发送端要发送的数据小于发送缓冲区的大小，TCP 将多次写入缓冲区的数据一次发送出去</p>
-<p>2、接收端应用层没有及时读取接收缓冲区中的数据</p></li>
-<li><p>拆包</p>
-<p>1、发送端要发送的数据大于发送缓冲区剩余空间大小</p>
-<p>2、发送端待发送数据大于 MSS（最大报文长度）</p></li>
+<li>验证：验证类是否符合Java规范和JVM规范</li>
+<li>准备：为类的静态变量分配内存，初始化为系统的初始值</li>
+<li>解析：将符号引用转为直接引用的过程。</li>
+</ul></li>
+<li>初始化：为类的静态变量赋值为正确的初始值。收集.class的静态变量、静态代码块、静态方法到clinit()方法，然后从上往下执行。如果实例化对象，则会调用方法对实例变量进行初始化，并执行相应的构造方法。</li>
 </ul>
-<p>解决方案：</p>
-<p>由于 TCP 本身是面向字节流的，无法理解上层的业务数据，所以在底层是无法保证数据包不被拆分和重组的，这个问题只能通过上层的应用层协议设计来解决。</p>
-<ul>
-<li><p>消息定长</p>
-<p>发送端将每个数据包封装为固定长度（不够的可以通过补 0 填充），这样接收端每次接收缓冲区中读取固定长度的数据就自然而然的把每个数据包拆分开来。</p></li>
-<li><p>设置消息边界</p>
-<p>接收端按消息边界分离出消息内容。比如可以在包尾增加特殊符号（回车换行符等）进行分割，例如 FTP 协议。</p></li>
-<li><p>在消息头中设置消息的长度</p>
-<p>将消息分为消息头和消息体，消息头中包含表示消息总长度（或者消息体长度）的字段。</p></li>
-<li><p>Netty协议</p></li>
-</ul>
-<h4 id="参考资料">参考资料</h4>
-<p>https://zhuanlan.zhihu.com/p/108822858（粘包、拆包）</p>
-<p>https://www.nowcoder.com/questionTerminal/72fa8f3cb67e4711ba8eee581f8be92b（TCP异常断开）</p>
-<p>https://zhuanlan.zhihu.com/p/79957519 （异常断开）</p>
+<h4 id="解释">解释</h4>
+<p>解释，就是把字节码转换成操作系统可识别的执行指令，在JVM中会有字节码解释器和即时编译器（JIT）两种解释的方式。</p>
+<p>在解释时会对代码进行分析，查看是否为热点代码（某个方法或代码块的运行特别频繁），如果为「热点代码」则触发JIT编译，下次执行时就无需重复进行解释，提高解释速度。</p>
+<p>使用热点探测来检测是否为热点代码。热点探测一般有两种方式：计数器和抽样。HotSpot使用计数器的方式进行探测，为每个方法准备方法调用计数器和回边计数器，当计数器超过阈值时就会触发JIT编译，JIT将热点方法的指令码保存起来，下次执行的时候就无需进行重复解释，直接执行缓存的机器指令。</p>
+<h4 id="执行">执行</h4>
+<p>调用系统的硬件执行最终的程序指令。</p>
+<h3 id="javac速度比较">Java/C++速度比较</h3>
+<h3 id="参考资料">参考资料</h3>
+<p>https://mp.weixin.qq.com/s?__biz=MzU4NzA3MTc5Mg==&amp;mid=2247484557&amp;idx=1&amp;sn=6fb103a2a322effc564fbb04c3b93a6c&amp;chksm=fdf0ecd2ca8765c4eacc22e54b4bc57888555efee99f1c7e57ee611e07d220b35b2aa658a4ca&amp;token=830702193&amp;lang=zh_CN&amp;scene=21#wechat_redirect</p>
 
     </div>
 
@@ -379,22 +348,18 @@
 
     <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/" rel="tag"># 计算机网络</a>
-              <a href="/tags/%E4%BC%A0%E8%BE%93%E5%B1%82/" rel="tag"># 传输层</a>
+              <a href="/tags/Java/" rel="tag"># Java</a>
           </div>
 
         
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/2021/04/13/SQL_%E7%AA%97%E5%8F%A3/" rel="prev" title="SQL窗口函数">
-                  <i class="fa fa-chevron-left"></i> SQL窗口函数
+                <a href="/2021/09/01/%E6%95%B0%E6%8D%AE%E5%BA%93_%E9%94%AE%E4%B8%8E%E8%8C%83%E5%BC%8F/" rel="prev" title="数据库中键和范式">
+                  <i class="fa fa-chevron-left"></i> 数据库中键和范式
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/2021/04/14/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E6%B5%B7%E9%87%8F%E6%95%B0%E6%8D%AE%E9%97%AE%E9%A2%98/" rel="next" title="海量数据问题">
-                  海量数据问题 <i class="fa fa-chevron-right"></i>
-                </a>
             </div>
           </div>
     </footer>
