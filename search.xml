@@ -5025,7 +5025,65 @@
     <title>07 Flink四大基石：检查点与状态</title>
     <url>/2021/08/14/Flink07_CheckpointAndState/</url>
     <content><![CDATA[<p>checkpoint机制是Flink可靠性的基石，可以保证Flink集群在某个算子因为某些原因(如 异常退出)出现故障时，能够将整个应用流图的状态恢复到故障之前的某一状态，保 证应用流图状态的一致性。Flink的checkpoint机制原理来自“Chandy-Lamport algorithm”算法。</p>
+<table>
+<colgroup>
+<col style="width: 18%">
+<col style="width: 81%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>概念</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>State</td>
+<td>State是指流计算过程中计算节点的中间计算结果或元数据属性。<br>State一般指一个具体的task/operator的状态。</td>
+</tr>
+<tr class="even">
+<td>State优势</td>
+<td>1、增量计算 2、错误恢复</td>
+</tr>
+<tr class="odd">
+<td>State存储</td>
+<td>1、内存 2、HDFS 3、RocksDB+HDFS</td>
+</tr>
+<tr class="even">
+<td>Checkpoint</td>
+<td>是一种容错机制，它保证Flink集群在某个算子出现故障时，能够将状态恢复到故障之前。<br>Checkpoint表示了一个Flink Job，在一个特定时刻的一份全局状态快照，即包含了所有task/operator的State。</td>
+</tr>
+<tr class="odd">
+<td>Checkpoint过程</td>
+<td>检查点协调器周期性的向该流应用的所有source算子发送 barrier，每个算子持久化它的state，当协调器收到所有算子的确认后即认为快照制作成功</td>
+</tr>
+<tr class="even">
+<td>Exactly Once</td>
+<td>一条数据只影响一次最终结果。<br>Source：保存读取数据的偏移量。<br>Flink：Checkpoint机制保证系统的一致性。<br>Sink：两阶段提交，当所有算子的快照完成的时候才真正提交。</td>
+</tr>
+</tbody>
+</table>
 <a id="more"></a>
+<h3 id="sate">Sate</h3>
+<h4 id="概念">概念</h4>
+<p>State是指流计算过程中计算节点的中间计算结果或元数据属性。</p>
+<p>比如 在aggregation过程中要在state中记录中间聚合结果。</p>
+<p>比如 Kafka 作为数据源时候，要记录已经读取记录的offset。</p>
+<p>这些State数据在计算过程中会进行持久化(插入或更新)。所以Apache Flink中的State就是与时间相关的，Apache Flink任务的内部数据（计算数据和元数据属性）的快照。</p>
+<h4 id="原因">原因</h4>
+<p>与批计算相比，State是流计算特有的，批计算没有failover机制，要么成功，要么重新计算。</p>
+<p>流计算在 大多数场景下是增量计算，数据逐条处理（大多数场景)，每次计算是在上一次计算结果之上进行处理的，这样的机制势必要将上一次的计算结果进行存储（生产模式要持久化）。</p>
+<p>另外由于 机器，网络，脏数据等原因导致的程序错误，在重启job时候需要从成功的检查点进行State的恢复。</p>
+<h4 id="分类">分类</h4>
+<p>KeyedState：这里面的key是我们在SQL语句中对应的GroupBy/PartitioneBy里面的字段，key的值就是groupby/PartitionBy字段组成的Row的字节数组，每一个key都有一个属于自己的State，key与key之间的State是不可见的。</p>
+<p>OperatorState：Apache Flink内部的Source Connector的实现中就会用OperatorState来记录source数据读取的offset。</p>
+<h4 id="存储">存储</h4>
+<p>基于内存的HeapStateBackend - 在debug模式使用，不建议在生产模式下应用；</p>
+<p>基于HDFS的FsStateBackend - 分布式文件持久化，每次读写都产生网络IO，整体性能不佳；</p>
+<p>基于RocksDB的RocksDBStateBackend - 本地文件+异步HDFS持久化；</p>
+<blockquote>
+<p>RocksDB+HDFS的方式进行State的存储，State存储分两个阶段，首先本地存储到RocksDB，然后异步的同步到远程的HDFS。 这样而设计既消除了HeapStateBackend的局限（内存大小，机器坏掉丢失等），也减少了纯分布式存储的网络IO开销。</p>
+</blockquote>
 <h3 id="checkpoint">Checkpoint</h3>
 <h4 id="单个数据源">单个数据源</h4>
 <p>每个需要checkpoint的应用在启动时，Flink的<strong>JobManager</strong>为其创建一个 <strong>CheckpointCoordinator</strong>(检查点协调器)，CheckpointCoordinator全权负责本应用的<strong>快照制作</strong>。</p>
@@ -5046,8 +5104,26 @@
 <li><p>当输入源B发出的barrier到来时，算子C制作自身快照并向 CheckpointCoordinator 报告自身的快照制作情况，然后将两个barrier合并为一个，向下游所有的算子广播。</p></li>
 <li><p>当由于某些原因出现故障时，CheckpointCoordinator通知流图上所有算子统一恢复到某个周期的checkpoint状态，然后恢复数据流处理。分布式checkpoint机制保证了数据仅被处理一次(Exactly Once)。</p></li>
 </ol>
+<h4 id="exactly-once">Exactly Once</h4>
+<p>Exactly once指的是一个系统能保证一条数据<strong>只影响一次最终结果</strong>。端倒端，指的是从source到sink。</p>
+<p>Checkpoint和故障恢复过程可以保证内部状态的一致性，但有数据重发的问题，如下图所示。</p>
+<p><img src="/2021/08/14/Flink07_CheckpointAndState/image-20210902103129900.png" alt="image-20210902103129900" style="zoom:50%;"></p>
+<p>假设系统最近一次Checkpoint时间戳是3，系统在时间戳10处发生故障，在Checkpoint之后和故障之前的3到10期间，系统已经处理了一些数据（图中时间戳为5和8的数据）。</p>
+<p>这引发了一个问题，那就是时间戳3至10之间的数据被重发了。故障之前，这部分数据已经被一些算子处理了，甚至可能已经发送到外部系统了，重启后，这些数据又重新发送一次。一条数据不是只被处理一次，而是有可能被处理了多次（At-Least-Once）。</p>
+<p>此处需要做到的是Exactly once，即一条数据<strong>只影响一次最终结果</strong>。（而不是一条数据每个算子只处理一次，因为可能会随时产生故障，这样只流转到中间算子的数据在故障恢复时仍然会被同一个算子再次处理；事件的处理可以发生多次，但是该处理的效果只在持久后端状态存储中反映一次）</p>
+<p>实现方法：</p>
+<p>对于Flink + Kafka的数据管道系统（Kafka进、Kafka出）而言，各组件保证Exactly Once语义方式：</p>
+<p>1、内部—— 利用checkpoint机制，把状态存盘，发生故障的时候可以恢复，保证内部的状态一致性。</p>
+<p>2、source —— kafka consumer作为source，可以将偏移量保存下来，如果后续任务出现了故障，恢复的时候可以重置偏移量，重新消费数据，保证一致性</p>
+<p>3、sink —— kafka producer作为sink，采用两阶段提交 sink。</p>
+<blockquote>
+<p>1、预提交：sink 收到 barrier，保存当前状态，存入 checkpoint，通知 jobmanager，并开启下一阶段的事务，用于提交下个检查点的数据。</p>
+<p>2、正式提交：jobmanager 收到所有算子返回的确认消息，向sink发出确认，表示 checkpoint 完成，则sink正式提交这段时间的数据。外部kafka关闭事务，提交的数据就可以正常消费了。</p>
+</blockquote>
 <h3 id="参考资料">参考资料</h3>
 <p>https://segmentfault.com/a/1190000039108197</p>
+<p>https://cloud.tencent.com/developer/article/1591349</p>
+<p>https://www.codenong.com/cs106082486/</p>
 ]]></content>
       <categories>
         <category>Flink</category>
@@ -5489,11 +5565,18 @@
 </ul>
 <h4 id="解释">解释</h4>
 <p>解释，就是把字节码转换成操作系统可识别的执行指令，在JVM中会有字节码解释器和即时编译器（JIT）两种解释的方式。</p>
-<p>在解释时会对代码进行分析，查看是否为热点代码（某个方法或代码块的运行特别频繁），如果为「热点代码」则触发JIT编译，下次执行时就无需重复进行解释，提高解释速度。</p>
+<p>在解释时会对代码进行分析，查看是否为「热点代码」（某个方法或代码块的运行特别频繁），如果为「热点代码」则触发JIT编译，下次执行时就无需重复进行解释，提高解释速度。</p>
 <p>使用热点探测来检测是否为热点代码。热点探测一般有两种方式：计数器和抽样。HotSpot使用计数器的方式进行探测，为每个方法准备方法调用计数器和回边计数器，当计数器超过阈值时就会触发JIT编译，JIT将热点方法的指令码保存起来，下次执行的时候就无需进行重复解释，直接执行缓存的机器指令。</p>
 <h4 id="执行">执行</h4>
 <p>调用系统的硬件执行最终的程序指令。</p>
 <h3 id="javac速度比较">Java/C++速度比较</h3>
+<p>1、Java是解释性语言，java程序在运行时类加载器从类路经中加载相关的类，然后java虚拟机读取该类文件的字节，执行相应操作。而C++编译的时候将程序编译成本地机器码。一般来说java程序执行速度要比C++慢10-30倍。即使采用just-in-time compiling （读取类文件字节后，编译成本地机器码）技术，速度也要比C++慢好多。</p>
+<p>2、在程序运行过程中，java虚拟机要检测数组是否越界，在C++中则不检测。</p>
+<p>l java中所有的对象都创建在堆中，没有对象被创建在stack中，而C++有的对象和变量是创建在stack中的</p>
+<p>l java在运行过程中检测对象的引用是否为空，如果引用指向都空指针，且执行某个方法时会抛出空指针异常</p>
+<p>l java运行时对类型检测，如果类型不正确会抛出ClassCastException异常。</p>
+<p>l java的垃圾回收机制较C++由程序员管理内存效率更低。</p>
+<p>l java中的原始数据类型在每个操作系统平台长度都是相同，而C++这些数据类型长度是随操作系统的不同而不同，所以java在不同操作系统上执行时有个转化过程。</p>
 <h3 id="参考资料">参考资料</h3>
 <p>https://mp.weixin.qq.com/s?__biz=MzU4NzA3MTc5Mg==&amp;mid=2247484557&amp;idx=1&amp;sn=6fb103a2a322effc564fbb04c3b93a6c&amp;chksm=fdf0ecd2ca8765c4eacc22e54b4bc57888555efee99f1c7e57ee611e07d220b35b2aa658a4ca&amp;token=830702193&amp;lang=zh_CN&amp;scene=21#wechat_redirect</p>
 ]]></content>
