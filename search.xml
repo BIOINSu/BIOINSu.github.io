@@ -5587,4 +5587,34 @@
         <tag>Java</tag>
       </tags>
   </entry>
+  <entry>
+    <title>环形缓冲区</title>
+    <url>/2021/09/03/Hadoop_%E7%8E%AF%E5%BD%A2%E7%BC%93%E5%86%B2%E5%8C%BA/</url>
+    <content><![CDATA[<h3 id="概念">概念</h3>
+<p>环形缓冲区是指数据<strong>被Map处理之后</strong>会先放入内存，内存中的这片区域就是环形缓冲区。</p>
+<p>环形缓冲区其实是一个简单的buffer，即一个byte类型的数组，默认大小是100M。</p>
+<p>当环形缓冲区达到容量的80%时，产生溢写（spill），数据从内存溢出到磁盘上。</p>
+<a id="more"></a>
+<h3 id="原理">原理</h3>
+<p>环形缓冲区其实是一个数组，数组中存放着key和value的数据，以及关于key和value的元数据信息（包括kv数据的索引）。</p>
+<p><img src="/2021/09/03/Hadoop_%E7%8E%AF%E5%BD%A2%E7%BC%93%E5%86%B2%E5%8C%BA/image-20210903143711067.png" alt="image-20210903143711067" style="zoom: 50%;"></p>
+<p>key/value的元数据存储的格式是int类型，每个key/value对应一个元数据，元数据由4个int组成：</p>
+<ul>
+<li>第一个int存放value的起始位置</li>
+<li>第二个int存放key的起始位置</li>
+<li>第三个int存放partition</li>
+<li>第四个int存放value的长度。</li>
+</ul>
+<p><img src="/2021/09/03/Hadoop_%E7%8E%AF%E5%BD%A2%E7%BC%93%E5%86%B2%E5%8C%BA/image-20210903143743711.png" alt="image-20210903143743711" style="zoom:50%;"></p>
+<p>key/value数据和元数据在环形缓冲区中的存储是由equator（赤道）分隔的，key/value按照索引递增的方向存储，元数据则按照索引递减的方向存储，将数组抽象为一个环形结构之后，以equator为界，key/value顺时针存储，元数据逆时针存储。</p>
+<h3 id="参考资料">参考资料</h3>
+<p>https://blog.csdn.net/xiaoxi_hahaha/article/details/110923860（环形缓冲区）</p>
+]]></content>
+      <categories>
+        <category>Hadoop</category>
+      </categories>
+      <tags>
+        <tag>Hadoop</tag>
+      </tags>
+  </entry>
 </search>
