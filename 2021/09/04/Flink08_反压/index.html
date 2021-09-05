@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.3.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/maze.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/maze.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/maze.png">
+  <link rel="mask-icon" href="/images/maze.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","images":"/images","scheme":"Mist","version":"8.2.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false}};
+  </script>
+<meta name="description" content="概念 解释     反压 某个计算节点的处理速度跟不上上游数据的发送速度，导致该节点成为计算瓶颈。   Flink 的网络传输架构 1、每个TaskManager内分为Flink、Netty、Socket三层的Buffer，向Buffer中写入数据。2、TaskManager间采用TCP协议进行数据传输。   TCP-based反压机制 1">
+<meta property="og:type" content="article">
+<meta property="og:title" content="08 Flink反压">
+<meta property="og:url" content="http://example.com/2021/09/04/Flink08_%E5%8F%8D%E5%8E%8B/index.html">
+<meta property="og:site_name" content="BIOINSu">
+<meta property="og:description" content="概念 解释     反压 某个计算节点的处理速度跟不上上游数据的发送速度，导致该节点成为计算瓶颈。   Flink 的网络传输架构 1、每个TaskManager内分为Flink、Netty、Socket三层的Buffer，向Buffer中写入数据。2、TaskManager间采用TCP协议进行数据传输。   TCP-based反压机制 1">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2021/09/04/Flink08_%E5%8F%8D%E5%8E%8B/image-20210904202201543.png">
+<meta property="og:image" content="http://example.com/2021/09/04/Flink08_%E5%8F%8D%E5%8E%8B/image-20210904204809895.png">
+<meta property="og:image" content="http://example.com/2021/09/04/Flink08_%E5%8F%8D%E5%8E%8B/image-20210904222517382.png">
+<meta property="og:image" content="http://example.com/2021/09/04/Flink08_%E5%8F%8D%E5%8E%8B/image-20210904222350722.png">
+<meta property="og:image" content="http://example.com/2021/09/04/Flink08_%E5%8F%8D%E5%8E%8B/image-20210904224837923.png">
+<meta property="og:image" content="http://example.com/2021/09/04/Flink08_%E5%8F%8D%E5%8E%8B/image-20210905092414582.png">
+<meta property="og:image" content="http://example.com/2021/09/04/Flink08_%E5%8F%8D%E5%8E%8B/image-20210905093913110.png">
+<meta property="article:published_time" content="2021-09-04T12:21:34.753Z">
+<meta property="article:modified_time" content="2021-09-05T01:47:24.321Z">
+<meta property="article:author" content="BIOINSu">
+<meta property="article:tag" content="Flink">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2021/09/04/Flink08_%E5%8F%8D%E5%8E%8B/image-20210904202201543.png">
+
+
+<link rel="canonical" href="http://example.com/2021/09/04/Flink08_%E5%8F%8D%E5%8E%8B/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+<title>08 Flink反压 | BIOINSu</title>
+  
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BIOINSu</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A6%82%E5%BF%B5"><span class="nav-number">1.</span> <span class="nav-text">概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#flink-%E7%9A%84%E7%BD%91%E7%BB%9C%E4%BC%A0%E8%BE%93%E6%9E%B6%E6%9E%84"><span class="nav-number">2.</span> <span class="nav-text">Flink 的网络传输架构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8Etcp%E7%9A%84%E6%B5%81%E6%8E%A7"><span class="nav-number">3.</span> <span class="nav-text">基于TCP的流控</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%8D%E5%8E%8B%E7%9A%84%E4%BC%A0%E6%92%AD"><span class="nav-number">4.</span> <span class="nav-text">反压的传播</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E4%BC%A0%E8%BE%93%E8%BF%87%E7%A8%8B"><span class="nav-number">5.</span> <span class="nav-text">数据传输过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#flink-tcp-based%E5%8F%8D%E5%8E%8B%E6%9C%BA%E5%88%B6before-v1.5"><span class="nav-number">6.</span> <span class="nav-text">Flink TCP-based反压机制（before V1.5）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%B7%A8taskmanager"><span class="nav-number">6.1.</span> <span class="nav-text">跨TaskManager</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#taskmanager-%E5%86%85"><span class="nav-number">6.2.</span> <span class="nav-text">TaskManager 内</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#fink-credit-based%E5%8F%8D%E5%8E%8B%E6%9C%BA%E5%88%B6since-v1.5"><span class="nav-number">7.</span> <span class="nav-text">Fink Credit-based反压机制（since V1.5）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#tcp-based%E5%8F%8D%E5%8E%8B%E7%9A%84%E5%BC%8A%E7%AB%AF"><span class="nav-number">7.1.</span> <span class="nav-text">TCP-based反压的弊端</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#credit-based-%E5%8F%8D%E5%8E%8B"><span class="nav-number">7.2.</span> <span class="nav-text">Credit-based 反压</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">8.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">BIOINSu</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">57</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">32</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">36</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/BIOINSu" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;BIOINSu" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/09/04/Flink08_%E5%8F%8D%E5%8E%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BIOINSu">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BIOINSu">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          08 Flink反压
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-09-04 20:21:34" itemprop="dateCreated datePublished" datetime="2021-09-04T20:21:34+08:00">2021-09-04</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-09-05 09:47:24" itemprop="dateModified" datetime="2021-09-05T09:47:24+08:00">2021-09-05</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Flink/" itemprop="url" rel="index"><span itemprop="name">Flink</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <table>
+<colgroup>
+<col style="width: 25%">
+<col style="width: 75%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>概念</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>反压</td>
+<td>某个计算节点的处理速度跟不上上游数据的发送速度，导致该节点成为计算瓶颈。</td>
+</tr>
+<tr class="even">
+<td>Flink 的网络传输架构</td>
+<td>1、每个TaskManager内分为Flink、Netty、Socket三层的Buffer，向Buffer中写入数据。<br>2、TaskManager间采用TCP协议进行数据传输。</td>
+</tr>
+<tr class="odd">
+<td>TCP-based反压机制</td>
+<td>1、当缓冲区被耗尽之后，写入数据和读取数据的组件都分别停止工作，将停止发送数据的信号传递给上层直到Source端。<br>2、TaskManager间采用TCP协议的流控机制（滑动窗口）来告知发送方停止发送数据。</td>
+</tr>
+<tr class="even">
+<td>Credit-based反压机制</td>
+<td>1、ResultSubPartition 向 InputChannel 发送消息的时候都会发送一个 backlog size 告诉下游准备发送多少消息。<br>2、下游计算有多少的 Buffer 去接收消息。<br>3、算完之后如果有充足的 Buffer 就会返还给上游一个 Credit 告知他可以发送消息。</td>
+</tr>
+</tbody>
+</table>
+<a id="more"></a>
+<h3 id="概念">概念</h3>
+<p>反压（back pressure），某个计算节点的处理速度跟不上上游数据的发送速度，导致该节点成为计算瓶颈。</p>
+<h3 id="flink-的网络传输架构">Flink 的网络传输架构</h3>
+<p><img src="/2021/09/04/Flink08_%E5%8F%8D%E5%8E%8B/image-20210904202201543.png" alt="image-20210904202201543" style="zoom:67%;"></p>
+<p>Flink的网络传输本质上就是在两个不同的TaskManager（机器节点）之间传输数据。</p>
+<p>在每一个TaskManager中，可以分为三层：</p>
+<p>1、Flink管理的 Network Buffer</p>
+<p>2、Netty框架管理的 ChannelOutbound Buffer</p>
+<p>3、Socket 管理的 Send/Receive Buffer</p>
+<p>所有这里的Buffer都是内存中的一块空间，用来存储数据。</p>
+<p>由于底层的通信是通过计算机网络中传输层协议TCP进行通信的，因此Flink 1.5之前的版本就是通过 TCP 的流量控制机制来实现 feedback的。</p>
+<h3 id="基于tcp的流控">基于TCP的流控</h3>
+<p>即TCP协议中基于滑动窗口的流量控制机制，具体见参考资料。</p>
+<h3 id="反压的传播">反压的传播</h3>
+<p>每个Task都拥有一个InputGate类的实例（负责接收数据）和ResultPartition类的实例（用来发送数据）。</p>
+<p>InputGate中包含InputChannel类的实例，ResultPartition中包含ResultSubpartition类的实例。</p>
+<p>每个InputGate会包含一个以上的InputChannel，即一个InputChannel接收一个ResultSubpartition的输出。</p>
+<p>ResultSubpartition是ResultPartition的一个子分区。每个ResultPartition包含多个ResultSubpartition用来发送数据。</p>
+<p><img src="/2021/09/04/Flink08_%E5%8F%8D%E5%8E%8B/image-20210904204809895.png" alt="image-20210904204809895" style="zoom: 67%;"></p>
+<p>反压的传播实际上是分为两个阶段的，对应着上面的执行图，一共涉及 3 个 TaskManager，在每个 TaskManager 里面都有相应的 Task 在执行，还有负责接收数据的 InputGate，发送数据的 ResultPartition，这就是一个最基本的数据传输的通道。</p>
+<p>在这时候假设最下游的 Task （Sink）出现了问题，处理速度降了下来这时候是如何将这个压力反向传播回去呢？这时候就分为两种情况：</p>
+<ul>
+<li><p>跨 TaskManager ，反压如何从 InputGate 传播到 ResultPartition。</p></li>
+<li><p>TaskManager 内，反压如何从 ResultPartition 传播到 InputGate。</p></li>
+</ul>
+<h3 id="数据传输过程">数据传输过程</h3>
+<p><img src="/2021/09/04/Flink08_%E5%8F%8D%E5%8E%8B/image-20210904222517382.png" alt="image-20210904222517382" style="zoom: 67%;"></p>
+<p>左边发送方，右边接收方。</p>
+<p>对于发送方来说，发送数据需要 ResultPartition，在每个 ResultPartition 里面会有分区 ResultSubPartition，中间还会有一些关于内存管理的 Buffer。</p>
+<p>对于一个 TaskManager，在初始化时会从 Off-heap Memory（堆外内存） 中申请内存给一个统一的 Network BufferPool 被所有的 Task 共享，申请到内存的后续内存管理就是同步 Network BufferPool 来进行的，不需要依赖 JVM GC 的机制去释放。有了 Network BufferPool 之后可以为每一个 ResultSubPartition 创建 Local BufferPool 。这样，Flink、Netty、Socket层的Buffer就被创建好了。</p>
+<p>右边接受方也是类似的。</p>
+<p>整个流程为：</p>
+<p>1、左边的 TaskManager 的 Record Writer 写了 &lt;1，2&gt; 这个两个数据进来</p>
+<p>2、因为 ResultSubPartition 初始化的时候为空，没有 Buffer 用来接收，就会向 Local BufferPool 申请内存</p>
+<p>3、这时 Local BufferPool 也没有足够的内存于是将请求转到 Network BufferPool</p>
+<p>4、最终将申请到的 Buffer 按原链路返还给 ResultSubPartition，&lt;1，2&gt; 这个两个数据就可以被写入了。</p>
+<p>5、之后会将 ResultSubPartition 的 Buffer 拷贝到 Netty 的 Buffer 当中，最终拷贝到 Socket 的 Buffer 将消息发送出去。</p>
+<p>6、然后接收端按照类似的机制去处理将消息消费掉。</p>
+<h3 id="flink-tcp-based反压机制before-v1.5">Flink TCP-based反压机制（before V1.5）</h3>
+<h4 id="跨taskmanager">跨TaskManager</h4>
+<p>接下来我们来模拟上下游处理速度不匹配的场景，发送端的速率为 2，接收端的速率为 1，看一下反压的过程是怎样的。</p>
+<p><img src="/2021/09/04/Flink08_%E5%8F%8D%E5%8E%8B/image-20210904222350722.png" alt="image-20210904222350722" style="zoom:80%;"></p>
+<p>1、因为速度不匹配就会导致一段时间后 InputChannel 的 Buffer 被用尽，于是他会向 Local BufferPool 申请新的 Buffer ，这时候可以看到 Local BufferPool 中的一个 Buffer 就会被标记为 Used。</p>
+<p>发送端还在持续以不匹配的速度发送数据，然后就会导致 InputChannel 向 Local BufferPool 申请 Buffer 的时候发现没有可用的 Buffer 了，这时候就只能向 Network BufferPool 去申请，当然<strong>每个 Local BufferPool 都有最大的可用的 Buffer</strong>，防止一个 Local BufferPool 把 Network BufferPool 耗尽。如果 Network BufferPool 还是有可用的 Buffer 的话，则可以向其申请。</p>
+<p>2、 一段时间后，发现 Network BufferPool 没有可用的 Buffer，或是 Local BufferPool 的最大可用 Buffer 到了上限无法向 Network BufferPool 申请，没有办法去读取新的数据，这时 Netty AutoRead 就会被禁掉，<strong>Netty 就不会从 Socket 的 Buffer 中读取数据了</strong>。</p>
+<p>3、再过不久 Socket 的 Buffer 也被用尽，这时就会将 Window = 0 发送给发送端（即 TCP 滑动窗口的流控机制）。这时发送端的 Socket 就会停止发送。</p>
+<p>4、 很快发送端的 Socket 的 Buffer 也被用尽，Netty 检测到 Socket 无法写了之后就会停止向 Socket 写数据。</p>
+<p>5、Netty 停止写了之后，所有的数据就会阻塞在 Netty 的 Buffer 当中了，但是 Netty 的 Buffer 是无界的，可以通过 Netty 的水位机制中的 high watermark 控制他的上界。当超过了 high watermark，Netty 就会将其 channel 置为不可写，ResultSubPartition 在写之前都会检测 Netty 是否可写，发现不可写就会停止向 Netty 写数据。</p>
+<p>6、 这时候所有的压力都来到了 ResultSubPartition，和接收端一样他会不断的向 Local BufferPool 和 Network BufferPool 申请内存。最终失败后则Record Writer就停止写入数据。</p>
+<h4 id="taskmanager-内">TaskManager 内</h4>
+<p><img src="/2021/09/04/Flink08_%E5%8F%8D%E5%8E%8B/image-20210904224837923.png" alt="image-20210904224837923" style="zoom:67%;"></p>
+<p>1、下游的 TaskManager 反压导致本 TaskManager 的 ResultSubPartition 无法继续写入数据，于是 Record Writer 的写也被阻塞住了。</p>
+<p>2、因为 Operator 需要有输入才能有计算后的输出，输入跟输出都是在同一线程执行， Record Writer 阻塞了，Record Reader 也停止从 InputChannel 读数据。</p>
+<p>3、这时上游的 TaskManager 还在不断地发送数据，最终将这个 TaskManager 的 Buffer 耗尽。</p>
+<h3 id="fink-credit-based反压机制since-v1.5">Fink Credit-based反压机制（since V1.5）</h3>
+<h4 id="tcp-based反压的弊端">TCP-based反压的弊端</h4>
+<p><img src="/2021/09/04/Flink08_%E5%8F%8D%E5%8E%8B/image-20210905092414582.png" alt="image-20210905092414582" style="zoom:67%;"></p>
+<p>1、在一个 TaskManager 中可能要执行多个 Task，如果<strong>多个 Task 的数据最终都要传输到下游的同一个 TaskManager</strong> 就会<strong>复用</strong>同一个 Socket 进行传输。</p>
+<p>这个时候如果单个 Task 产生反压，就会导致复用的 Socket 阻塞，其余的 Task 也无法使用传输。</p>
+<p>checkpoint barrier 也无法发出导致下游执行 checkpoint 的延迟增大。</p>
+<p>2、依赖最底层的 TCP 去做流控，会导致反压传播路径太长，导致生效的延迟比较大。</p>
+<h4 id="credit-based-反压">Credit-based 反压</h4>
+<p>Credit 可以类比为 TCP 的 Window 机制。</p>
+<p>每一次 ResultSubPartition 向 InputChannel 发送消息的时候都会发送一个 <strong>backlog size 告诉下游准备发送多少消息</strong>，下游就会去计算有多少的 Buffer 去接收消息，算完之后如果有充足的 Buffer 就会<strong>返还给上游一个 Credit 告知他可以发送消息</strong>。</p>
+<p><img src="/2021/09/04/Flink08_%E5%8F%8D%E5%8E%8B/image-20210905093913110.png" alt="image-20210905093913110" style="zoom:67%;"></p>
+<p>假设上下游的速度不匹配，上游发送速率为 2，下游接收速率为 1，则会在 ResultSubPartition 中累积了两条消息，10 和 11， backlog 就为 2，这时就会将发送的数据 &lt;8,9&gt; 和 backlog = 2 一同发送给下游。</p>
+<p>下游收到了之后就会去计算是否有 2 个 Buffer 去接收，InputChannel 中的Buffer如果已经不足了这时就会从 Local BufferPool 和 Network BufferPool 申请，好在这个时候 Buffer 还是可以申请到的。</p>
+<p>1、过了一段时间后由于上游的发送速率要大于下游的接受速率，下游的 TaskManager 的 Buffer 已经到达了申请上限，这时候下游就会向上游返回 Credit = 0</p>
+<p>2、ResultSubPartition 接收到之后就<strong>不会向 Netty 去传输数据</strong>，上游 TaskManager 的 Buffer 也很快耗尽，达到反压的效果。</p>
+<p>这样在 ResultSubPartition 层就能感知到反压，不用通过 Socket 和 Netty 一层层地向上反馈，降低了反压生效的延迟。同时也不会将 Socket 去阻塞，解决了由于一个 Task 反压导致 TaskManager 和 TaskManager 之间的 Socket 阻塞的问题。</p>
+<h3 id="参考资料">参考资料</h3>
+<p>https://mp.weixin.qq.com/s/78dkQMxf7uRfMzmzHEqHrA</p>
+<p>https://www.cnblogs.com/Java3y/p/14167540.html</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Flink/" rel="tag"># Flink</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/09/03/Hadoop_%E7%8E%AF%E5%BD%A2%E7%BC%93%E5%86%B2%E5%8C%BA/" rel="prev" title="环形缓冲区">
+                  <i class="fa fa-chevron-left"></i> 环形缓冲区
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">BIOINSu</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+  <script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'none'
+      },
+      options: {
+        renderActions: {
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              const target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3.1.2/es5/tex-mml-chtml.js';
+    script.defer = true;
+    document.head.appendChild(script);
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.typesetClear();
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+
+
+</body>
+</html>

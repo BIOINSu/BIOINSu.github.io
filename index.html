@@ -194,7 +194,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">56</span>
+          <span class="site-state-item-count">57</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -241,6 +241,122 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/09/04/Flink08_%E5%8F%8D%E5%8E%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BIOINSu">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BIOINSu">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/09/04/Flink08_%E5%8F%8D%E5%8E%8B/" class="post-title-link" itemprop="url">08 Flink反压</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-09-04 20:21:34" itemprop="dateCreated datePublished" datetime="2021-09-04T20:21:34+08:00">2021-09-04</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-09-05 09:47:24" itemprop="dateModified" datetime="2021-09-05T09:47:24+08:00">2021-09-05</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Flink/" itemprop="url" rel="index"><span itemprop="name">Flink</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <table>
+<colgroup>
+<col style="width: 25%">
+<col style="width: 75%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>概念</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>反压</td>
+<td>某个计算节点的处理速度跟不上上游数据的发送速度，导致该节点成为计算瓶颈。</td>
+</tr>
+<tr class="even">
+<td>Flink 的网络传输架构</td>
+<td>1、每个TaskManager内分为Flink、Netty、Socket三层的Buffer，向Buffer中写入数据。<br>2、TaskManager间采用TCP协议进行数据传输。</td>
+</tr>
+<tr class="odd">
+<td>TCP-based反压机制</td>
+<td>1、当缓冲区被耗尽之后，写入数据和读取数据的组件都分别停止工作，将停止发送数据的信号传递给上层直到Source端。<br>2、TaskManager间采用TCP协议的流控机制（滑动窗口）来告知发送方停止发送数据。</td>
+</tr>
+<tr class="even">
+<td>Credit-based反压机制</td>
+<td>1、ResultSubPartition 向 InputChannel 发送消息的时候都会发送一个 backlog size 告诉下游准备发送多少消息。<br>2、下游计算有多少的 Buffer 去接收消息。<br>3、算完之后如果有充足的 Buffer 就会返还给上游一个 Credit 告知他可以发送消息。</td>
+</tr>
+</tbody>
+</table>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/09/04/Flink08_%E5%8F%8D%E5%8E%8B/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1224,132 +1340,6 @@
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2021/08/02/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E6%B5%B7%E9%87%8F%E5%B0%8F%E6%96%87%E4%BB%B6%E9%97%AE%E9%A2%98/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/08/01/Java_ComparableAndComparator/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="BIOINSu">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BIOINSu">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/08/01/Java_ComparableAndComparator/" class="post-title-link" itemprop="url">Java中Comparable和Comparator</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-      
-
-      <time title="创建时间：2021-08-01 09:07:53 / 修改时间：10:07:22" itemprop="dateCreated datePublished" datetime="2021-08-01T09:07:53+08:00">2021-08-01</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/Java/Java%E5%9F%BA%E7%A1%80/" itemprop="url" rel="index"><span itemprop="name">Java基础</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>Java中Comparable和Comparator两个<strong>接口</strong>的比较。</p>
-<table>
-<colgroup>
-<col style="width: 9%">
-<col style="width: 45%">
-<col style="width: 45%">
-</colgroup>
-<thead>
-<tr class="header">
-<th></th>
-<th>Comparable</th>
-<th>Comparator</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>作用</td>
-<td>可以让实现它的类的对象进行比较大小</td>
-<td>在类对象的外部制定排序规则，然后作为排序策略参数传递给某些类的对象的构造函数，实现比较大小</td>
-</tr>
-<tr class="even">
-<td>位置</td>
-<td>java.lang 包</td>
-<td>java.util 包</td>
-</tr>
-<tr class="odd">
-<td>接口中的方法</td>
-<td>只有一个方法 compareTo()</td>
-<td>JDK 8 以前只有两个方法compare()和equals()，8以后增加多个方法</td>
-</tr>
-<tr class="even">
-<td>使用</td>
-<td>public class Test implements Comparable{} 并重写其中的compareTo()方法</td>
-<td>数组工具类和集合工具类中提供的工具方法sort方法都给出了含有Comparator接口的重载方法。</td>
-</tr>
-<tr class="odd">
-<td>排序规则</td>
-<td>compareTo 方法的返回值有三种情况：e1.compareTo(e2) &gt; 0 即 e1 &gt; e2<br>e1.compareTo(e2) = 0 即 e1 = e2<br>e1.compareTo(e2) &lt; 0 即 e1 &lt; e2</td>
-<td>compare函数返回正数就交换传入参数的位置，否则（负数或0）就不交换两者的位置。</td>
-</tr>
-</tbody>
-</table>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/08/01/Java_ComparableAndComparator/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
