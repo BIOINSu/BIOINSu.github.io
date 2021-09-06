@@ -5910,4 +5910,156 @@
         <tag>Java原理</tag>
       </tags>
   </entry>
+  <entry>
+    <title>0902字节</title>
+    <url>/2021/09/06/%E9%9D%A2%E8%AF%95_0902%E5%AD%97%E8%8A%82%E4%B8%80%E9%9D%A2/</url>
+    <content><![CDATA[<h3 id="计网">计网</h3>
+<h4 id="sync攻击">Sync攻击</h4>
+<p><strong>是什么</strong></p>
+<p>TCP三次握手中，攻击者向服务器发送连接请求，服务器回复ACK确认后，攻击者并不返回ACK确认，即使得第三次握手无法完成，导致消耗服务器的资源，使得正常的SYN请求被丢弃。</p>
+<p><strong>怎么检测</strong></p>
+<p>当发现大量的大量的半连接状态时，特别是源IP地址是随机的时候，可以检测为是Sync攻击。</p>
+<p><strong>怎么防范</strong></p>
+<p>1、降低SYN 超时时间，使得主机尽快释放半连接的占用。</p>
+<p>2、使用代理服务器。当客户端SYN包到达代理服务器时，SYN代理服务器并不转发SYN包，而是以服务器的名义主动回复SYN/ACK包给客户，如果收到客户的ACK包，表明这是正常的访问，此时代理服务器向服务器发送ACK包并完成三次握手。</p>
+<a id="more"></a>
+<h3 id="操作系统">操作系统</h3>
+<h4 id="进程的通信方式"><strong>进程的通信方式</strong></h4>
+<p>1、管道：本质上是内存中的缓冲区，匿名管道用于有亲缘关系的进程通信，有名管道用于无关进程的进程间通信。</p>
+<p>2、信号：一个进程通知另一个进程某个事件已经发生。信号量：计数器，用于多进程对共享数据的访问。</p>
+<p>3、消息队列：内核中的消息列表。</p>
+<p>4、共享内存。</p>
+<p>5、套接字：不同主机间进程间的通信。</p>
+<h4 id="线程的锁"><strong>线程的锁</strong></h4>
+<p>1、互斥量：只有拥有互斥对象的线程才有访问公共资源的权限，互斥对象通常只有一个，比如Java中的synchronized关键字和locks都是类似的机制。</p>
+<p>2、信号量：信号量本质上是计数器，允许多个线程访问同一个公共资源。</p>
+<p>3、信号：Wait/Notify，通过发送通知的方式来保持多线程同步。</p>
+<h3 id="数据库">数据库</h3>
+<h4 id="隔离级别"><strong>隔离级别</strong></h4>
+<table>
+<thead>
+<tr class="header">
+<th>级别</th>
+<th>说明</th>
+<th>读写数据</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>未提交读</td>
+<td>事务的修改，在提交之前对其他事务也可见。</td>
+<td>当前读</td>
+</tr>
+<tr class="even">
+<td>提交读</td>
+<td>事务的修改，在提交之前对其他事务不可见。</td>
+<td>当前读<br>（也可以是快照读，每次都读取最新的快照）</td>
+</tr>
+<tr class="odd">
+<td>可重复读（MySQL默认）</td>
+<td>保证一个事务多次读取同一数据的结果是相同的。</td>
+<td>快照读</td>
+</tr>
+<tr class="even">
+<td>可串行化</td>
+<td>强制事务串行执行，不会出现并发一致性问题。</td>
+<td>当前读</td>
+</tr>
+</tbody>
+</table>
+<p>mysql读取数据实际上有两种读取模式：当前读和快照读</p>
+<p>当前读：每次读取的都是当前最新的数据，但是读的时候不允许写，写的时候也不允许读。（加锁）</p>
+<p>快照读：读写不冲突，每次读取的是快照数据。（版本控制）</p>
+<h3 id="大数据">大数据</h3>
+<h4 id="flink-exactly-once">Flink Exactly Once</h4>
+<p><strong>流程</strong></p>
+<p>一条数据只影响一次最终结果。</p>
+<p>1、Source：保存读取数据的偏移量。</p>
+<p>2、Flink：Checkpoint机制保证系统的一致性。</p>
+<p>3、Sink：两阶段提交，当所有算子的快照完成的时候才真正提交。</p>
+<p><strong>两阶段提交怎么提交</strong></p>
+<p>1、预提交：sink 收到 barrier，保存当前状态，存入 checkpoint，通知 jobmanager，并开启下一阶段的事务，用于提交下个检查点的数据。（<strong>本质上是在目的文件系统中创建了一个临时文件，并向里面写入数据，然后停止写入并关闭该文件</strong>）</p>
+<p>2、正式提交：jobmanager 收到所有算子返回的确认消息，向sink发出确认，表示 checkpoint 完成，则sink正式提交这段时间的数据。外部kafka关闭事务，提交的数据就可以正常消费了。（<strong>本质上是通过原子操作将临时文件移动到目的文件夹</strong>）</p>
+<h4 id="flink-反压">Flink 反压</h4>
+<p><strong>怎么排查</strong></p>
+<p>1、通过 Flink Web UI 自带的反压监控面板</p>
+<p>Flink Web UI 的反压监控提供了 SubTask 级别的反压监控。原理是通过周期性对 Task 线程的栈信息采样，得到<strong>线程被阻塞在请求 Buffer的频率</strong>来判断该节点是否处于反压状态。默认配置下，这个频率在 0.1 以下则为 OK，0.1 至 0.5 为 LOW，而超过 0.5 则为 HIGH。</p>
+<p><img src="/2021/09/06/%E9%9D%A2%E8%AF%95_0902%E5%AD%97%E8%8A%82%E4%B8%80%E9%9D%A2/image-20210906103911274.png" alt="image-20210906103911274" style="zoom: 50%;"></p>
+<p>如果处于反压状态，那么有两种可能性：</p>
+<p>1、该节点的发送速率跟不上它的产生数据速率。这一般会发生在一条输入多条输出的 Operator（比如 flatmap）。</p>
+<p>2、下游的节点接受速率较慢，通过反压机制限制了该节点的发送速率。</p>
+<p>如果是第一种状况，那么该节点则为反压的根源节点，它是从 Source Task 到 Sink Task 的第一个出现反压的节点。如果是第二种情况，则需要继续排查下游节点。</p>
+<p>2、通过 Flink Task Metrics</p>
+<p>Flink本身提供了大量的REST API来获取任务的各种状态，通过各个buffer的使用率情况来进行判定是否产生了反压。</p>
+<blockquote>
+<p>https://www.cnblogs.com/zhaowei121/p/11950759.html</p>
+<p>https://blog.csdn.net/u013411339/article/details/112756701</p>
+</blockquote>
+<p><strong>解决方案</strong></p>
+<p>1、数据倾斜</p>
+<p>2、GC（频繁地垃圾回收导致buffer无法被分配）</p>
+<p>3、代码问题（算子被阻塞或者性能太低）</p>
+<h4 id="kafka">Kafka</h4>
+<p><strong>Kafka是什么语义的</strong></p>
+<p>三种语义都支持，通过参数进行控制。</p>
+<table>
+<colgroup>
+<col style="width: 17%">
+<col style="width: 82%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>语义</th>
+<th>实现</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>at-least-once</td>
+<td>这种方式是在消费数据之后，异步提交offset。<br>有可能消费者的消息处理完并输出时，offset还没提交，消费者挂掉了，再重启的时候会重新消费并处理消息。<br>所以至少会处理一次。<br><strong>先消费数据，再提交offset。</strong></td>
+</tr>
+<tr class="even">
+<td>at-most-once</td>
+<td>消费者的offset已经提交，但是消息还在处理中(还没有处理完)。<br>这个时候程序挂了，导致数据没有被成功处理。<br>再重启的时候会从上次提交的offset处消费，导致上次没有被成功处理的消息就丢失了。<br><strong>先提交offset，再消费数据。</strong></td>
+</tr>
+<tr class="odd">
+<td>exactly-once</td>
+<td>以原子事务的方式保存offset和处理的消息结果，这个时候相当于自己保存offset信息。<br>把offset和具体的数据绑定到一块，数据真正处理成功的时候才会保存offset信息。<br><strong>原子性地绑定消息处理和offset提交。</strong></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>https://blog.csdn.net/lt326030434/article/details/119881907</p>
+</blockquote>
+<p><strong>kafka会不会丢失数据</strong></p>
+<p>1、生产者发送数据。</p>
+<p>ack机制。为保证producer发送的数据，能可靠的发送到指定的topic，topic的每个partition收到producer发送的数据后，都需要向producer发送ack（acknowledgement确认收到），如果producer收到ack，就会进行下一轮的发送，否则重新发送数据。</p>
+<p>ack应答机制。Kafka提供三种可靠性级别，根据对可靠性和延迟的要求进行权衡。acks参数配置：</p>
+<p>0：producer不等待broker的ack，最低的延迟，broker一接收到还没有写入磁盘就已经返回，当broker故障时有可能丢失数据。</p>
+<p>1：producer等待broker的ack，partition的leader落盘成功后返回ack，如果在follower同步成功之前leader故障，那么follower将会丢失数据。</p>
+<p>2、Kafka Broker 存储数据。</p>
+<p>Kafka把数据写入磁盘时是先写缓存再刷盘，如果数据已经写入系统 cache 中但是还没来得及刷入磁盘，此时突然机器宕机或者掉电那就丢了。</p>
+<p>理论上，要完全让kafka保证单个broker不丢失消息是做不到的，只能通过调整刷盘机制的参数缓解该情况。</p>
+<p>3、消费者消费数据。</p>
+<p>取决于支持的语义，at-least-once和exactly-once 不会，但是at-most-once 会发生丢失。</p>
+<p>at-most-once先提交offset，再消费数据，如果数据并未成功被消费的话，呢么数据就丢失了。</p>
+<blockquote>
+<p>https://www.cnblogs.com/jmcui/p/14032488.html#_label1</p>
+</blockquote>
+<p><strong>flink+kafka实现两阶段提交</strong></p>
+<p>就是flink的两阶段提交过程，再通过幂等性来防止重复提交。</p>
+<p>幂等性的Producer在初始化的时候会被分配一个PID，发往同一Partition的消息会附带序列号。而Broker端会对&lt; PID, Partition, 序列号&gt;做缓存，当具有相同主键的消息提交时，Broker只会持久化一条。</p>
+<blockquote>
+<p>https://blog.csdn.net/longlovefilm/article/details/104908006</p>
+</blockquote>
+<h3 id="算法">算法</h3>
+<p>leetcode 重排链表</p>
+]]></content>
+      <categories>
+        <category>面试</category>
+      </categories>
+      <tags>
+        <tag>面试</tag>
+      </tags>
+  </entry>
 </search>
