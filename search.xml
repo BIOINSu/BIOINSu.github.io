@@ -6069,4 +6069,96 @@
         <tag>面试</tag>
       </tags>
   </entry>
+  <entry>
+    <title>0906网易互娱一面</title>
+    <url>/2021/09/06/%E9%9D%A2%E8%AF%95_0906%E7%BD%91%E6%98%93%E4%BA%92%E5%A8%B1%E4%B8%80%E9%9D%A2/</url>
+    <content><![CDATA[<h3 id="hive">Hive</h3>
+<p>分区表是如何加速的</p>
+<a id="more"></a>
+<p>分区表分区字段的指导原则</p>
+<p>数据倾斜有几种情况</p>
+<p>维度表、事实表</p>
+<p>星型模型、雪花模型</p>
+<p>HDFS</p>
+<p>如何存储文件的</p>
+<h3 id="操作系统">操作系统</h3>
+<p>Top命令下CPU占用率能不能超过100%</p>
+<p>可以，这里显示的所有的cpu加起来的使用率，说明你的CPU是多核，你运行top后按大键盘1看看，可以显示每个cpu的使用率，top里显示的是把所有使用率加起来</p>
+<h3 id="kafka">Kafka</h3>
+<p>数据是否可以乱序</p>
+<p>如何保证数据有序消费</p>
+<p>发送端 发送端不能异步发送</p>
+<p>存储端 对于存储端，要保证消息顺序，会有以下几个问题： （1）消息不能分区。也就是1个topic，只能有1个队列。在Kafka中，它叫做partition；在RocketMQ中，它叫做queue。 如果你有多个队列，那同1个topic的消息，会分散到多个分区里面，自然不能保证顺序。</p>
+<p>（2）即使只有1个队列的情况下，会有第2个问题。该机器挂了之后，能否切换到其他机器？也就是高可用问题。</p>
+<p>比如你当前的机器挂了，上面还有消息没有消费完。此时切换到其他机器，可用性保证了。但消息顺序就乱掉了。</p>
+<p>要想保证，一方面要同步复制，不能异步复制；另1方面得保证，切机器之前，挂掉的机器上面，所有消息必须消费完了，不能有残留。很明显，这个很难！！！</p>
+<p>接收端 对于接收端，不能并行消费，也即不能开多线程或者多个客户端消费同1个队列。</p>
+<p>https://cloud.tencent.com/developer/article/1682566</p>
+<p>https://blog.csdn.net/weixin_39877754/article/details/108558016</p>
+<p>消费者分配策略</p>
+<h3 id="java">Java</h3>
+<h4 id="静态">静态</h4>
+<p><strong>静态类的加载过程</strong></p>
+<p>Java源码到执行的过程，从JVM的角度看可以总结为四个步骤：编译-&gt;加载-&gt;解释-&gt;执行。</p>
+<p>编译后的class文件加载到JVM中。</p>
+<p>加载又可以细分步骤为：加载-&gt;连接-&gt;初始化。</p>
+<p>加载：通过双亲委派机制把.class文件加载至JVM。</p>
+<p>连接：对.class的信息进行验证，为类的静态变量分配内存空间并对其赋默认值。</p>
+<p>初始化：为类的静态变量赋值为正确的初始值。收集.class的静态变量、静态代码块、静态方法到clinit()方法，然后初始化。</p>
+<p><strong>静态方法和非静态方法的区别</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th>静态方法</th>
+<th>非静态方法</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>访问变量</td>
+<td>可以访问static修饰的变量<br>不能访问非static修饰的变量</td>
+<td>都可以访问</td>
+</tr>
+<tr class="even">
+<td>调用方法</td>
+<td>只能调用static修饰的方法</td>
+<td>都可以调用</td>
+</tr>
+<tr class="odd">
+<td>是否实例化才能调用</td>
+<td>不需要类实例化出对象，就能通过 类名.方法名 调用</td>
+<td>需要实例化对象，通过 对象.方法名 调用</td>
+</tr>
+<tr class="even">
+<td>super和this关键字</td>
+<td>不能使用</td>
+<td>可以使用</td>
+</tr>
+</tbody>
+</table>
+<h4 id="单例模式">单例模式</h4>
+<p><strong>单例模式是什么</strong></p>
+<p>单例（Singleton）模式：某个类只能生成一个实例，该类提供了一个全局访问点供外部获取该实例。</p>
+<p>该类包括：</p>
+<p>1、持有私有静态实例</p>
+<p>2、私有构造方法，防止被实例化</p>
+<p>3、公共获取方法，创建实例</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span> </span>&#123;</span><br><span class="line"> </span><br><span class="line">	<span class="comment">/* 持有私有静态实例，防止被引用，此处赋值为null，目的是实现延迟加载 */</span></span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> Singleton instance = <span class="keyword">null</span>;</span><br><span class="line"> </span><br><span class="line">	<span class="comment">/* 私有构造方法，防止被实例化 */</span></span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="title">Singleton</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	&#125;</span><br><span class="line"> </span><br><span class="line">	<span class="comment">/* 静态工程方法，创建实例 */</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">if</span> (instance == <span class="keyword">null</span>) &#123;</span><br><span class="line">			instance = <span class="keyword">new</span> Singleton();</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> instance;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">/* 线程安全</span></span><br><span class="line"><span class="comment">	public static Singleton getInstance() &#123;</span></span><br><span class="line"><span class="comment">		if (instance == null) &#123;</span></span><br><span class="line"><span class="comment">			synchronized (instance) &#123;</span></span><br><span class="line"><span class="comment">				if (instance == null) &#123;</span></span><br><span class="line"><span class="comment">					instance = new Singleton();</span></span><br><span class="line"><span class="comment">				&#125;</span></span><br><span class="line"><span class="comment">			&#125;</span></span><br><span class="line"><span class="comment">		&#125;</span></span><br><span class="line"><span class="comment">		return instance;</span></span><br><span class="line"><span class="comment">	&#125;</span></span><br><span class="line"><span class="comment">	*/</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">/* 如果该对象被用于序列化，可以保证对象在序列化前后保持一致 */</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> Object <span class="title">readResolve</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> instance;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>懒汉式和饿汉式</strong></p>
+<p><strong>单例模式构造函数有参数是否可行</strong></p>
+<p>不可行，单例模式本身就要求只有一个实例，传入不同参数意味着需要多种不同的实例，而且本身构造方法就是私有化的不可以传入参数。</p>
+<p><strong>单例模式下多线程访问单例</strong></p>
+<h4 id="垃圾回收">垃圾回收</h4>
+<p>垃圾回收方法</p>
+<p>垃圾收集器</p>
+<h3 id="参考资料">参考资料</h3>
+]]></content>
+      <categories>
+        <category>面试</category>
+      </categories>
+      <tags>
+        <tag>面试</tag>
+      </tags>
+  </entry>
 </search>
