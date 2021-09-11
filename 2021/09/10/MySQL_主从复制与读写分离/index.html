@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.3.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/maze.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/maze.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/maze.png">
+  <link rel="mask-icon" href="/images/maze.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","images":"/images","scheme":"Mist","version":"8.2.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false}};
+  </script>
+<meta name="description" content="概念 解释     读写分离 将数据库分为主库和从库，主库只写数据，多个从库只读取数据。缓解因写入操作时间过长而影响数据库查询效率的问题。   读写分离分机配置 1、程序代码内部实现：insert主库，select从库2、中间代理服务器自动判断转发：MySQL Proxy连接池   主从同步延迟 1、二次读取，从库读不到就去读主库2、写数据之后，立刻到来的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL读写分离与主从复制">
+<meta property="og:url" content="http://example.com/2021/09/10/MySQL_%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E4%B8%8E%E8%AF%BB%E5%86%99%E5%88%86%E7%A6%BB/index.html">
+<meta property="og:site_name" content="BIOINSu">
+<meta property="og:description" content="概念 解释     读写分离 将数据库分为主库和从库，主库只写数据，多个从库只读取数据。缓解因写入操作时间过长而影响数据库查询效率的问题。   读写分离分机配置 1、程序代码内部实现：insert主库，select从库2、中间代理服务器自动判断转发：MySQL Proxy连接池   主从同步延迟 1、二次读取，从库读不到就去读主库2、写数据之后，立刻到来的">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2021/09/10/MySQL_%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E4%B8%8E%E8%AF%BB%E5%86%99%E5%88%86%E7%A6%BB/image-20210911214924821.png">
+<meta property="article:published_time" content="2021-09-10T03:02:32.001Z">
+<meta property="article:modified_time" content="2021-09-11T14:05:29.514Z">
+<meta property="article:author" content="BIOINSu">
+<meta property="article:tag" content="数据库">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2021/09/10/MySQL_%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E4%B8%8E%E8%AF%BB%E5%86%99%E5%88%86%E7%A6%BB/image-20210911214924821.png">
+
+
+<link rel="canonical" href="http://example.com/2021/09/10/MySQL_%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E4%B8%8E%E8%AF%BB%E5%86%99%E5%88%86%E7%A6%BB/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+<title>MySQL读写分离与主从复制 | BIOINSu</title>
+  
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BIOINSu</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="nav-number">1.</span> <span class="nav-text">基本概念</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AF%BB%E5%86%99%E5%88%86%E7%A6%BB"><span class="nav-number">1.1.</span> <span class="nav-text">读写分离</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6"><span class="nav-number">1.2.</span> <span class="nav-text">主从复制</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%BB%E5%86%99%E5%88%86%E7%A6%BB-1"><span class="nav-number">2.</span> <span class="nav-text">读写分离</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%86%E6%9C%BA%E9%85%8D%E7%BD%AE"><span class="nav-number">2.1.</span> <span class="nav-text">分机配置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%E5%8F%8A%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="nav-number">2.2.</span> <span class="nav-text">问题及解决方案</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6-1"><span class="nav-number">3.</span> <span class="nav-text">主从复制</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#mysql%E6%94%AF%E6%8C%81%E7%9A%84%E5%A4%8D%E5%88%B6%E7%B1%BB%E5%9E%8B"><span class="nav-number">3.1.</span> <span class="nav-text">MySQL支持的复制类型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A4%8D%E5%88%B6%E8%BF%87%E7%A8%8B"><span class="nav-number">3.2.</span> <span class="nav-text">复制过程</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">4.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">BIOINSu</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">63</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">31</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">35</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/BIOINSu" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;BIOINSu" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/09/10/MySQL_%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E4%B8%8E%E8%AF%BB%E5%86%99%E5%88%86%E7%A6%BB/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BIOINSu">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BIOINSu">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          MySQL读写分离与主从复制
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-09-10 11:02:32" itemprop="dateCreated datePublished" datetime="2021-09-10T11:02:32+08:00">2021-09-10</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-09-11 22:05:29" itemprop="dateModified" datetime="2021-09-11T22:05:29+08:00">2021-09-11</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/" itemprop="url" rel="index"><span itemprop="name">数据库</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <table>
+<thead>
+<tr class="header">
+<th>概念</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>读写分离</td>
+<td>将数据库分为主库和从库，主库只写数据，多个从库只读取数据。<br>缓解因写入操作时间过长而影响数据库查询效率的问题。</td>
+</tr>
+<tr class="even">
+<td>读写分离分机配置</td>
+<td>1、程序代码内部实现：insert主库，select从库<br>2、中间代理服务器自动判断转发：MySQL Proxy连接池</td>
+</tr>
+<tr class="odd">
+<td>主从同步延迟</td>
+<td>1、二次读取，从库读不到就去读主库<br>2、写数据之后，立刻到来的读操作指定为访问主库<br>3、关键业务读写都由主库承担，非关键业务读写分离</td>
+</tr>
+<tr class="even">
+<td>主从复制</td>
+<td>将主库写入、变更的数据同步到从库上。<br>使得从库提供和主库一致的数据。</td>
+</tr>
+<tr class="odd">
+<td>MySQL支持的复制类型</td>
+<td>1、基于语句，直接复制SQL命令。<br>2、基于行，直接复制数据。<br>3、混合方式，先语句后行。</td>
+</tr>
+<tr class="even">
+<td>主从复制过程</td>
+<td>binlog复制并重放语句。</td>
+</tr>
+</tbody>
+</table>
+<a id="more"></a>
+<h3 id="基本概念">基本概念</h3>
+<h4 id="读写分离">读写分离</h4>
+<p><strong>概念</strong></p>
+<p>将数据库分为主库和从库，主库只写数据，多个从库只读取数据。</p>
+<p><strong>原因</strong></p>
+<p>因为数据库的“写”操作是比较耗时的（写10000条数据到oracle可能要3分钟）。</p>
+<p>但是数据库的“读”操作相对较快（从oracle读10000条数据可能只要5秒钟）。</p>
+<p>所以读写分离解决的是，数据库的写入影响查询效率的问题，把访问的压力从主库转移到从库。</p>
+<p>读写分离相对分表分库而言是比较简单的，但是它只能分担访问的压力，分担不了存储的压力，也就是你的数据库表的数据逐渐增多，但是面对一张表海量的数据，查询还是很慢的，所以如果业务发展的快数据暴增，到一定时间还是得分库分表。即当读写分离都无法解决查询效率低的问题时，需要改用分库分表的操作。</p>
+<h4 id="主从复制">主从复制</h4>
+<p><strong>概念</strong></p>
+<p>将主库写入、变更的数据同步到从库上。</p>
+<p><strong>原因</strong></p>
+<p>使得从库提供和主库一致的数据。</p>
+<h3 id="读写分离-1">读写分离</h3>
+<h4 id="分机配置">分机配置</h4>
+<p>分配机制，也就是制定写操作是去主库写，读操作是去从库读的方案。</p>
+<p>1、基于程序代码内部实现</p>
+<p>在代码中根据select 、insert进行路由分类，这类方法也是目前生产环境下应用最广泛的。</p>
+<p>实现很简单，就是抽出一个中间层，让这个中间层来实现读写分离和数据库连接。讲白点就是搞个provider封装了save,select等通常数据库操作，内部save操作的dataSource是主库的，select操作的dataSource是从库的。</p>
+<p>优点：就是实现简单，并且可以根据业务定制化变化，随心所欲。性能较好，因为程序在代码中实现，不需要增加额外的硬件开支。</p>
+<p>缺点：就是是如果哪个数据库宕机了，发生主从切换了之后，就得修改配置重启。并且如果你的系统很大，一个业务可能包含多个子系统，一个子系统是java写的一个子系统用go写的，这样的话得分别为不同语言实现一套中间层，重复开发。需要开发人员来实现，运维人员无从下手。</p>
+<p>2、基于中间代理层实现</p>
+<p>代理一般介于应用服务器和数据库服务器之间，代理数据库服务器接收到应用服务器的请求后根据判断后转发到后端数据库。代理数据库服务器的代表性程序有：Mysql Proxy，Atlas等。</p>
+<p>MySQL Proxy实际上是在客户端请求与MySQL服务器之间建立了一个连接池。所有客户端请求都是发向MySQL Proxy，然后经由MySQL Proxy进行相应的分析，判断出是读操作还是写操作，分发至对应的MySQL服务器上。对于多节点Slave集群，也可以起做到负载均衡的效果。</p>
+<p>优点：因为是通过sql协议的所以可以兼容不同的语言不需要单独写一套，并且有中间件来实现主从切换，业务服务器不需要关心这点。</p>
+<p>缺点：如果数据库中间件出现故障则导致所有服务都不可用。并且多了一个系统就等于多了一个瓶颈，所以对中间件的性能要求也高，所有的数据库操作都要经过它。中间件实现很复杂，难度比代码封装高很多。</p>
+<h4 id="问题及解决方案">问题及解决方案</h4>
+<p><strong>问题：主从同步延迟</strong></p>
+<p>主库有数据写入之后，同时也写入在binlog(二进制日志文件)中，从库是通过binlog文件来同步数据的，这期间会有一定时间的延迟，可能是1秒，如果同时有大量数据写入的话，时间可能更长。</p>
+<p>对于实时性要求较高的场景下，主从同步延迟可能会造成较大的影响。比如有一个付款操作，你付款了，主库是已经写入数据，但是查询是到从库查，从库里还没有你的付款记录，所以页面上查询的时候你还没付款。</p>
+<p><strong>解决方案：</strong></p>
+<p>1、二次读取</p>
+<p>二次读取的意思就是读从库没读到之后再去主库读一下，只要通过对数据库访问的API进行封装就能实现这个功能。很简单，并且和业务之间没有耦合。但是有个问题，如果有很多二次读取相当于压力还是回到了主库身上，等于读写分离白分了。而且如有人恶意攻击，就一直访问没有的数据，那主库就可能爆了。</p>
+<p>2、写数据之后，立刻到来的读操作指定为访问主库</p>
+<p>也就是写操作之后，立刻到来的读操作指定访问主库，经过一定时间后的读操作访问从库。这就等于写死了，和业务强耦合了。</p>
+<p>3、关键业务读写都由主库承担，非关键业务读写分离</p>
+<p>类似付钱的这种业务，读写都到主库，避免延迟的问题，但是例如改个头像啊，个人签名这种比较不重要的就读写分离，查询都去从库查，毕竟延迟一下影响也不大。</p>
+<h3 id="主从复制-1">主从复制</h3>
+<h4 id="mysql支持的复制类型">MySQL支持的复制类型</h4>
+<p>1） 基于语句的复制。在服务器上执行sql语句，在从服务器上执行同样的语句，MySQL默认采用基于语句的复制，执行效率高。</p>
+<p>2） 基于行的复制。把改变的内容复制过去，而不是把命令在从服务器上执行一遍。</p>
+<p>3） 混合类型的复制。默认采用基于语句的复制，一旦发现基于语句无法精确复制时，就会采用基于行的复制。</p>
+<h4 id="复制过程">复制过程</h4>
+<p>①当Master节点进行insert、update、delete操作时，会按顺序写入到binlog中。</p>
+<p>②salve从库连接master主库，Master有多少个slave就会创建多少个binlog dump线程。</p>
+<p>③当Master节点的binlog发生变化时，binlog dump 线程会通知所有的salve节点，并将相应的binlog内容复制到slave节点。</p>
+<p>④slave中的I/O线程接收到 binlog 内容后，将内容写入到本地的 relay-log（中继日志，通常会位于os缓存中，所以中继日志的开销很小）。</p>
+<p>⑤SQL线程读取I/O线程写入的relay-log，并重放其中的SQL语句更新slave数据，使其与master中的数据一致。</p>
+<p><img src="/2021/09/10/MySQL_%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E4%B8%8E%E8%AF%BB%E5%86%99%E5%88%86%E7%A6%BB/image-20210911214924821.png" alt="image-20210911214924821" style="zoom: 67%;"></p>
+<h3 id="参考资料">参考资料</h3>
+<p>https://blog.csdn.net/u013421629/article/details/78793966</p>
+<p>https://juejin.cn/post/6844903828588855309</p>
+<p>http://article.docway.net/details?id=6045c3864da5fa50e1500786</p>
+<p>https://juejin.cn/post/6844903475101302797#heading-15</p>
+<p>https://segmentfault.com/a/1190000023775512</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag"># 数据库</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/09/10/%E5%88%86%E5%B8%83%E5%BC%8F_%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C%E7%AE%97%E6%B3%95/" rel="prev" title="一致性哈希算法">
+                  <i class="fa fa-chevron-left"></i> 一致性哈希算法
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">BIOINSu</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+  <script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'none'
+      },
+      options: {
+        renderActions: {
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              const target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3.1.2/es5/tex-mml-chtml.js';
+    script.defer = true;
+    document.head.appendChild(script);
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.typesetClear();
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+
+
+</body>
+</html>

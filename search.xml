@@ -513,6 +513,49 @@
     <title>MySQL日志</title>
     <url>/2021/04/02/MySQL_%E6%97%A5%E5%BF%97/</url>
     <content><![CDATA[<p>日志是MySQL数据库的重要组成部分，记录着数据库运行期间各种状态信息。</p>
+<table>
+<colgroup>
+<col style="width: 4%">
+<col style="width: 31%">
+<col style="width: 31%">
+<col style="width: 31%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>binlog</th>
+<th>redo log</th>
+<th>undo log</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>记录内容</td>
+<td>用于<strong>记录数据库执行的写入性操作</strong>(不包括查询)信息，以二进制的形式保存在磁盘中。</td>
+<td>记录事务<strong>对数据页做了哪些修改</strong>。</td>
+<td>保存了事务发生之前的<strong>数据的一个版本</strong>，可以用于回滚。其实本质上，老旧的记录就形成了undo log。</td>
+</tr>
+<tr class="even">
+<td>日志类型</td>
+<td>逻辑日志</td>
+<td>物理日志</td>
+<td>逻辑日志</td>
+</tr>
+<tr class="odd">
+<td>使用场景</td>
+<td><strong>主从复制</strong>和<strong>数据恢复</strong>。主从复制：在Master端开启binlog，然后将binlog发送到各个Slave端，Slave端重放binlog从而达到主从数据一致。数据恢复：通过使用MySQL binlog工具来恢复数据。</td>
+<td>redo log <strong>防止DB出现故障造成数据的丢失</strong>。当出现故障导致脏页还未来得及保存进磁盘时，通过redo log进行重做，从而达到事务的持久性这一特性。</td>
+<td>多版本并发控制协议<strong>MVCC中的快照读</strong>，通过undo log形成记录的多个版本，能执行快照读时能够判断读取的是哪个版本的记录。</td>
+</tr>
+</tbody>
+</table>
+<p><strong>redo log 和 bin log 区别</strong></p>
+<p>作用不同：redo log是保证事务的持久性的，binlog主要用于主从复制。</p>
+<p>内容不同：redo log是物理日志，是数据页面的修改之后的物理记录，binlog是逻辑日志，可以简单认为记录的就是sql语句</p>
+<p>产生时机不同：事务开始之后就产生redo log，事务提交的时候产生bin log。</p>
+<p>释放时机不同：当对应事务的脏页写入到磁盘之后，redo log可以被移除，超过一定时间后，binlog被删除。</p>
+<p>恢复效率：基于物理日志的redo log恢复数据的效率要高于语句逻辑日志的binlog。</p>
+<p>先写redo log，再写binlog，两个日志都提交成功（刷入磁盘），事务才算真正的完成。</p>
 <a id="more"></a>
 <h4 id="binlog">binlog</h4>
 <ul>
@@ -582,50 +625,6 @@
 <li><p>释放时机</p>
 <p>当事务提交之后，undo log并不能立马被删除，而是放入待清理的链表，由purge线程判断是否由其他事务在使用undo log上的旧版本，决定是否可以清理undo log的日志空间。</p></li>
 </ul>
-<h4 id="三者区别">三者区别</h4>
-<table>
-<colgroup>
-<col style="width: 4%">
-<col style="width: 31%">
-<col style="width: 31%">
-<col style="width: 31%">
-</colgroup>
-<thead>
-<tr class="header">
-<th></th>
-<th>binlog</th>
-<th>redo log</th>
-<th>undo log</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>记录内容</td>
-<td>用于<strong>记录数据库执行的写入性操作</strong>(不包括查询)信息，以二进制的形式保存在磁盘中。</td>
-<td>记录事务<strong>对数据页做了哪些修改</strong>。</td>
-<td>保存了事务发生之前的<strong>数据的一个版本</strong>，可以用于回滚。其实本质上，老旧的记录就形成了undo log。</td>
-</tr>
-<tr class="even">
-<td>日志类型</td>
-<td>逻辑日志</td>
-<td>物理日志</td>
-<td>逻辑日志</td>
-</tr>
-<tr class="odd">
-<td>使用场景</td>
-<td><strong>主从复制</strong>和<strong>数据恢复</strong>。主从复制：在Master端开启binlog，然后将binlog发送到各个Slave端，Slave端重放binlog从而达到主从数据一致。数据恢复：通过使用MySQL binlog工具来恢复数据。</td>
-<td>redo log <strong>防止DB出现故障造成数据的丢失</strong>。当出现故障导致脏页还未来得及保存进磁盘时，通过redo log进行重做，从而达到事务的持久性这一特性。</td>
-<td>多版本并发控制协议<strong>MVCC中的快照读</strong>，通过undo log形成记录的多个版本，能执行快照读时能够判断读取的是哪个版本的记录。</td>
-</tr>
-</tbody>
-</table>
-<p><strong>redo log 和 bin log 区别</strong></p>
-<p>作用不同：redo log是保证事务的持久性的，binlog主要用于主从复制。</p>
-<p>内容不同：redo log是物理日志，是数据页面的修改之后的物理记录，binlog是逻辑日志，可以简单认为记录的就是sql语句</p>
-<p>产生时机不同：事务开始之后就产生redo log，事务提交的时候产生bin log。</p>
-<p>释放时机不同：当对应事务的脏页写入到磁盘之后，redo log可以被移除，超过一定时间后，binlog被删除。</p>
-<p>恢复效率：基于物理日志的redo log恢复数据的效率要高于语句逻辑日志的binlog。</p>
-<p>先写redo log，再写binlog，两个日志都提交成功（刷入磁盘），事务才算真正的完成。</p>
 <h4 id="参考资料">参考资料</h4>
 <p>https://cloud.tencent.com/developer/article/1679325</p>
 <p>https://www.cnblogs.com/wy123/p/8365234.html</p>
@@ -634,11 +633,9 @@
 ]]></content>
       <categories>
         <category>数据库</category>
-        <category>MySQL</category>
       </categories>
       <tags>
         <tag>数据库</tag>
-        <tag>MySQL</tag>
       </tags>
   </entry>
   <entry>
@@ -3023,11 +3020,9 @@
 ]]></content>
       <categories>
         <category>数据库</category>
-        <category>SQL</category>
       </categories>
       <tags>
         <tag>数据库</tag>
-        <tag>SQL</tag>
       </tags>
   </entry>
   <entry>
@@ -3083,11 +3078,9 @@
 ]]></content>
       <categories>
         <category>数据库</category>
-        <category>SQL</category>
       </categories>
       <tags>
         <tag>数据库</tag>
-        <tag>SQL</tag>
       </tags>
   </entry>
   <entry>
@@ -6089,10 +6082,20 @@
 <p>该key对应的数据被分发到同一台机器上，该机器节点成为计算瓶颈。</p>
 <p>解决方案：</p>
 <p>将有数据倾斜的这些key的数据拿出来，加上随机前缀，做两阶段join。</p>
-<p>问题：字段中null值较多（不管对于join还是group by）</p>
+<p>问题：group by中某个key对应的数据量大</p>
+<p>该key对应的数据被分发到同一台机器上进行聚合</p>
+<p>解决方案：</p>
+<p>当设定hive.groupby.skewindata为true时，生成的查询计划会有两个MapReduce任务。</p>
+<p>在第一个MapReduce 中，map的输出结果集合会随机分布到 reduce 中， 每个 reduce 做部分聚合操作，这样处理之后，相同的 Group By Key 有可能分发到不同的 reduce 中，从而达到负载均衡的目的。</p>
+<p>在第二个 MapReduce 任务再根据第一步中处理的数据按照Group By Key分布到reduce中，（这一步中相同的key在同一个reduce中），最终生成聚合操作结果。</p>
+<blockquote>
 <p>https://zhuanlan.zhihu.com/p/115005700</p>
-<p>group by key</p>
-<p>两阶段group by</p>
+</blockquote>
+<p>问题：字段中null值较多（不管对于join还是group by）</p>
+<p>null值或者空值，都会产生数据倾斜的问题</p>
+<p>解决方案：</p>
+<p>1、用where条件筛选掉null值。</p>
+<p>2、给null值赋值上随机数，将数据分散到多个机器上，因为不关心null值的聚合结果，所以没关系。</p>
 <p>问题：Count Distinct</p>
 <p>Hive中 count(distinct id) 这样的操作，仅生成一个Reduce 任务，该任务会对全部数据进行去重统计，因此会成为瓶颈。</p>
 <p>解决方案：</p>
@@ -6320,6 +6323,194 @@
       </categories>
       <tags>
         <tag>面试</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>MySQL读写分离与主从复制</title>
+    <url>/2021/09/10/MySQL_%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E4%B8%8E%E8%AF%BB%E5%86%99%E5%88%86%E7%A6%BB/</url>
+    <content><![CDATA[<table>
+<thead>
+<tr class="header">
+<th>概念</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>读写分离</td>
+<td>将数据库分为主库和从库，主库只写数据，多个从库只读取数据。<br>缓解因写入操作时间过长而影响数据库查询效率的问题。</td>
+</tr>
+<tr class="even">
+<td>读写分离分机配置</td>
+<td>1、程序代码内部实现：insert主库，select从库<br>2、中间代理服务器自动判断转发：MySQL Proxy连接池</td>
+</tr>
+<tr class="odd">
+<td>主从同步延迟</td>
+<td>1、二次读取，从库读不到就去读主库<br>2、写数据之后，立刻到来的读操作指定为访问主库<br>3、关键业务读写都由主库承担，非关键业务读写分离</td>
+</tr>
+<tr class="even">
+<td>主从复制</td>
+<td>将主库写入、变更的数据同步到从库上。<br>使得从库提供和主库一致的数据。</td>
+</tr>
+<tr class="odd">
+<td>MySQL支持的复制类型</td>
+<td>1、基于语句，直接复制SQL命令。<br>2、基于行，直接复制数据。<br>3、混合方式，先语句后行。</td>
+</tr>
+<tr class="even">
+<td>主从复制过程</td>
+<td>binlog复制并重放语句。</td>
+</tr>
+</tbody>
+</table>
+<a id="more"></a>
+<h3 id="基本概念">基本概念</h3>
+<h4 id="读写分离">读写分离</h4>
+<p><strong>概念</strong></p>
+<p>将数据库分为主库和从库，主库只写数据，多个从库只读取数据。</p>
+<p><strong>原因</strong></p>
+<p>因为数据库的“写”操作是比较耗时的（写10000条数据到oracle可能要3分钟）。</p>
+<p>但是数据库的“读”操作相对较快（从oracle读10000条数据可能只要5秒钟）。</p>
+<p>所以读写分离解决的是，数据库的写入影响查询效率的问题，把访问的压力从主库转移到从库。</p>
+<p>读写分离相对分表分库而言是比较简单的，但是它只能分担访问的压力，分担不了存储的压力，也就是你的数据库表的数据逐渐增多，但是面对一张表海量的数据，查询还是很慢的，所以如果业务发展的快数据暴增，到一定时间还是得分库分表。即当读写分离都无法解决查询效率低的问题时，需要改用分库分表的操作。</p>
+<h4 id="主从复制">主从复制</h4>
+<p><strong>概念</strong></p>
+<p>将主库写入、变更的数据同步到从库上。</p>
+<p><strong>原因</strong></p>
+<p>使得从库提供和主库一致的数据。</p>
+<h3 id="读写分离-1">读写分离</h3>
+<h4 id="分机配置">分机配置</h4>
+<p>分配机制，也就是制定写操作是去主库写，读操作是去从库读的方案。</p>
+<p>1、基于程序代码内部实现</p>
+<p>在代码中根据select 、insert进行路由分类，这类方法也是目前生产环境下应用最广泛的。</p>
+<p>实现很简单，就是抽出一个中间层，让这个中间层来实现读写分离和数据库连接。讲白点就是搞个provider封装了save,select等通常数据库操作，内部save操作的dataSource是主库的，select操作的dataSource是从库的。</p>
+<p>优点：就是实现简单，并且可以根据业务定制化变化，随心所欲。性能较好，因为程序在代码中实现，不需要增加额外的硬件开支。</p>
+<p>缺点：就是是如果哪个数据库宕机了，发生主从切换了之后，就得修改配置重启。并且如果你的系统很大，一个业务可能包含多个子系统，一个子系统是java写的一个子系统用go写的，这样的话得分别为不同语言实现一套中间层，重复开发。需要开发人员来实现，运维人员无从下手。</p>
+<p>2、基于中间代理层实现</p>
+<p>代理一般介于应用服务器和数据库服务器之间，代理数据库服务器接收到应用服务器的请求后根据判断后转发到后端数据库。代理数据库服务器的代表性程序有：Mysql Proxy，Atlas等。</p>
+<p>MySQL Proxy实际上是在客户端请求与MySQL服务器之间建立了一个连接池。所有客户端请求都是发向MySQL Proxy，然后经由MySQL Proxy进行相应的分析，判断出是读操作还是写操作，分发至对应的MySQL服务器上。对于多节点Slave集群，也可以起做到负载均衡的效果。</p>
+<p>优点：因为是通过sql协议的所以可以兼容不同的语言不需要单独写一套，并且有中间件来实现主从切换，业务服务器不需要关心这点。</p>
+<p>缺点：如果数据库中间件出现故障则导致所有服务都不可用。并且多了一个系统就等于多了一个瓶颈，所以对中间件的性能要求也高，所有的数据库操作都要经过它。中间件实现很复杂，难度比代码封装高很多。</p>
+<h4 id="问题及解决方案">问题及解决方案</h4>
+<p><strong>问题：主从同步延迟</strong></p>
+<p>主库有数据写入之后，同时也写入在binlog(二进制日志文件)中，从库是通过binlog文件来同步数据的，这期间会有一定时间的延迟，可能是1秒，如果同时有大量数据写入的话，时间可能更长。</p>
+<p>对于实时性要求较高的场景下，主从同步延迟可能会造成较大的影响。比如有一个付款操作，你付款了，主库是已经写入数据，但是查询是到从库查，从库里还没有你的付款记录，所以页面上查询的时候你还没付款。</p>
+<p><strong>解决方案：</strong></p>
+<p>1、二次读取</p>
+<p>二次读取的意思就是读从库没读到之后再去主库读一下，只要通过对数据库访问的API进行封装就能实现这个功能。很简单，并且和业务之间没有耦合。但是有个问题，如果有很多二次读取相当于压力还是回到了主库身上，等于读写分离白分了。而且如有人恶意攻击，就一直访问没有的数据，那主库就可能爆了。</p>
+<p>2、写数据之后，立刻到来的读操作指定为访问主库</p>
+<p>也就是写操作之后，立刻到来的读操作指定访问主库，经过一定时间后的读操作访问从库。这就等于写死了，和业务强耦合了。</p>
+<p>3、关键业务读写都由主库承担，非关键业务读写分离</p>
+<p>类似付钱的这种业务，读写都到主库，避免延迟的问题，但是例如改个头像啊，个人签名这种比较不重要的就读写分离，查询都去从库查，毕竟延迟一下影响也不大。</p>
+<h3 id="主从复制-1">主从复制</h3>
+<h4 id="mysql支持的复制类型">MySQL支持的复制类型</h4>
+<p>1） 基于语句的复制。在服务器上执行sql语句，在从服务器上执行同样的语句，MySQL默认采用基于语句的复制，执行效率高。</p>
+<p>2） 基于行的复制。把改变的内容复制过去，而不是把命令在从服务器上执行一遍。</p>
+<p>3） 混合类型的复制。默认采用基于语句的复制，一旦发现基于语句无法精确复制时，就会采用基于行的复制。</p>
+<h4 id="复制过程">复制过程</h4>
+<p>①当Master节点进行insert、update、delete操作时，会按顺序写入到binlog中。</p>
+<p>②salve从库连接master主库，Master有多少个slave就会创建多少个binlog dump线程。</p>
+<p>③当Master节点的binlog发生变化时，binlog dump 线程会通知所有的salve节点，并将相应的binlog内容复制到slave节点。</p>
+<p>④slave中的I/O线程接收到 binlog 内容后，将内容写入到本地的 relay-log（中继日志，通常会位于os缓存中，所以中继日志的开销很小）。</p>
+<p>⑤SQL线程读取I/O线程写入的relay-log，并重放其中的SQL语句更新slave数据，使其与master中的数据一致。</p>
+<p><img src="/2021/09/10/MySQL_%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E4%B8%8E%E8%AF%BB%E5%86%99%E5%88%86%E7%A6%BB/image-20210911214924821.png" alt="image-20210911214924821" style="zoom: 67%;"></p>
+<h3 id="参考资料">参考资料</h3>
+<p>https://blog.csdn.net/u013421629/article/details/78793966</p>
+<p>https://juejin.cn/post/6844903828588855309</p>
+<p>http://article.docway.net/details?id=6045c3864da5fa50e1500786</p>
+<p>https://juejin.cn/post/6844903475101302797#heading-15</p>
+<p>https://segmentfault.com/a/1190000023775512</p>
+]]></content>
+      <categories>
+        <category>数据库</category>
+      </categories>
+      <tags>
+        <tag>数据库</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>一致性哈希算法</title>
+    <url>/2021/09/10/%E5%88%86%E5%B8%83%E5%BC%8F_%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C%E7%AE%97%E6%B3%95/</url>
+    <content><![CDATA[<table>
+<colgroup>
+<col style="width: 18%">
+<col style="width: 81%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>概念</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>一致性哈希算法</td>
+<td>一致性哈希算法就是将哈希缓存的除数改为<span class="math inline">\(2^{32}\)</span>，将映射空间看成一个hash环，把服务器和缓存数据看作是上面的每个点。<br>缓存数据会分配到沿顺时针方向遇到的第一个服务器上。</td>
+</tr>
+<tr class="even">
+<td>优点</td>
+<td>服务器的数量如果发生改变，并不是所有缓存都会失效，而是<strong>只有部分缓存会失效</strong>。</td>
+</tr>
+<tr class="odd">
+<td>hash环偏斜</td>
+<td>服务器可能会不均匀地被映射到hash环上。<br>大量缓存数据可能会被映射到同一个服务器上。</td>
+</tr>
+<tr class="even">
+<td>虚拟节点</td>
+<td>实际节点虚拟复制而来的节点，其实就是在hash环上再设置多个服务器的映射。<br>解决hash环偏斜导致缓存数据分配不均的问题。</td>
+</tr>
+</tbody>
+</table>
+<a id="more"></a>
+<h3 id="基础">基础</h3>
+<p>一致性哈希算法在1997年由麻省理工学院提出，是一种特殊的哈希算法，目的是解决分布式缓存的问题。在移除或者添加一个服务器时，能够尽可能小地改变已存在的服务请求与处理请求服务器之间的映射关系（哈希过程）。</p>
+<h3 id="背景">背景</h3>
+<p>有三台缓存服务器，用于缓存图片，我们为这三台缓存服务器编号为0号、1号、2号，现在，有3万张图片需要缓存，我们希望这些图片被均匀的缓存到这3台服务器上，以便它们能够分摊缓存的压力。</p>
+<p>没有任何规律的将3万张图片平均的缓存在3台服务器上，需要访问某个缓存项时，则需要遍历3台缓存服务器，时长不可接受。</p>
+<p>另一种做法是对缓存项的键进行哈希，将hash后的结果对缓存服务器的数量进行取模操作，通过取模后的结果，决定缓存项将会缓存在哪一台服务器上。下次访问某张图片时就不再需要遍历所有的服务器了。</p>
+<blockquote>
+<p>hash（图片名称）% N</p>
+<p>因为图片的名称是不重复的，所以，当我们对同一个图片名称做相同的哈希计算时，得出的结果应该是不变的，如果我们有3台服务器，使用哈希后的结果对3求余，那么余数一定是0、1或者2，正好与我们之前的服务器编号相同，如果求余的结果为0， 我们就把当前图片名称对应的图片缓存在0号服务器上。</p>
+</blockquote>
+<p><img src="/2021/09/10/%E5%88%86%E5%B8%83%E5%BC%8F_%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C%E7%AE%97%E6%B3%95/image-20210911093838711.png" alt="image-20210911093838711" style="zoom:33%;"></p>
+<p>如果3台缓存服务器已经不能满足我们的缓存需求，增加或减少服务器数量后，取余的数量不再是3，除数不变的情况下余数不再相同，所有缓存的位置都要发生改变。</p>
+<p>换句话说，当服务器数量发生改变时（增加服务器提高性能或因为故障减少服务器），所有缓存在一定时间内是失效的，当应用无法从缓存中获取数据时，则会向后端服务器请求数据，由于大量缓存在同一时间失效，造成了<strong>缓存的雪崩</strong>。</p>
+<h3 id="一致性哈希">一致性哈希</h3>
+<p>一致性哈希算法就是将哈希缓存的除数改为<span class="math inline">\(2^{32}\)</span>，将映射空间看成一个hash环，把服务器和缓存数据看作是上面的每个点。缓存数据会分配到沿顺时针方向遇到的第一个服务器上。</p>
+<p>这样即使有服务器增加或减少，只会有部分的缓存数据会失效，其余的缓存数据仍然起作用，避免缓存雪崩导致的服务崩溃。</p>
+<h4 id="过程">过程</h4>
+<p><img src="/2021/09/10/%E5%88%86%E5%B8%83%E5%BC%8F_%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C%E7%AE%97%E6%B3%95/image-20210911095342719.png" alt="image-20210911095342719" style="zoom:50%;"></p>
+<p>三台服务器有自己的IP地址，我们使用它们各自的IP地址进行哈希计算，使用哈希后的结果对2^32取模：</p>
+<p>hash（服务器A的IP地址）% <span class="math inline">\(2^{32}\)</span></p>
+<p>通过上述公式算出的结果一定是一个0到<span class="math inline">\(2^{32}-1\)</span>之间的一个整数，我们就用算出的这个整数，代表服务器。同理，服务器B与服务器C也可以通过相同的方法映射。</p>
+<p>利用同样的方法将图片进行映射：</p>
+<p>hash（图片名称） % <span class="math inline">\(2^{32}\)</span></p>
+<p>然后将图片缓存到沿顺时针方向遇到的第一个服务器上。</p>
+<p><img src="/2021/09/10/%E5%88%86%E5%B8%83%E5%BC%8F_%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C%E7%AE%97%E6%B3%95/image-20210911095316323.png" alt="image-20210911095316323" style="zoom:50%;"></p>
+<p>由于被缓存对象与服务器hash后的值是固定的，所以，在服务器不变的情况下，一张图片必定会被缓存到固定的服务器上，那么，当下次想要访问这张图片时，只要再次使用相同的算法进行计算，即可算出这个图片被缓存在哪个服务器上，直接去对应的服务器查找对应的图片即可。</p>
+<h4 id="优点">优点</h4>
+<p>如果使用之前的hash算法，服务器数量发生改变时，所有服务器的所有缓存在同一时间失效了，而使用一致性哈希算法时，服务器的数量如果发生改变，并不是所有缓存都会失效，而是<strong>只有部分缓存会失效</strong>，前端的缓存仍然能分担整个系统的压力，而不至于所有压力都在同一时间集中到后端服务器上。</p>
+<p><img src="/2021/09/10/%E5%88%86%E5%B8%83%E5%BC%8F_%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C%E7%AE%97%E6%B3%95/image-20210911095522730.png" alt="image-20210911095522730" style="zoom:50%;"></p>
+<p>例如此时服务器B失效，只有图片3的缓存失效，其余图片的缓存仍然维持在原有的服务器上。</p>
+<h4 id="hash环的偏斜">hash环的偏斜</h4>
+<p>实际情况下，服务器可能会不均匀地被映射到hash环上，也就是集中地映射到部分位置：</p>
+<p><img src="/2021/09/10/%E5%88%86%E5%B8%83%E5%BC%8F_%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C%E7%AE%97%E6%B3%95/image-20210911095815909.png" alt="image-20210911095815909" style="zoom:50%;"></p>
+<p>那么被缓存的对象很有可能大部分集中缓存在某一台服务器上：</p>
+<p><img src="/2021/09/10/%E5%88%86%E5%B8%83%E5%BC%8F_%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C%E7%AE%97%E6%B3%95/image-20210911095857352.png" alt="image-20210911095857352" style="zoom:50%;"></p>
+<p>例如上图几乎大部分图片都被缓存到服务器A上，导致的情况是：</p>
+<p>1、三台服务器并没有被合理的平均的充分利用，缓存分布的极度不均匀。</p>
+<p>2、如果此时缓存了大量数据的服务器出现故障，那么失效缓存的数量也将达到最大值，在极端情况下，仍然有可能引起缓存雪崩和系统崩溃。</p>
+<h4 id="虚拟节点">虚拟节点</h4>
+<p>为了解决hash环偏斜导致的缓存不均衡地分布在各服务器的问题，引入虚拟节点的概念。</p>
+<p>虚拟节点就是实际节点虚拟复制而来的节点，其实就是在hash环上再设置多个服务器的映射，保证服务器均匀地分布在hash环上，解决缓存分布不均衡的问题。</p>
+<p><img src="/2021/09/10/%E5%88%86%E5%B8%83%E5%BC%8F_%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C%E7%AE%97%E6%B3%95/image-20210911101520105.png" alt="image-20210911101520105" style="zoom: 50%;"></p>
+<h3 id="参考资料">参考资料</h3>
+<p>https://www.zsythink.net/archives/1182</p>
+]]></content>
+      <categories>
+        <category>分布式</category>
+      </categories>
+      <tags>
+        <tag>分布式</tag>
       </tags>
   </entry>
 </search>
