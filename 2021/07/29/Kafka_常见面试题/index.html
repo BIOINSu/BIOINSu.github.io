@@ -24,21 +24,21 @@
   </script>
 <meta name="description" content="总结        问题 解答     为什么用 缓冲、解耦、冗余、健壮与异步   可靠性 partition向producer发送ack   ack机制 接收没写入、leader落盘、全部落盘   Exactly Once At Least Once（数据重复） + 幂等性（仅持久化一条） &#x3D; Exactly Once（数据不重复且不丢失）；">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Kafka">
-<meta property="og:url" content="http://example.com/2021/07/29/%E9%9D%A2%E8%AF%95_Kafka/index.html">
+<meta property="og:title" content="Kafka常见面试题">
+<meta property="og:url" content="http://example.com/2021/07/29/Kafka_%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%A2%98/index.html">
 <meta property="og:site_name" content="BIOINSu">
 <meta property="og:description" content="总结        问题 解答     为什么用 缓冲、解耦、冗余、健壮与异步   可靠性 partition向producer发送ack   ack机制 接收没写入、leader落盘、全部落盘   Exactly Once At Least Once（数据重复） + 幂等性（仅持久化一条） &#x3D; Exactly Once（数据不重复且不丢失）；">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://example.com/2021/07/29/%E9%9D%A2%E8%AF%95_Kafka/image-20210729080554829.png">
+<meta property="og:image" content="http://example.com/2021/07/29/Kafka_%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%A2%98/image-20210729080554829.png">
 <meta property="article:published_time" content="2021-07-28T23:18:40.388Z">
-<meta property="article:modified_time" content="2021-08-14T01:55:31.958Z">
+<meta property="article:modified_time" content="2021-09-12T01:22:22.462Z">
 <meta property="article:author" content="BIOINSu">
-<meta property="article:tag" content="面试">
+<meta property="article:tag" content="Kafka">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://example.com/2021/07/29/%E9%9D%A2%E8%AF%95_Kafka/image-20210729080554829.png">
+<meta name="twitter:image" content="http://example.com/2021/07/29/Kafka_%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%A2%98/image-20210729080554829.png">
 
 
-<link rel="canonical" href="http://example.com/2021/07/29/%E9%9D%A2%E8%AF%95_Kafka/">
+<link rel="canonical" href="http://example.com/2021/07/29/Kafka_%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%A2%98/">
 
 
 <script class="page-configurations">
@@ -50,7 +50,7 @@
     lang   : 'zh-CN'
   };
 </script>
-<title>Kafka | BIOINSu</title>
+<title>Kafka常见面试题 | BIOINSu</title>
   
 
 
@@ -202,20 +202,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">63</span>
+          <span class="site-state-item-count">65</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">31</span>
+        <span class="site-state-item-count">32</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">35</span>
+        <span class="site-state-item-count">36</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -259,7 +259,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/29/%E9%9D%A2%E8%AF%95_Kafka/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/29/Kafka_%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%A2%98/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -272,7 +272,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          Kafka
+          Kafka常见面试题
         </h1>
 
         <div class="post-meta-container">
@@ -290,7 +290,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-08-14 09:55:31" itemprop="dateModified" datetime="2021-08-14T09:55:31+08:00">2021-08-14</time>
+        <time title="修改时间：2021-09-12 09:22:22" itemprop="dateModified" datetime="2021-09-12T09:22:22+08:00">2021-09-12</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -298,7 +298,7 @@
       </span>
       <span class="post-meta-item-text">分类于</span>
         <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E9%9D%A2%E8%AF%95/" itemprop="url" rel="index"><span itemprop="name">面试</span></a>
+          <a href="/categories/Kafka/" itemprop="url" rel="index"><span itemprop="name">Kafka</span></a>
         </span>
     </span>
 
@@ -343,7 +343,7 @@
 </tr>
 <tr class="odd">
 <td>速度快的原因</td>
-<td>磁盘顺序写入、数据分段以及段内索引、内存文件映射</td>
+<td>磁盘顺序写入、parition中数据分段以及段内索引、内存操作直接映射到物理硬盘</td>
 </tr>
 <tr class="even">
 <td>副本同步策略</td>
@@ -441,7 +441,7 @@
 <p>LEO（Log End Offset）：指的是每个副本最大的offset。</p>
 <p>HW（High Watermark）：指的是消费者能见到的最大的offset，ISR队列中最小的LEO。</p>
 <p>HW之前的数据才会对Consumer可见，所以出现故障的时候，Consumer从HW处继续消费消息，就不会产生重复消费消息的问题。</p>
-<p><img src="/2021/07/29/%E9%9D%A2%E8%AF%95_Kafka/image-20210729080554829.png" alt="image-20210729080554829" style="zoom: 50%;"></p>
+<p><img src="/2021/07/29/Kafka_%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%A2%98/image-20210729080554829.png" alt="image-20210729080554829" style="zoom: 50%;"></p>
 <h4 id="kafka事务">kafka事务</h4>
 <p>Kafka从0.11版本开始引入了事务支持。事务可以保证Kafka在Exactly Once语义的基础上，生产和消费可以跨分区和会话，要么全部成功，要么全部失败。</p>
 <ul>
@@ -572,7 +572,7 @@
 
     <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/%E9%9D%A2%E8%AF%95/" rel="tag"># 面试</a>
+              <a href="/tags/Kafka/" rel="tag"># Kafka</a>
           </div>
 
         
