@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.3.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/maze.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/maze.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/maze.png">
+  <link rel="mask-icon" href="/images/maze.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","images":"/images","scheme":"Mist","version":"8.2.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false}};
+  </script>
+<meta name="description" content="概述 Apache Parquet是Hadoop生态圈中一种新型列式存储格式，它可以兼容Hadoop生态圈中大多数计算框架(Hadoop、Spark等)，被多种查询引擎支持（Hive、Impala、Drill等），并且它是语言和平台无关的。 Parquet的灵感来自于2010年Google发表的Dremel论文，文中介绍了一种支持嵌套结构的存储格式，并且使用了列式存储的方式提升查询性能，在">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Parquet列式存储">
+<meta property="og:url" content="http://example.com/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_Parquet/index.html">
+<meta property="og:site_name" content="BIOINSu">
+<meta property="og:description" content="概述 Apache Parquet是Hadoop生态圈中一种新型列式存储格式，它可以兼容Hadoop生态圈中大多数计算框架(Hadoop、Spark等)，被多种查询引擎支持（Hive、Impala、Drill等），并且它是语言和平台无关的。 Parquet的灵感来自于2010年Google发表的Dremel论文，文中介绍了一种支持嵌套结构的存储格式，并且使用了列式存储的方式提升查询性能，在">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_Parquet/image-20210912200414640.png">
+<meta property="og:image" content="http://example.com/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_Parquet/image-20210912203137743.png">
+<meta property="og:image" content="http://example.com/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_Parquet/image-20210912203605062.png">
+<meta property="og:image" content="http://example.com/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_Parquet/image-20210912203743337.png">
+<meta property="og:image" content="http://example.com/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_Parquet/image-20210912221630425.png">
+<meta property="og:image" content="http://example.com/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_Parquet/image-20210912221904125.png">
+<meta property="article:published_time" content="2021-09-12T01:48:04.147Z">
+<meta property="article:modified_time" content="2021-09-12T14:55:15.044Z">
+<meta property="article:author" content="BIOINSu">
+<meta property="article:tag" content="大数据">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_Parquet/image-20210912200414640.png">
+
+
+<link rel="canonical" href="http://example.com/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_Parquet/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+<title>Parquet列式存储 | BIOINSu</title>
+  
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BIOINSu</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#parquet%E7%9A%84%E7%BB%84%E6%88%90%E4%B8%8E%E7%BB%84%E4%BB%B6"><span class="nav-number">2.</span> <span class="nav-text">Parquet的组成与组件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#parquet%E7%9A%84%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B"><span class="nav-number">3.</span> <span class="nav-text">Parquet的数据模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#parquet%E7%9A%84%E7%89%A9%E7%90%86%E5%AD%98%E5%82%A8"><span class="nav-number">4.</span> <span class="nav-text">Parquet的物理存储</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#stripingassembly-%E7%AE%97%E6%B3%95"><span class="nav-number">5.</span> <span class="nav-text">Striping&#x2F;Assembly 算法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#definition-level"><span class="nav-number">5.1.</span> <span class="nav-text">Definition Level</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#repetition-level"><span class="nav-number">5.2.</span> <span class="nav-text">Repetition Level</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">6.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">BIOINSu</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">66</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">31</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">35</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/BIOINSu" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;BIOINSu" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_Parquet/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BIOINSu">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BIOINSu">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Parquet列式存储
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2021-09-12 09:48:04 / 修改时间：22:55:15" itemprop="dateCreated datePublished" datetime="2021-09-12T09:48:04+08:00">2021-09-12</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/" itemprop="url" rel="index"><span itemprop="name">大数据</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <a id="more"></a>
+<h3 id="概述">概述</h3>
+<p>Apache Parquet是Hadoop生态圈中一种新型列式存储格式，它可以兼容Hadoop生态圈中大多数计算框架(Hadoop、Spark等)，被多种查询引擎支持（Hive、Impala、Drill等），并且它是语言和平台无关的。</p>
+<p>Parquet的灵感来自于2010年Google发表的Dremel论文，文中介绍了一种支持嵌套结构的存储格式，并且使用了列式存储的方式提升查询性能，在Dremel论文中还介绍了Google如何使用这种存储格式实现并行查询的。</p>
+<p>Parquet最初是由Twitter和Cloudera(由于Impala的缘故)合作开发完成并开源，2015年5月从Apache的孵化器里毕业成为Apache顶级项目。</p>
+<p>目前能够和Parquet适配的组件包括下面这些，可以看出基本上通常使用的查询引擎和计算框架都已适配，并且可以很方便的将其它序列化工具生成的数据转换成Parquet格式。</p>
+<p>查询引擎: Hive, Impala, Pig, Presto, Drill, Tajo, HAWQ, IBM Big SQL</p>
+<p>计算框架: MapReduce, Spark, Cascading, Crunch, Scalding, Kite</p>
+<p>数据模型: Avro, Thrift, Protocol Buffers, POJOs</p>
+<h3 id="parquet的组成与组件">Parquet的组成与组件</h3>
+<p><strong>项目组成</strong></p>
+<ul>
+<li>parquet-format项目由java实现
+<ul>
+<li>定义了所有Parquet元数据对象，Parquet的元数据是使用Apache Thrift进行序列化并存储在Parquet文件的尾部。</li>
+<li>同时包括了多个模块，例如实现了读写Parquet文件的功能，并且提供一些和其它组件适配的工具，如Hadoop Input/Output Formats、Hive Serde(目前Hive已经自带Parquet了)、Pig loaders等。</li>
+</ul></li>
+<li>parquet-compatibility项目，包含不同编程语言之间(JAVA和C/C++)读写文件的测试代码。</li>
+<li>parquet-cpp项目，它是用于用于读写Parquet文件的C++库。</li>
+</ul>
+<p><strong>相关组件</strong></p>
+<p>Parquet仅仅是一种存储格式，它是语言、平台无关的，并且不需要和任何一种数据处理框架绑定。为了实现平台无关的功能，各个大数据框架需要支持相关的组件：</p>
+<figure>
+<img src="/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_Parquet/image-20210912200414640.png" alt="image-20210912200414640"><figcaption aria-hidden="true">image-20210912200414640</figcaption>
+</figure>
+<ul>
+<li><p>对象模型层（Object Model）定义了如何读取Parquet文件的内容，它为各个不同的大数据组件提供了读写Parquet文件的工具，这一层转换包括Avro、Thrift、PB等序列化格式、Hive Serde等的适配。并且为了帮助大家理解和使用，Parquet提供了org.apache.parquet.example包实现了java对象和Parquet文件的转换。</p></li>
+<li><p>对象转换层（Converters）完成其他对象模型与Parquet内部数据模型的映射和转换，Parquet的编码方式使用的是striping and assembly算法。</p></li>
+<li><p>数据存储层（Language Agnosic）定义了Parquet的文件格式，其中元数据在parquet-format中定义，包括Parquet原始类型定义、Page类型、编码类型、压缩类型等等。</p></li>
+</ul>
+<h3 id="parquet的数据模型">Parquet的数据模型</h3>
+<p>此处介绍Parquet 的逻辑存储结构。</p>
+<p>Parquet 的Schema（视图约束）不是传统的关系型（二维表格）约束，而是类似树形结构的约束。</p>
+<p>每个 Schema 的结构组成为：</p>
+<ul>
+<li>根叫做 message，message 包含多个 fields
+<ul>
+<li>每个 field 包含三个属性：repetition, type, name。
+<ul>
+<li>repetition 可以是以下三种：required（出现 1 次），optional（出现 0 次或者 1 次），repeated（出现 0 次或者多次）。</li>
+<li>type 可以是一个 group 类型或者一个 primitive（Int, Long, String等基本类型） 类型。</li>
+</ul></li>
+</ul></li>
+</ul>
+<p>注意，Parquet 格式的数据类型没有复杂的 Map, List, Set 等，而是使用 repeated fields 或 groups 来表示。例如 List 和 Set 可以被表示成一个 repeated field，Map 可以表示成一个包含有 key-value 对的 repeated field，而且 key 是 required 的。</p>
+<p>例如一个 AddressBook 主题的存储，它的Schema可以表示为：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">message AddressBook &#123;</span><br><span class="line"> required string owner;</span><br><span class="line"> repeated string ownerPhoneNumbers;</span><br><span class="line"> repeated group contacts &#123;</span><br><span class="line">   required string name;</span><br><span class="line">   optional string phoneNumber;</span><br><span class="line"> &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个 schema 中每条记录表示一个人的 AddressBook。</p>
+<ul>
+<li>有且只有一个 owner</li>
+<li>owner 可以有 0 个或者多个 ownerPhoneNumbers，</li>
+<li>owner 可以有 0 个或者多个 contacts。
+<ul>
+<li>每个 contact 有且只有一个 name</li>
+<li>这个 contact 的 phoneNumber 可有可无。</li>
+</ul></li>
+</ul>
+<p>这个 schema 可以用树结构来表示：</p>
+<p><img src="/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_Parquet/image-20210912203137743.png" alt="image-20210912203137743" style="zoom:67%;"></p>
+<h3 id="parquet的物理存储">Parquet的物理存储</h3>
+<p>此处介绍Parquet 的物理存储结构。</p>
+<p>在 Parquet 格式的存储中，一个 schema 的树结构有几个叶子节点，实际的存储中就会有多少 column。</p>
+<p>上述案例的 Schema 的数据存储实际上有四个 Column：</p>
+<p><img src="/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_Parquet/image-20210912203605062.png" alt="image-20210912203605062" style="zoom:67%;"></p>
+<p>Parquet 文件在磁盘上的存储如下图所示，注意左右两边表示的是同一个主题的存储数据（只是怕太长难看所以分了左右）：</p>
+<p><img src="/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_Parquet/image-20210912203743337.png" alt="image-20210912203743337" style="zoom:67%;"></p>
+<ul>
+<li><p><strong>Row Group</strong>：所有数据被分割成多个Row Group存储。以HDFS为例，一个 Row group 大小 1G，一个 HDFS 块大小 1G，刚好一个Row Group对应一个HDFS块是常见的设置。</p>
+<p>同时，一个 Row group 包含所有的列（即包含多个Column Chunk）。</p>
+<ul>
+<li><strong>Column Chunk</strong>：就是每一列，一个 Column Chunk 负责存储某一列的数据，这些数据是这一列的 Repetition levels, Definition levels 和 values（详见后文）
+<ul>
+<li><strong>Page</strong>：一个 Column Chunk 是由多个 Page 组成的，Page 是压缩和编码的单元，对数据模型来说是透明的。</li>
+</ul></li>
+</ul></li>
+<li><p><strong>Footer</strong>：一个 Parquet 文件最后是 Footer，存储了文件的元数据信息和统计信息。</p></li>
+</ul>
+<p>用上述的 Schema 举例，</p>
+<p>每一个Row Group存储了多个owner的信息。</p>
+<p>在任何一个 Row Group 内，会顺序存储四个 Column Chunk，这四个 Column Chunk 都是 string 类型。</p>
+<p>每一个Column Chunk内部分成了多个 Page，按列存储这一列对应的数据。</p>
+<p>这个时候 Parquet 就需要把内存中的 AddressBook 对象映射到四个 string 类型的 column 中。</p>
+<p>如果读取磁盘上的 4 个 column 要能够恢复出 AddressBook 对象。这就用到了前面提到的 Striping/Assembly 算法。</p>
+<h3 id="stripingassembly-算法">Striping/Assembly 算法</h3>
+<p>这个算法是专门设计的一种数据存储方式，<strong>用于将嵌套类型的数据序列化和反序列化</strong>。直观地来说就是定义了数据存储的方式，来决定嵌套类型的数据如何存储到磁盘，以及如何在内存中恢复这些数据。</p>
+<p>对于嵌套数据类型，除了存储数据本身的值 value 之外<strong>还需要两个变量 Repetition Level(R), Definition Level(D)</strong> 才能存储其完整的信息用于<strong>序列化和反序列化</strong>嵌套数据类型。</p>
+<p>Repetition Level 和 Definition Level 可以说是为了支持嵌套类型而设计的，但是它同样适用于简单数据类型。</p>
+<p>在 Parquet 中只需定义和存储 Schema 的叶子节点所在列的 Repetition Level 和 Definition Level。</p>
+<h4 id="definition-level">Definition Level</h4>
+<p>Definition Level指的是截至当前位置（当前Field）为止，从根节点一路到这个Field的路径上有多少节点（Field）被定义了。</p>
+<ul>
+<li><p>如果一个 Field的 Definition Level 等于这个 Field 的最大 Definition Level 就说明这个 Field是有数据的。</p></li>
+<li><p>从根节点开始遍历，当某一个 Field的路径上的节点开始是空的时候我们记录下当前的深度作为这个 Field的 Definition Level。</p></li>
+<li><p>如果一个 Field是定义的，那么它的所有的父节点都是被定义的。</p></li>
+<li><p>对于 required 类型的 field 必须是有定义的，所以这个 Definition Level 是不需要的。</p></li>
+<li><p>注意每一个列对应的值都有不同的Definition Level，要分开不同的列来看。</p></li>
+</ul>
+<p>用 AddressBook 的例子来说明Definition Level：</p>
+<p>有如下两条数据</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">//Schema</span><br><span class="line">message AddressBook &#123;</span><br><span class="line"> required string owner;</span><br><span class="line"> repeated string ownerPhoneNumbers;</span><br><span class="line"> repeated group contacts &#123;</span><br><span class="line">   required string name;</span><br><span class="line">   optional string phoneNumber;</span><br><span class="line"> &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//数据1</span><br><span class="line">AddressBook &#123;</span><br><span class="line"> owner: &quot;Julien Le Dem&quot;,</span><br><span class="line"> ownerPhoneNumbers: &quot;555 123 4567&quot;,</span><br><span class="line"> ownerPhoneNumbers: &quot;555 666 1337&quot;,</span><br><span class="line"> contacts: &#123;</span><br><span class="line">   name: &quot;Dmitriy Ryaboy&quot;,</span><br><span class="line">   phoneNumber: &quot;555 987 6543&quot;,</span><br><span class="line"> &#125;,</span><br><span class="line"> contacts: &#123;</span><br><span class="line">   name: &quot;Chris Aniszczyk&quot;</span><br><span class="line"> &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//数据2</span><br><span class="line">AddressBook &#123;</span><br><span class="line"> owner: &quot;A. Nonymous&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>以 contacts.phoneNumber 这一列为例，按照正常情况来看找到一个phoneNumber 需要经历的层级是（AddressBook，contacts，phoneNumber ），因此最大的Definition Level就是2（从0开始 ）：</p>
+<ul>
+<li>"555 987 6543"这个 contacts.phoneNumber 的 Definition Level 是最大 Definition Level=2。（数据1的第一个contacts）</li>
+<li>而如果一个 contact 没有 phoneNumber，那么它的 Definition Level 就是 1。（数据1的第二个contacts）</li>
+<li>如果连 contact 都没有，那么它的 Definition Level 就是 0。（数据2的第一个contacts）</li>
+</ul>
+<p>针对contacts.phoneNumber 这一列来说，这两条数据的序列化过程如下：</p>
+<p><img src="/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_Parquet/image-20210912221630425.png" alt="image-20210912221630425" style="zoom:67%;"></p>
+<p>因此在磁盘中，这一列对应的数据，在每个Page中可以存储为：</p>
+<p><img src="/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_Parquet/image-20210912221904125.png" alt="image-20210912221904125" style="zoom:67%;"></p>
+<p>NULL 实际上不会被存储，如果一个 column value 的 Definition Level 小于该 column 最大 Definition Level 的话，那么就表示这是一个空值。</p>
+<h4 id="repetition-level">Repetition Level</h4>
+<p>Repetition Level指的是截至当前位置（当前Field）为止，从根节点一路到这个Field的路径上重复节点的个数。本质上，是记录了该 field 的值是在哪一个深度上重复的。</p>
+<ul>
+<li><p>只有 repeated 类型的 field 需要 Repetition Level，optional 和 required 类型的不需要。</p></li>
+<li><p>Repetition Level = 0 表示开始一个新的 record。</p></li>
+</ul>
+<p>用下面的例子来说明Repetition Level：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">message nested &#123;</span><br><span class="line">     repeated group leve1 &#123;</span><br><span class="line">          repeated string leve2;</span><br><span class="line">     &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//数据1</span><br><span class="line">nested &#123;</span><br><span class="line">    leve1 &#123;</span><br><span class="line">    	leve2:&quot;a&quot;,</span><br><span class="line">    	leve2:&quot;b&quot;,</span><br><span class="line">    	leve2:&quot;c&quot;,</span><br><span class="line">    &#125;,</span><br><span class="line">    leve1 &#123;</span><br><span class="line">    	leve2:&quot;d&quot;,</span><br><span class="line">    	leve2:&quot;e&quot;,</span><br><span class="line">    	leve2:&quot;f&quot;,</span><br><span class="line">    	leve2:&quot;g&quot;</span><br><span class="line">    &#125;   </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//数据2</span><br><span class="line">nested &#123;</span><br><span class="line">    leve1 &#123;</span><br><span class="line">    	leve2:&quot;h&quot;</span><br><span class="line">    &#125;, </span><br><span class="line">    leve1 &#123;</span><br><span class="line">    	leve2:&quot;i&quot;,</span><br><span class="line">    	leve2:&quot;j&quot;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">r1:[[a,b,c,] , [d,e,f,g]]</span><br><span class="line">r2:[[h] , [i,j]]</span><br></pre></td></tr></table></figure>
+<p>https://blog.csdn.net/yu616568/article/details/50993491</p>
+<h3 id="参考资料">参考资料</h3>
+<p>https://www.cnblogs.com/panpanwelcome/p/10248990.html</p>
+<p>https://blog.csdn.net/yu616568/article/details/50993491</p>
+<p>https://www.cnblogs.com/helongBlog/p/13750315.html</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/" rel="tag"># 大数据</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/09/12/Hadoop_%E6%8E%92%E5%BA%8F/" rel="prev" title="Hadoop中的排序">
+                  <i class="fa fa-chevron-left"></i> Hadoop中的排序
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/09/12/%E6%95%B0%E6%8D%AE%E5%BA%93_%E7%BB%93%E6%9E%84%E5%8C%96%E5%8D%8A%E7%BB%93%E6%9E%84%E5%8C%96%E9%9D%9E%E7%BB%93%E6%9E%84%E5%8C%96%E6%95%B0%E6%8D%AE/" rel="next" title="结构化数据、半结构化数据、非结构化数据">
+                  结构化数据、半结构化数据、非结构化数据 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">BIOINSu</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+  <script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'none'
+      },
+      options: {
+        renderActions: {
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              const target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3.1.2/es5/tex-mml-chtml.js';
+    script.defer = true;
+    document.head.appendChild(script);
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.typesetClear();
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+
+
+</body>
+</html>

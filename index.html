@@ -194,20 +194,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">65</span>
+          <span class="site-state-item-count">66</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">32</span>
+        <span class="site-state-item-count">31</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">36</span>
+        <span class="site-state-item-count">35</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -327,6 +327,203 @@
             </div>
           <!--/noindex-->
         
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_Parquet/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BIOINSu">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BIOINSu">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_Parquet/" class="post-title-link" itemprop="url">Parquet列式存储</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2021-09-12 09:48:04 / 修改时间：22:55:15" itemprop="dateCreated datePublished" datetime="2021-09-12T09:48:04+08:00">2021-09-12</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/" itemprop="url" rel="index"><span itemprop="name">大数据</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <a id="more"></a>
+<h3 id="概述">概述</h3>
+<p>Apache Parquet是Hadoop生态圈中一种新型列式存储格式，它可以兼容Hadoop生态圈中大多数计算框架(Hadoop、Spark等)，被多种查询引擎支持（Hive、Impala、Drill等），并且它是语言和平台无关的。</p>
+<p>Parquet的灵感来自于2010年Google发表的Dremel论文，文中介绍了一种支持嵌套结构的存储格式，并且使用了列式存储的方式提升查询性能，在Dremel论文中还介绍了Google如何使用这种存储格式实现并行查询的。</p>
+<p>Parquet最初是由Twitter和Cloudera(由于Impala的缘故)合作开发完成并开源，2015年5月从Apache的孵化器里毕业成为Apache顶级项目。</p>
+<p>目前能够和Parquet适配的组件包括下面这些，可以看出基本上通常使用的查询引擎和计算框架都已适配，并且可以很方便的将其它序列化工具生成的数据转换成Parquet格式。</p>
+<p>查询引擎: Hive, Impala, Pig, Presto, Drill, Tajo, HAWQ, IBM Big SQL</p>
+<p>计算框架: MapReduce, Spark, Cascading, Crunch, Scalding, Kite</p>
+<p>数据模型: Avro, Thrift, Protocol Buffers, POJOs</p>
+<h3 id="parquet的组成与组件">Parquet的组成与组件</h3>
+<p><strong>项目组成</strong></p>
+<ul>
+<li>parquet-format项目由java实现
+<ul>
+<li>定义了所有Parquet元数据对象，Parquet的元数据是使用Apache Thrift进行序列化并存储在Parquet文件的尾部。</li>
+<li>同时包括了多个模块，例如实现了读写Parquet文件的功能，并且提供一些和其它组件适配的工具，如Hadoop Input/Output Formats、Hive Serde(目前Hive已经自带Parquet了)、Pig loaders等。</li>
+</ul></li>
+<li>parquet-compatibility项目，包含不同编程语言之间(JAVA和C/C++)读写文件的测试代码。</li>
+<li>parquet-cpp项目，它是用于用于读写Parquet文件的C++库。</li>
+</ul>
+<p><strong>相关组件</strong></p>
+<p>Parquet仅仅是一种存储格式，它是语言、平台无关的，并且不需要和任何一种数据处理框架绑定。为了实现平台无关的功能，各个大数据框架需要支持相关的组件：</p>
+<figure>
+<img src="/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_Parquet/image-20210912200414640.png" alt="image-20210912200414640"><figcaption aria-hidden="true">image-20210912200414640</figcaption>
+</figure>
+<ul>
+<li><p>对象模型层（Object Model）定义了如何读取Parquet文件的内容，它为各个不同的大数据组件提供了读写Parquet文件的工具，这一层转换包括Avro、Thrift、PB等序列化格式、Hive Serde等的适配。并且为了帮助大家理解和使用，Parquet提供了org.apache.parquet.example包实现了java对象和Parquet文件的转换。</p></li>
+<li><p>对象转换层（Converters）完成其他对象模型与Parquet内部数据模型的映射和转换，Parquet的编码方式使用的是striping and assembly算法。</p></li>
+<li><p>数据存储层（Language Agnosic）定义了Parquet的文件格式，其中元数据在parquet-format中定义，包括Parquet原始类型定义、Page类型、编码类型、压缩类型等等。</p></li>
+</ul>
+<h3 id="parquet的数据模型">Parquet的数据模型</h3>
+<p>此处介绍Parquet 的逻辑存储结构。</p>
+<p>Parquet 的Schema（视图约束）不是传统的关系型（二维表格）约束，而是类似树形结构的约束。</p>
+<p>每个 Schema 的结构组成为：</p>
+<ul>
+<li>根叫做 message，message 包含多个 fields
+<ul>
+<li>每个 field 包含三个属性：repetition, type, name。
+<ul>
+<li>repetition 可以是以下三种：required（出现 1 次），optional（出现 0 次或者 1 次），repeated（出现 0 次或者多次）。</li>
+<li>type 可以是一个 group 类型或者一个 primitive（Int, Long, String等基本类型） 类型。</li>
+</ul></li>
+</ul></li>
+</ul>
+<p>注意，Parquet 格式的数据类型没有复杂的 Map, List, Set 等，而是使用 repeated fields 或 groups 来表示。例如 List 和 Set 可以被表示成一个 repeated field，Map 可以表示成一个包含有 key-value 对的 repeated field，而且 key 是 required 的。</p>
+<p>例如一个 AddressBook 主题的存储，它的Schema可以表示为：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">message AddressBook &#123;</span><br><span class="line"> required string owner;</span><br><span class="line"> repeated string ownerPhoneNumbers;</span><br><span class="line"> repeated group contacts &#123;</span><br><span class="line">   required string name;</span><br><span class="line">   optional string phoneNumber;</span><br><span class="line"> &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个 schema 中每条记录表示一个人的 AddressBook。</p>
+<ul>
+<li>有且只有一个 owner</li>
+<li>owner 可以有 0 个或者多个 ownerPhoneNumbers，</li>
+<li>owner 可以有 0 个或者多个 contacts。
+<ul>
+<li>每个 contact 有且只有一个 name</li>
+<li>这个 contact 的 phoneNumber 可有可无。</li>
+</ul></li>
+</ul>
+<p>这个 schema 可以用树结构来表示：</p>
+<p><img src="/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_Parquet/image-20210912203137743.png" alt="image-20210912203137743" style="zoom:67%;"></p>
+<h3 id="parquet的物理存储">Parquet的物理存储</h3>
+<p>此处介绍Parquet 的物理存储结构。</p>
+<p>在 Parquet 格式的存储中，一个 schema 的树结构有几个叶子节点，实际的存储中就会有多少 column。</p>
+<p>上述案例的 Schema 的数据存储实际上有四个 Column：</p>
+<p><img src="/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_Parquet/image-20210912203605062.png" alt="image-20210912203605062" style="zoom:67%;"></p>
+<p>Parquet 文件在磁盘上的存储如下图所示，注意左右两边表示的是同一个主题的存储数据（只是怕太长难看所以分了左右）：</p>
+<p><img src="/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_Parquet/image-20210912203743337.png" alt="image-20210912203743337" style="zoom:67%;"></p>
+<ul>
+<li><p><strong>Row Group</strong>：所有数据被分割成多个Row Group存储。以HDFS为例，一个 Row group 大小 1G，一个 HDFS 块大小 1G，刚好一个Row Group对应一个HDFS块是常见的设置。</p>
+<p>同时，一个 Row group 包含所有的列（即包含多个Column Chunk）。</p>
+<ul>
+<li><strong>Column Chunk</strong>：就是每一列，一个 Column Chunk 负责存储某一列的数据，这些数据是这一列的 Repetition levels, Definition levels 和 values（详见后文）
+<ul>
+<li><strong>Page</strong>：一个 Column Chunk 是由多个 Page 组成的，Page 是压缩和编码的单元，对数据模型来说是透明的。</li>
+</ul></li>
+</ul></li>
+<li><p><strong>Footer</strong>：一个 Parquet 文件最后是 Footer，存储了文件的元数据信息和统计信息。</p></li>
+</ul>
+<p>用上述的 Schema 举例，</p>
+<p>每一个Row Group存储了多个owner的信息。</p>
+<p>在任何一个 Row Group 内，会顺序存储四个 Column Chunk，这四个 Column Chunk 都是 string 类型。</p>
+<p>每一个Column Chunk内部分成了多个 Page，按列存储这一列对应的数据。</p>
+<p>这个时候 Parquet 就需要把内存中的 AddressBook 对象映射到四个 string 类型的 column 中。</p>
+<p>如果读取磁盘上的 4 个 column 要能够恢复出 AddressBook 对象。这就用到了前面提到的 Striping/Assembly 算法。</p>
+<h3 id="stripingassembly-算法">Striping/Assembly 算法</h3>
+<p>这个算法是专门设计的一种数据存储方式，<strong>用于将嵌套类型的数据序列化和反序列化</strong>。直观地来说就是定义了数据存储的方式，来决定嵌套类型的数据如何存储到磁盘，以及如何在内存中恢复这些数据。</p>
+<p>对于嵌套数据类型，除了存储数据本身的值 value 之外<strong>还需要两个变量 Repetition Level(R), Definition Level(D)</strong> 才能存储其完整的信息用于<strong>序列化和反序列化</strong>嵌套数据类型。</p>
+<p>Repetition Level 和 Definition Level 可以说是为了支持嵌套类型而设计的，但是它同样适用于简单数据类型。</p>
+<p>在 Parquet 中只需定义和存储 Schema 的叶子节点所在列的 Repetition Level 和 Definition Level。</p>
+<h4 id="definition-level">Definition Level</h4>
+<p>Definition Level指的是截至当前位置（当前Field）为止，从根节点一路到这个Field的路径上有多少节点（Field）被定义了。</p>
+<ul>
+<li><p>如果一个 Field的 Definition Level 等于这个 Field 的最大 Definition Level 就说明这个 Field是有数据的。</p></li>
+<li><p>从根节点开始遍历，当某一个 Field的路径上的节点开始是空的时候我们记录下当前的深度作为这个 Field的 Definition Level。</p></li>
+<li><p>如果一个 Field是定义的，那么它的所有的父节点都是被定义的。</p></li>
+<li><p>对于 required 类型的 field 必须是有定义的，所以这个 Definition Level 是不需要的。</p></li>
+<li><p>注意每一个列对应的值都有不同的Definition Level，要分开不同的列来看。</p></li>
+</ul>
+<p>用 AddressBook 的例子来说明Definition Level：</p>
+<p>有如下两条数据</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">//Schema</span><br><span class="line">message AddressBook &#123;</span><br><span class="line"> required string owner;</span><br><span class="line"> repeated string ownerPhoneNumbers;</span><br><span class="line"> repeated group contacts &#123;</span><br><span class="line">   required string name;</span><br><span class="line">   optional string phoneNumber;</span><br><span class="line"> &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//数据1</span><br><span class="line">AddressBook &#123;</span><br><span class="line"> owner: &quot;Julien Le Dem&quot;,</span><br><span class="line"> ownerPhoneNumbers: &quot;555 123 4567&quot;,</span><br><span class="line"> ownerPhoneNumbers: &quot;555 666 1337&quot;,</span><br><span class="line"> contacts: &#123;</span><br><span class="line">   name: &quot;Dmitriy Ryaboy&quot;,</span><br><span class="line">   phoneNumber: &quot;555 987 6543&quot;,</span><br><span class="line"> &#125;,</span><br><span class="line"> contacts: &#123;</span><br><span class="line">   name: &quot;Chris Aniszczyk&quot;</span><br><span class="line"> &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//数据2</span><br><span class="line">AddressBook &#123;</span><br><span class="line"> owner: &quot;A. Nonymous&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>以 contacts.phoneNumber 这一列为例，按照正常情况来看找到一个phoneNumber 需要经历的层级是（AddressBook，contacts，phoneNumber ），因此最大的Definition Level就是2（从0开始 ）：</p>
+<ul>
+<li>"555 987 6543"这个 contacts.phoneNumber 的 Definition Level 是最大 Definition Level=2。（数据1的第一个contacts）</li>
+<li>而如果一个 contact 没有 phoneNumber，那么它的 Definition Level 就是 1。（数据1的第二个contacts）</li>
+<li>如果连 contact 都没有，那么它的 Definition Level 就是 0。（数据2的第一个contacts）</li>
+</ul>
+<p>针对contacts.phoneNumber 这一列来说，这两条数据的序列化过程如下：</p>
+<p><img src="/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_Parquet/image-20210912221630425.png" alt="image-20210912221630425" style="zoom:67%;"></p>
+<p>因此在磁盘中，这一列对应的数据，在每个Page中可以存储为：</p>
+<p><img src="/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_Parquet/image-20210912221904125.png" alt="image-20210912221904125" style="zoom:67%;"></p>
+<p>NULL 实际上不会被存储，如果一个 column value 的 Definition Level 小于该 column 最大 Definition Level 的话，那么就表示这是一个空值。</p>
+<h4 id="repetition-level">Repetition Level</h4>
+<p>Repetition Level指的是截至当前位置（当前Field）为止，从根节点一路到这个Field的路径上重复节点的个数。本质上，是记录了该 field 的值是在哪一个深度上重复的。</p>
+<ul>
+<li><p>只有 repeated 类型的 field 需要 Repetition Level，optional 和 required 类型的不需要。</p></li>
+<li><p>Repetition Level = 0 表示开始一个新的 record。</p></li>
+</ul>
+<p>用下面的例子来说明Repetition Level：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">message nested &#123;</span><br><span class="line">     repeated group leve1 &#123;</span><br><span class="line">          repeated string leve2;</span><br><span class="line">     &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//数据1</span><br><span class="line">nested &#123;</span><br><span class="line">    leve1 &#123;</span><br><span class="line">    	leve2:&quot;a&quot;,</span><br><span class="line">    	leve2:&quot;b&quot;,</span><br><span class="line">    	leve2:&quot;c&quot;,</span><br><span class="line">    &#125;,</span><br><span class="line">    leve1 &#123;</span><br><span class="line">    	leve2:&quot;d&quot;,</span><br><span class="line">    	leve2:&quot;e&quot;,</span><br><span class="line">    	leve2:&quot;f&quot;,</span><br><span class="line">    	leve2:&quot;g&quot;</span><br><span class="line">    &#125;   </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//数据2</span><br><span class="line">nested &#123;</span><br><span class="line">    leve1 &#123;</span><br><span class="line">    	leve2:&quot;h&quot;</span><br><span class="line">    &#125;, </span><br><span class="line">    leve1 &#123;</span><br><span class="line">    	leve2:&quot;i&quot;,</span><br><span class="line">    	leve2:&quot;j&quot;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">r1:[[a,b,c,] , [d,e,f,g]]</span><br><span class="line">r2:[[h] , [i,j]]</span><br></pre></td></tr></table></figure>
+<p>https://blog.csdn.net/yu616568/article/details/50993491</p>
+<h3 id="参考资料">参考资料</h3>
+<p>https://www.cnblogs.com/panpanwelcome/p/10248990.html</p>
+<p>https://blog.csdn.net/yu616568/article/details/50993491</p>
+<p>https://www.cnblogs.com/helongBlog/p/13750315.html</p>
+
       
     </div>
 
@@ -1174,90 +1371,6 @@
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2021/09/04/Flink08_%E5%8F%8D%E5%8E%8B/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/09/03/Hadoop_%E7%8E%AF%E5%BD%A2%E7%BC%93%E5%86%B2%E5%8C%BA/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="BIOINSu">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BIOINSu">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/09/03/Hadoop_%E7%8E%AF%E5%BD%A2%E7%BC%93%E5%86%B2%E5%8C%BA/" class="post-title-link" itemprop="url">环形缓冲区</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-      
-
-      <time title="创建时间：2021-09-03 14:35:24 / 修改时间：14:38:26" itemprop="dateCreated datePublished" datetime="2021-09-03T14:35:24+08:00">2021-09-03</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/Hadoop/" itemprop="url" rel="index"><span itemprop="name">Hadoop</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h3 id="概念">概念</h3>
-<p>环形缓冲区是指数据<strong>被Map处理之后</strong>会先放入内存，内存中的这片区域就是环形缓冲区。</p>
-<p>环形缓冲区其实是一个简单的buffer，即一个byte类型的数组，默认大小是100M。</p>
-<p>当环形缓冲区达到容量的80%时，产生溢写（spill），数据从内存溢出到磁盘上。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/09/03/Hadoop_%E7%8E%AF%E5%BD%A2%E7%BC%93%E5%86%B2%E5%8C%BA/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
