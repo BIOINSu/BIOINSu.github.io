@@ -7701,4 +7701,72 @@
         <tag>LeetCode</tag>
       </tags>
   </entry>
+  <entry>
+    <title>HDFS容错</title>
+    <url>/2021/09/14/HDFS_%E5%AE%B9%E9%94%99/</url>
+    <content><![CDATA[<table>
+<colgroup>
+<col style="width: 16%">
+<col style="width: 83%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>概念</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>NameNode容错</td>
+<td>1、持久化的元数据（fsimage、edit log）进行备份到远程网络文件系统（NFS）<br>2、SecondaryNamenode中存有前一个时间点的fsimage的备份，结合NFS形成Namenode<br>3、搭建HDFS高可用模式，直接切换成StandbyNamenode</td>
+</tr>
+<tr class="even">
+<td>DataNode容错</td>
+<td>1、副本机制<br>2、心跳机制<br>3、安全模式<br>4、校验和</td>
+</tr>
+<tr class="odd">
+<td>HDFS写容错</td>
+<td>将出错的DataNode移除，剩余的继续传输，最后维持副本的数量。</td>
+</tr>
+<tr class="even">
+<td>HDFS读容错</td>
+<td>直接更换DataNode读数据。</td>
+</tr>
+</tbody>
+</table>
+<a id="more"></a>
+<h3 id="namenode容错">NameNode容错</h3>
+<p>没有Namenode，HDFS就不能工作。事实上，如果运行namenode的机器坏掉的话，系统中的文件将会完全丢失，因为没有其他方法能够将位于不同datanode上的文件块(blocks)重建文件。因此，namenode的容错机制非常重要，Hadoop提供了两种机制。</p>
+<p>第一种方式是将持久化存储在本地硬盘的文件系统元数据备份。Hadoop可以通过配置来让Namenode将他的持久化状态文件写到不同的文件系统中。这种写操作是同步并且是原子化的。比较常见的配置是在将持久化状态写到本地硬盘的同时，也写入到一个远程挂载的网络文件系统（NFS）。</p>
+<p>第二种方式是运行一个SecondaryNamenode。 事实上SecondaryNamenode并不能直接被用作Namenode。它的主要作用是定期的将元数据镜像（fsimage）与操作日志文件（edit log）合并，以防止操作日志文件(edit log)变得过大。通常，SecondaryNamenode 运行在一个单独的物理机上，因为合并操作需要占用大量的CPU时间以及和Namenode相当的内存。SecondaryNamenode保存着合并后的元数据镜像（fsimage）的一个备份，万一哪天Namenode宕机了，这个备份就可以用上了。</p>
+<p>但是SecondaryNamenode总是落后于主Namenode，所以在Namenode宕机时，数据丢失是不可避免的。在这种情况下，一般的，要结合第一种方式中提到的远程挂载的网络文件系统(NFS)中的Namenode的元数据文件来使用，把NFS中的Namenode元数据文件，拷贝到SecondaryNamenode，并把SecondaryNamenode作为主Namenode来运行。</p>
+<p>第三种方式就是在高可用模式下直接切换成StandbyNamenode。</p>
+<h3 id="datanode容错">DataNode容错</h3>
+<p>1、副本机制</p>
+<p>2、心跳机制</p>
+<p>DataNode启动后向NameNode注册，心跳是每3秒一次，目的是告诉Namenode存活状态以及可用空间。心跳返回结果带有NameNode给该DataNode的命令如复制块数据到另一台机器，或删除某个数据块。</p>
+<p>3、安全模式</p>
+<p>NameNode启动后会进入一个称为安全模式的特殊状态。处于安全模式的NameNode对于客户端来说是只读的。NameNode从所有的DataNode接收心跳信号和块状态报告（blockreport）。</p>
+<p>每个数据块都有一个指定的最小副本数（dfs.replication.min），当NameNode检测确认某个数据块的副本数目达到这个最小值，那么该数据块就会被认为是副本安全(safely replicated)的。</p>
+<p>在一定百分比（这个参数配置于dfs.safemode.threshold.pct，默认值是99.9%）的数据块被NameNode检测确认是安全之后，再过若干时间后（这个参数配置于dfs.safemode.extension，默认值是30秒），NameNode将退出安全模式状态。接下来NameNode会确定还有哪些数据块的副本没有达到指定数目，并将这些数据块复制到其他DataNode上。</p>
+<p>4、校验和</p>
+<p>HDFS会对写入的所有数据计算校验和（checksum）和数据本身一并存储，在读取数据时再次计算校验和并且验证和写入时是否相同。</p>
+<p>此外Datanode还会定期运行一个进程检验本身存在的数据块是否和校验和一致。</p>
+<h3 id="hdfs读写容错">HDFS读写容错</h3>
+<h4 id="写容错">写容错</h4>
+<p>如果传输过程中，有某个 datanode 出现了故障，那么当前的 pipeline 会被关闭，出现故 障的 datanode 会从当前的 pipeline 中移除，剩余的 block 会继续剩下的 datanode 中继续 以 pipeline 的形式传输，同时 namenode 会分配一个新的 datanode，保持 replicas 设定的 数量。</p>
+<h4 id="读容错">读容错</h4>
+<p>由于在读HDFS的过程中会从NameNode获取到数据块位置列表，如果某个DataNode失效，从可用列表中更换另一个DataNode进行读取即可。</p>
+<h3 id="参考资料">参考资料</h3>
+<p>http://article.docway.net/details?id=5f33d50ab4f20b6366ff6676#215NameNode_25</p>
+<p>https://blog.csdn.net/ThreeAspects/article/details/105983047?utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7Edefault-2.no_search_link&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7Edefault-2.no_search_link</p>
+<p>https://www.cnblogs.com/zeq912/p/9606105.html（NFS网络文件系统）</p>
+]]></content>
+      <categories>
+        <category>Hadoop</category>
+      </categories>
+      <tags>
+        <tag>Hadoop</tag>
+      </tags>
+  </entry>
 </search>
