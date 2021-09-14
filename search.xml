@@ -7647,4 +7647,58 @@
         <tag>LeetCode</tag>
       </tags>
   </entry>
+  <entry>
+    <title>LeetCode 数组</title>
+    <url>/2021/09/14/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_LeetCode_%E6%95%B0%E7%BB%84/</url>
+    <content><![CDATA[<p>LeetCode中与数组有关的题目。</p>
+<a id="more"></a>
+<h3 id="缺失的第一个正数">41 缺失的第一个正数</h3>
+<p><strong>题目描述</strong></p>
+<p>给你一个未排序的整数数组 nums ，请你找出其中没有出现的最小的<strong>正整数</strong>。</p>
+<p>进阶：你可以实现时间复杂度为 O(n) 并且只使用常数级别额外空间的解决方案吗？</p>
+<p>示例 1：</p>
+<p>输入：nums = [1,2,0] 输出：3</p>
+<p><strong>题解</strong></p>
+<p>时间复杂度O(<span class="math inline">\(n\)</span>)：</p>
+<p>空间复杂度O(1)：不使用额外空间</p>
+<p>原地哈希法，<strong>最小的正数是从1开始的</strong>，因此遍历数组，把每个元素存放到对应的位置，直到当前位置的数是非正数或大于数组长度的就继续处理下一个，比如1存放到数组的第一个位置（下标为0），3存放到数组的第3个位置（下标为2），如果是非正数或者大于数组的长度的值，不做处理。</p>
+<p>注意，如果 nums[i] == nums[ nums[i] - 1 ]，即nums[i] 应该放在的位置上有值了，<strong>表示存在重复值</strong>，也是不做处理的，这个重复值会占据一个本来属于其他正数的位置。</p>
+<p>最后再遍历一遍数组，如果nums[i] == i+1不成立，说明这个位置没有这个数，我们就直接i+1即可。图解流程见题解。</p>
+<h2 id="section"><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">firstMissingPositive</span><span class="params">(<span class="keyword">int</span>[] nums)</span> </span>&#123;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">int</span> max = nums.length;</span><br><span class="line">        <span class="keyword">int</span> i = <span class="number">0</span>;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">while</span>( i &lt; max)&#123;</span><br><span class="line">            </span><br><span class="line">            <span class="comment">//只有[1,max]之间的数，才需要放到对应的位置numbers-1，0也不需要因为它不是正整数不是题目需要处理的范围</span></span><br><span class="line">            <span class="comment">// nums[i] == i+1 表示当前遍历到的值已经放在对应的位置</span></span><br><span class="line">            <span class="comment">// nums[i] == nums[ nums[i] - 1 ] 表示当前遍历到的值，它应该交换到的位置上已经满足条件,即存在重复值，此时继续交换则会导致无限循环下去，因此也是直接跳过</span></span><br><span class="line">            <span class="comment">//nums[i] 应该放在下标为 nums[i] - 1的位置，此时才能保证nums[i] == i+1</span></span><br><span class="line">            <span class="keyword">if</span>(nums[i] &lt; <span class="number">1</span> || nums[i] &gt; max || nums[i] == i+<span class="number">1</span> || nums[i] == nums[ nums[i] - <span class="number">1</span> ])&#123;</span><br><span class="line">                i++;</span><br><span class="line">                <span class="keyword">continue</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">            swap(nums, i, nums[i]-<span class="number">1</span>);</span><br><span class="line">            </span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">//再次遍历数组</span></span><br><span class="line">        i = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">while</span>(i &lt; max)&#123;</span><br><span class="line">            </span><br><span class="line">            <span class="keyword">if</span>( nums[i] != i+<span class="number">1</span> )</span><br><span class="line">                <span class="keyword">return</span> i+<span class="number">1</span>;</span><br><span class="line">            </span><br><span class="line">            i++;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">//如果上面都没有return，说明数字都在对应的位置上面，即[1，max]都已经归位，因此返回长度+1</span></span><br><span class="line">        <span class="keyword">return</span> max+<span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">swap</span><span class="params">(<span class="keyword">int</span> [] nums, <span class="keyword">int</span> i, <span class="keyword">int</span> j)</span></span>&#123;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">int</span> tmp = nums[i];</span><br><span class="line">        nums[i] = nums[j];</span><br><span class="line">        nums[j] = tmp;</span><br><span class="line">        </span><br><span class="line">    &#125; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></h2>
+<h3 id="颜色分类荷兰国旗法正数负数零移动">75 颜色分类（荷兰国旗法，正数负数零移动）</h3>
+<p>题目描述</p>
+<p>给定一个包含红色、白色和蓝色，一共 n 个元素的数组，原地对它们进行排序，使得相同颜色的元素相邻，并按照红色、白色、蓝色顺序排列。</p>
+<p>此题中，我们使用整数 0、 1 和 2 分别表示红色、白色和蓝色。</p>
+<p>示例 1：</p>
+<p>输入：nums = [2,0,2,1,1,0] 输出：[0,0,1,1,2,2]</p>
+<p><strong>题解</strong></p>
+<p>时间复杂度O(<span class="math inline">\(n\)</span>)：</p>
+<p>空间复杂度O(1)：不使用额外空间</p>
+<p>第一种最简单的方法，使用单指针，设置一个全局指针，每次遇到0就和全局指针交换并递增全局指针，先排好0；然后从全局指针的位置开始出发，每次遇到1就和全局指针交换，就排好1，剩下2自动排好。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">sortColors</span><span class="params">(<span class="keyword">int</span>[] nums)</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">        <span class="comment">//设置全局指针</span></span><br><span class="line">        <span class="keyword">int</span> ptr = <span class="number">0</span>;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">//交换0</span></span><br><span class="line">    	<span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; nums.length; i++)&#123;</span><br><span class="line">            <span class="keyword">if</span>(nums[i] == <span class="number">0</span>)&#123;</span><br><span class="line">                swap(nums, ptr, i);</span><br><span class="line">                ptr++;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">//交换1</span></span><br><span class="line">        <span class="comment">//注意这里是从ptr开始的，而不是ptr+1开始的，因为要使得ptr++</span></span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i = ptr; i &lt; nums.length; i++)&#123;</span><br><span class="line">            <span class="keyword">if</span>(nums[i] == <span class="number">1</span>)&#123;</span><br><span class="line">                swap(nums, ptr, i);</span><br><span class="line">                ptr++;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">swap</span><span class="params">(<span class="keyword">int</span>[] nums, <span class="keyword">int</span> i, <span class="keyword">int</span> j)</span></span>&#123;</span><br><span class="line">        <span class="keyword">int</span> tmp = nums[i];</span><br><span class="line">        nums[i] = nums[j];</span><br><span class="line">        nums[j] = tmp;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>还有第二种使用三指针的方法，见题解。</p>
+<h3 id="盛最多水的容器">11 盛最多水的容器</h3>
+<p>题目描述</p>
+<p>输入：[1,8,6,2,5,4,8,3,7] 输出：49 解释：图中垂直线代表输入数组 [1,8,6,2,5,4,8,3,7]。在此情况下，容器能够容纳水（表示为蓝色部分）的最大值为 49。</p>
+<p><strong>题解</strong></p>
+<p>时间复杂度O(<span class="math inline">\(n\)</span>)：</p>
+<p>空间复杂度O(1)：不使用额外空间</p>
+<p>双指针从两边向中间移动，每次移动短板，因为短板决定了最多能盛水多少。每次移动短板，则水有可能增多、不变、减少；移动长板，则水不可能增多，只能不变或减少，因为短板才是决定因素。</p>
+<p>因此，移动短板不会导致丢失面积最大值。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">maxArea</span><span class="params">(<span class="keyword">int</span>[] height)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">int</span> i = <span class="number">0</span>, j = height.length - <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">int</span> res = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">while</span>(i &lt; j)&#123;</span><br><span class="line"></span><br><span class="line">            res = Math.max(res, (j-i)*Math.min(height[i],height[j]) );</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span>(height[i] &lt; height[j])  i++;</span><br><span class="line">            <span class="keyword">else</span> j--;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> res;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="题解来源">题解来源</h3>
+<p>缺失的第一个正数：https://leetcode-cn.com/problems/first-missing-positive</p>
+<p>https://leetcode-cn.com/problems/first-missing-positive/solution/javade-6chong-jie-fa-de-tu-wen-xiang-jie-wei-yun-s/</p>
+<p>颜色分类：https://leetcode-cn.com/problems/sort-colors/solution/xue-sheng-wu-de-nu-peng-you-du-neng-kan-71kjg/</p>
+<p>盛水最多的容器：https://leetcode-cn.com/problems/container-with-most-water/solution/container-with-most-water-shuang-zhi-zhen-fa-yi-do/</p>
+]]></content>
+      <categories>
+        <category>数据结构与算法</category>
+        <category>LeetCode</category>
+      </categories>
+      <tags>
+        <tag>数据结构与算法</tag>
+        <tag>LeetCode</tag>
+      </tags>
+  </entry>
 </search>
