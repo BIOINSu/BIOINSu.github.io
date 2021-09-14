@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.3.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/maze.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/maze.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/maze.png">
+  <link rel="mask-icon" href="/images/maze.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","images":"/images","scheme":"Mist","version":"8.2.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false}};
+  </script>
+<meta name="description" content="对称加密虽然性能好但有密钥泄漏的风险，非对称加密（2组公钥+2私钥双向传输）安全但性能低下，因此考虑用非对称加密来传输对称加密所需的密钥，然后进行对称加密，但是为了防止非对称过程产生的中间人攻击，需要对服务器公钥和服务器身份进行配对的数字认证，然后引入了CA数字签名+数字证书验证的方式！这是我梳理的整体逻辑流程。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HTTP和HTTPS">
+<meta property="og:url" content="http://example.com/2021/09/14/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C_HTTP%E5%92%8CHTTPS/index.html">
+<meta property="og:site_name" content="BIOINSu">
+<meta property="og:description" content="对称加密虽然性能好但有密钥泄漏的风险，非对称加密（2组公钥+2私钥双向传输）安全但性能低下，因此考虑用非对称加密来传输对称加密所需的密钥，然后进行对称加密，但是为了防止非对称过程产生的中间人攻击，需要对服务器公钥和服务器身份进行配对的数字认证，然后引入了CA数字签名+数字证书验证的方式！这是我梳理的整体逻辑流程。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2021/09/14/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C_HTTP%E5%92%8CHTTPS/image-20210914095855554.png">
+<meta property="og:image" content="http://example.com/2021/09/14/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C_HTTP%E5%92%8CHTTPS/image-20210914093855261.png">
+<meta property="og:image" content="http://example.com/2021/09/14/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C_HTTP%E5%92%8CHTTPS/image-20210914095109879.png">
+<meta property="article:published_time" content="2021-09-14T01:02:38.373Z">
+<meta property="article:modified_time" content="2021-09-14T02:28:23.028Z">
+<meta property="article:author" content="BIOINSu">
+<meta property="article:tag" content="计算机网络">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2021/09/14/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C_HTTP%E5%92%8CHTTPS/image-20210914095855554.png">
+
+
+<link rel="canonical" href="http://example.com/2021/09/14/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C_HTTP%E5%92%8CHTTPS/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+<title>HTTP和HTTPS | BIOINSu</title>
+  
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BIOINSu</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#https%E5%8A%A0%E5%AF%86%E8%BF%87%E7%A8%8B"><span class="nav-number">1.</span> <span class="nav-text">HTTPS加密过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E5%AD%97%E8%AF%81%E4%B9%A6%E5%8F%8A%E5%85%B6%E9%AA%8C%E8%AF%81"><span class="nav-number">2.</span> <span class="nav-text">数字证书及其验证</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%95%B0%E5%AD%97%E8%AF%81%E4%B9%A6%E5%88%B6%E4%BD%9C"><span class="nav-number">2.1.</span> <span class="nav-text">数字证书制作</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%A2%E6%88%B7%E7%AB%AF%E9%AA%8C%E8%AF%81%E8%AF%81%E4%B9%A6"><span class="nav-number">2.2.</span> <span class="nav-text">客户端验证证书</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BF%9D%E8%AF%81%E8%AF%81%E4%B9%A6%E5%8F%AF%E4%BF%A1%E7%9A%84%E5%8E%9F%E5%9B%A0"><span class="nav-number">2.3.</span> <span class="nav-text">保证证书可信的原因</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%B9%E7%A7%B0%E5%92%8C%E9%9D%9E%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86"><span class="nav-number">3.</span> <span class="nav-text">对称和非对称加密</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">4.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">BIOINSu</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">69</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">37</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/BIOINSu" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;BIOINSu" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/09/14/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C_HTTP%E5%92%8CHTTPS/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BIOINSu">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BIOINSu">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          HTTP和HTTPS
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2021-09-14 09:02:38 / 修改时间：10:28:23" itemprop="dateCreated datePublished" datetime="2021-09-14T09:02:38+08:00">2021-09-14</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/" itemprop="url" rel="index"><span itemprop="name">计算机网络</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>对称加密虽然性能好但有密钥泄漏的风险，非对称加密（2组公钥+2私钥双向传输）安全但性能低下，因此考虑用非对称加密来传输对称加密所需的密钥，然后进行对称加密，但是为了防止非对称过程产生的中间人攻击，需要对服务器公钥和服务器身份进行配对的数字认证，然后引入了CA数字签名+数字证书验证的方式！这是我梳理的整体逻辑流程。</p>
+<a id="more"></a>
+<h3 id="https加密过程">HTTPS加密过程</h3>
+<p><img src="/2021/09/14/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C_HTTP%E5%92%8CHTTPS/image-20210914095855554.png" alt="image-20210914095855554" style="zoom: 67%;"></p>
+<p>1、客户端发起请求，服务端返回CA数字证书和公钥</p>
+<p>2、客户端验证数字证书合法性。（公钥保存在数字证书中，如果合法证明公钥来自正确的服务器）</p>
+<p>3、客户端生成私钥，用合法的公钥将私钥加密传输给服务器，服务器用对应的私钥解密。</p>
+<p>4、双方通过对称加密的方式进行通信。</p>
+<h3 id="数字证书及其验证">数字证书及其验证</h3>
+<p>服务器（网站）在使用HTTPS前，需要向CA机构申领一份<strong>数字证书</strong>，数字证书里含有<strong>服务器的信息</strong>以及<strong>服务器的公钥</strong>等。服务器把证书传输给浏览器，浏览器从证书里获取公钥就行了，证书就如身份证，证明“该公钥对应该网站”。</p>
+<p>如何判断证书是否被篡改：证书原本的内容生成一份<strong>数字签名</strong>（Hash值），比对证书内容和签名是否一致就能判别是否被篡改。</p>
+<h4 id="数字证书制作">数字证书制作</h4>
+<p><img src="/2021/09/14/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C_HTTP%E5%92%8CHTTPS/image-20210914093855261.png" alt="image-20210914093855261" style="zoom:67%;"></p>
+<p>1、CA机构拥有非对称加密的私钥和公钥。</p>
+<p>2、CA机构对证书明文数据T进行hash。</p>
+<p>3、对hash后的值用私钥加密，得到数字签名S。</p>
+<p>4、明文和数字签名共同组成了数字证书，这样一份数字证书就可以颁发给网站了。</p>
+<h4 id="客户端验证证书">客户端验证证书</h4>
+<p><img src="/2021/09/14/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C_HTTP%E5%92%8CHTTPS/image-20210914095109879.png" alt="image-20210914095109879" style="zoom:67%;"></p>
+<p>1、拿到证书，得到明文T，签名S。</p>
+<p>2、用CA机构的公钥对S解密（由于是浏览器信任的机构，所以浏览器保有它的公钥。详情见下文），得到S’。</p>
+<p>3、用证书里指明的hash算法对明文T进行hash得到T’。</p>
+<p>4、显然通过以上步骤，T’应当等于S‘，除非明文或签名被篡改。所以此时比较S’是否等于T’，等于则表明证书可信。</p>
+<h4 id="保证证书可信的原因">保证证书可信的原因</h4>
+<p><strong>中间人修改证书中的明文部分：</strong></p>
+<p>假设中间人篡改了证书的原文，由于他没有CA机构的私钥，所以无法得到此时加密后签名，<strong>无法相应地篡改签名</strong>。浏览器收到该证书后会发现原文和签名解密后的值不一致，则说明证书已被篡改，证书不可信，从而终止向服务器传输信息，防止信息泄露给中间人。</p>
+<p><strong>中间人修改证书中的明文和数字签名（直接整个掉包）：</strong></p>
+<p>就是中间人直接将原来的数字证书替换成自己的证书，传给客户端。</p>
+<p>此时证书里包含了中间人网站的信息，包括域名，浏览器<strong>把证书里的域名与自己请求的域名比对</strong>一下就知道有没有被掉包了。</p>
+<p>那证书的安全性怎么保证？为什么中间人不能做一个假证书？</p>
+<p>因为这套证书体系已经根植于每一个操作系统里了。每一个操作系统里，都内置了数十张根证书，每个根证书都对应一个非常权威的证书签发机构。这些根证书上记录了各个机构的公钥。</p>
+<h3 id="对称和非对称加密">对称和非对称加密</h3>
+<p>只用对称加密：</p>
+<p>私钥无法保证安全地传输到对方。</p>
+<p>非对称加密：</p>
+<p>服务器先把公钥以明文方式传输给浏览器，之后浏览器向服务器传数据前都先用这个公钥加密好再传，这条数据的安全似乎可以保障了，因为只有服务器有相应的私钥能解开公钥加密的数据。</p>
+<p>反过来由服务器到浏览器的这条路怎么保障安全，如果服务器用它的私钥加密数据传给浏览器，那么浏览器用公钥可以解密它，而这个公钥是一开始通过明文传输给浏览器的，若这个公钥被中间人劫持到了，那他也能用该公钥解密服务器传来的信息了。所以需要有某种手段验证公钥的合法性。</p>
+<p>另外，非对称加密的效率相对于对称加密的效率是低的。</p>
+<h3 id="参考资料">参考资料</h3>
+<p>https://zhuanlan.zhihu.com/p/43789231</p>
+<p>https://segmentfault.com/a/1190000021494676</p>
+<p>https://zhuanlan.zhihu.com/p/72616216</p>
+<p>https://zhuanlan.zhihu.com/p/37738632（根证书）</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/" rel="tag"># 计算机网络</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/09/13/MySQL_ACID%E5%92%8C%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86/" rel="prev" title="MySQL实现ACID">
+                  <i class="fa fa-chevron-left"></i> MySQL实现ACID
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">BIOINSu</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+  <script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'none'
+      },
+      options: {
+        renderActions: {
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              const target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3.1.2/es5/tex-mml-chtml.js';
+    script.defer = true;
+    document.head.appendChild(script);
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.typesetClear();
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+
+
+</body>
+</html>
