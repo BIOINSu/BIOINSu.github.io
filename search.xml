@@ -7841,4 +7841,43 @@
         <tag>Hadoop</tag>
       </tags>
   </entry>
+  <entry>
+    <title>Kafka经典三问：数据有序、丢失、重复</title>
+    <url>/2021/09/15/Kafka_%E6%9C%89%E5%BA%8F%E4%B8%A2%E5%A4%B1%E9%87%8D%E5%A4%8D/</url>
+    <content><![CDATA[<table>
+<colgroup>
+<col style="width: 16%">
+<col style="width: 83%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>概念</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>保证数据有序</td>
+<td>1、发送端：不能异步发送。<br>2、Broker端：只能有一个分区，高可用时要同步复制。<br>3、接收端：不能并行消费。</td>
+</tr>
+<tr class="even">
+<td>数据是否丢失</td>
+<td>1、发送端：partition向producer发送ack，ack=0不能保证broker一定落盘，ack=1 follower可能丢失。<br>2、Borker：先写缓存再刷盘，宕机丢失。<br>3、接收端：消费者at-most-once语义先提交offset，再消费数据，重启后只能从下一个offset处消费。</td>
+</tr>
+<tr class="odd">
+<td>数据是否重复</td>
+<td>Exactly Once语义，Broker端会对&lt; Producer ID, Partition, SeqNumber&gt;做缓存，相同主键只持久化一次。</td>
+</tr>
+</tbody>
+</table>
+<a id="more"></a>
+<h3 id="参考资料">参考资料</h3>
+]]></content>
+      <categories>
+        <category>Kafka</category>
+      </categories>
+      <tags>
+        <tag>Kafka</tag>
+      </tags>
+  </entry>
 </search>
