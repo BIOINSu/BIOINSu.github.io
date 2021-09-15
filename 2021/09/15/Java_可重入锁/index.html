@@ -22,22 +22,22 @@
     var NexT = window.NexT || {};
     var CONFIG = {"hostname":"example.com","root":"/","images":"/images","scheme":"Mist","version":"8.2.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false}};
   </script>
-<meta name="description" content="概念 解释     Java跨平台 通过JVM实现，JVM本身与平台有关。   Java从编译到执行 编译：源码编译为.class文件加载：将编译后的.class文件加载到 JVM 中解释：把字节码转换成操作系统可识别的执行指令执行：调用系统的硬件执行最终的程序指令   Java&#x2F;C++速度比较">
+<meta name="description" content="可重入锁，指的是以线程为单位，当一个线程获取对象锁之后，这个线程可以再次获取本对象上的锁，而其他的线程是不可以的。 Java中synchronized关键字和ReentrantLock都是可重入的锁。 如果锁不可重入，则当有如下情况时会产生死锁：">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Java从编译到执行">
-<meta property="og:url" content="http://example.com/2021/09/01/Java_%E7%BC%96%E8%AF%91%E4%B8%8E%E6%89%A7%E8%A1%8C/index.html">
+<meta property="og:title" content="Java可重入锁">
+<meta property="og:url" content="http://example.com/2021/09/15/Java_%E5%8F%AF%E9%87%8D%E5%85%A5%E9%94%81/index.html">
 <meta property="og:site_name" content="BIOINSu">
-<meta property="og:description" content="概念 解释     Java跨平台 通过JVM实现，JVM本身与平台有关。   Java从编译到执行 编译：源码编译为.class文件加载：将编译后的.class文件加载到 JVM 中解释：把字节码转换成操作系统可识别的执行指令执行：调用系统的硬件执行最终的程序指令   Java&#x2F;C++速度比较">
+<meta property="og:description" content="可重入锁，指的是以线程为单位，当一个线程获取对象锁之后，这个线程可以再次获取本对象上的锁，而其他的线程是不可以的。 Java中synchronized关键字和ReentrantLock都是可重入的锁。 如果锁不可重入，则当有如下情况时会产生死锁：">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2021-09-01T12:41:55.190Z">
-<meta property="article:modified_time" content="2021-09-07T03:33:13.132Z">
+<meta property="article:published_time" content="2021-09-15T12:26:50.008Z">
+<meta property="article:modified_time" content="2021-09-15T12:47:22.942Z">
 <meta property="article:author" content="BIOINSu">
 <meta property="article:tag" content="Java">
 <meta property="article:tag" content="Java原理">
 <meta name="twitter:card" content="summary">
 
 
-<link rel="canonical" href="http://example.com/2021/09/01/Java_%E7%BC%96%E8%AF%91%E4%B8%8E%E6%89%A7%E8%A1%8C/">
+<link rel="canonical" href="http://example.com/2021/09/15/Java_%E5%8F%AF%E9%87%8D%E5%85%A5%E9%94%81/">
 
 
 <script class="page-configurations">
@@ -49,7 +49,7 @@
     lang   : 'zh-CN'
   };
 </script>
-<title>Java从编译到执行 | BIOINSu</title>
+<title>Java可重入锁 | BIOINSu</title>
   
 
 
@@ -187,7 +187,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#java%E8%B7%A8%E5%B9%B3%E5%8F%B0"><span class="nav-number">1.</span> <span class="nav-text">Java跨平台</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#java%E4%BB%8E%E7%BC%96%E8%AF%91%E5%88%B0%E6%89%A7%E8%A1%8C"><span class="nav-number">2.</span> <span class="nav-text">Java从编译到执行</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BC%96%E8%AF%91"><span class="nav-number">2.1.</span> <span class="nav-text">编译</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8A%A0%E8%BD%BD"><span class="nav-number">2.2.</span> <span class="nav-text">加载</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A7%A3%E9%87%8A"><span class="nav-number">2.3.</span> <span class="nav-text">解释</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%89%A7%E8%A1%8C"><span class="nav-number">2.4.</span> <span class="nav-text">执行</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#javac%E9%80%9F%E5%BA%A6%E6%AF%94%E8%BE%83"><span class="nav-number">3.</span> <span class="nav-text">Java&#x2F;C++速度比较</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">4.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">1.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -258,7 +258,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/09/01/Java_%E7%BC%96%E8%AF%91%E4%B8%8E%E6%89%A7%E8%A1%8C/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/09/15/Java_%E5%8F%AF%E9%87%8D%E5%85%A5%E9%94%81/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -271,7 +271,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          Java从编译到执行
+          Java可重入锁
         </h1>
 
         <div class="post-meta-container">
@@ -281,16 +281,10 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
+      
 
-      <time title="创建时间：2021-09-01 20:41:55" itemprop="dateCreated datePublished" datetime="2021-09-01T20:41:55+08:00">2021-09-01</time>
+      <time title="创建时间：2021-09-15 20:26:50 / 修改时间：20:47:22" itemprop="dateCreated datePublished" datetime="2021-09-15T20:26:50+08:00">2021-09-15</time>
     </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-09-07 11:33:13" itemprop="dateModified" datetime="2021-09-07T11:33:13+08:00">2021-09-07</time>
-      </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
         <i class="far fa-folder"></i>
@@ -315,81 +309,21 @@
     
     
     <div class="post-body" itemprop="articleBody">
-        <table>
-<colgroup>
-<col style="width: 21%">
-<col style="width: 78%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>概念</th>
-<th>解释</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Java跨平台</td>
-<td>通过JVM实现，JVM本身与平台有关。</td>
-</tr>
-<tr class="even">
-<td>Java从编译到执行</td>
-<td>编译：源码编译为.class文件<br>加载：将编译后的.class文件加载到 JVM 中<br>解释：把字节码转换成操作系统可识别的执行指令<br>执行：调用系统的硬件执行最终的程序指令</td>
-</tr>
-<tr class="odd">
-<td>Java/C++速度比较</td>
-<td></td>
-</tr>
-</tbody>
-</table>
+        <p>可重入锁，指的是以线程为单位，当一个线程获取对象锁之后，这个线程可以再次获取本对象上的锁，而其他的线程是不可以的。</p>
+<p>Java中synchronized关键字和ReentrantLock都是可重入的锁。</p>
+<p>如果锁不可重入，则当有如下情况时会产生死锁：</p>
 <a id="more"></a>
-<h3 id="java跨平台">Java跨平台</h3>
-<p>Java跨平台通过Java虚拟机（JVM）实现。Java源代码会被编译为.class文件，JVM负责把.class字节码文件解释成各个操作系统所能够识别的指令并执行，JVM本身是和操作系统有关的，因此通过JVM实现跨平台执行。</p>
-<h3 id="java从编译到执行">Java从编译到执行</h3>
-<p>Java源码到执行的过程，从JVM的角度看可以总结为四个步骤：编译-&gt;加载-&gt;解释-&gt;执行。</p>
-<h4 id="编译">编译</h4>
-<p>将源码编译成JVM可以解释的class文件。</p>
-<p>Java源代码文件经过 语法分析、语义分析、注解处理，最后生成.class字节码文件。</p>
-<h4 id="加载">加载</h4>
-<p>将编译后的class文件加载到JVM中。</p>
-<p>加载又可以细分步骤为：加载-&gt;连接-&gt;初始化。</p>
-<ul>
-<li>加载：把.class文件加载至JVM。查找并加载类的二进制数据，在JVM堆中创建一个java.lang.Class类的对象，并将类相关的信息存储在JVM方法区中。
-<ul>
-<li>加载时机：为了节省内存开销，不会一次性把所有类都加载至JVM，而是等到有需要的时候才进行加载。（比如new和反射等等）</li>
-<li>加载发生：.class文件通过类加载器加载到JVM，为了防止内存中出现多个同样的字节码，使用双亲委派机制加载类。</li>
-<li>加载规则：JDK中的本地方法一般由根加载器（Bootstrap Loader）加载，JDK中内部实现的扩展类一般由扩展类加载器加载，而程序中的类文件则由系统类加载器加载。</li>
-</ul></li>
-<li>连接：对.class的信息进行验证，为类的静态变量分配内存空间并对其赋默认值。连接里又可以细化为：验证、准备、解析。
-<ul>
-<li>验证：验证类是否符合Java规范和JVM规范</li>
-<li>准备：为类的静态变量分配内存，初始化为系统的初始值</li>
-<li>解析：将符号引用转为直接引用的过程。</li>
-</ul></li>
-<li>初始化：为类的静态变量赋值为正确的初始值。收集.class的静态变量、静态代码块、静态方法到clinit()方法，然后从上往下执行。如果实例化对象，则会调用方法对实例变量进行初始化，并执行相应的构造方法。</li>
-</ul>
-<blockquote>
-<p>初始化具体过程：</p>
-<p>将一个类中所有被static关键字标识的代码统一执行一遍，如果执行的是静态变量，那么就会使用用户指定的值覆盖之前在准备阶段设置的初始值。</p>
-<p>如果执行的是static代码块，那么在初始化阶段，JVM就会执行static代码块中定义的所有操作。</p>
-<p>所有类变量初始化语句和静态代码块都会在编译时被前端编译器放在收集器里头，存放到一个特殊的方法中，这个方法就是<clinit>方法，即类/接口初始化方法。该方法的作用就是初始化变量，使用用户指定的值覆盖之前在准备阶段里设定的初始值。任何invoke之类的字节码都无法调用<clinit>方法，因为该方法只能在类加载的过程中由JVM调用。</clinit></clinit></p>
-<p>如果父类还没有被初始化，那么优先对父类初始化，但在<clinit>方法内部不会显示调用父类的<clinit>方法，由JVM负责保证一个类的<clinit>方法执行之前，它的父类<clinit>方法已经被执行。</clinit></clinit></clinit></clinit></p>
-</blockquote>
-<h4 id="解释">解释</h4>
-<p>解释，就是把字节码转换成操作系统可识别的执行指令，在JVM中会有字节码解释器和即时编译器（JIT）两种解释的方式。</p>
-<p>在解释时会对代码进行分析，查看是否为「热点代码」（某个方法或代码块的运行特别频繁），如果为「热点代码」则触发JIT编译，下次执行时就无需重复进行解释，提高解释速度。</p>
-<p>使用热点探测来检测是否为热点代码。热点探测一般有两种方式：计数器和抽样。HotSpot使用计数器的方式进行探测，为每个方法准备方法调用计数器和回边计数器，当计数器超过阈值时就会触发JIT编译，JIT将热点方法的指令码保存起来，下次执行的时候就无需进行重复解释，直接执行缓存的机器指令。</p>
-<h4 id="执行">执行</h4>
-<p>调用系统的硬件执行最终的程序指令。</p>
-<h3 id="javac速度比较">Java/C++速度比较</h3>
-<p>1、Java是解释性语言，java程序在运行时类加载器从类路经中加载相关的类，然后java虚拟机读取该类文件的字节，执行相应操作。而C++编译的时候将程序编译成本地机器码。一般来说java程序执行速度要比C++慢10-30倍。即使采用just-in-time compiling （读取类文件字节后，编译成本地机器码）技术，速度也要比C++慢好多。</p>
-<p>2、在程序运行过程中，java虚拟机要检测数组是否越界，在C++中则不检测。</p>
-<p>l java中所有的对象都创建在堆中，没有对象被创建在stack中，而C++有的对象和变量是创建在stack中的</p>
-<p>l java在运行过程中检测对象的引用是否为空，如果引用指向都空指针，且执行某个方法时会抛出空指针异常</p>
-<p>l java运行时对类型检测，如果类型不正确会抛出ClassCastException异常。</p>
-<p>l java的垃圾回收机制较C++由程序员管理内存效率更低。</p>
-<p>l java中的原始数据类型在每个操作系统平台长度都是相同，而C++这些数据类型长度是随操作系统的不同而不同，所以java在不同操作系统上执行时有个转化过程。</p>
+<p>1、递归调用</p>
+<p>自己调用自己时，因为自身已经获得了这个对象的锁，如果不能再加锁的话，就会导致线程一直在等待自己释放锁，就会产生死锁。</p>
+<p>2、此线程调用同一对象其它synchronized或者有同步锁函数。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Demo</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">method1</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        method2();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">method2</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>两个方法method1和method2都用synchronized修饰了，假如某一时刻，线程A执行到了method1，此时线程A获取了这个对象的锁，而由于method2也是synchronized方法，如果synchronized不具备可重入性，此时线程A需要重新申请锁。但是这就会造成一个问题，因为线程A已经持有了该对象的锁，而又在申请获取该对象的锁，这样就会线程A一直等待永远不会获取到的锁，导致死锁发生。</p>
+<p>为什么说java中的reentrantlock的效率要比synchronise的效率高？</p>
+<p>synchronized和lock在阻塞线程时都需要上下文切换，但是lock锁有优化策略，减少了线程被阻塞的几率。早期的synchronized是一把重量级锁，没有优化机制，可以说只要有线程竞争，竞争失败的线程一定会被阻塞，而reentrantlock对于那些竞争失败的线程，并不会直接阻塞，而是会尝试重新获得锁（自旋锁），如果这时候加锁成功，则线程就无需阻塞，相当于做了一定的优化。直到 jdk1.6 之后，两种锁的性能已经相差无几，甚至 Synchronized 的自动释放锁会更好用。</p>
 <h3 id="参考资料">参考资料</h3>
-<p>https://mp.weixin.qq.com/s?__biz=MzU4NzA3MTc5Mg==&amp;mid=2247484557&amp;idx=1&amp;sn=6fb103a2a322effc564fbb04c3b93a6c&amp;chksm=fdf0ecd2ca8765c4eacc22e54b4bc57888555efee99f1c7e57ee611e07d220b35b2aa658a4ca&amp;token=830702193&amp;lang=zh_CN&amp;scene=21#wechat_redirect</p>
+<p>https://blog.csdn.net/papamilk/article/details/80836268</p>
+<p>https://www.zhihu.com/question/53444947</p>
+<p>https://zhuanlan.zhihu.com/p/336248650</p>
 
     </div>
 
@@ -407,13 +341,13 @@
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/2021/09/01/%E6%95%B0%E6%8D%AE%E5%BA%93_%E9%94%AE%E4%B8%8E%E8%8C%83%E5%BC%8F/" rel="prev" title="数据库中键和范式">
-                  <i class="fa fa-chevron-left"></i> 数据库中键和范式
+                <a href="/2021/09/15/Kafka_%E6%9C%89%E5%BA%8F%E4%B8%A2%E5%A4%B1%E9%87%8D%E5%A4%8D/" rel="prev" title="Kafka经典三问：数据有序、丢失、重复">
+                  <i class="fa fa-chevron-left"></i> Kafka经典三问：数据有序、丢失、重复
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/2021/09/03/Hadoop_%E7%8E%AF%E5%BD%A2%E7%BC%93%E5%86%B2%E5%8C%BA/" rel="next" title="环形缓冲区">
-                  环形缓冲区 <i class="fa fa-chevron-right"></i>
+                <a href="/2021/09/15/%E5%88%86%E5%B8%83%E5%BC%8F_CAP%E5%AE%9A%E7%90%86/" rel="next" title="CAP定理">
+                  CAP定理 <i class="fa fa-chevron-right"></i>
                 </a>
             </div>
           </div>

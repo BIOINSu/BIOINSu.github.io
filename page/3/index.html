@@ -194,7 +194,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">77</span>
+          <span class="site-state-item-count">79</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -241,6 +241,219 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/09/06/%E9%9D%A2%E8%AF%95_0902%E5%AD%97%E8%8A%82%E4%B8%80%E9%9D%A2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BIOINSu">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BIOINSu">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/09/06/%E9%9D%A2%E8%AF%95_0902%E5%AD%97%E8%8A%82%E4%B8%80%E9%9D%A2/" class="post-title-link" itemprop="url">0902字节一面</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-09-06 09:04:47" itemprop="dateCreated datePublished" datetime="2021-09-06T09:04:47+08:00">2021-09-06</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-09-09 10:58:49" itemprop="dateModified" datetime="2021-09-09T10:58:49+08:00">2021-09-09</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E9%9D%A2%E8%AF%95/" itemprop="url" rel="index"><span itemprop="name">面试</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h3 id="计网">计网</h3>
+<h4 id="syn攻击">Syn攻击</h4>
+<p><strong>是什么</strong></p>
+<p>TCP三次握手中，攻击者向服务器发送连接请求，服务器回复ACK确认后，攻击者并不返回ACK确认，即使得第三次握手无法完成，导致消耗服务器的资源，使得正常的SYN请求被丢弃。</p>
+<p><strong>怎么检测</strong></p>
+<p>当发现大量的大量的半连接状态时，特别是源IP地址是随机的时候，可以检测为是Sync攻击。</p>
+<p><strong>怎么防范</strong></p>
+<p>1、降低超时时间，使得主机尽快释放半连接的占用。</p>
+<p>2、使用代理服务器。当客户端SYN包到达代理服务器时，SYN代理服务器并不转发SYN包，而是以服务器的名义主动回复SYN/ACK包给客户，如果收到客户的ACK包，表明这是正常的访问，此时代理服务器向服务器发送ACK包并完成三次握手。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/09/06/%E9%9D%A2%E8%AF%95_0902%E5%AD%97%E8%8A%82%E4%B8%80%E9%9D%A2/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/09/05/Java_%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BIOINSu">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BIOINSu">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/09/05/Java_%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/" class="post-title-link" itemprop="url">Java内存模型</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2021-09-05 10:35:01 / 修改时间：19:08:45" itemprop="dateCreated datePublished" datetime="2021-09-05T10:35:01+08:00">2021-09-05</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Java/Java%E5%8E%9F%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">Java原理</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <table>
+<colgroup>
+<col style="width: 24%">
+<col style="width: 75%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>概念</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>缓存一致性问题</td>
+<td>各个CPU<strong>核中的缓存数据不一致</strong>导致计算结果不正确的问题。</td>
+</tr>
+<tr class="even">
+<td>Java内存模型（JMM）</td>
+<td>是Java 定义的<strong>一套协议</strong>，用来屏蔽各种硬件和操作系统的内存访问差异，让Java 程序在各种平台都能有数据一致性的运行效果，解决缓存一致性的问题。</td>
+</tr>
+<tr class="odd">
+<td>JMM协议的内容</td>
+<td>1、所有的变量都存储在主内存中，每个线程还有自己的工作内存。<br><br>2、线程的工作内存中保存了该线程使用到的变量（主内存的拷贝），线程对变量的所有操作（读取、赋值）都必须在工作内存中进行，而不能直接读写主内存中的变量。<br><br>3、不同线程之间无法直接访问对方工作内存中的变量，线程间变量值的传递均需要在主内存来完成。</td>
+</tr>
+<tr class="even">
+<td>Volatile的作用</td>
+<td>Java语言通过 volatile 修饰变量实现内存可见性，它强制修改后的变量写入主存，避免前后指令的CPU重排序，并及时让其他核中的相应缓存行失效，volatile是利用MESI达到符合预期的效果。</td>
+</tr>
+<tr class="odd">
+<td>可见性</td>
+<td>可见性是指当多个线程访问同一个共享变量时，一个线程修改了这个变量的值，其他线程能够立即看到修改后的值。</td>
+</tr>
+</tbody>
+</table>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/09/05/Java_%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1062,293 +1275,6 @@
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2021/08/03/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93_%E6%95%B0%E6%8D%AE%E5%BB%BA%E6%A8%A1/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/08/03/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93_OLTP%E4%B8%8EOLAP/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="BIOINSu">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BIOINSu">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/08/03/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93_OLTP%E4%B8%8EOLAP/" class="post-title-link" itemprop="url">OLTP与OLAP</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-      
-
-      <time title="创建时间：2021-08-03 08:50:42 / 修改时间：08:50:32" itemprop="dateCreated datePublished" datetime="2021-08-03T08:50:42+08:00">2021-08-03</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93/" itemprop="url" rel="index"><span itemprop="name">数据仓库</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <table>
-<colgroup>
-<col style="width: 7%">
-<col style="width: 46%">
-<col style="width: 46%">
-</colgroup>
-<thead>
-<tr class="header">
-<th></th>
-<th>OLTP(Online Transaction Processing)</th>
-<th>OLAT(Online Analytical Processing)</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>概念</td>
-<td>在线事务处理，是一种数据处理的概念</td>
-<td>在线分析处理，是一种数据处理的概念</td>
-</tr>
-<tr class="even">
-<td>操作目的</td>
-<td>查询、改变数据</td>
-<td>分析规律、预测趋势</td>
-</tr>
-<tr class="odd">
-<td>操作对象</td>
-<td>数据库</td>
-<td>数据仓库</td>
-</tr>
-<tr class="even">
-<td>操作数据量</td>
-<td>一般仅一两张表。（数据量小）<br>点查为主，返回的是记录本身或该记录的多个列。即使是范围查询，基本上也会通过limit来限制返回的记录数。</td>
-<td>对多张表的数据进行count()、sum()和avg()等聚合方法<br>从大量数据中找出规律。<br>表中单条记录本身并不是查询所关心的，比较典型的特点包括有聚合类算子、涉及多表Join。</td>
-</tr>
-<tr class="odd">
-<td>数据模型</td>
-<td>实体-关系模型（ER）</td>
-<td>星型或雪花</td>
-</tr>
-<tr class="even">
-<td>数据时效</td>
-<td>当前数据</td>
-<td>当前以及历史</td>
-</tr>
-<tr class="odd">
-<td>数据操作</td>
-<td>DDL、DML</td>
-<td>一般不支持更新和删除</td>
-</tr>
-<tr class="even">
-<td>性能要求</td>
-<td>高吞吐、低延迟</td>
-<td>性能要求相对较低</td>
-</tr>
-<tr class="odd">
-<td>业务类型</td>
-<td>查询、支付、转账</td>
-<td>统计报表</td>
-</tr>
-</tbody>
-</table>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/08/03/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93_OLTP%E4%B8%8EOLAP/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/08/02/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E6%B5%B7%E9%87%8F%E5%B0%8F%E6%96%87%E4%BB%B6%E9%97%AE%E9%A2%98/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="BIOINSu">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BIOINSu">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/08/02/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E6%B5%B7%E9%87%8F%E5%B0%8F%E6%96%87%E4%BB%B6%E9%97%AE%E9%A2%98/" class="post-title-link" itemprop="url">海量小文件问题</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-      
-
-      <time title="创建时间：2021-08-02 08:55:08 / 修改时间：08:53:21" itemprop="dateCreated datePublished" datetime="2021-08-02T08:55:08+08:00">2021-08-02</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/" itemprop="url" rel="index"><span itemprop="name">大数据</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <table>
-<colgroup>
-<col style="width: 5%">
-<col style="width: 35%">
-<col style="width: 23%">
-<col style="width: 35%">
-</colgroup>
-<thead>
-<tr class="header">
-<th></th>
-<th>Hadoop</th>
-<th>Hive</th>
-<th>Spark</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>小文件来源</td>
-<td>数据源有大量小文件；reducer太多，每个都生成小文件</td>
-<td>Hive分区表的每个分区数据量很小</td>
-<td>sparkstreaming在每个batch结束后都会重新打开一个新的文件作为输出，因此每个batch下的每个分区生成大量小文件</td>
-</tr>
-<tr class="even">
-<td>解决方案</td>
-<td>1、在数据源处就合并小文件</td>
-<td>1、配置map前合并和reduce后合并小文件</td>
-<td>1、增加batch大小</td>
-</tr>
-<tr class="odd">
-<td></td>
-<td>2、定期运行一个MR任务，读取某一个文件夹中的所有小文件，并通过减少reduce的数量将它们重写为较少数量的大文件</td>
-<td>2、使用HAR归档文件</td>
-<td>2、通过coalesce和repartition减少分区数量</td>
-</tr>
-<tr class="even">
-<td></td>
-<td>3、SequenceFile将数据以KV的形式序列化到文件中，MR任务只需要为每个block启动一个map任务，并且保留文件名</td>
-<td>3、减少分区表中的分区数量</td>
-<td>3、自定义合并脚本</td>
-</tr>
-<tr class="odd">
-<td></td>
-<td>4、使用Hbase进行数据存储，将数据抽取过程从生成大量小HDFS文件更改为以逐条记录写入到HBase表</td>
-<td>4、数据压缩，通过序列化存储方式存储数据</td>
-<td>4、通过foreach输出类追加小文件</td>
-</tr>
-<tr class="even">
-<td></td>
-<td>5、CombineFileInputFormat是Hadoop提供的抽象类，在MR读取时合并小文件。合并的文件不会持久化到磁盘</td>
-<td></td>
-<td></td>
-</tr>
-<tr class="odd">
-<td></td>
-<td>6、自己编写特定的程序通过输出类来追加到现有的小文件</td>
-<td></td>
-<td></td>
-</tr>
-<tr class="even">
-<td></td>
-<td>7、NameNode中通过Hadoop Archive(HAR)和联邦机制解决内存不足的问题</td>
-<td></td>
-<td></td>
-</tr>
-</tbody>
-</table>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/08/02/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E6%B5%B7%E9%87%8F%E5%B0%8F%E6%96%87%E4%BB%B6%E9%97%AE%E9%A2%98/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>

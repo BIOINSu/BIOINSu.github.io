@@ -7880,4 +7880,99 @@
         <tag>Kafka</tag>
       </tags>
   </entry>
+  <entry>
+    <title>Java可重入锁</title>
+    <url>/2021/09/15/Java_%E5%8F%AF%E9%87%8D%E5%85%A5%E9%94%81/</url>
+    <content><![CDATA[<p>可重入锁，指的是以线程为单位，当一个线程获取对象锁之后，这个线程可以再次获取本对象上的锁，而其他的线程是不可以的。</p>
+<p>Java中synchronized关键字和ReentrantLock都是可重入的锁。</p>
+<p>如果锁不可重入，则当有如下情况时会产生死锁：</p>
+<a id="more"></a>
+<p>1、递归调用</p>
+<p>自己调用自己时，因为自身已经获得了这个对象的锁，如果不能再加锁的话，就会导致线程一直在等待自己释放锁，就会产生死锁。</p>
+<p>2、此线程调用同一对象其它synchronized或者有同步锁函数。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Demo</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">method1</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        method2();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">method2</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>两个方法method1和method2都用synchronized修饰了，假如某一时刻，线程A执行到了method1，此时线程A获取了这个对象的锁，而由于method2也是synchronized方法，如果synchronized不具备可重入性，此时线程A需要重新申请锁。但是这就会造成一个问题，因为线程A已经持有了该对象的锁，而又在申请获取该对象的锁，这样就会线程A一直等待永远不会获取到的锁，导致死锁发生。</p>
+<p>为什么说java中的reentrantlock的效率要比synchronise的效率高？</p>
+<p>synchronized和lock在阻塞线程时都需要上下文切换，但是lock锁有优化策略，减少了线程被阻塞的几率。早期的synchronized是一把重量级锁，没有优化机制，可以说只要有线程竞争，竞争失败的线程一定会被阻塞，而reentrantlock对于那些竞争失败的线程，并不会直接阻塞，而是会尝试重新获得锁（自旋锁），如果这时候加锁成功，则线程就无需阻塞，相当于做了一定的优化。直到 jdk1.6 之后，两种锁的性能已经相差无几，甚至 Synchronized 的自动释放锁会更好用。</p>
+<h3 id="参考资料">参考资料</h3>
+<p>https://blog.csdn.net/papamilk/article/details/80836268</p>
+<p>https://www.zhihu.com/question/53444947</p>
+<p>https://zhuanlan.zhihu.com/p/336248650</p>
+]]></content>
+      <categories>
+        <category>Java</category>
+        <category>Java原理</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
+        <tag>Java原理</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>CAP定理</title>
+    <url>/2021/09/15/%E5%88%86%E5%B8%83%E5%BC%8F_CAP%E5%AE%9A%E7%90%86/</url>
+    <content><![CDATA[<table>
+<thead>
+<tr class="header">
+<th></th>
+<th>Consistency<br>一致性</th>
+<th>Availability<br>可用性</th>
+<th>Partition tolerance<br>分区容错性</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>概念</td>
+<td>所有节点在同一时间的数据完全一致。</td>
+<td>集群整体一直能够响应客户端的读写请求。</td>
+<td>节点之间无法通信或节点故障时，<br>集群仍然可以对外提供服务。</td>
+</tr>
+</tbody>
+</table>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 17%">
+<col style="width: 41%">
+<col style="width: 41%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>满足特性</th>
+<th>描述</th>
+<th>案例</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>CP without A：无可用性</td>
+<td>集群为了提供满足一致性的数据<br>需要暂时停止集群中的某些节点的服务完成数据同步。<br>一旦发生网络故障或者消息丢失等情况，就要牺牲用户的体验，<br>等待所有数据全部一致了之后再让用户访问系统。</td>
+<td>分布式数据库，<br>如Redis、HBase等。</td>
+</tr>
+<tr class="even">
+<td>AP wihtout C：无一致性</td>
+<td>集群为了一直能够提供服务<br>当某些节点更新数据后，不能立刻同步给所有节点。<br>每个节点只能用本地数据提供服务，<br>而这样会导致全局数据的不一致性。</td>
+<td>抢购商品时显示存在库存，<br>但实际上会下单失败，<br>原因就是节点间的数据无法保持一致。</td>
+</tr>
+<tr class="odd">
+<td>CA without P：无分区容错性</td>
+<td>集群为了提供一致性数据和一直提供服务<br>就不能够进行分区。<br>这样就无法形成一个分布式系统。</td>
+<td>MySQL等单机的数据库服务。</td>
+</tr>
+</tbody>
+</table>
+<a id="more"></a>
+<h3 id="概述">概述</h3>
+<p>1998年，加州大学的计算机科学家 Eric Brewer 提出，分布式系统有三个特性。</p>
+<p>Consistency、Availability、Partition tolerance。</p>
+<p>它们的第一个字母分别是 C、A、P。Eric Brewer 说，分布式系统中这三个特性不可能同时做到，最多只能同时满足其中的两个。这个结论就叫做 CAP 定理。</p>
+<h3 id="参考资料">参考资料</h3>
+<p>https://blog.csdn.net/hong10086/article/details/88627210</p>
+]]></content>
+      <categories>
+        <category>分布式</category>
+      </categories>
+      <tags>
+        <tag>分布式</tag>
+      </tags>
+  </entry>
 </search>

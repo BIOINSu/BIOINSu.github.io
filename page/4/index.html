@@ -194,7 +194,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">77</span>
+          <span class="site-state-item-count">79</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -241,6 +241,293 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/08/03/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93_OLTP%E4%B8%8EOLAP/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BIOINSu">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BIOINSu">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/08/03/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93_OLTP%E4%B8%8EOLAP/" class="post-title-link" itemprop="url">OLTP与OLAP</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2021-08-03 08:50:42 / 修改时间：08:50:32" itemprop="dateCreated datePublished" datetime="2021-08-03T08:50:42+08:00">2021-08-03</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93/" itemprop="url" rel="index"><span itemprop="name">数据仓库</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <table>
+<colgroup>
+<col style="width: 7%">
+<col style="width: 46%">
+<col style="width: 46%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>OLTP(Online Transaction Processing)</th>
+<th>OLAT(Online Analytical Processing)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>概念</td>
+<td>在线事务处理，是一种数据处理的概念</td>
+<td>在线分析处理，是一种数据处理的概念</td>
+</tr>
+<tr class="even">
+<td>操作目的</td>
+<td>查询、改变数据</td>
+<td>分析规律、预测趋势</td>
+</tr>
+<tr class="odd">
+<td>操作对象</td>
+<td>数据库</td>
+<td>数据仓库</td>
+</tr>
+<tr class="even">
+<td>操作数据量</td>
+<td>一般仅一两张表。（数据量小）<br>点查为主，返回的是记录本身或该记录的多个列。即使是范围查询，基本上也会通过limit来限制返回的记录数。</td>
+<td>对多张表的数据进行count()、sum()和avg()等聚合方法<br>从大量数据中找出规律。<br>表中单条记录本身并不是查询所关心的，比较典型的特点包括有聚合类算子、涉及多表Join。</td>
+</tr>
+<tr class="odd">
+<td>数据模型</td>
+<td>实体-关系模型（ER）</td>
+<td>星型或雪花</td>
+</tr>
+<tr class="even">
+<td>数据时效</td>
+<td>当前数据</td>
+<td>当前以及历史</td>
+</tr>
+<tr class="odd">
+<td>数据操作</td>
+<td>DDL、DML</td>
+<td>一般不支持更新和删除</td>
+</tr>
+<tr class="even">
+<td>性能要求</td>
+<td>高吞吐、低延迟</td>
+<td>性能要求相对较低</td>
+</tr>
+<tr class="odd">
+<td>业务类型</td>
+<td>查询、支付、转账</td>
+<td>统计报表</td>
+</tr>
+</tbody>
+</table>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/08/03/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93_OLTP%E4%B8%8EOLAP/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/08/02/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E6%B5%B7%E9%87%8F%E5%B0%8F%E6%96%87%E4%BB%B6%E9%97%AE%E9%A2%98/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BIOINSu">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BIOINSu">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/08/02/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E6%B5%B7%E9%87%8F%E5%B0%8F%E6%96%87%E4%BB%B6%E9%97%AE%E9%A2%98/" class="post-title-link" itemprop="url">海量小文件问题</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2021-08-02 08:55:08 / 修改时间：08:53:21" itemprop="dateCreated datePublished" datetime="2021-08-02T08:55:08+08:00">2021-08-02</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/" itemprop="url" rel="index"><span itemprop="name">大数据</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <table>
+<colgroup>
+<col style="width: 5%">
+<col style="width: 35%">
+<col style="width: 23%">
+<col style="width: 35%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>Hadoop</th>
+<th>Hive</th>
+<th>Spark</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>小文件来源</td>
+<td>数据源有大量小文件；reducer太多，每个都生成小文件</td>
+<td>Hive分区表的每个分区数据量很小</td>
+<td>sparkstreaming在每个batch结束后都会重新打开一个新的文件作为输出，因此每个batch下的每个分区生成大量小文件</td>
+</tr>
+<tr class="even">
+<td>解决方案</td>
+<td>1、在数据源处就合并小文件</td>
+<td>1、配置map前合并和reduce后合并小文件</td>
+<td>1、增加batch大小</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>2、定期运行一个MR任务，读取某一个文件夹中的所有小文件，并通过减少reduce的数量将它们重写为较少数量的大文件</td>
+<td>2、使用HAR归档文件</td>
+<td>2、通过coalesce和repartition减少分区数量</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>3、SequenceFile将数据以KV的形式序列化到文件中，MR任务只需要为每个block启动一个map任务，并且保留文件名</td>
+<td>3、减少分区表中的分区数量</td>
+<td>3、自定义合并脚本</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>4、使用Hbase进行数据存储，将数据抽取过程从生成大量小HDFS文件更改为以逐条记录写入到HBase表</td>
+<td>4、数据压缩，通过序列化存储方式存储数据</td>
+<td>4、通过foreach输出类追加小文件</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>5、CombineFileInputFormat是Hadoop提供的抽象类，在MR读取时合并小文件。合并的文件不会持久化到磁盘</td>
+<td></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>6、自己编写特定的程序通过输出类来追加到现有的小文件</td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td>7、NameNode中通过Hadoop Archive(HAR)和联邦机制解决内存不足的问题</td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/08/02/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E6%B5%B7%E9%87%8F%E5%B0%8F%E6%96%87%E4%BB%B6%E9%97%AE%E9%A2%98/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1083,214 +1370,6 @@
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2021/07/24/%E9%9D%A2%E8%AF%95_Hive/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/23/%E9%9D%A2%E8%AF%95_%E5%88%86%E5%B8%83%E5%BC%8F/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="BIOINSu">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BIOINSu">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/07/23/%E9%9D%A2%E8%AF%95_%E5%88%86%E5%B8%83%E5%BC%8F/" class="post-title-link" itemprop="url">分布式</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-      
-
-      <time title="创建时间：2021-07-23 08:54:19 / 修改时间：08:54:04" itemprop="dateCreated datePublished" datetime="2021-07-23T08:54:19+08:00">2021-07-23</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E9%9D%A2%E8%AF%95/" itemprop="url" rel="index"><span itemprop="name">面试</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <a id="more"></a>
-<h3 id="分布式锁">分布式锁</h3>
-<p>https://blog.csdn.net/wuzhiwei549/article/details/80692278</p>
-<h3 id="分布式事务">分布式事务</h3>
-<p>https://zhuanlan.zhihu.com/p/183753774</p>
-<h3 id="参考资料">参考资料</h3>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/11/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93_%E6%95%B0%E4%BB%93%E5%88%86%E5%B1%82/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="BIOINSu">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BIOINSu">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/07/11/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93_%E6%95%B0%E4%BB%93%E5%88%86%E5%B1%82/" class="post-title-link" itemprop="url">数据仓库分层</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-07-11 14:47:33" itemprop="dateCreated datePublished" datetime="2021-07-11T14:47:33+08:00">2021-07-11</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-09-01 20:09:00" itemprop="dateModified" datetime="2021-09-01T20:09:00+08:00">2021-09-01</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93/" itemprop="url" rel="index"><span itemprop="name">数据仓库</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h3 id="总结">总结</h3>
-<p>数仓分成其实大致可以分为数据引入（数据源解耦）、数据公共（数仓）、数据应用（业务）这三层。</p>
-<p>数据公共层又可以分为明细层（DWD）、公共层（DWB/DWS）、维度层（DIM）等。</p>
-<p>总结下来可以大致分为：</p>
-<table>
-<thead>
-<tr class="header">
-<th>数仓分层</th>
-<th></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>数据应用层（ADS）</td>
-<td>存放不同业务的指标统计数据。</td>
-</tr>
-<tr class="even">
-<td>维度层（DIM）</td>
-<td>用户资料表，配置表</td>
-</tr>
-<tr class="odd">
-<td>服务数据层（DWS）</td>
-<td>针对特定的业务主题生成宽表，用于提供后续的业务查询</td>
-</tr>
-<tr class="even">
-<td>基础数据层（DWB/DWM）</td>
-<td>对数据做轻度的聚合操作，生成一些中间表，提升公共指标的复用性</td>
-</tr>
-<tr class="odd">
-<td>明细层（DWD）</td>
-<td>减少表的关联关系，提供一定的数据质量保证</td>
-</tr>
-<tr class="even">
-<td>数据引入层（ODS）</td>
-<td>存放未经过处理的原始数据</td>
-</tr>
-<tr class="odd">
-<td>数据源</td>
-<td>存储在消息队列MQ和数据库OLTP中的数据</td>
-</tr>
-</tbody>
-</table>
-<p><img src="/2021/07/11/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93_%E6%95%B0%E4%BB%93%E5%88%86%E5%B1%82/image-20210711155449936.png" alt="image-20210711155449936" style="zoom:67%;"></p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/07/11/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93_%E6%95%B0%E4%BB%93%E5%88%86%E5%B1%82/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
