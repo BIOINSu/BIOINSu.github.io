@@ -7796,4 +7796,49 @@
         <tag>数据库</tag>
       </tags>
   </entry>
+  <entry>
+    <title>Hadoop Shuffle与Spark Shuffle</title>
+    <url>/2021/09/15/Hadoop_Shuffle%E4%B8%8ESparkShuffle/</url>
+    <content><![CDATA[<table>
+<colgroup>
+<col style="width: 3%">
+<col style="width: 48%">
+<col style="width: 48%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>Hadoop Shuffle</th>
+<th>Spark Shuffle</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>流程</td>
+<td>Hadoop的Shuffle操作发生在Map之后，Reduce之前。<br>将流程分为溢写（spill）、合并（merge）、拉取（copy）、排序（sort）、合并（合并）。</td>
+<td>Spark的Shuffle操作是发生在宽依赖之间。<br>流程没有明显的划分，Reducer直接进行拉取。</td>
+</tr>
+<tr class="even">
+<td>排序</td>
+<td>在四个阶段均会发生数据排序。<br>目的是将Key相同的数据聚合在一起。</td>
+<td>Spark 1.2之后，Sort-Based Shuffle变为默认的Shuffle实现。<br>普通：和Hadoop类似；内存数据结构reduceByKey用Map，join用Array；Reducer从索引文件内读取自己应该拉取的范围。<br>bypass：按key哈希写入磁盘文件，最后将磁盘文件合并，但不排序。</td>
+</tr>
+<tr class="odd">
+<td>功能</td>
+<td>没有差别，目的都是将Key相同的数据拉取到同一个Reducer。</td>
+<td>没有差别，目的都是将Key相同的数据拉取到同一个Reducer。</td>
+</tr>
+</tbody>
+</table>
+<a id="more"></a>
+<h3 id="参考资料">参考资料</h3>
+<p>https://tech.meituan.com/2016/05/12/spark-tuning-pro.html</p>
+]]></content>
+      <categories>
+        <category>Hadoop</category>
+      </categories>
+      <tags>
+        <tag>Hadoop</tag>
+      </tags>
+  </entry>
 </search>

@@ -194,7 +194,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">75</span>
+          <span class="site-state-item-count">76</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -241,6 +241,147 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/29/Kafka_%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%A2%98/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BIOINSu">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BIOINSu">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/07/29/Kafka_%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%A2%98/" class="post-title-link" itemprop="url">Kafka常见面试题</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-07-29 07:18:40" itemprop="dateCreated datePublished" datetime="2021-07-29T07:18:40+08:00">2021-07-29</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-09-12 09:22:22" itemprop="dateModified" datetime="2021-09-12T09:22:22+08:00">2021-09-12</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Kafka/" itemprop="url" rel="index"><span itemprop="name">Kafka</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h4 id="总结">总结</h4>
+<table>
+<colgroup>
+<col style="width: 23%">
+<col style="width: 76%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>问题</th>
+<th>解答</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>为什么用</td>
+<td>缓冲、解耦、冗余、健壮与异步</td>
+</tr>
+<tr class="even">
+<td>可靠性</td>
+<td>partition向producer发送ack</td>
+</tr>
+<tr class="odd">
+<td>ack机制</td>
+<td>接收没写入、leader落盘、全部落盘</td>
+</tr>
+<tr class="even">
+<td>Exactly Once</td>
+<td>At Least Once（数据重复） + 幂等性（仅持久化一条） = Exactly Once（数据不重复且不丢失）；对&lt; PID, Partition, SeqNumber&gt;主键做缓存</td>
+</tr>
+<tr class="odd">
+<td>速度快的原因</td>
+<td>磁盘顺序写入、parition中数据分段以及段内索引、内存操作直接映射到物理硬盘</td>
+</tr>
+<tr class="even">
+<td>副本同步策略</td>
+<td>全部follower完成同步，才发送ack，需要的副本数较少（n+1）</td>
+</tr>
+<tr class="odd">
+<td>ISR</td>
+<td>意为和leader保持同步的follower集合，未定期发送ack者被踢出去</td>
+</tr>
+<tr class="even">
+<td>故障处理</td>
+<td>HW之前的数据才会对Consumer可见，所以出现故障的时候，Consumer从HW处继续消费消息</td>
+</tr>
+<tr class="odd">
+<td>读写分离</td>
+<td>延时敏感应用，数据一致性问题和延迟问题（经过磁盘）</td>
+</tr>
+<tr class="even">
+<td>消费者分区分配策略</td>
+<td>range（分区/线程）RoundRobinAssignor（排序加轮询）StickyAssignor（分区数最多差1，与上次分配相同）</td>
+</tr>
+</tbody>
+</table>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/07/29/Kafka_%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%A2%98/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1115,93 +1256,6 @@
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2021/05/13/Flink06_WindowAndTime/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/05/09/Flink05_DataStreamAPI/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="BIOINSu">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BIOINSu">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/05/09/Flink05_DataStreamAPI/" class="post-title-link" itemprop="url">05 Flink DataStream</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-05-09 11:52:17" itemprop="dateCreated datePublished" datetime="2021-05-09T11:52:17+08:00">2021-05-09</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-05-11 09:18:58" itemprop="dateModified" datetime="2021-05-11T09:18:58+08:00">2021-05-11</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/Flink/" itemprop="url" rel="index"><span itemprop="name">Flink</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>Flink中对无界数据进行计算（流处理）。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/05/09/Flink05_DataStreamAPI/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>

@@ -194,7 +194,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">75</span>
+          <span class="site-state-item-count">76</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -241,6 +241,122 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_Parquet/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BIOINSu">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BIOINSu">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_Parquet/" class="post-title-link" itemprop="url">Parquet列式存储</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-09-12 09:48:04" itemprop="dateCreated datePublished" datetime="2021-09-12T09:48:04+08:00">2021-09-12</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-09-13 09:52:44" itemprop="dateModified" datetime="2021-09-13T09:52:44+08:00">2021-09-13</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/" itemprop="url" rel="index"><span itemprop="name">大数据</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <table>
+<colgroup>
+<col style="width: 22%">
+<col style="width: 77%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>概念</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Parquet</td>
+<td>是一种列式数据存储格式，和语言、平台无关，Spark的默认存储格式。</td>
+</tr>
+<tr class="even">
+<td>数据模型</td>
+<td>Schema是类似树形结构的约束，包括message、filed。<br>每个field中又包括repetition, type, name三种描述。</td>
+</tr>
+<tr class="odd">
+<td>物理存储</td>
+<td>将数据分为Row Group，里面包含所有的列Column Chunk，每个列可分为多个Page<br>最底层还有个footer存储了文件的元数据信息和统计信息</td>
+</tr>
+<tr class="even">
+<td>Striping/Assembly</td>
+<td>这个算法是专门设计的一种数据存储方式，<strong>用于将嵌套类型的数据序列化和反序列化</strong>。<br>对于嵌套数据类型，除了存储数据本身的值 value 之外还需要两个变量 Repetition Level(R)，Definition Level(D) 才能存储其完整的信息用于<strong>序列化和反序列化</strong>数据。</td>
+</tr>
+</tbody>
+</table>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_Parquet/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1414,90 +1530,6 @@
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2021/09/04/Flink08_%E5%8F%8D%E5%8E%8B/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/09/03/Hadoop_%E7%8E%AF%E5%BD%A2%E7%BC%93%E5%86%B2%E5%8C%BA/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="BIOINSu">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BIOINSu">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/09/03/Hadoop_%E7%8E%AF%E5%BD%A2%E7%BC%93%E5%86%B2%E5%8C%BA/" class="post-title-link" itemprop="url">环形缓冲区</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-      
-
-      <time title="创建时间：2021-09-03 14:35:24 / 修改时间：14:38:26" itemprop="dateCreated datePublished" datetime="2021-09-03T14:35:24+08:00">2021-09-03</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/Hadoop/" itemprop="url" rel="index"><span itemprop="name">Hadoop</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h3 id="概念">概念</h3>
-<p>环形缓冲区是指数据<strong>被Map处理之后</strong>会先放入内存，内存中的这片区域就是环形缓冲区。</p>
-<p>环形缓冲区其实是一个简单的buffer，即一个byte类型的数组，默认大小是100M。</p>
-<p>当环形缓冲区达到容量的80%时，产生溢写（spill），数据从内存溢出到磁盘上。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/09/03/Hadoop_%E7%8E%AF%E5%BD%A2%E7%BC%93%E5%86%B2%E5%8C%BA/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
