@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.3.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/maze.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/maze.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/maze.png">
+  <link rel="mask-icon" href="/images/maze.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","images":"/images","scheme":"Mist","version":"8.2.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false}};
+  </script>
+<meta name="description" content="SQL中连续登录问题和在线峰值问题等">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SQL面试题">
+<meta property="og:url" content="http://example.com/2021/09/15/%E6%95%B0%E6%8D%AE%E5%BA%93_SQL%E9%9D%A2%E8%AF%95%E9%A2%98/index.html">
+<meta property="og:site_name" content="BIOINSu">
+<meta property="og:description" content="SQL中连续登录问题和在线峰值问题等">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-09-15T02:28:02.041Z">
+<meta property="article:modified_time" content="2021-09-15T02:55:30.024Z">
+<meta property="article:author" content="BIOINSu">
+<meta property="article:tag" content="数据库">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://example.com/2021/09/15/%E6%95%B0%E6%8D%AE%E5%BA%93_SQL%E9%9D%A2%E8%AF%95%E9%A2%98/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+<title>SQL面试题 | BIOINSu</title>
+  
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BIOINSu</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%9E%E7%BB%AD%E7%99%BB%E5%BD%95%E9%97%AE%E9%A2%98"><span class="nav-number">1.</span> <span class="nav-text">连续登录问题</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BF%9E%E7%BB%AD%E7%99%BB%E5%BD%95n%E5%A4%A9%E7%9A%84%E7%94%A8%E6%88%B7id"><span class="nav-number">1.1.</span> <span class="nav-text">连续登录n天的用户id</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%88%AA%E8%87%B3%E5%BD%93%E5%89%8D%E8%BF%9E%E7%BB%AD%E7%AD%BE%E5%88%B0%E7%9A%84%E5%A4%A9%E6%95%B0"><span class="nav-number">1.2.</span> <span class="nav-text">截至当前连续签到的天数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9C%80%E5%A4%A7%E8%BF%9E%E7%BB%AD%E5%A4%A9%E6%95%B0"><span class="nav-number">1.3.</span> <span class="nav-text">最大连续天数</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%A1%E7%AE%97%E7%94%A8%E6%88%B7%E5%9C%A8%E7%BA%BF%E5%B3%B0%E5%80%BC"><span class="nav-number">2.</span> <span class="nav-text">计算用户在线峰值</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%89%8Dn%E4%B8%AA%E9%98%85%E8%AF%BB%E9%87%8F%E6%9C%80%E9%AB%98%E7%9A%84%E6%96%87%E7%AB%A0"><span class="nav-number">3.</span> <span class="nav-text">前N个阅读量最高的文章</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">4.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">BIOINSu</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">75</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">37</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/BIOINSu" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;BIOINSu" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/09/15/%E6%95%B0%E6%8D%AE%E5%BA%93_SQL%E9%9D%A2%E8%AF%95%E9%A2%98/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BIOINSu">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BIOINSu">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          SQL面试题
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2021-09-15 10:28:02 / 修改时间：10:55:30" itemprop="dateCreated datePublished" datetime="2021-09-15T10:28:02+08:00">2021-09-15</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/" itemprop="url" rel="index"><span itemprop="name">数据库</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>SQL中连续登录问题和在线峰值问题等</p>
+<a id="more"></a>
+<h3 id="连续登录问题">连续登录问题</h3>
+<h4 id="连续登录n天的用户id">连续登录n天的用户id</h4>
+<p>1、因为每天用户登录次数可能不止一次，所以需要先将用户每天的登录日期去重。</p>
+<p>2、再用row_number() over(partition by _ order by _)函数将用户id分组，按照登陆时间进行排序。</p>
+<p>3、计算登录日期减去第二步骤得到的结果值，用户连续登陆情况下，每次相减的结果都相同。</p>
+<p>4、按照id和日期分组并求和，筛选大于等于7的即为连续7天登陆的用户。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"># id, date</span><br><span class="line"># 用户ID，用户登录时间</span><br><span class="line"></span><br><span class="line">#最后先按照id和结果列进行 group by，然后统计结果，旋转连续天数大于7的用户id</span><br><span class="line">select id,count(*) from </span><br><span class="line">(</span><br><span class="line">    #date函数仅返回日期部分，不返回时间部分，结果列表示  用户连续登陆情况下，每次相减的结果都相同</span><br><span class="line">    select *,date(date)-cum as res from </span><br><span class="line">    (</span><br><span class="line">        #按照用户分组，按照时间排序, cum是排名</span><br><span class="line">        select *,row_number() over(PARTITION by id order by date) as cum from </span><br><span class="line">        (</span><br><span class="line">            #给时间去重</span><br><span class="line">            select DISTINCT date(date) as date,id from orde</span><br><span class="line">        ) a </span><br><span class="line">    )b</span><br><span class="line">)c </span><br><span class="line">GROUP BY id,res having count(*)&gt;&#x3D;7;</span><br></pre></td></tr></table></figure>
+<p>有一张用户签到表t_user_attendence，标记每天用户是否签到（说明：该表包含所有用户所有工作日的出勤记录） ，</p>
+<p>包含三个字段：日期 fdate，用户id user_id，用户当天是否签到 is_sign_in 0否1是</p>
+<h4 id="截至当前连续签到的天数">截至当前连续签到的天数</h4>
+<p>问题1：请计算截至当前每个用户已经连续签到的天数（输出表仅包含当天签到的所有用户，计算其连续签到天数）</p>
+<p>解题方案：先找用户最近一次未签到日期，再用今天减那个日期</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> user_id,datediff(CURDATE(),maxdate) <span class="keyword">as</span> fconsecutive_days</span><br><span class="line"><span class="keyword">from</span> </span><br><span class="line">( </span><br><span class="line">   <span class="keyword">select</span> user_id, <span class="built_in">max</span>(fdate) <span class="keyword">as</span> maxdate</span><br><span class="line">   <span class="keyword">from</span> t_user_attendence</span><br><span class="line">   <span class="keyword">where</span> is_sign_in <span class="operator">=</span> <span class="number">0</span></span><br><span class="line">   <span class="keyword">group</span> <span class="keyword">by</span> user_id</span><br><span class="line">) <span class="keyword">as</span> T1</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>NOW()函数以'YYYY-MM-DD HH:MM:SS'返回当前的日期时间，可以直接存到DATETIME字段中。</p>
+<p>CURDATE()以'YYYY-MM-DD'的格式返回今天的日期，可以直接存到DATE字段中。</p>
+<p>CURTIME()以'HH:MM:SS'的格式返回当前的时间，可以直接存到TIME字段中。</p>
+</blockquote>
+<h4 id="最大连续天数">最大连续天数</h4>
+<p>问题2：请计算每个用户历史以来最大的连续签到天数</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> user_id, <span class="built_in">max</span>(days)</span><br><span class="line"><span class="keyword">from</span> </span><br><span class="line">	(</span><br><span class="line">		<span class="keyword">select</span> user_id,groupday, <span class="built_in">count</span>(<span class="operator">*</span>) <span class="keyword">as</span> days</span><br><span class="line">		<span class="keyword">from</span> </span><br><span class="line">		(</span><br><span class="line">			<span class="keyword">select</span> </span><br><span class="line">				user_id, </span><br><span class="line">                (<span class="type">date</span>(fdate) <span class="operator">-</span> <span class="built_in">row_number</span>() <span class="keyword">over</span> (<span class="keyword">partition</span> <span class="keyword">by</span> user_id <span class="keyword">order</span> <span class="keyword">by</span> <span class="type">date</span>(fdate)) ) <span class="keyword">as</span> groupday</span><br><span class="line">			<span class="keyword">from</span> user_sign</span><br><span class="line">			<span class="keyword">where</span> is_sign_in <span class="operator">=</span> <span class="number">1</span></span><br><span class="line">		)  T2</span><br><span class="line">		<span class="keyword">group</span> <span class="keyword">by</span> user_id,groupday</span><br><span class="line"></span><br><span class="line">	) T1</span><br><span class="line"><span class="keyword">group</span> <span class="keyword">by</span> user_id</span><br></pre></td></tr></table></figure>
+<h3 id="计算用户在线峰值">计算用户在线峰值</h3>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">#(timestampe:String, uid:Int, logtype:Int)</span><br><span class="line">#时间戳 用户ID 上线下线状态(-1下线，1上线)</span><br><span class="line"></span><br><span class="line">select</span><br><span class="line">    max(max_users)</span><br><span class="line">from </span><br><span class="line">(</span><br><span class="line">    select</span><br><span class="line">        sum(logtype) over(order by &#96;timestampe&#96;) as max_users #排序后第一行到本行的和，就统计了当前时刻究竟有多少人在线</span><br><span class="line">    from</span><br><span class="line">    (</span><br><span class="line">        select</span><br><span class="line">            uid,</span><br><span class="line">            unix_timestamp(timestampe) as &#96;timestampe&#96;, #unix_timestamp 自&#39;1970-01-01 00:00:00&#39;的到当前时间的秒数差</span><br><span class="line">            logtype</span><br><span class="line">        from</span><br><span class="line">            mytable</span><br><span class="line">    ) as a  #将登录时间和登出时间多列成多行</span><br><span class="line">)as b</span><br></pre></td></tr></table></figure>
+<h3 id="前n个阅读量最高的文章">前N个阅读量最高的文章</h3>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">#给定用户id，文章id，阅读时间</span><br><span class="line">select 文章id, count(*) as 阅读量</span><br><span class="line">from biao</span><br><span class="line">group by 文章id</span><br><span class="line">order by 阅读量 desc</span><br><span class="line">limit 5</span><br></pre></td></tr></table></figure>
+<h3 id="参考资料">参考资料</h3>
+<p>https://www.codeleading.com/article/5399898432/ （在线峰值）</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag"># 数据库</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/09/14/HDFS_%E5%AE%B9%E9%94%99/" rel="prev" title="HDFS容错">
+                  <i class="fa fa-chevron-left"></i> HDFS容错
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">BIOINSu</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+  <script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'none'
+      },
+      options: {
+        renderActions: {
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              const target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3.1.2/es5/tex-mml-chtml.js';
+    script.defer = true;
+    document.head.appendChild(script);
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.typesetClear();
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+
+
+</body>
+</html>

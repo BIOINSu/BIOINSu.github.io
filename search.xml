@@ -3004,19 +3004,6 @@
 <h4 id="case-when">CASE WHEN</h4>
 <figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="keyword">distinct</span> <span class="type">Date</span>,</span><br><span class="line"><span class="built_in">sum</span>(<span class="keyword">case</span> <span class="keyword">Result</span> <span class="keyword">when</span> <span class="string">&#x27;胜&#x27;</span> <span class="keyword">then</span> <span class="number">1</span> <span class="keyword">else</span> <span class="number">0</span> <span class="keyword">end</span>) <span class="keyword">as</span> <span class="string">&#x27;胜&#x27;</span>,</span><br><span class="line"><span class="built_in">sum</span>(<span class="keyword">case</span> <span class="keyword">Result</span> <span class="keyword">when</span> <span class="string">&#x27;负&#x27;</span> <span class="keyword">then</span> <span class="number">1</span> <span class="keyword">else</span> <span class="number">0</span> <span class="keyword">end</span>) <span class="keyword">as</span> <span class="string">&#x27;负&#x27;</span></span><br><span class="line"><span class="keyword">from</span> test</span><br><span class="line"><span class="keyword">group</span> <span class="keyword">by</span> <span class="type">date</span></span><br></pre></td></tr></table></figure>
 <figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    STUDENT_NAME,</span><br><span class="line">    (<span class="keyword">CASE</span> <span class="keyword">WHEN</span> score <span class="operator">&lt;</span> <span class="number">60</span> <span class="keyword">THEN</span> <span class="string">&#x27;不及格&#x27;</span></span><br><span class="line">        <span class="keyword">WHEN</span> score <span class="operator">&gt;=</span> <span class="number">60</span> <span class="keyword">AND</span> score <span class="operator">&lt;</span> <span class="number">80</span> <span class="keyword">THEN</span> <span class="string">&#x27;及格&#x27;</span></span><br><span class="line">        <span class="keyword">WHEN</span> score <span class="operator">&gt;=</span> <span class="number">80</span> <span class="keyword">THEN</span> <span class="string">&#x27;优秀&#x27;</span></span><br><span class="line">        <span class="keyword">WHEN</span> score <span class="keyword">IS</span> <span class="keyword">NULL</span> <span class="keyword">THEN</span> <span class="string">&#x27;缺席考试&#x27;</span></span><br><span class="line">        <span class="keyword">ELSE</span> <span class="string">&#x27;异常&#x27;</span> <span class="keyword">END</span>) <span class="keyword">AS</span> REMARK</span><br><span class="line"><span class="keyword">FROM</span></span><br><span class="line">    <span class="keyword">TABLE</span></span><br></pre></td></tr></table></figure>
-<h3 id="面试">面试</h3>
-<h4 id="查询连续登录用户">查询连续登录用户</h4>
-<p>1、因为每天用户登录次数可能不止一次，所以需要先将用户每天的登录日期去重。</p>
-<p>2、再用row_number() over(partition by _ order by _)函数将用户id分组，按照登陆时间进行排序。</p>
-<p>3、计算登录日期减去第二步骤得到的结果值，用户连续登陆情况下，每次相减的结果都相同。</p>
-<p>4、按照id和日期分组并求和，筛选大于等于7的即为连续7天登陆的用户。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># id, date</span><br><span class="line"># 用户ID，用户登录时间</span><br><span class="line"></span><br><span class="line">#最后先按照id和结果列进行 group by，然后统计结果，旋转连续天数大于7的用户id</span><br><span class="line">select id,count(*) from </span><br><span class="line">(</span><br><span class="line">    #date函数仅返回日期部分，不返回时间部分，结果列表示  用户连续登陆情况下，每次相减的结果都相同</span><br><span class="line">    select *,date(日期)-cum as 结果 from </span><br><span class="line">    (</span><br><span class="line">        #按照用户分组，按照时间排序, cum是排名</span><br><span class="line">        select *,row_number() over(PARTITION by id order by 日期) as cum from </span><br><span class="line">        (</span><br><span class="line">            #给时间去重</span><br><span class="line">            select DISTINCT date(date) as 日期,id from orde) a </span><br><span class="line">    )b</span><br><span class="line">)c GROUP BY id,结果 having count(*)&gt;&#x3D;7;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<h4 id="计算用户在线峰值">计算用户在线峰值</h4>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#(timestampe:String, uid:Int, logtype:Int)</span><br><span class="line">#时间戳 用户ID 上线下线状态(-1下线，1上线)</span><br><span class="line"></span><br><span class="line">select</span><br><span class="line">    max(max_users)</span><br><span class="line">from </span><br><span class="line">(</span><br><span class="line">    select</span><br><span class="line">        sum(logtype) over(order by &#96;timestampe&#96;) as max_users #排序后第一行到本行的和，就统计了当前时刻究竟有多少人在线</span><br><span class="line">    from</span><br><span class="line">    (</span><br><span class="line">        select</span><br><span class="line">            uid,</span><br><span class="line">            unix_timestamp(timestampe) as &#96;timestampe&#96;, #unix_timestamp 自&#39;1970-01-01 00:00:00&#39;的到当前时间的秒数差</span><br><span class="line">            logtype</span><br><span class="line">        from</span><br><span class="line">            mytable</span><br><span class="line">    ) as a  #将登录时间和登出时间多列成多行</span><br><span class="line">)as b</span><br></pre></td></tr></table></figure>
-<h4 id="前n个阅读量最高的文章">前N个阅读量最高的文章</h4>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#给定用户id，文章id，阅读时间</span><br><span class="line">select 文章id, count(*) as 阅读量</span><br><span class="line">from biao</span><br><span class="line">group by 文章id</span><br><span class="line">order by 阅读量 desc</span><br><span class="line">limit 5</span><br></pre></td></tr></table></figure>
-<h3 id="参考资料">参考资料</h3>
-<p>https://www.codeleading.com/article/5399898432/ （在线峰值）</p>
 ]]></content>
       <categories>
         <category>数据库</category>
@@ -7767,6 +7754,46 @@
       </categories>
       <tags>
         <tag>Hadoop</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>SQL面试题</title>
+    <url>/2021/09/15/%E6%95%B0%E6%8D%AE%E5%BA%93_SQL%E9%9D%A2%E8%AF%95%E9%A2%98/</url>
+    <content><![CDATA[<p>SQL中连续登录问题和在线峰值问题等</p>
+<a id="more"></a>
+<h3 id="连续登录问题">连续登录问题</h3>
+<h4 id="连续登录n天的用户id">连续登录n天的用户id</h4>
+<p>1、因为每天用户登录次数可能不止一次，所以需要先将用户每天的登录日期去重。</p>
+<p>2、再用row_number() over(partition by _ order by _)函数将用户id分组，按照登陆时间进行排序。</p>
+<p>3、计算登录日期减去第二步骤得到的结果值，用户连续登陆情况下，每次相减的结果都相同。</p>
+<p>4、按照id和日期分组并求和，筛选大于等于7的即为连续7天登陆的用户。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># id, date</span><br><span class="line"># 用户ID，用户登录时间</span><br><span class="line"></span><br><span class="line">#最后先按照id和结果列进行 group by，然后统计结果，旋转连续天数大于7的用户id</span><br><span class="line">select id,count(*) from </span><br><span class="line">(</span><br><span class="line">    #date函数仅返回日期部分，不返回时间部分，结果列表示  用户连续登陆情况下，每次相减的结果都相同</span><br><span class="line">    select *,date(date)-cum as res from </span><br><span class="line">    (</span><br><span class="line">        #按照用户分组，按照时间排序, cum是排名</span><br><span class="line">        select *,row_number() over(PARTITION by id order by date) as cum from </span><br><span class="line">        (</span><br><span class="line">            #给时间去重</span><br><span class="line">            select DISTINCT date(date) as date,id from orde</span><br><span class="line">        ) a </span><br><span class="line">    )b</span><br><span class="line">)c </span><br><span class="line">GROUP BY id,res having count(*)&gt;&#x3D;7;</span><br></pre></td></tr></table></figure>
+<p>有一张用户签到表t_user_attendence，标记每天用户是否签到（说明：该表包含所有用户所有工作日的出勤记录） ，</p>
+<p>包含三个字段：日期 fdate，用户id user_id，用户当天是否签到 is_sign_in 0否1是</p>
+<h4 id="截至当前连续签到的天数">截至当前连续签到的天数</h4>
+<p>问题1：请计算截至当前每个用户已经连续签到的天数（输出表仅包含当天签到的所有用户，计算其连续签到天数）</p>
+<p>解题方案：先找用户最近一次未签到日期，再用今天减那个日期</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> user_id,datediff(CURDATE(),maxdate) <span class="keyword">as</span> fconsecutive_days</span><br><span class="line"><span class="keyword">from</span> </span><br><span class="line">( </span><br><span class="line">   <span class="keyword">select</span> user_id, <span class="built_in">max</span>(fdate) <span class="keyword">as</span> maxdate</span><br><span class="line">   <span class="keyword">from</span> t_user_attendence</span><br><span class="line">   <span class="keyword">where</span> is_sign_in <span class="operator">=</span> <span class="number">0</span></span><br><span class="line">   <span class="keyword">group</span> <span class="keyword">by</span> user_id</span><br><span class="line">) <span class="keyword">as</span> T1</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>NOW()函数以'YYYY-MM-DD HH:MM:SS'返回当前的日期时间，可以直接存到DATETIME字段中。</p>
+<p>CURDATE()以'YYYY-MM-DD'的格式返回今天的日期，可以直接存到DATE字段中。</p>
+<p>CURTIME()以'HH:MM:SS'的格式返回当前的时间，可以直接存到TIME字段中。</p>
+</blockquote>
+<h4 id="最大连续天数">最大连续天数</h4>
+<p>问题2：请计算每个用户历史以来最大的连续签到天数</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> user_id, <span class="built_in">max</span>(days)</span><br><span class="line"><span class="keyword">from</span> </span><br><span class="line">	(</span><br><span class="line">		<span class="keyword">select</span> user_id,groupday, <span class="built_in">count</span>(<span class="operator">*</span>) <span class="keyword">as</span> days</span><br><span class="line">		<span class="keyword">from</span> </span><br><span class="line">		(</span><br><span class="line">			<span class="keyword">select</span> </span><br><span class="line">				user_id, </span><br><span class="line">                (<span class="type">date</span>(fdate) <span class="operator">-</span> <span class="built_in">row_number</span>() <span class="keyword">over</span> (<span class="keyword">partition</span> <span class="keyword">by</span> user_id <span class="keyword">order</span> <span class="keyword">by</span> <span class="type">date</span>(fdate)) ) <span class="keyword">as</span> groupday</span><br><span class="line">			<span class="keyword">from</span> user_sign</span><br><span class="line">			<span class="keyword">where</span> is_sign_in <span class="operator">=</span> <span class="number">1</span></span><br><span class="line">		)  T2</span><br><span class="line">		<span class="keyword">group</span> <span class="keyword">by</span> user_id,groupday</span><br><span class="line"></span><br><span class="line">	) T1</span><br><span class="line"><span class="keyword">group</span> <span class="keyword">by</span> user_id</span><br></pre></td></tr></table></figure>
+<h3 id="计算用户在线峰值">计算用户在线峰值</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#(timestampe:String, uid:Int, logtype:Int)</span><br><span class="line">#时间戳 用户ID 上线下线状态(-1下线，1上线)</span><br><span class="line"></span><br><span class="line">select</span><br><span class="line">    max(max_users)</span><br><span class="line">from </span><br><span class="line">(</span><br><span class="line">    select</span><br><span class="line">        sum(logtype) over(order by &#96;timestampe&#96;) as max_users #排序后第一行到本行的和，就统计了当前时刻究竟有多少人在线</span><br><span class="line">    from</span><br><span class="line">    (</span><br><span class="line">        select</span><br><span class="line">            uid,</span><br><span class="line">            unix_timestamp(timestampe) as &#96;timestampe&#96;, #unix_timestamp 自&#39;1970-01-01 00:00:00&#39;的到当前时间的秒数差</span><br><span class="line">            logtype</span><br><span class="line">        from</span><br><span class="line">            mytable</span><br><span class="line">    ) as a  #将登录时间和登出时间多列成多行</span><br><span class="line">)as b</span><br></pre></td></tr></table></figure>
+<h3 id="前n个阅读量最高的文章">前N个阅读量最高的文章</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#给定用户id，文章id，阅读时间</span><br><span class="line">select 文章id, count(*) as 阅读量</span><br><span class="line">from biao</span><br><span class="line">group by 文章id</span><br><span class="line">order by 阅读量 desc</span><br><span class="line">limit 5</span><br></pre></td></tr></table></figure>
+<h3 id="参考资料">参考资料</h3>
+<p>https://www.codeleading.com/article/5399898432/ （在线峰值）</p>
+]]></content>
+      <categories>
+        <category>数据库</category>
+      </categories>
+      <tags>
+        <tag>数据库</tag>
       </tags>
   </entry>
 </search>
