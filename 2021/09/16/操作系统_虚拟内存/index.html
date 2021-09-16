@@ -22,24 +22,24 @@
     var NexT = window.NexT || {};
     var CONFIG = {"hostname":"example.com","root":"/","images":"/images","scheme":"Mist","version":"8.2.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false}};
   </script>
-<meta name="description" content="概念 解释     Hadoop排序发生阶段 Map1、环形缓冲区到达阈值后先排序再溢写2、溢写后不同分区的文件进行归并排序形成一个文件Reduce1、Reduce对每一个接收到的分区在内存中进行merge和排序2、当溢写到磁盘的文件数量达到合并因子后进行归并排序3、Reduce Task前分组排序   排序发生原因 Map减轻reduce端排序的">
+<meta name="description" content="概念 解释     早期内存分配存在的问题 1、进程地址空间不隔离。2、内存使用效率低。3、进程运行地址不确定。   虚拟内存技术 本质上就是增加一个中间层，利用一种间接的地址访问方法访问物理内存。   分段管理 采用虚拟内存技术。进程的地址空间按照进程自身的逻辑关系（数据段、代码段等）划分为若干个段。内存分配时以段位单位进行分配，每个段在">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Hadoop中的排序">
-<meta property="og:url" content="http://example.com/2021/09/12/Hadoop_%E6%8E%92%E5%BA%8F/index.html">
+<meta property="og:title" content="虚拟内存技术">
+<meta property="og:url" content="http://example.com/2021/09/16/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F_%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98/index.html">
 <meta property="og:site_name" content="BIOINSu">
-<meta property="og:description" content="概念 解释     Hadoop排序发生阶段 Map1、环形缓冲区到达阈值后先排序再溢写2、溢写后不同分区的文件进行归并排序形成一个文件Reduce1、Reduce对每一个接收到的分区在内存中进行merge和排序2、当溢写到磁盘的文件数量达到合并因子后进行归并排序3、Reduce Task前分组排序   排序发生原因 Map减轻reduce端排序的">
+<meta property="og:description" content="概念 解释     早期内存分配存在的问题 1、进程地址空间不隔离。2、内存使用效率低。3、进程运行地址不确定。   虚拟内存技术 本质上就是增加一个中间层，利用一种间接的地址访问方法访问物理内存。   分段管理 采用虚拟内存技术。进程的地址空间按照进程自身的逻辑关系（数据段、代码段等）划分为若干个段。内存分配时以段位单位进行分配，每个段在">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://example.com/2021/09/12/Hadoop_%E6%8E%92%E5%BA%8F/image-20210912110532672.png">
-<meta property="og:image" content="http://example.com/2021/09/12/Hadoop_%E6%8E%92%E5%BA%8F/image-20210912111555925.png">
-<meta property="article:published_time" content="2021-09-12T01:47:13.883Z">
-<meta property="article:modified_time" content="2021-09-12T07:06:43.867Z">
+<meta property="og:image" content="http://example.com/2021/09/16/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F_%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98/image-20210916105514274.png">
+<meta property="og:image" content="http://example.com/2021/09/16/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F_%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98/image-20210916111126625.png">
+<meta property="article:published_time" content="2021-09-16T02:41:01.528Z">
+<meta property="article:modified_time" content="2021-09-16T03:23:13.758Z">
 <meta property="article:author" content="BIOINSu">
-<meta property="article:tag" content="Hadoop">
+<meta property="article:tag" content="操作系统">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://example.com/2021/09/12/Hadoop_%E6%8E%92%E5%BA%8F/image-20210912110532672.png">
+<meta name="twitter:image" content="http://example.com/2021/09/16/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F_%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98/image-20210916105514274.png">
 
 
-<link rel="canonical" href="http://example.com/2021/09/12/Hadoop_%E6%8E%92%E5%BA%8F/">
+<link rel="canonical" href="http://example.com/2021/09/16/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F_%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98/">
 
 
 <script class="page-configurations">
@@ -51,7 +51,7 @@
     lang   : 'zh-CN'
   };
 </script>
-<title>Hadoop中的排序 | BIOINSu</title>
+<title>虚拟内存技术 | BIOINSu</title>
   
 
 
@@ -189,7 +189,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#mr%E7%9A%84%E5%9F%BA%E6%9C%AC%E8%BF%87%E7%A8%8B"><span class="nav-number">1.</span> <span class="nav-text">MR的基本过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%92%E5%BA%8F%E5%8F%91%E7%94%9F%E7%9A%84%E9%98%B6%E6%AE%B5"><span class="nav-number">2.</span> <span class="nav-text">排序发生的阶段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%92%E5%BA%8F%E5%8E%9F%E5%9B%A0"><span class="nav-number">3.</span> <span class="nav-text">排序原因</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%81%BF%E5%85%8D%E6%8E%92%E5%BA%8F"><span class="nav-number">4.</span> <span class="nav-text">避免排序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">5.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%97%A9%E6%9C%9F%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D"><span class="nav-number">1.</span> <span class="nav-text">早期内存分配</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E6%AE%B5"><span class="nav-number">2.</span> <span class="nav-text">分段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E9%A1%B5"><span class="nav-number">3.</span> <span class="nav-text">分页</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">4.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -260,7 +260,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/09/12/Hadoop_%E6%8E%92%E5%BA%8F/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/09/16/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F_%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -273,7 +273,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          Hadoop中的排序
+          虚拟内存技术
         </h1>
 
         <div class="post-meta-container">
@@ -285,7 +285,7 @@
       <span class="post-meta-item-text">发表于</span>
       
 
-      <time title="创建时间：2021-09-12 09:47:13 / 修改时间：15:06:43" itemprop="dateCreated datePublished" datetime="2021-09-12T09:47:13+08:00">2021-09-12</time>
+      <time title="创建时间：2021-09-16 10:41:01 / 修改时间：11:23:13" itemprop="dateCreated datePublished" datetime="2021-09-16T10:41:01+08:00">2021-09-16</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -293,7 +293,7 @@
       </span>
       <span class="post-meta-item-text">分类于</span>
         <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/Hadoop/" itemprop="url" rel="index"><span itemprop="name">Hadoop</span></a>
+          <a href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" itemprop="url" rel="index"><span itemprop="name">操作系统</span></a>
         </span>
     </span>
 
@@ -309,8 +309,8 @@
     <div class="post-body" itemprop="articleBody">
         <table>
 <colgroup>
-<col style="width: 23%">
-<col style="width: 76%">
+<col style="width: 26%">
+<col style="width: 73%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -320,62 +320,60 @@
 </thead>
 <tbody>
 <tr class="odd">
-<td>Hadoop排序发生阶段</td>
-<td>Map<br>1、环形缓冲区到达阈值后先排序再溢写<br>2、溢写后不同分区的文件进行归并排序形成一个文件<br>Reduce<br>1、Reduce对每一个接收到的分区在内存中进行merge和排序<br>2、当溢写到磁盘的文件数量达到合并因子后进行归并排序<br>3、Reduce Task前分组排序</td>
+<td>早期内存分配存在的问题</td>
+<td>1、进程地址空间不隔离。<br>2、内存使用效率低。<br>3、进程运行地址不确定。</td>
 </tr>
 <tr class="even">
-<td>排序发生原因</td>
-<td>Map<br>减轻reduce端排序的压力。<br>Reduce<br>选择排序的方式将Key相同的数据分到一起，为之后的Reduce Task做准备。</td>
+<td>虚拟内存技术</td>
+<td>本质上就是增加一个中间层，利用一种间接的地址访问方法访问物理内存。</td>
 </tr>
 <tr class="odd">
-<td>如何避免排序</td>
-<td>Hadoop2.x是可以关闭的，将Reduce Task设置为0，没有Reduce Task就不会发生排序。</td>
+<td>分段管理</td>
+<td>采用虚拟内存技术。<br>进程的地址空间按照进程自身的逻辑关系（数据段、代码段等）划分为若干个段。<br>内存分配时以段位单位进行分配，每个段在内存中占连续空间，但各段之间可以不相邻。<br>解决问题1、3，不能解决2。</td>
+</tr>
+<tr class="even">
+<td>分页管理</td>
+<td>采用虚拟内存技术。<br>将地址空间分成许多的页，进程运行时用到哪页就为哪页分配内存，没用到的页暂时保留在硬盘上。<br>一个可执行文件(PE文件)其实就是一些编译链接好的数据和指令的集合，它也会被分成很多页，在PE文件执行的过程中，它往内存中装载的单位就是页。</td>
 </tr>
 </tbody>
 </table>
 <a id="more"></a>
-<h3 id="mr的基本过程">MR的基本过程</h3>
-<p><img src="/2021/09/12/Hadoop_%E6%8E%92%E5%BA%8F/image-20210912110532672.png" alt="image-20210912110532672" style="zoom:150%;"></p>
-<p>① : 每个数据的Split对应一个Map任务作为Map的输入，一般来说是HDFS的一个Block。</p>
-<p>② : Map产生的数据会先写入到一个环形的内存的Buffer空间里。</p>
-<p>③ : 当Buffer满了以后, 会Spill溢出数据到磁盘里。在溢出之前会先按照Partition函数对数据进行<strong>分区</strong>(默认是取key的hash值然后根据Reducer的个数进行取模)，然后按照Key进行<strong>排序</strong>(快速排序)。如果设置了Combiner会在写入磁盘前，对数据进行Combine操作，通过减少key的数据量来减轻Reducer拉取数据的网络传输。</p>
-<p>④ : 最后将所有的溢出文件<strong>合并</strong>为一个文件，合并的过程中先按照分区再按照key进行<strong>排序</strong>（归并排序）, 如果溢出文件超过一定的数量（可配置)， 会在合并的前还会执行Combine操作（如果设置了Combiner）。</p>
-<p>⑤ : 当Map端有任务完成后，Reducer端就会启动对应的fetch &amp; copy线程去从Map端复制数据。</p>
-<p>⑥ : 当Copy过来的数据内存中放不下后，会往<strong>磁盘写</strong>，写之前会先进行merge和sort操作（归并排序），combiner操作，最终会合并得到一份Reduce的输入数据。</p>
-<p>⑦ : 当输入数据准备好后，进行Reduce操作。</p>
-<p>⑧ : 输出数据到指定的位置。</p>
-<h3 id="排序发生的阶段">排序发生的阶段</h3>
-<figure>
-<img src="/2021/09/12/Hadoop_%E6%8E%92%E5%BA%8F/image-20210912111555925.png" alt="image-20210912111555925"><figcaption aria-hidden="true">image-20210912111555925</figcaption>
-</figure>
-<p><strong>Map阶段</strong></p>
-<p>1、环形缓冲区的数据达到阈值后，对key按照字典序进行排序（快速排序，只排索引，不会移动数据在缓冲区的位置），然后再根据分区溢写到磁盘上。</p>
-<p>2、对溢写到磁盘的不同分区的数据进行归并排序。</p>
-<p><strong>Reduce阶段</strong></p>
-<p>3、当reduce接收到所有map传输过来的数据之后，对每一个接收到的分区在内存中进行merge和排序，当内存不足时就会溢写到磁盘上再次形成小文件。</p>
-<p>4、当溢写到磁盘的文件数量达到合并因子（默认是10）的时候就会进行合并和排序（归并排序）。比如map有50个输出，那么合并将进行5趟。每趟将10个文件合并成一个文件。</p>
-<p>5、Reduce Task前分组排序：自定义。</p>
-<h3 id="排序原因">排序原因</h3>
-<p><strong>Map端排序的目的</strong></p>
-<p>减轻reduce端排序的压力。在Map端排序后，每一个分区内的数据已经是部分有序的了，这样当不同机器的分区被拉取到同一个reducer内的时候，就可以执行归并排序的过程，而不需要对所有数据再次排序。</p>
-<p><strong>Reduce端排序的目的</strong></p>
-<p>在Reduce阶段需要将Key相同的数据放在一起进行聚合操作。每一个Reducer内可能存在多种不同Key的数据，为了将Key相同的数据放在一起，有两种实现方式：</p>
-<p>1、Hash方法，太过于耗费内存。</p>
-<p>2、外部排序方法，可以降低内存的使用量，只要磁盘空间足够即可。</p>
-<p>因此，选择排序的方式将Key相同的数据分到一起，为之后的Reduce Task做准备。</p>
-<h3 id="避免排序">避免排序</h3>
-<p>这些排序过程在Hadoop1.x中无法避免，也不可以关闭，但Hadoop2.x是可以关闭的，将Reduce Task设置为0，即不使用 Reducer ，则不会排序。</p>
+<h3 id="早期内存分配">早期内存分配</h3>
+<p><img src="/2021/09/16/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F_%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98/image-20210916105514274.png" alt="image-20210916105514274" style="zoom:50%;"></p>
+<p>1、一个程序想要运行，需要全都装入内存，即预先在内存上分配好它需要的所有空间。运行多个程序时，必须保证这些程序用到的内存总量要小于计算机实际物理内存的大小。</p>
+<p>2、程序中访问的内存地址都是实际的物理内存地址。</p>
+<p>带来的问题：</p>
+<p>1、进程地址空间不隔离。由于程序都是直接访问物理内存，所以恶意程序可以随意修改别的进程的内存数据，以达到破坏的目的。</p>
 <blockquote>
-<p>为了避免触发 Reduce 任务，你可以在驱动程序（driver program）通过调用下面的方法来把 reduce 任务数设置为 0。</p>
-<p>job.setNumreduceTasks(0)</p>
-<p>设置完之后，Hadoop 作业在执行的时候就只有 map 阶段，而不会发生 reduce 了。</p>
+<p>举个例子，假设我有两个程序，一个是程序A，一个是程序B。程序A在内存中的地址<strong>假设</strong>是0x00000000<sub>0x00000099，程序B在内存中的地址<strong>假设</strong>是0x00000100</sub>x00000199。那么假设你在程序A中，本来想操作地址0x00000050，不小心<strong>手残</strong>操作了地址0x00000150，那么，不好的事情或许会发生。你影响了程序A也就罢了，你把程序B也搞了一顿。</p>
 </blockquote>
+<p>2、内存使用效率低。空闲的内存碎片无法得到有效利用，进程在切换（上下文切换）的时候需要将大量数据装载导出，效率低下。</p>
+<blockquote>
+<p>举个例子，假设你写了3个程序，其中程序A大小为10M，程序B为70M，程序C的大小为30M你的计算机的内存总共有100M。</p>
+<p>这三个程序加起来有110M，显然这三个程序是无法同时存在于内存中的。</p>
+</blockquote>
+<p>3、进程运行地址不确定。操作系统会在可用物理内存上随机分配物理地址，导致地址不确定。</p>
+<blockquote>
+<p>因为我们程序每次要运行的时候，都是需要装载到内存中的，假设你在程序中<strong>写死</strong>了要操作某个地址的内存，例如你要地址0x00000010。但是问题来了，你能够保证你操作的地址0x00000010真的就是你<strong>原来</strong>想操作的那个位置吗？很可能程序第一次装载进内存的位置是0x00000000<sub>0x00000099，而程序第二次运行的时候，这个程序装载进内存的位置变成了0x00000200</sub>0x00000299，而你操作的0x00000010地址压根就不是属于这个程序所占有的内存。</p>
+</blockquote>
+<h3 id="分段">分段</h3>
+<p>为了解决问题1、3，提出虚拟地址的概念。本质上就是增加一个中间层，利用一种间接的地址访问方法访问物理内存。进程中访问的内存地址不再是实际的物理内存地址，而是一个虚拟地址，然后由操作系统将这个虚拟地址映射到适当的物理内存地址上。这样，只要操作系统处理好虚拟地址到物理内存地址的映射，就可以保证不同的程序最终访问的内存地址位于不同的区域，彼此没有重叠，就可以达到内存地址空间隔离的效果。</p>
+<p><img src="/2021/09/16/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F_%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98/image-20210916111126625.png" alt="image-20210916111126625" style="zoom: 50%;"></p>
+<p>内存的分段管理，就是进程的地址空间按照进程自身的逻辑关系（数据段、代码段等）划分为若干个段，每个段都有一个段名，每段从0开始编址。 内存分配时以段位单位进行分配，每个段在内存中占连续空间，但各段之间可以不相邻。由于时按照逻辑功能划分，用户编程更方便，程序可读性更高。</p>
+<p>案例：</p>
+<p>假设有两个进程A和B。</p>
+<p>进程A所需内存大小为10M，其虚拟地址空间分布在<strong>0x00000000</strong>到0x00A00000。</p>
+<p>进程B所需内存为100M，其虚拟地址空间分布为<strong>0x00000000</strong>到0x06400000。</p>
+<p>那么按照分段的映射方法，进程A在物理内存上映射区域为0x00100000到0x00B00000，，进程B在物理内存上映射区域为0x00C00000到0x07000000。于是进程A和进程B分别被映射到了不同的内存区间，彼此互不重叠，实现了地址隔离。从应用程序的角度看来，进程A的地址空间就是分布在0x00000000到0x00A00000，在做开发时，开发人员只需访问这段区间上的地址即可。应用程序并不关心进程A究竟被映射到物理内存的那块区域上了，所以程序的运行地址也就是相当于说是确定的了。</p>
+<p>缺陷：</p>
+<p>分段管理依然没有解决内存的使用效率问题。在分段的映射方法中，每次换入换出内存的都是整个程序，这样会造成大量的磁盘访问操作，导致效率低下。</p>
+<p>实际上，程序的运行有局部性特点，在某个时间段内，程序只是访问程序的一小部分数据，也就是说，程序的大部分数据在一个时间段内都不会被用到。基于这种情况，人们想到了粒度更小的内存分割和映射方法，这种方法就是分页(Paging)。</p>
+<h3 id="分页">分页</h3>
+<p>分页的基本方法是，将地址空间分成许多的页。每页的大小由CPU决定，然后由操作系统选择页的大小。目前Inter系列的CPU支持4KB或4MB的页大小，而PC上目前都选择使用4KB。按这种选择，4GB虚拟地址空间共可以分成1048576个页，512M的物理内存可以分为131072个页。显然虚拟空间的页数要比物理空间的页数多得多。</p>
+<p>在分段的方法中，每次程序运行时总是把程序全部装入内存，而分页的方法则有所不同。分页的思想是程序运行时用到哪页就为哪页分配内存，没用到的页暂时保留在硬盘上。当用到这些页时再在物理地址空间中为这些页分配内存，然后建立虚拟地址空间中的页和刚分配的物理内存页间的映射。</p>
+<p>一个可执行文件(PE文件)其实就是一些编译链接好的数据和指令的集合，它也会被分成很多页，在PE文件执行的过程中，它往内存中装载的单位就是页。</p>
 <h3 id="参考资料">参考资料</h3>
-<p>https://dataelement.top/2021/01/04/MapReduce-in-Hadoop/#map-reduce%E7%9A%84%E8%BF%87%E7%A8%8B%E8%AF%A6%E7%BB%86%E8%A7%A3%E6%9E%90</p>
-<p>https://blog.csdn.net/qq_42246689/article/details/84590215?utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7Edefault-8.no_search_link&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7Edefault-8.no_search_link</p>
-<p>https://blog.csdn.net/qq_45287265/article/details/107781030?utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7Edefault-3.no_search_link&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7Edefault-3.no_search_link</p>
-<p>https://blog.csdn.net/Betty_betty_betty/article/details/103727691</p>
-<p>https://www.hadoopdoc.com/mapreduce/mapreduce-only-map</p>
+<p>https://www.cnblogs.com/myseries/p/12487211.html</p>
 
     </div>
 
@@ -385,21 +383,18 @@
 
     <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/Hadoop/" rel="tag"># Hadoop</a>
+              <a href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" rel="tag"># 操作系统</a>
           </div>
 
         
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/2021/09/12/Hbase_%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86/" rel="prev" title="Hbase基本原理">
-                  <i class="fa fa-chevron-left"></i> Hbase基本原理
+                <a href="/2021/09/15/%E5%88%86%E5%B8%83%E5%BC%8F_CAP%E5%AE%9A%E7%90%86/" rel="prev" title="CAP定理">
+                  <i class="fa fa-chevron-left"></i> CAP定理
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_Parquet/" rel="next" title="Parquet列式存储">
-                  Parquet列式存储 <i class="fa fa-chevron-right"></i>
-                </a>
             </div>
           </div>
     </footer>

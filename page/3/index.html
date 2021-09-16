@@ -194,7 +194,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">79</span>
+          <span class="site-state-item-count">80</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -241,6 +241,101 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/09/06/%E9%9D%A2%E8%AF%95_0906%E7%BD%91%E6%98%93%E4%BA%92%E5%A8%B1%E4%B8%80%E9%9D%A2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BIOINSu">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BIOINSu">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/09/06/%E9%9D%A2%E8%AF%95_0906%E7%BD%91%E6%98%93%E4%BA%92%E5%A8%B1%E4%B8%80%E9%9D%A2/" class="post-title-link" itemprop="url">0906网易互娱一面</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-09-06 20:16:29" itemprop="dateCreated datePublished" datetime="2021-09-06T20:16:29+08:00">2021-09-06</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-09-10 09:20:53" itemprop="dateModified" datetime="2021-09-10T09:20:53+08:00">2021-09-10</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E9%9D%A2%E8%AF%95/" itemprop="url" rel="index"><span itemprop="name">面试</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h3 id="hive">Hive</h3>
+<h4 id="分区">分区</h4>
+<p><strong>分区表是如何加速的</strong></p>
+<p>将数据按字段值划分开。</p>
+<p>从文件上来看，每个分区就是HDFS上的一个目录。（可以指定多个分区形成多级分区）</p>
+<p>查询时通过where进行分区过滤，查询指定分区的数据，避免全表扫描，加快查询速度。</p>
+<p><strong>分区表分区字段的指导原则</strong></p>
+<p>1、分区字段名称不能是表中已经存在的字段名称，因为分区字段最终也会以虚拟字段的形式显示在表结构上。</p>
+<p>2、最好选用那些字段值分布均匀的字段来作为分区字段，否则单个文件可能会过大，失去了分区表的意义。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/09/06/%E9%9D%A2%E8%AF%95_0906%E7%BD%91%E6%98%93%E4%BA%92%E5%A8%B1%E4%B8%80%E9%9D%A2/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -602,10 +697,16 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2021-09-03 14:35:24 / 修改时间：14:38:26" itemprop="dateCreated datePublished" datetime="2021-09-03T14:35:24+08:00">2021-09-03</time>
+      <time title="创建时间：2021-09-03 14:35:24" itemprop="dateCreated datePublished" datetime="2021-09-03T14:35:24+08:00">2021-09-03</time>
     </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-09-16 09:10:58" itemprop="dateModified" datetime="2021-09-16T09:10:58+08:00">2021-09-16</time>
+      </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
         <i class="far fa-folder"></i>
@@ -630,6 +731,9 @@
 <p>环形缓冲区是指数据<strong>被Map处理之后</strong>会先放入内存，内存中的这片区域就是环形缓冲区。</p>
 <p>环形缓冲区其实是一个简单的buffer，即一个byte类型的数组，默认大小是100M。</p>
 <p>当环形缓冲区达到容量的80%时，产生溢写（spill），数据从内存溢出到磁盘上。</p>
+<blockquote>
+<p>阈值太小经常溢写导致IO操作影响性能，阈值太大影响内存并阻塞map的写操作。</p>
+</blockquote>
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2021/09/03/Hadoop_%E7%8E%AF%E5%BD%A2%E7%BC%93%E5%86%B2%E5%8C%BA/#more" rel="contents">
@@ -1185,96 +1289,6 @@
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2021/08/08/%E9%9D%A2%E8%AF%95_0807%E8%99%BE%E7%9A%AE%E4%B8%80%E9%9D%A2/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/08/03/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93_%E6%95%B0%E6%8D%AE%E5%BB%BA%E6%A8%A1/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="BIOINSu">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BIOINSu">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/08/03/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93_%E6%95%B0%E6%8D%AE%E5%BB%BA%E6%A8%A1/" class="post-title-link" itemprop="url">数据建模</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-08-03 08:53:12" itemprop="dateCreated datePublished" datetime="2021-08-03T08:53:12+08:00">2021-08-03</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-09-07 11:27:05" itemprop="dateModified" datetime="2021-09-07T11:27:05+08:00">2021-09-07</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93/" itemprop="url" rel="index"><span itemprop="name">数据仓库</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h3 id="基本概念">基本概念</h3>
-<h4 id="事实表">事实表</h4>
-<p>事实表（Fact Table）用来记录具体事件，包含了每个事件的具体要素，以及具体发生的事情。<strong>也就是每一条数据记录了发生的一件事情</strong>。例子中就通过一条事实表记录说明了某个地方（地域ID）的某人（用户ID）在某个时间（时间ID）通过某种方式（支付ID）买了某产品（产品ID）。</p>
-<p><img src="/2021/08/03/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93_%E6%95%B0%E6%8D%AE%E5%BB%BA%E6%A8%A1/image-20210803085511700.png" alt="image-20210803085511700" style="zoom:67%;"></p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/08/03/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93_%E6%95%B0%E6%8D%AE%E5%BB%BA%E6%A8%A1/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
