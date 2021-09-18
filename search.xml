@@ -8056,4 +8056,78 @@
         <tag>操作系统</tag>
       </tags>
   </entry>
+  <entry>
+    <title>Java FullGC</title>
+    <url>/2021/09/18/Java_FullGC/</url>
+    <content><![CDATA[<table>
+<colgroup>
+<col style="width: 18%">
+<col style="width: 81%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>概念</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Full GC排查</td>
+<td>1、查看GC日志<br>2、jstat命令查看实时GC，判断老年代占用空间<br>3、通过jmap命令获取dump文件<br>4、通过JVisualVM分析对象的引用链的方式来定位具体频繁创建对象的地方</td>
+</tr>
+<tr class="even">
+<td>常见FullGC情况</td>
+<td>1、System.gc()方法的调用 <br>2、老年代空间不足<br>3、方法区空间不足<br>4、CMS GC时出现promotion failed和concurrent mode failure<br>5、堆中分配很大的对象（代码中频繁地去分配大对象）</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<a id="more"></a>
+<h3 id="背景">背景</h3>
+<p>GC就是Java的垃圾回收机制，通常来说，GC主要针对的是堆(java heap)区。</p>
+<p>Java heap是分代的（年轻代和老年代），分代就是为了优化性能，如果不分代，那就会导致所有对象揉在一块，那样GC就会对堆区域进行全扫描。因此，分代可以大大提升GC性能。</p>
+<p>分代的原理就是根据堆中对象的存活周期进行分代，年轻代中，每次垃圾回收都有大批对象死去，只有少量存活，而老年代中存放的对象存活率高。</p>
+<p>Full GC：无官方定义，通常意义上而言指的是一次特殊GC的行为描述，这次GC会回收整个堆的内存，包含老年代，新生代，metaspace等。</p>
+<p>但是实际情况中，我们主要看的是gc.log日志，其中也会发现在部分gc日志头中也有Full GC字眼，此处表示含义是在这次GC的全过程中，都是STW的状态，也就是说在这次GC的全过程中所有用户线程都是处于暂停的状态。</p>
+<h3 id="full-gc排查">Full GC排查</h3>
+<p>1、查看GC日志</p>
+<p><img src="/2021/09/18/Java_FullGC/image-20210918110533578.png" alt="image-20210918110533578" style="zoom: 80%;"></p>
+<p>2、jstat命令查看实时GC</p>
+<p>使用jstat -gcutil 5280 1000查看实时GC情况，年老代采用的是CMS收集器，发现触发Full GC的原因是年老代占用空间达到指定阈值70%（-XX:CMSInitiatingOccupancyFraction=70）。</p>
+<p>3、通过jmap命令获取dump文件，通过jvisualvm分析对象的引用链</p>
+<p>通过jmap -dump:format=b,file=temp.dump 5280 dump文件，然后下载到本地通过jvisualvm分析对象的引用链的方式来定位具体频繁创建对象的地方，dump文件下载下来有5G多，整个导入过程都花了10多分钟。想查看所占空间较多对象的引用链，直接OOM了，dump对象太大了。这时候就换了种思路，查看占用空间比较大的一系列对象，看能不能找出什么端倪。占用空间最大的几类对象如下图：</p>
+<figure>
+<img src="/2021/09/18/Java_FullGC/image-20210918111100815.png" alt="image-20210918111100815"><figcaption aria-hidden="true">image-20210918111100815</figcaption>
+</figure>
+<blockquote>
+<p>java dump heap 是分配给实例类和数组对象运行数据区，所有java线程在运行期间共享heap中的数据。Java heap dump相当于java应用在运行的时候在某个时间点上打了个快照(snapshot)。</p>
+<p>Dump文件是进程的内存镜像，可以把程序的执行状态保存在dump文件中。</p>
+<p>jmap命令(Java Memory Map)是其中之一。主要用于打印指定Java进程(或核心文件、远程调试服务器)的共享对象内存映射或堆内存细节。jmap命令可以获得运行中的jvm的堆的快照。</p>
+<p>JVisualVM是JDK自带的JVM性能检测工具，路径在%JAVA_HOME%/bin下面。</p>
+</blockquote>
+<h3 id="常见fullgc情况">常见FullGC情况</h3>
+<p>1、System.gc()方法的调用</p>
+<p>2、老年代空间不足</p>
+<p>3、方法区空间不足</p>
+<p>4、CMS GC时出现promotion failed和concurrent mode failure</p>
+<p>5、堆中分配很大的对象（代码中频繁地去分配大对象）</p>
+<h3 id="参考资料">参考资料</h3>
+<p>https://blog.csdn.net/weixin_39309402/article/details/104756815</p>
+<p>https://www.cnblogs.com/w-y-c-m/p/9919717.html</p>
+<p>https://zhuanlan.zhihu.com/p/119401318</p>
+<p>https://zhuanlan.zhihu.com/p/66492995</p>
+<p>https://blog.csdn.net/tianya3530/article/details/88309852</p>
+]]></content>
+      <categories>
+        <category>Java</category>
+        <category>Java原理</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
+        <tag>Java原理</tag>
+      </tags>
+  </entry>
 </search>

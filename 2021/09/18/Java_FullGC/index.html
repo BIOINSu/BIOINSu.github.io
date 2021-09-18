@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.3.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/maze.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/maze.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/maze.png">
+  <link rel="mask-icon" href="/images/maze.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","images":"/images","scheme":"Mist","version":"8.2.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false}};
+  </script>
+<meta name="description" content="概念 解释     Full GC排查 1、查看GC日志2、jstat命令查看实时GC，判断老年代占用空间3、通过jmap命令获取dump文件4、通过JVisualVM分析对象的引用链的方式来定位具体频繁创建对象的地方   常见FullGC情况 1、System.gc()方法的调用 2、老年代空间不足3、方法区空间不足4、CMS GC时出现prom">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java FullGC">
+<meta property="og:url" content="http://example.com/2021/09/18/Java_FullGC/index.html">
+<meta property="og:site_name" content="BIOINSu">
+<meta property="og:description" content="概念 解释     Full GC排查 1、查看GC日志2、jstat命令查看实时GC，判断老年代占用空间3、通过jmap命令获取dump文件4、通过JVisualVM分析对象的引用链的方式来定位具体频繁创建对象的地方   常见FullGC情况 1、System.gc()方法的调用 2、老年代空间不足3、方法区空间不足4、CMS GC时出现prom">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2021/09/18/Java_FullGC/image-20210918110533578.png">
+<meta property="og:image" content="http://example.com/2021/09/18/Java_FullGC/image-20210918111100815.png">
+<meta property="article:published_time" content="2021-09-18T01:46:20.199Z">
+<meta property="article:modified_time" content="2021-09-18T03:26:49.608Z">
+<meta property="article:author" content="BIOINSu">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="Java原理">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2021/09/18/Java_FullGC/image-20210918110533578.png">
+
+
+<link rel="canonical" href="http://example.com/2021/09/18/Java_FullGC/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+<title>Java FullGC | BIOINSu</title>
+  
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BIOINSu</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#full-gc%E6%8E%92%E6%9F%A5"><span class="nav-number">2.</span> <span class="nav-text">Full GC排查</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%B8%E8%A7%81fullgc%E6%83%85%E5%86%B5"><span class="nav-number">3.</span> <span class="nav-text">常见FullGC情况</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">4.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">BIOINSu</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">81</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">37</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/BIOINSu" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;BIOINSu" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/09/18/Java_FullGC/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BIOINSu">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BIOINSu">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Java FullGC
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2021-09-18 09:46:20 / 修改时间：11:26:49" itemprop="dateCreated datePublished" datetime="2021-09-18T09:46:20+08:00">2021-09-18</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Java/Java%E5%8E%9F%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">Java原理</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <table>
+<colgroup>
+<col style="width: 18%">
+<col style="width: 81%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>概念</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Full GC排查</td>
+<td>1、查看GC日志<br>2、jstat命令查看实时GC，判断老年代占用空间<br>3、通过jmap命令获取dump文件<br>4、通过JVisualVM分析对象的引用链的方式来定位具体频繁创建对象的地方</td>
+</tr>
+<tr class="even">
+<td>常见FullGC情况</td>
+<td>1、System.gc()方法的调用 <br>2、老年代空间不足<br>3、方法区空间不足<br>4、CMS GC时出现promotion failed和concurrent mode failure<br>5、堆中分配很大的对象（代码中频繁地去分配大对象）</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<a id="more"></a>
+<h3 id="背景">背景</h3>
+<p>GC就是Java的垃圾回收机制，通常来说，GC主要针对的是堆(java heap)区。</p>
+<p>Java heap是分代的（年轻代和老年代），分代就是为了优化性能，如果不分代，那就会导致所有对象揉在一块，那样GC就会对堆区域进行全扫描。因此，分代可以大大提升GC性能。</p>
+<p>分代的原理就是根据堆中对象的存活周期进行分代，年轻代中，每次垃圾回收都有大批对象死去，只有少量存活，而老年代中存放的对象存活率高。</p>
+<p>Full GC：无官方定义，通常意义上而言指的是一次特殊GC的行为描述，这次GC会回收整个堆的内存，包含老年代，新生代，metaspace等。</p>
+<p>但是实际情况中，我们主要看的是gc.log日志，其中也会发现在部分gc日志头中也有Full GC字眼，此处表示含义是在这次GC的全过程中，都是STW的状态，也就是说在这次GC的全过程中所有用户线程都是处于暂停的状态。</p>
+<h3 id="full-gc排查">Full GC排查</h3>
+<p>1、查看GC日志</p>
+<p><img src="/2021/09/18/Java_FullGC/image-20210918110533578.png" alt="image-20210918110533578" style="zoom: 80%;"></p>
+<p>2、jstat命令查看实时GC</p>
+<p>使用jstat -gcutil 5280 1000查看实时GC情况，年老代采用的是CMS收集器，发现触发Full GC的原因是年老代占用空间达到指定阈值70%（-XX:CMSInitiatingOccupancyFraction=70）。</p>
+<p>3、通过jmap命令获取dump文件，通过jvisualvm分析对象的引用链</p>
+<p>通过jmap -dump:format=b,file=temp.dump 5280 dump文件，然后下载到本地通过jvisualvm分析对象的引用链的方式来定位具体频繁创建对象的地方，dump文件下载下来有5G多，整个导入过程都花了10多分钟。想查看所占空间较多对象的引用链，直接OOM了，dump对象太大了。这时候就换了种思路，查看占用空间比较大的一系列对象，看能不能找出什么端倪。占用空间最大的几类对象如下图：</p>
+<figure>
+<img src="/2021/09/18/Java_FullGC/image-20210918111100815.png" alt="image-20210918111100815"><figcaption aria-hidden="true">image-20210918111100815</figcaption>
+</figure>
+<blockquote>
+<p>java dump heap 是分配给实例类和数组对象运行数据区，所有java线程在运行期间共享heap中的数据。Java heap dump相当于java应用在运行的时候在某个时间点上打了个快照(snapshot)。</p>
+<p>Dump文件是进程的内存镜像，可以把程序的执行状态保存在dump文件中。</p>
+<p>jmap命令(Java Memory Map)是其中之一。主要用于打印指定Java进程(或核心文件、远程调试服务器)的共享对象内存映射或堆内存细节。jmap命令可以获得运行中的jvm的堆的快照。</p>
+<p>JVisualVM是JDK自带的JVM性能检测工具，路径在%JAVA_HOME%/bin下面。</p>
+</blockquote>
+<h3 id="常见fullgc情况">常见FullGC情况</h3>
+<p>1、System.gc()方法的调用</p>
+<p>2、老年代空间不足</p>
+<p>3、方法区空间不足</p>
+<p>4、CMS GC时出现promotion failed和concurrent mode failure</p>
+<p>5、堆中分配很大的对象（代码中频繁地去分配大对象）</p>
+<h3 id="参考资料">参考资料</h3>
+<p>https://blog.csdn.net/weixin_39309402/article/details/104756815</p>
+<p>https://www.cnblogs.com/w-y-c-m/p/9919717.html</p>
+<p>https://zhuanlan.zhihu.com/p/119401318</p>
+<p>https://zhuanlan.zhihu.com/p/66492995</p>
+<p>https://blog.csdn.net/tianya3530/article/details/88309852</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Java/" rel="tag"># Java</a>
+              <a href="/tags/Java%E5%8E%9F%E7%90%86/" rel="tag"># Java原理</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/09/16/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F_%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98/" rel="prev" title="虚拟内存技术">
+                  <i class="fa fa-chevron-left"></i> 虚拟内存技术
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">BIOINSu</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+  <script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'none'
+      },
+      options: {
+        renderActions: {
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              const target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3.1.2/es5/tex-mml-chtml.js';
+    script.defer = true;
+    document.head.appendChild(script);
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.typesetClear();
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+
+
+</body>
+</html>
