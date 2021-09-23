@@ -8130,4 +8130,276 @@
         <tag>Java原理</tag>
       </tags>
   </entry>
+  <entry>
+    <title>剑指Offer 动态规划</title>
+    <url>/2021/09/23/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E5%89%91%E6%8C%87_%E5%8A%A8%E8%A7%84/</url>
+    <content><![CDATA[<p>剑指Offer中关于动态规划的题目解析。</p>
+<a id="more"></a>
+<h3 id="跳台阶">01 跳台阶</h3>
+<p><strong>题目描述</strong></p>
+<p>一只青蛙一次可以跳上1级台阶，也可以跳上2级。求该青蛙跳上一个n级的台阶总共有多少种跳法（先后次序不同算不同的结果）。</p>
+<p><strong>题解</strong></p>
+<p>时间复杂度O(<span class="math inline">\(n\)</span>)：需要遍历一次n</p>
+<p>空间复杂度O(1)：只需要保存前两个值</p>
+<p>动态规划的思想是，令dp[i]表示当前青蛙在第i个台阶，那么它可以由dp[i-1]级台阶跳1级，也可以由dp[i-2]级台阶跳2级，因此可得到递推式为dp[i] = dp[i-1] + dp[i-2]。最便捷的方法为可以发现dp[i]只和dp的前两个值有关，因此只需要保存前两个值即可。</p>
+<h2 id="section"><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">JumpFloor</span><span class="params">(<span class="keyword">int</span> target)</span> </span>&#123;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span>(target &lt;= <span class="number">2</span>)</span><br><span class="line">            <span class="keyword">return</span> target;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">int</span> one = <span class="number">2</span>;<span class="comment">//dp[i-1]</span></span><br><span class="line">        <span class="keyword">int</span> two = <span class="number">1</span>;<span class="comment">//dp[i-2]</span></span><br><span class="line">        <span class="keyword">int</span> res = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">3</span>; i &lt;= target; i++)&#123;</span><br><span class="line">            res = one + two;</span><br><span class="line">            two = one;</span><br><span class="line">            one = res;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> res;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></h2>
+<h3 id="变态跳台阶">02 变态跳台阶</h3>
+<p>题目描述</p>
+<p>一只青蛙一次可以跳上1级台阶，也可以跳上2级……它也可以跳上n级。求该青蛙跳上一个n级的台阶总共有多少种跳法。</p>
+<p>题解</p>
+<p>时间复杂度O(<span class="math inline">\(n\)</span>)：需要遍历一次n</p>
+<p>空间复杂度O(1)：只需要保存前一个值</p>
+<p>dp[i]表示当前青蛙在第i个台阶，则它可以由dp[i-1]级台阶跳1级，也可以由dp[i-2]级台阶跳2级，由dp[i-3]级台阶跳3级等等。</p>
+<p>则dp[i] = dp[i-1] + dp[i-2] + dp[i-3] + ... dp[1] + dp[0]。</p>
+<p>同理可得dp[i-1] = dp[i-2] + dp[i-3] + ... dp[1] + dp[0]。</p>
+<p>dp[i] - dp[i-1] = dp[i-1]，则dp[i] = 2dp[i-1]。</p>
+<h2 id="section-1"><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">JumpFloorII</span><span class="params">(<span class="keyword">int</span> target)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(target &lt;= <span class="number">1</span>)</span><br><span class="line">            <span class="keyword">return</span> target;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">int</span> res = <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">2</span>; i &lt;= target; i++)&#123;</span><br><span class="line">             res = res*<span class="number">2</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> res;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></h2>
+<h3 id="矩形覆盖">03 矩形覆盖</h3>
+<p><strong>题目描述</strong></p>
+<p>我们可以用2*1的小矩形横着或者竖着去覆盖更大的矩形。请问用n个2*1的小矩形无重叠地覆盖一个2*n的大矩形，总共有多少种方法？</p>
+<p>比如n=3时，2*3的矩形块有3种覆盖方法 。</p>
+<p><strong>题解</strong></p>
+<p>时间复杂度O(<span class="math inline">\(n\)</span>)：需要遍历一次n</p>
+<p>空间复杂度O(1)：只需要保存前两个值</p>
+<p>假设dp[i]表示用i个小矩形覆盖一个2*i的大矩形的方法，则dp[i]可以由dp[i-1]加上一个竖的矩形，也可以由dp[i-2]加上两个横的矩形，因此递推式可以归纳为：dp[i] = dp[i-1] + dp[i-2]。</p>
+<h2 id="section-2"><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">rectCover</span><span class="params">(<span class="keyword">int</span> target)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(target &lt;= <span class="number">2</span>)</span><br><span class="line">            <span class="keyword">return</span> target;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">int</span> one = <span class="number">2</span>;<span class="comment">//dp[i-1]</span></span><br><span class="line">        <span class="keyword">int</span> two = <span class="number">1</span>;<span class="comment">//dp[i-2]</span></span><br><span class="line">        <span class="keyword">int</span> res = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">3</span>; i &lt;= target; i++)&#123;</span><br><span class="line">            res = one + two;</span><br><span class="line">            two = one;</span><br><span class="line">            one = res;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">		<span class="keyword">return</span> res;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></h2>
+<h3 id="矩阵中的路径">04 矩阵中的路径</h3>
+<p><strong>题目描述</strong></p>
+<p>请设计一个函数，用来判断在一个矩阵中是否存在一条包含某字符串所有字符的路径。路径可以从矩阵中的任意一个格子开始，每一步可以在矩阵中向左，向右，向上，向下移动一个格子。如果一条路径经过了矩阵中的某一个格子，则该路径不能再进入该格子。</p>
+<p>例如 <span class="math inline">\(\begin{bmatrix} a &amp; b &amp; c &amp;e \\ s &amp; f &amp; c &amp; s \\ a &amp; d &amp; e&amp; e\\ \end{bmatrix}\)</span> 矩阵中包含一条字符串"bcced"的路径，但是矩阵中不包含"abcb"路径，因为字符串的第一个字符b占据了矩阵中的第一行第二个格子之后，路径不能再次进入该格子。</p>
+<p>输入</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&quot;ABCESFCSADEE&quot;,3,4,&quot;ABCCED&quot;</span><br></pre></td></tr></table></figure>
+<p>返回值</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">true</span><br></pre></td></tr></table></figure>
+<p><strong>题解</strong></p>
+<p>时间复杂度O(<span class="math inline">\(n3^k\)</span>)：矩阵每个位置进行一次递归，每次递归时，对于字符串<span class="math inline">\(k\)</span>的每个字符来说，除了到达这个字符的方向之外，还有三个方向可以走，因此递归的复杂度为<span class="math inline">\(3^k\)</span>。</p>
+<p>空间复杂度O(<span class="math inline">\(k\)</span>)：递归深度为字符串长度</p>
+<p>显然，这道题可以在矩阵中每个元素上进行递归，递归就是朝着四个方向走，并判断是否能够匹配所有字符。</p>
+<p>问题1：<strong>如何表示当前所在元素</strong>？</p>
+<p>牛客网中，矩阵的表示方式是一维数组，给出矩阵的row和col数。</p>
+<p>那么，用x表示row，y表示col，则取值范围是<span class="math inline">\(0\leq x \leq row-1\)</span>，<span class="math inline">\(0\leq y \leq col-1\)</span>。</p>
+<p>如何从x、y转为一维数组的坐标？index = x*col +y。（x*col表示经过了多少个行，一行的元素个数刚好等于列的数量）</p>
+<p>问题2：<strong>如何朝着四个方向走</strong>？</p>
+<p>x-1，y+0向下</p>
+<p>x+0，y+1向右</p>
+<p>x+1，y+0向上</p>
+<p>x+0，y-1向左</p>
+<p>数组{-1, 0, 1, 0, -1}，x = index，y = index + 1 刚好可以表示这四个方向。</p>
+<p>问题3：<strong>递归中的退出条件？</strong></p>
+<p>首先，假如当前坐标（x，y）超出范围，则立即退出。</p>
+<p>判断（x，y）所代表的元素是否已经走过，走过则退出。</p>
+<p>然后，判断（x，y）所代表的元素和字符串位置是否相等，不等则退出。</p>
+<p>判断字符串是否匹配完成，完成则直接返回true，不需要再向下递归。</p>
+<p>若没有退出，则将当前位置标记为走过，并朝着四个方向递归，某个方向上返回存在，即立刻返回存在。</p>
+<p>四个方向都回退到这里时，将当前位置标记为没走过，且字符串位置回退，返回不存在。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">char</span>[] gmatrix = <span class="keyword">null</span>;</span><br><span class="line">    <span class="keyword">char</span>[] gstr = <span class="keyword">null</span>;</span><br><span class="line">    <span class="keyword">int</span> grows = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">int</span> gcols = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">int</span> cur = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">int</span>[] dir = <span class="keyword">new</span> <span class="keyword">int</span>[]&#123;-<span class="number">1</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>, -<span class="number">1</span>&#125;;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">hasPath</span><span class="params">(<span class="keyword">char</span>[] matrix, <span class="keyword">int</span> rows, <span class="keyword">int</span> cols, <span class="keyword">char</span>[] str)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="comment">//给全局变量赋值</span></span><br><span class="line">    	gmatrix = matrix;</span><br><span class="line">        gstr = str;</span><br><span class="line">        grows = rows;</span><br><span class="line">        gcols = cols;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">//每个位置上都进行递归判断</span></span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> x = <span class="number">0</span>; x &lt; rows; x++)&#123;</span><br><span class="line">            <span class="keyword">for</span>(<span class="keyword">int</span> y = <span class="number">0</span>; y &lt; cols; y++)&#123;</span><br><span class="line">                <span class="keyword">if</span>(Recur(x, y, cur))</span><br><span class="line">                    <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">Recur</span><span class="params">(<span class="keyword">int</span> x, <span class="keyword">int</span> y, <span class="keyword">int</span> cur)</span></span>&#123;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">//判断越界</span></span><br><span class="line">        <span class="keyword">if</span>(x &lt; <span class="number">0</span> || x &gt;= grows || y &lt; <span class="number">0</span> || y &gt;= gcols )</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">//走过，或是字符不等</span></span><br><span class="line">        <span class="keyword">if</span>(gmatrix[x*gcols+y] == <span class="string">&#x27;#&#x27;</span> || gmatrix[x*gcols+y] != gstr[cur])</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">//是否匹配到了字符串底部</span></span><br><span class="line">        <span class="keyword">if</span>(cur == gstr.length - <span class="number">1</span>)</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">//记录已经走过</span></span><br><span class="line">        <span class="keyword">char</span> ch = gmatrix[x*gcols+y];</span><br><span class="line">        gmatrix[x*gcols+y] = <span class="string">&#x27;#&#x27;</span>;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">//朝着四个方向递归</span></span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">4</span>; i++)&#123;</span><br><span class="line">            <span class="keyword">if</span>(Recur(x+dir[i], y+dir[i+<span class="number">1</span>], cur+<span class="number">1</span>))</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">//到这里说明没有匹配的，将字符恢复原状</span></span><br><span class="line">        gmatrix[x*gcols+y] = ch;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>数据结构与算法</category>
+        <category>剑指Offer</category>
+      </categories>
+      <tags>
+        <tag>数据结构与算法</tag>
+        <tag>剑指Offer</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>剑指Offer 数学</title>
+    <url>/2021/09/23/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E5%89%91%E6%8C%87_%E6%95%B0%E5%AD%A6/</url>
+    <content><![CDATA[<p>剑指Offer中关于数学的题目解析。</p>
+<a id="more"></a>
+<h3 id="求123...n">01 求1+2+3+...+n</h3>
+<p><strong>题目描述</strong></p>
+<p>求1+2+3+...+n，要求不能使用乘除法、for、while、if、else、switch、case等关键字及条件判断语句（A?B:C）。</p>
+<p>输入</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">5</span><br></pre></td></tr></table></figure>
+<p>返回值</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">15</span><br></pre></td></tr></table></figure>
+<p><strong>题解</strong></p>
+<p>时间复杂度O(n​)：需要开启n个递归函数</p>
+<p>空间复杂度O(n)：递归深度达到n</p>
+<p>传统的递归操作为：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">sumNums</span><span class="params">(<span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">          <span class="comment">//结束条件</span></span><br><span class="line">          <span class="keyword">if</span> (n == <span class="number">1</span>) &#123;</span><br><span class="line">              <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">          &#125;</span><br><span class="line">          <span class="comment">//返回</span></span><br><span class="line">          <span class="keyword">return</span> sumNums(n-<span class="number">1</span>) + n;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>由题目可知不能使用if语句，为了使得递归有终结，需要进行判断，则联想到判断语句的等价代替，即逻辑操作符与或非，因为它们也能进行判断。采用逻辑符短路操作，可以在第一个条件为false时，不再执行后面的语句，即不再向下递归。</p>
+<p>A &amp;&amp; B 若A == false，则不执行B</p>
+<p>A || B 若A == true，则不执行B</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> sum = <span class="number">0</span>; <span class="comment">//递归部分只负责返回加数，由全局变量记录加和</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">Sum_Solution</span><span class="params">(<span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">//当 n = 1 时，由于逻辑符短路操作，则不再继续递归</span></span><br><span class="line">        <span class="keyword">boolean</span> x = (n&gt;<span class="number">1</span>) &amp;&amp; ( Sum_Solution(n-<span class="number">1</span>) &gt; <span class="number">0</span> ); </span><br><span class="line">        </span><br><span class="line">        sum = sum + n;</span><br><span class="line">        <span class="keyword">return</span> sum;</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="不用加减乘除做加法">02 不用加减乘除做加法</h3>
+<p><strong>题目描述</strong></p>
+<p>写一个函数，求两个整数之和，要求在函数体内不得使用+、-、*、/四则运算符号。</p>
+<p>输入</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1,2</span><br></pre></td></tr></table></figure>
+<p>返回值</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">3</span><br></pre></td></tr></table></figure>
+<p><strong>题解</strong></p>
+<p>时间复杂度O(1​)：最差情况下需要循环32 次</p>
+<p>空间复杂度O(1)：使用常数大小额外空间</p>
+<p>不是四则运算就是二进制运算，则显然此处使用二进制运算。</p>
+<p>例如：</p>
+<p>12的二进制：1100 15的二进制：1111</p>
+<p>1.各位置上的数字分别相加先不管进位的问题：</p>
+<blockquote>
+<p>1100 + 1111 = 0011 得到临时二进制结果：0011</p>
+</blockquote>
+<p>2.计算进位的数字（两者同时为1的位置才会进位1）：</p>
+<blockquote>
+<p>0100 + 0100 = 1000 1000 + 1000= 10000 得到进位结果：10000+1000=11000</p>
+</blockquote>
+<p>3.将进位和临时结果相加得到结果</p>
+<blockquote>
+<p>0011 + 11000 = 11011（十进制：27）</p>
+</blockquote>
+<p>第一步中<strong>不进位的加法通过异或实现</strong>（相同为0，不同为1，刚好满足）：a^b = 1100 ^ 1111 = 0011</p>
+<p>第二步中<strong>进位的加法通过与操作实现</strong>，并在最低位补充0，即<strong>左移1位</strong>：(a&amp;b) &lt;&lt; 1 = (1100&amp;1111)&lt;&lt;1 = 1100&lt;&lt;1 = 11000</p>
+<p>第三步，两个结果相加就是重复第一步、第二步。即 1100 + 1111 = 0011 + 11000。再次对0011和11000通过不进位加法和进位加法进行变化，直到进位加法为0 。</p>
+<p>为什么不断变化之后，进位会变成0呢？因为不断变化时会进行a&amp;b操作，并且左移，左移在低位补充0，当a和b有1的位置完全错开时，整个计算结果就会变成0。</p>
+<h2 id="section"><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">Add</span><span class="params">(<span class="keyword">int</span> num1,<span class="keyword">int</span> num2)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> a = num1^num2; <span class="comment">//存储非进位和</span></span><br><span class="line">        <span class="keyword">int</span> b = (num1&amp;num2)&lt;&lt;<span class="number">1</span>; <span class="comment">//存储进位和</span></span><br><span class="line">        <span class="keyword">while</span>(b!=<span class="number">0</span>)&#123;</span><br><span class="line">            <span class="keyword">int</span> tmp = a;</span><br><span class="line">            a = a^b;</span><br><span class="line">            b = (tmp&amp;b)&lt;&lt;<span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> a;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></h2>
+<h3 id="二进制中1的个数">03 二进制中1的个数</h3>
+<p><strong>题目描述</strong></p>
+<p>输入一个整数，输出该数32位二进制表示中1的个数。其中负数用补码表示。</p>
+<p>输入</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">10</span><br></pre></td></tr></table></figure>
+<p>返回值</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">2</span><br></pre></td></tr></table></figure>
+<p><strong>题解</strong></p>
+<p>时间复杂度O(<span class="math inline">\(log_2n\)</span>)：基本运算的复杂度均为O(1)，逐个位数判断需要经历<span class="math inline">\(log_2n\)</span>次，<span class="math inline">\(n\)</span>表示这个十进制数，<span class="math inline">\(log_2n\)</span>即表示最高位是1时究竟有几位数。（如<span class="math inline">\(log_24=2，log_216=4\)</span>，即4的二进制是2位，16的二进制为4位）</p>
+<p>空间复杂度O(1)：使用常数大小额外空间</p>
+<p>Java中，与运算<strong>&amp;将两边的数转换为二进制位</strong>，然后运算最终值。</p>
+<p>可以<strong>循环判断</strong> ：</p>
+<ol type="1">
+<li>判断 n 最右一位是否为 1（通过与运算） ，根据结果计数。</li>
+<li>将 n 右移一位（本题要求把数字 n 看作无符号数，因此使用 <strong>无符号右移 &gt;&gt;</strong> 操作）。</li>
+</ol>
+<p><img src="/2021/09/23/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E5%89%91%E6%8C%87_%E6%95%B0%E5%AD%A6/Users\lenovo\0.png" style="zoom: 50%;"></p>
+<p>时间复杂度O(<span class="math inline">\(logM\)</span>)：基本运算的复杂度均为O(1)，M表示该整数的二进制表示中1的个数。</p>
+<p>空间复杂度O(1)：使用常数大小额外空间</p>
+<p>巧用n&amp;(n-1)来不停地消去n的二进制表示中的1。</p>
+<p>分析n以n-1两个数的差别，</p>
+<ul>
+<li>如果n != 0，那么其二进制位中至少有一个1</li>
+<li>如果n的最低位是1（奇数），那么n-1正好把这个最低位的1变成0，其他位不变</li>
+<li>如果n的最低位是0（偶数），那么假设其右起第一个1位于m位，即m位后面全是0，那么n-1的第m位由1变成0，而第m位后面的所有0均变成1（<strong>还原进位的操作</strong>），m位之前的所有位保持不变。</li>
+</ul>
+<p>当n&amp;(n-1)时，最右边的1即被消去变为0，其他位置的数值不变。</p>
+<p><img src="/2021/09/23/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E5%89%91%E6%8C%87_%E6%95%B0%E5%AD%A6/Users\lenovo\1.png" style="zoom:67%;"></p>
+<h2 id="section-1"><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">NumberOf1</span><span class="params">(<span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">int</span> res = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">while</span>(n != <span class="number">0</span>)&#123; <span class="comment">//不为0的时候，二进制的表示中必定有一个位是1</span></span><br><span class="line">            res++;</span><br><span class="line">            n = n&amp;(n-<span class="number">1</span>); <span class="comment">//消去一个1</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> res;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></h2>
+<h3 id="数值的整数次方">04 数值的整数次方</h3>
+<p><strong>题目描述</strong></p>
+<p>给定一个double类型的浮点数base和int类型的整数exponent。求base的exponent次方。</p>
+<p>保证base和exponent不同时为0</p>
+<p>输入</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">2,3</span><br></pre></td></tr></table></figure>
+<p>返回值</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">8.00000</span><br></pre></td></tr></table></figure>
+<p><strong>题解</strong></p>
+<p>时间复杂度O(<span class="math inline">\(logn\)</span>)：将原本的<span class="math inline">\(n\)</span>次循环转换成二进制的位数<span class="math inline">\(logn\)</span></p>
+<p>空间复杂度O(1)：使用常数大小额外空间</p>
+<p>快速幂的二进制角度。设要求<span class="math inline">\(x^n\)</span>次方，例如<span class="math inline">\(2^3\)</span>。<span class="math inline">\(n\)</span>的二进制表示为<span class="math inline">\(b_m...b_2b_1\)</span>。</p>
+<p><span class="math inline">\(n\)</span>由二进制转换为十进制可以表示为：<span class="math inline">\(n=1b_1+2b_2+4b_3+...2^{m-1}b_m\)</span>。其中每一项<span class="math inline">\(2^{m-1}b_m\)</span>可以看成是2的幂再乘上0或1。例如<span class="math inline">\(3\)</span>的二进制表示为<span class="math inline">\(11\)</span>，<span class="math inline">\(3 = 2^0\cdot 1 + 2^1\cdot 1\)</span>。</p>
+<p><img src="/2021/09/23/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E5%89%91%E6%8C%87_%E6%95%B0%E5%AD%A6/Users\lenovo\2.png" style="zoom:67%;"></p>
+<p><span class="math inline">\(x^n\)</span>可以表示为：<span class="math inline">\(x^{1b_1+2b_2+4b_3+...2^{m-1}b_m} = x^{1b_1}\cdot x^{2b_2}\cdot x^{4b_3}...\cdot x^{2^{m-1}b_m}\)</span>。这样原本暴力乘法需要将<span class="math inline">\(x\)</span>累计乘上<span class="math inline">\(n\)</span>次，<strong>现在将<span class="math inline">\(n\)</span>拆分成二进制的位数<span class="math inline">\(logn\)</span>，则只需要循环<span class="math inline">\(logn\)</span>次</strong>，每个循环中计算<span class="math inline">\(x = x^2\)</span>，然后根据<span class="math inline">\(b\)</span>是否为1决定能否将当前的项乘进答案，所以每个循环内最多计算两次乘法。例如<span class="math inline">\(2^3 = 2^{1\cdot1}\cdot2^{2\cdot1}\)</span>。</p>
+<p>在Java中，通过<span class="math inline">\(n\&amp;1\)</span>操作可以判断<span class="math inline">\(n\)</span>的二进制的最右一位是否为1；通过<span class="math inline">\(n&gt;&gt;1\)</span>右移操作可以删除二进制表示中的最右一位。</p>
+<p>则整个算法就是不断地判断<span class="math inline">\(n\)</span>的二进制表示位数中是否为1，如果是1则将当前<span class="math inline">\(x\)</span>的幂次方的结果乘进最终结果中。</p>
+<p>注意如果<span class="math inline">\(n\)</span>为负数，则<span class="math inline">\(x^n = (\frac{1}{x})^{-n}\)</span>。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">double</span> <span class="title">Power</span><span class="params">(<span class="keyword">double</span> base, <span class="keyword">int</span> exponent)</span> </span>&#123;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">//判断n为负数</span></span><br><span class="line">        <span class="keyword">if</span>(exponent &lt; <span class="number">0</span>)&#123;</span><br><span class="line">            base = <span class="number">1</span> / base;</span><br><span class="line">            exponent = -exponent;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">//用与运算判断当前位数是1还是0，用右移删除二进制最末尾</span></span><br><span class="line">        <span class="keyword">double</span> res = <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">while</span>(exponent &gt; <span class="number">0</span>)&#123;</span><br><span class="line">            <span class="keyword">if</span>((exponent &amp; <span class="number">1</span>) == <span class="number">1</span>) <span class="comment">//当前n的二进制位数为1，可以乘进答案</span></span><br><span class="line">                res = res * base;</span><br><span class="line">            base = base * base;</span><br><span class="line">            exponent = exponent &gt;&gt; <span class="number">1</span>; <span class="comment">//用右移删除指数二进制最末尾</span></span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> res;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>时间复杂度O(<span class="math inline">\(log_2n\)</span>)：二分的时间复杂度为对数级别</p>
+<p>空间复杂度O(1)：使用常数大小额外空间</p>
+<p>快速幂，从分治法角度理解。当<span class="math inline">\(n\)</span>为偶数时，<span class="math inline">\(x^n = (x^2)^{n/2}\)</span>；当<span class="math inline">\(n\)</span>为奇数时，<span class="math inline">\(x^n = (x^2)^{(n-1)/2}\cdot x\)</span>；<strong>快速幂的核心思想就是不断二分幂次项，每次二分幂次项（幂次项整除2）时，底数都变成原来的平方，遇到幂次项为奇数时就可以将底数乘进结果当中（偶数才能二分）</strong>，直到幂次项变成0为止（幂次项为1的时候一定会将底数乘进结果）。</p>
+<p><img src="/2021/09/23/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E5%89%91%E6%8C%87_%E6%95%B0%E5%AD%A6/Users\lenovo\3.png" style="zoom:67%;"></p>
+<h2 id="section-2"><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">/*该代码与二进制角度完全相同！！！只是解释不同！*/</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">double</span> <span class="title">Power</span><span class="params">(<span class="keyword">double</span> base, <span class="keyword">int</span> exponent)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//判断n为负数</span></span><br><span class="line">        <span class="keyword">if</span>(exponent &lt; <span class="number">0</span>)&#123;</span><br><span class="line">            base = <span class="number">1</span> / base;</span><br><span class="line">            exponent = -exponent;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">int</span> res = <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">while</span>(exponent&gt;<span class="number">0</span>)&#123;</span><br><span class="line">            <span class="keyword">if</span>((exponent &amp; <span class="number">1</span>) == <span class="number">1</span>) <span class="comment">//用%判断幂次项为奇数，相当于判断二进制最右是否为1 </span></span><br><span class="line">                res = res * base;</span><br><span class="line">            </span><br><span class="line">            base = base * base; <span class="comment">//底数变为原来的平方</span></span><br><span class="line">            exponent = exponent &gt;&gt; <span class="number">1</span>; <span class="comment">//指数整除2，相当于右移1         </span></span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> res;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></h2>
+<h3 id="整数中1出现的次数">05 整数中1出现的次数</h3>
+<p><strong>题目描述</strong></p>
+<p>求出1<sub>13的整数中1出现的次数,并算出100</sub>1300的整数中1出现的次数？为此他特别数了一下1~13中包含1的数字有1、10、11、12、13因此共出现6次,但是对于后面问题他就没辙了。ACMer希望你们帮帮他,并把问题更加普遍化,可以很快的求出任意非负整数区间中1出现的次数（从1 到 n 中1出现的次数）。</p>
+<p>输入</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">13</span><br></pre></td></tr></table></figure>
+<p>返回值</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">6</span><br></pre></td></tr></table></figure>
+<p><strong>题解</strong></p>
+<p>时间复杂度O(<span class="math inline">\(n\)</span>)：只遍历每个位上的数字</p>
+<p>空间复杂度O(1)：使用常数大小额外空间</p>
+<p>注意题目中是1出现的次数，不是有1的数字是多少个，<strong>比如11中，1是出现了两次</strong>。</p>
+<p>因此，给定一个数字，它的某一位上出现了1，即可计数1次。</p>
+<p>LeetCode题目描述中写到要求时间复杂度为O(n)，所以想到能否遍历输入数字的每一位来得到答案。按照这个思路进行思考，发现了每一位可能为1的个数是有一定的规律，按照规律遍历该数上的每一位，将每一位上能取到的1的个数相加，即可得到最终结果。</p>
+<p><img src="/2021/09/23/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E5%89%91%E6%8C%87_%E6%95%B0%E5%AD%A6/Users\lenovo\4.png" style="zoom: 40%;"></p>
+<p>每一位上的数字有三种可能，每种选项对应规律为：</p>
+<ul>
+<li><p>当给出的n中某一位上的数字大于1时</p>
+<p>如果倒数第x位上的数字大于1，则该位置上的数为1的情况有<span class="math inline">\((preNum+1)·(10^{x-1})\)</span>种，其中preNum为该位数字之后的所有数字所组成的数字。</p>
+<p>比如n=3<strong>2</strong>514,正数第2位，也就是倒数第4位的数字为2，大于1，此时该位置为1的情况有4·1000种，即(01000~01999) + (11000~11999) + (21000~21999) + (31000~31999)。（可以看出当前位数之前的数取值为0-3，当前位数之后的取值为000-999，则组合起来就是4·1000种）</p>
+<p>再如正数第1位，也就是倒数第5位的数字为3，大于1，此时该位置上为1的情况有(0+1)·10000种,即10000~19999。</p></li>
+<li><p>当给出的n中某一位上的数字等于1时</p>
+<p>如果倒数第x位上的数字等于1，则该位置上的数为1的情况有<span class="math inline">\(preNum·(10^{x-1})+postNum+1\)</span>种，其中postNum为该位数字之后的所有数字所组成的数字。</p>
+<p>比如n=3<strong>1</strong>567，正数第2位，也就是倒数第4位的数字为1，此时该位置为1的情况有3·1000+568种，即(01000~01999) + (11000~11999) + (21000~21999) + (31000~31567)。（可以看出和大于1不同的地方在于，最后一次只能取到567，而非999）</p>
+<p>再比如14，第一位上的数字等于1，该位上数字为1的可能的情况有5种，即10，11，12，13，14。</p></li>
+<li><p>当给出的n中某一位上的数字等于0时</p>
+<p>如果倒数第x位上的数字小于1，则该位置上的数为1的情况有<span class="math inline">\(preNum·(10^{x-1})\)</span>种。</p>
+<p>比如n=30567，正数第2位，也就是倒数第4位的数字为0，此时该位置为1的情况有3·1000种，即(01000~01999) + (11000~11999) + (21000~21999)。</p></li>
+</ul>
+<p>digit从低位到高位分别是1、10、100等。</p>
+<h2 id="section-3"><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">NumberOf1Between1AndN_Solution</span><span class="params">(<span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">//记录结果</span></span><br><span class="line">        <span class="keyword">int</span> res = <span class="number">0</span>; </span><br><span class="line">        </span><br><span class="line">        <span class="comment">//从低位到高位，遍历每一位</span></span><br><span class="line">        <span class="keyword">int</span> digit = <span class="number">1</span>; <span class="comment">//记录当前是10的0次方，即最低位，不要用pow函数，因为其类型是double</span></span><br><span class="line">        <span class="keyword">int</span> pre = n / <span class="number">10</span>, cur = n % <span class="number">10</span>, post = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">while</span>(pre != <span class="number">0</span> || cur != <span class="number">0</span>)&#123; <span class="comment">//当两者都为0的时候，就没有多余的位了</span></span><br><span class="line">            </span><br><span class="line">            <span class="keyword">if</span>(cur == <span class="number">0</span>)</span><br><span class="line">                res = res + pre*digit;</span><br><span class="line">            <span class="keyword">else</span> <span class="keyword">if</span>(cur == <span class="number">1</span>)</span><br><span class="line">                res = res + pre*digit + post + <span class="number">1</span>;</span><br><span class="line">            <span class="keyword">else</span> <span class="keyword">if</span>(cur &gt; <span class="number">1</span>)</span><br><span class="line">                res = res + (pre+<span class="number">1</span>)*digit;</span><br><span class="line">            </span><br><span class="line">            post = post + cur * digit; <span class="comment">//每次增加1位</span></span><br><span class="line">            cur = pre % <span class="number">10</span>; <span class="comment">//每次只有1位</span></span><br><span class="line">            pre = pre / <span class="number">10</span>; <span class="comment">//每次减少1位</span></span><br><span class="line">            digit =digit * <span class="number">10</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> res;</span><br><span class="line">    </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></h2>
+<h3 id="丑数">06 丑数</h3>
+<p>题目描述</p>
+<p>把只包含质因子2、3和5的数称作丑数（Ugly Number）。例如6、8都是丑数，但14不是，因为它包含质因子7。 习惯上我们把1当做是第一个丑数。求按从小到大的顺序的第N个丑数。</p>
+<p>输入</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">7</span><br></pre></td></tr></table></figure>
+<p>返回值</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">8</span><br></pre></td></tr></table></figure>
+<p>题解</p>
+<p>时间复杂度O(<span class="math inline">\(n\)</span>)：</p>
+<p>空间复杂度O(<span class="math inline">\(n\)</span>)：求第n个丑数就要维护n个元素的数组</p>
+<p>丑数的因子只有2、3、5,一个丑数一定由另一个丑数乘以2或者乘以3或者乘以5得到。 因此维护一个数组，这个数组中的每个值都将乘上2、3、5,每次判断乘之后谁最小，最小的就加入这个数组。 设置三个指针分别指向该乘2、3、5的数，每次加入后将对应指针往后移动。</p>
+<h2 id="section-4"><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> java.lang.Math;</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">GetUglyNumber_Solution</span><span class="params">(<span class="keyword">int</span> index)</span> </span>&#123;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span>(index == <span class="number">0</span>)</span><br><span class="line">            <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">int</span> [] ugnums = <span class="keyword">new</span> <span class="keyword">int</span>[index];</span><br><span class="line">        ugnums[<span class="number">0</span>] = <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">int</span> p2 = <span class="number">0</span>, p3 = <span class="number">0</span>, p5 = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">int</span> tmp;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; index; i++)&#123;</span><br><span class="line">            </span><br><span class="line">            tmp = Math.min(<span class="number">2</span>*ugnums[p2], Math.min(<span class="number">3</span>*ugnums[p3], <span class="number">5</span>*ugnums[p5]) );</span><br><span class="line">            ugnums[i] = tmp;</span><br><span class="line">            </span><br><span class="line">            <span class="comment">//为了防止重复需要三个if都能够走到！不能用if else if</span></span><br><span class="line">            <span class="comment">//比如6可以是2*3，也可以是3*2，这样6会加入两次</span></span><br><span class="line">            <span class="keyword">if</span>(tmp == <span class="number">2</span>*ugnums[p2]) p2++;</span><br><span class="line">            <span class="keyword">if</span>(tmp == <span class="number">3</span>*ugnums[p3]) p3++;</span><br><span class="line">            <span class="keyword">if</span>(tmp == <span class="number">5</span>*ugnums[p5]) p5++;</span><br><span class="line">            </span><br><span class="line">        &#125;                </span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> ugnums[index-<span class="number">1</span>];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></h2>
+<h3 id="圆圈中剩下的数字约瑟夫环">07 圆圈中剩下的数字（约瑟夫环）</h3>
+<p><strong>题目描述</strong></p>
+<p>0,1,···,n-1这n个数字排成一个圆圈，从数字0开始，每次从这个圆圈里删除第m个数字（删除后从下一个数字开始计数）。求出这个圆圈里剩下的最后一个数字。</p>
+<p>例如，0、1、2、3、4这5个数字组成一个圆圈，从数字0开始每次删除第3个数字，则删除的前4个数字依次是2、0、4、1，因此最后剩下的数字是3。</p>
+<p>示例 1：</p>
+<p>输入: n = 5, m = 3 输出: 3</p>
+<p><strong>题解</strong></p>
+<p>时间复杂度O(<span class="math inline">\(n\)</span>)：需要循环n-1次找到结果</p>
+<p>空间复杂度O(<span class="math inline">\(1\)</span>)：</p>
+<p>题目本质上询问n个数组成一个环，每次从环中删除第m个元素，则最后剩余的数是哪个。令f(n,m)表示最后剩下数字的索引号，如下图所示进行模拟：</p>
+<p><img src="/2021/09/23/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E5%89%91%E6%8C%87_%E6%95%B0%E5%AD%A6/Users\lenovo\5.png" style="zoom: 50%;"></p>
+<p>可以采用反推的方式，由图可知，最后剩余的那个数，数组中只有1个元素，且该元素的下标为0，即f(1,3)=0（它在原本的数组中下标为f(8,3)=6）。则思考当数组元素增加一个时，它的下标变化为多少。</p>
+<p>以n=7到n=8的时候举例，如下图所示：</p>
+<p><img src="/2021/09/23/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E5%89%91%E6%8C%87_%E6%95%B0%E5%AD%A6/Users\lenovo\6.png" style="zoom:67%;"></p>
+<p><strong>先把被删掉的数补充回来，然后右移m个数，发现溢出了，再把溢出的补充在最前面。</strong>（暗示删除其实是左移）</p>
+<p>这样就能使得n=7的数组复原回n=8。这里，复原指代的是不仅增加了一个数，<strong>每个数字的数组下标也发生了改变</strong>。</p>
+<p>因此，可以得到<strong>递推式</strong><span class="math inline">\(f(n,m)=[f(n−1,m)+m]\%n\)</span>。+m是还原取模是防止溢出。</p>
+<p>注意，这里的f始终表示的是最后剩余的那个数，它的下标变化情况，因为只有它能够确定一开始是从0开始的。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">LastRemaining_Solution</span><span class="params">(<span class="keyword">int</span> n, <span class="keyword">int</span> m)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> f = <span class="number">0</span>; <span class="comment">//记录下标的变化，一开始为0</span></span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">2</span>; i &lt;= n; i++)&#123; <span class="comment">//从数组内只剩下两个数开始计算下标</span></span><br><span class="line">            f = (f+m)%i;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> f; <span class="comment">//这里表明下标为f的值存储数字f</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>本题不可以用链表模拟的方法，因为从ArrayList中删除一个数的复杂度为O(n)，要删除n-1个数，复杂度变为O(<span class="math inline">\(n^2\)</span>)。</p>
+<hr>
+<h3 id="剪绳子">08 剪绳子</h3>
+<p>题目描述</p>
+<p>给你一根长度为n的绳子，请把绳子剪成整数长的m段（m、n都是整数，n&gt;1并且m&gt;1，m&lt;=n），每段绳子的长度记为k[1],...,k[m]。请问k[1]x...xk[m]可能的最大乘积是多少？例如，当绳子的长度是8时，我们把它剪成长度分别为2、3、3的三段，此时得到的最大乘积是18。</p>
+<p>题解</p>
+<p>时间复杂度O(<span class="math inline">\(n^2\)</span>)：两重循环</p>
+<p>空间复杂度O(<span class="math inline">\(n\)</span>)：需要辅助数组</p>
+<p>实际上，就是将一个整数拆分，使得它的乘积最大。利用DP的思想。</p>
+<p>定义f(n)表示整数n拆分之后的乘积最大值，则有<strong>递推式</strong>：</p>
+<p><span class="math inline">\(f(n) = max( i*f(n-i),i*(n-i) ),\quad i = 1,2...n-1\)</span></p>
+<p><span class="math inline">\(i*f(n-i)\)</span>表示<strong>将数字i从整数中拆分出来，并继续拆分n-i</strong>；<span class="math inline">\(i*(n-i)\)</span>就表示<strong>仅仅将当前长度分成两段，不再划分</strong>。</p>
+<p>可以发现，i从1到n-1；</p>
+<p>n从3开始到n（当长度为1时，不可分，当长度为2时，只能分成1和1，因此最大乘积为1）</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.*;</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">cutRope</span><span class="params">(<span class="keyword">int</span> target)</span> </span>&#123;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span>(target&lt;<span class="number">2</span>)</span><br><span class="line">            <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">int</span> [] dp = <span class="keyword">new</span> <span class="keyword">int</span>[target+<span class="number">1</span>];<span class="comment">//动态规划数组</span></span><br><span class="line">        </span><br><span class="line">        dp[<span class="number">2</span>] = <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> n = <span class="number">3</span>; n &lt;= target; n++ )&#123;</span><br><span class="line">            <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; n; i++)&#123;</span><br><span class="line">                dp[n] = Math.max( Math.max( i*dp[n-i], i*(n-i) ), dp[n] );</span><br><span class="line">            &#125;        </span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> dp[target];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="题解来源">题解来源</h3>
+<p>求1+2+3+...+n：https://leetcode-cn.com/problems/qiu-12n-lcof/solution/di-gui-jie-fa-ni-yi-ding-ke-yi-du-dong-b-vms4/</p>
+<p>不用加减乘除做加法：https://leetcode-cn.com/problems/bu-yong-jia-jian-cheng-chu-zuo-jia-fa-lcof/solution/jin-zhi-tao-wa-ru-he-yong-wei-yun-suan-wan-cheng-j/</p>
+<p>二进制中1的个数：https://leetcode-cn.com/problems/er-jin-zhi-zhong-1de-ge-shu-lcof/solution/mian-shi-ti-15-er-jin-zhi-zhong-1de-ge-shu-wei-yun/</p>
+<p>数值的整数次方：https://leetcode-cn.com/problems/shu-zhi-de-zheng-shu-ci-fang-lcof/solution/mian-shi-ti-16-shu-zhi-de-zheng-shu-ci-fang-kuai-s/</p>
+<p>整数中1出现的次数：https://leetcode-cn.com/problems/1nzheng-shu-zhong-1chu-xian-de-ci-shu-lcof/solution/jian-dan-yi-dong-zhao-gui-lu-by-zhige/</p>
+<p>https://leetcode-cn.com/problems/1nzheng-shu-zhong-1chu-xian-de-ci-shu-lcof/solution/mian-shi-ti-43-1n-zheng-shu-zhong-1-chu-xian-de-2/</p>
+<p>圆圈中剩下的数字（约瑟夫环）：https://leetcode-cn.com/problems/yuan-quan-zhong-zui-hou-sheng-xia-de-shu-zi-lcof/solution/huan-ge-jiao-du-ju-li-jie-jue-yue-se-fu-huan-by-as/</p>
+<p>剪绳子：https://leetcode-cn.com/problems/jian-sheng-zi-lcof/solution/jian-sheng-zi-dong-tai-gui-hua-by-97wgl/</p>
+]]></content>
+      <categories>
+        <category>数据结构与算法</category>
+        <category>剑指Offer</category>
+      </categories>
+      <tags>
+        <tag>数据结构与算法</tag>
+        <tag>剑指Offer</tag>
+      </tags>
+  </entry>
 </search>
