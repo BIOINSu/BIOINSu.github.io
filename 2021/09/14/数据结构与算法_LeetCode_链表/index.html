@@ -33,7 +33,7 @@
 <meta property="og:image" content="http://example.com/2021/09/14/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_LeetCode_%E9%93%BE%E8%A1%A8/1.png">
 <meta property="og:image" content="http://example.com/2021/09/14/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_LeetCode_%E9%93%BE%E8%A1%A8/0.png">
 <meta property="article:published_time" content="2021-09-14T03:28:53.557Z">
-<meta property="article:modified_time" content="2021-09-14T03:38:31.764Z">
+<meta property="article:modified_time" content="2021-09-23T14:14:59.599Z">
 <meta property="article:author" content="BIOINSu">
 <meta property="article:tag" content="数据结构与算法">
 <meta property="article:tag" content="LeetCode">
@@ -299,277 +299,7 @@ class Solution &amp;#123;
 
     &amp;#125;
 &amp;#125;
-</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%A4%E6%95%B0%E7%9B%B8%E5%8A%A0"><span class="nav-number">1.</span> <span class="nav-text">2 两数相加</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#section-1"><span class="nav-number"></span> <span class="nav-text">1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40
-41
-&#x2F;**
- * Definition for singly-linked list.
- * public class ListNode &amp;#123;
- *     int val;
- *     ListNode next;
- *     ListNode() &amp;#123;&amp;#125;
- *     ListNode(int val) &amp;#123; this.val &#x3D; val; &amp;#125;
- *     ListNode(int val, ListNode next) &amp;#123; this.val &#x3D; val; this.next &#x3D; next; &amp;#125;
- * &amp;#125;
- *&#x2F;
-class Solution &amp;#123;
-    public ListNode addTwoNumbers(ListNode l1, ListNode l2) &amp;#123;
-        
-        int carry &#x3D; 0; &#x2F;&#x2F;记录进位
-        int sum &#x3D; 0; &#x2F;&#x2F; 记录每一位相加
-        ListNode vhead &#x3D; new ListNode(0);
-        ListNode tmp &#x3D; vhead;
-
-        while(l1 !&#x3D; null || l2 !&#x3D; null)&amp;#123;
-
-            sum &#x3D; (l1 &#x3D;&#x3D; null? 0 : l1.val) + (l2 &#x3D;&#x3D; null? 0 : l2.val) + carry;
-
-            carry &#x3D; sum &#x2F; 10;
-
-            sum &#x3D; sum % 10;
-
-            tmp.next &#x3D; new ListNode(sum);
-            tmp &#x3D; tmp.next;
-
-            if(l1 !&#x3D; null) l1 &#x3D; l1.next;
-            if(l2 !&#x3D; null) l2 &#x3D; l2.next;
-
-        &amp;#125;
-
-        if(carry !&#x3D; 0)
-            tmp.next &#x3D; new ListNode(carry);
-
-        return vhead.next;
-
-    &amp;#125;
-&amp;#125;
-</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%92%E5%BA%8F%E9%93%BE%E8%A1%A8"><span class="nav-number">1.</span> <span class="nav-text">148 排序链表</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#section-2"><span class="nav-number"></span> <span class="nav-text">1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40
-41
-42
-43
-44
-45
-46
-47
-48
-49
-50
-51
-52
-53
-54
-55
-56
-57
-58
-59
-60
-61
-62
-63
-64
-65
-66
-67
-68
-69
-70
-71
-72
-73
-74
-75
-76
-77
-78
-79
-80
-81
-82
-83
-84
-85
-86
-87
-88
-89
-90
-91
-92
-93
-94
-&#x2F;**
- * Definition for singly-linked list.
- * public class ListNode &amp;#123;
- *     int val;
- *     ListNode next;
- *     ListNode() &amp;#123;&amp;#125;
- *     ListNode(int val) &amp;#123; this.val &#x3D; val; &amp;#125;
- *     ListNode(int val, ListNode next) &amp;#123; this.val &#x3D; val; this.next &#x3D; next; &amp;#125;
- * &amp;#125;
- *&#x2F;
-class Solution &amp;#123;
-    
-    &#x2F;&#x2F;获取链表的长度用于判断归并终止条件
-    public int getLength(ListNode head)&amp;#123;        
-        int count &#x3D; 0;
-        while(head !&#x3D; null)&amp;#123;
-            count++;
-            head &#x3D; head.next;
-        &amp;#125;
-        return count;              
-    &amp;#125;
-    
-    &#x2F;&#x2F;split(l,n) 即切掉链表l的前n个节点，并返回后半部分的链表头
-    public ListNode split(ListNode head, int n)&amp;#123;
-        if(head &#x3D;&#x3D; null) return null;
-        
-        ListNode tmp &#x3D; head;
-        for(int i &#x3D; 1; i &lt; n &amp;&amp; tmp.next!&#x3D; null; i++)&amp;#123; &#x2F;&#x2F;走n步刚好到达后半部分链表头，从1开始走n-1步则走到前一个节点（为了断链）
-            tmp &#x3D; tmp.next;
-        &amp;#125;
-        ListNode right &#x3D; tmp.next; &#x2F;&#x2F;返回后半部分的链表头
-        tmp.next &#x3D; null;&#x2F;&#x2F;断链操作
-        return right;
-    &amp;#125;
-    
-    &#x2F;&#x2F;合并两个有序链表
-    public ListNode merge(ListNode h1, ListNode h2)&amp;#123;
-        
-        ListNode vhead &#x3D; new ListNode(-1);
-        ListNode p &#x3D; vhead;
-        
-        while(h1 !&#x3D; null &amp;&amp; h2 !&#x3D; null)&amp;#123;
-            
-            if(h1.val &lt; h2.val)&amp;#123;
-                p.next &#x3D; h1;
-                h1 &#x3D; h1.next;       
-            &amp;#125;else&amp;#123;
-                p.next &#x3D; h2;
-                h2 &#x3D; h2.next;
-            &amp;#125;
-            p &#x3D; p.next;
-        &amp;#125;
-        
-        p.next &#x3D; h1 &#x3D;&#x3D; null ? h2 : h1;
-        
-        return vhead.next;
-        
-    &amp;#125;
-    
-    
-    public ListNode sortList(ListNode head) &amp;#123;
-        
-        if(head &#x3D;&#x3D; null)
-            return null;
-        
-        int len &#x3D; getLength(head);
-        &#x2F;&#x2F;新建虚拟头节点，该头节点的next指针永远指向链表的第一个位置
-        ListNode dummy &#x3D; new ListNode(-1);
-        dummy.next &#x3D; head;
-        
-        for(int step &#x3D; 1; step &lt; len; step &#x3D; step*2)&amp;#123; &#x2F;&#x2F;依次将链表分成1块，2块，4块...
-            
-            ListNode pre &#x3D; dummy; &#x2F;&#x2F;每次迭代开始时pre都指向虚拟头节点，并用pre将排序好的链表串联起来
-            ListNode cur &#x3D; dummy.next;
-            
-            while(cur !&#x3D; null)&amp;#123;
-                
-                ListNode h1 &#x3D; cur;
-                ListNode h2 &#x3D; split(h1, step); &#x2F;&#x2F;将第一部分数组切割，并返回第二部分数组头
-                cur &#x3D; split(h2, step); &#x2F;&#x2F;将第二部分数组切割，将cur往后移动
-                
-                ListNode tmp &#x3D; merge(h1, h2); &#x2F;&#x2F;合并两个排序链表
-                pre.next &#x3D; tmp; &#x2F;&#x2F;用pre将排序链表串起来（首次执行时pre &#x3D; dummy，则虚拟头永远可以指向链表头）
-                while(pre.next !&#x3D; null)
-                    pre &#x3D; pre.next;
-                  
-            &amp;#125;
-            
-        &amp;#125;
-        
-        return dummy.next;
-
-    &amp;#125;
-&amp;#125;
-</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%88%E5%B9%B6k%E4%B8%AA%E5%8D%87%E5%BA%8F%E9%93%BE%E8%A1%A8"><span class="nav-number">1.</span> <span class="nav-text">23 合并K个升序链表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A2%98%E8%A7%A3%E6%9D%A5%E6%BA%90"><span class="nav-number">2.</span> <span class="nav-text">题解来源</span></a></li></ol></div>
+</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%A4%E6%95%B0%E7%9B%B8%E5%8A%A0"><span class="nav-number">1.</span> <span class="nav-text">2 两数相加</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%92%E5%BA%8F%E9%93%BE%E8%A1%A8"><span class="nav-number">2.</span> <span class="nav-text">148 排序链表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%88%E5%B9%B6k%E4%B8%AA%E5%8D%87%E5%BA%8F%E9%93%BE%E8%A1%A8"><span class="nav-number">3.</span> <span class="nav-text">23 合并K个升序链表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A2%98%E8%A7%A3%E6%9D%A5%E6%BA%90"><span class="nav-number">4.</span> <span class="nav-text">题解来源</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -663,10 +393,16 @@ class Solution &amp;#123;
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2021-09-14 11:28:53 / 修改时间：11:38:31" itemprop="dateCreated datePublished" datetime="2021-09-14T11:28:53+08:00">2021-09-14</time>
+      <time title="创建时间：2021-09-14 11:28:53" itemprop="dateCreated datePublished" datetime="2021-09-14T11:28:53+08:00">2021-09-14</time>
     </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-09-23 22:14:59" itemprop="dateModified" datetime="2021-09-23T22:14:59+08:00">2021-09-23</time>
+      </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
         <i class="far fa-folder"></i>
@@ -727,7 +463,7 @@ class Solution &amp;#123;
 <p>直接采用模拟竖式加法的过程，新建一个虚拟头节点，然后同时遍历两个链表，从最低位至最高位，逐位相加，如果和大于等于 10，则保留个位数字，同时记录进位为 1留给下一轮相加。当某个链表为空时，补上0 。</p>
 <p>注意不能将数字转为int相加，因为链表本身代表的数字有可能越界。</p>
 <p>注意最后的进位如果不是0，要新建一个节点给它。</p>
-<h2 id="section-1"><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Definition for singly-linked list.</span></span><br><span class="line"><span class="comment"> * public class ListNode &#123;</span></span><br><span class="line"><span class="comment"> *     int val;</span></span><br><span class="line"><span class="comment"> *     ListNode next;</span></span><br><span class="line"><span class="comment"> *     ListNode() &#123;&#125;</span></span><br><span class="line"><span class="comment"> *     ListNode(int val) &#123; this.val = val; &#125;</span></span><br><span class="line"><span class="comment"> *     ListNode(int val, ListNode next) &#123; this.val = val; this.next = next; &#125;</span></span><br><span class="line"><span class="comment"> * &#125;</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> ListNode <span class="title">addTwoNumbers</span><span class="params">(ListNode l1, ListNode l2)</span> </span>&#123;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">int</span> carry = <span class="number">0</span>; <span class="comment">//记录进位</span></span><br><span class="line">        <span class="keyword">int</span> sum = <span class="number">0</span>; <span class="comment">// 记录每一位相加</span></span><br><span class="line">        ListNode vhead = <span class="keyword">new</span> ListNode(<span class="number">0</span>);</span><br><span class="line">        ListNode tmp = vhead;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">while</span>(l1 != <span class="keyword">null</span> || l2 != <span class="keyword">null</span>)&#123;</span><br><span class="line"></span><br><span class="line">            sum = (l1 == <span class="keyword">null</span>? <span class="number">0</span> : l1.val) + (l2 == <span class="keyword">null</span>? <span class="number">0</span> : l2.val) + carry;</span><br><span class="line"></span><br><span class="line">            carry = sum / <span class="number">10</span>;</span><br><span class="line"></span><br><span class="line">            sum = sum % <span class="number">10</span>;</span><br><span class="line"></span><br><span class="line">            tmp.next = <span class="keyword">new</span> ListNode(sum);</span><br><span class="line">            tmp = tmp.next;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span>(l1 != <span class="keyword">null</span>) l1 = l1.next;</span><br><span class="line">            <span class="keyword">if</span>(l2 != <span class="keyword">null</span>) l2 = l2.next;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span>(carry != <span class="number">0</span>)</span><br><span class="line">            tmp.next = <span class="keyword">new</span> ListNode(carry);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> vhead.next;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></h2>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Definition for singly-linked list.</span></span><br><span class="line"><span class="comment"> * public class ListNode &#123;</span></span><br><span class="line"><span class="comment"> *     int val;</span></span><br><span class="line"><span class="comment"> *     ListNode next;</span></span><br><span class="line"><span class="comment"> *     ListNode() &#123;&#125;</span></span><br><span class="line"><span class="comment"> *     ListNode(int val) &#123; this.val = val; &#125;</span></span><br><span class="line"><span class="comment"> *     ListNode(int val, ListNode next) &#123; this.val = val; this.next = next; &#125;</span></span><br><span class="line"><span class="comment"> * &#125;</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> ListNode <span class="title">addTwoNumbers</span><span class="params">(ListNode l1, ListNode l2)</span> </span>&#123;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">int</span> carry = <span class="number">0</span>; <span class="comment">//记录进位</span></span><br><span class="line">        <span class="keyword">int</span> sum = <span class="number">0</span>; <span class="comment">// 记录每一位相加</span></span><br><span class="line">        ListNode vhead = <span class="keyword">new</span> ListNode(<span class="number">0</span>);</span><br><span class="line">        ListNode tmp = vhead;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">while</span>(l1 != <span class="keyword">null</span> || l2 != <span class="keyword">null</span>)&#123;</span><br><span class="line"></span><br><span class="line">            sum = (l1 == <span class="keyword">null</span>? <span class="number">0</span> : l1.val) + (l2 == <span class="keyword">null</span>? <span class="number">0</span> : l2.val) + carry;</span><br><span class="line"></span><br><span class="line">            carry = sum / <span class="number">10</span>;</span><br><span class="line"></span><br><span class="line">            sum = sum % <span class="number">10</span>;</span><br><span class="line"></span><br><span class="line">            tmp.next = <span class="keyword">new</span> ListNode(sum);</span><br><span class="line">            tmp = tmp.next;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span>(l1 != <span class="keyword">null</span>) l1 = l1.next;</span><br><span class="line">            <span class="keyword">if</span>(l2 != <span class="keyword">null</span>) l2 = l2.next;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span>(carry != <span class="number">0</span>)</span><br><span class="line">            tmp.next = <span class="keyword">new</span> ListNode(carry);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> vhead.next;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h3 id="排序链表">148 排序链表</h3>
 <p><strong>题目描述</strong></p>
 <p>给你链表的头结点 head ，请将其按升序排列并返回 排序后的链表 。要求在 O(n log n) 时间复杂度和常数级空间复杂度下，对链表进行排序。</p>
@@ -750,7 +486,7 @@ class Solution &amp;#123;
 <p>1、依次将链表分成1块，2块，4块...</p>
 <p>2、每次分割时，分别找到第一部分和第二部分数组的头节点，两个两个数组合并</p>
 <p>3、用一个指针将前面的部分与排序好的部分连接</p>
-<h2 id="section-2"><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Definition for singly-linked list.</span></span><br><span class="line"><span class="comment"> * public class ListNode &#123;</span></span><br><span class="line"><span class="comment"> *     int val;</span></span><br><span class="line"><span class="comment"> *     ListNode next;</span></span><br><span class="line"><span class="comment"> *     ListNode() &#123;&#125;</span></span><br><span class="line"><span class="comment"> *     ListNode(int val) &#123; this.val = val; &#125;</span></span><br><span class="line"><span class="comment"> *     ListNode(int val, ListNode next) &#123; this.val = val; this.next = next; &#125;</span></span><br><span class="line"><span class="comment"> * &#125;</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//获取链表的长度用于判断归并终止条件</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getLength</span><span class="params">(ListNode head)</span></span>&#123;        </span><br><span class="line">        <span class="keyword">int</span> count = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">while</span>(head != <span class="keyword">null</span>)&#123;</span><br><span class="line">            count++;</span><br><span class="line">            head = head.next;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> count;              </span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//split(l,n) 即切掉链表l的前n个节点，并返回后半部分的链表头</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> ListNode <span class="title">split</span><span class="params">(ListNode head, <span class="keyword">int</span> n)</span></span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(head == <span class="keyword">null</span>) <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        </span><br><span class="line">        ListNode tmp = head;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; n &amp;&amp; tmp.next!= <span class="keyword">null</span>; i++)&#123; <span class="comment">//走n步刚好到达后半部分链表头，从1开始走n-1步则走到前一个节点（为了断链）</span></span><br><span class="line">            tmp = tmp.next;</span><br><span class="line">        &#125;</span><br><span class="line">        ListNode right = tmp.next; <span class="comment">//返回后半部分的链表头</span></span><br><span class="line">        tmp.next = <span class="keyword">null</span>;<span class="comment">//断链操作</span></span><br><span class="line">        <span class="keyword">return</span> right;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//合并两个有序链表</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> ListNode <span class="title">merge</span><span class="params">(ListNode h1, ListNode h2)</span></span>&#123;</span><br><span class="line">        </span><br><span class="line">        ListNode vhead = <span class="keyword">new</span> ListNode(-<span class="number">1</span>);</span><br><span class="line">        ListNode p = vhead;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">while</span>(h1 != <span class="keyword">null</span> &amp;&amp; h2 != <span class="keyword">null</span>)&#123;</span><br><span class="line">            </span><br><span class="line">            <span class="keyword">if</span>(h1.val &lt; h2.val)&#123;</span><br><span class="line">                p.next = h1;</span><br><span class="line">                h1 = h1.next;       </span><br><span class="line">            &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">                p.next = h2;</span><br><span class="line">                h2 = h2.next;</span><br><span class="line">            &#125;</span><br><span class="line">            p = p.next;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        p.next = h1 == <span class="keyword">null</span> ? h2 : h1;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> vhead.next;</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> ListNode <span class="title">sortList</span><span class="params">(ListNode head)</span> </span>&#123;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span>(head == <span class="keyword">null</span>)</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">int</span> len = getLength(head);</span><br><span class="line">        <span class="comment">//新建虚拟头节点，该头节点的next指针永远指向链表的第一个位置</span></span><br><span class="line">        ListNode dummy = <span class="keyword">new</span> ListNode(-<span class="number">1</span>);</span><br><span class="line">        dummy.next = head;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> step = <span class="number">1</span>; step &lt; len; step = step*<span class="number">2</span>)&#123; <span class="comment">//依次将链表分成1块，2块，4块...</span></span><br><span class="line">            </span><br><span class="line">            ListNode pre = dummy; <span class="comment">//每次迭代开始时pre都指向虚拟头节点，并用pre将排序好的链表串联起来</span></span><br><span class="line">            ListNode cur = dummy.next;</span><br><span class="line">            </span><br><span class="line">            <span class="keyword">while</span>(cur != <span class="keyword">null</span>)&#123;</span><br><span class="line">                </span><br><span class="line">                ListNode h1 = cur;</span><br><span class="line">                ListNode h2 = split(h1, step); <span class="comment">//将第一部分数组切割，并返回第二部分数组头</span></span><br><span class="line">                cur = split(h2, step); <span class="comment">//将第二部分数组切割，将cur往后移动</span></span><br><span class="line">                </span><br><span class="line">                ListNode tmp = merge(h1, h2); <span class="comment">//合并两个排序链表</span></span><br><span class="line">                pre.next = tmp; <span class="comment">//用pre将排序链表串起来（首次执行时pre = dummy，则虚拟头永远可以指向链表头）</span></span><br><span class="line">                <span class="keyword">while</span>(pre.next != <span class="keyword">null</span>)</span><br><span class="line">                    pre = pre.next;</span><br><span class="line">                  </span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> dummy.next;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></h2>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Definition for singly-linked list.</span></span><br><span class="line"><span class="comment"> * public class ListNode &#123;</span></span><br><span class="line"><span class="comment"> *     int val;</span></span><br><span class="line"><span class="comment"> *     ListNode next;</span></span><br><span class="line"><span class="comment"> *     ListNode() &#123;&#125;</span></span><br><span class="line"><span class="comment"> *     ListNode(int val) &#123; this.val = val; &#125;</span></span><br><span class="line"><span class="comment"> *     ListNode(int val, ListNode next) &#123; this.val = val; this.next = next; &#125;</span></span><br><span class="line"><span class="comment"> * &#125;</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//获取链表的长度用于判断归并终止条件</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getLength</span><span class="params">(ListNode head)</span></span>&#123;        </span><br><span class="line">        <span class="keyword">int</span> count = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">while</span>(head != <span class="keyword">null</span>)&#123;</span><br><span class="line">            count++;</span><br><span class="line">            head = head.next;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> count;              </span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//split(l,n) 即切掉链表l的前n个节点，并返回后半部分的链表头</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> ListNode <span class="title">split</span><span class="params">(ListNode head, <span class="keyword">int</span> n)</span></span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(head == <span class="keyword">null</span>) <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        </span><br><span class="line">        ListNode tmp = head;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; n &amp;&amp; tmp.next!= <span class="keyword">null</span>; i++)&#123; <span class="comment">//走n步刚好到达后半部分链表头，从1开始走n-1步则走到前一个节点（为了断链）</span></span><br><span class="line">            tmp = tmp.next;</span><br><span class="line">        &#125;</span><br><span class="line">        ListNode right = tmp.next; <span class="comment">//返回后半部分的链表头</span></span><br><span class="line">        tmp.next = <span class="keyword">null</span>;<span class="comment">//断链操作</span></span><br><span class="line">        <span class="keyword">return</span> right;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//合并两个有序链表</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> ListNode <span class="title">merge</span><span class="params">(ListNode h1, ListNode h2)</span></span>&#123;</span><br><span class="line">        </span><br><span class="line">        ListNode vhead = <span class="keyword">new</span> ListNode(-<span class="number">1</span>);</span><br><span class="line">        ListNode p = vhead;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">while</span>(h1 != <span class="keyword">null</span> &amp;&amp; h2 != <span class="keyword">null</span>)&#123;</span><br><span class="line">            </span><br><span class="line">            <span class="keyword">if</span>(h1.val &lt; h2.val)&#123;</span><br><span class="line">                p.next = h1;</span><br><span class="line">                h1 = h1.next;       </span><br><span class="line">            &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">                p.next = h2;</span><br><span class="line">                h2 = h2.next;</span><br><span class="line">            &#125;</span><br><span class="line">            p = p.next;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        p.next = h1 == <span class="keyword">null</span> ? h2 : h1;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> vhead.next;</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> ListNode <span class="title">sortList</span><span class="params">(ListNode head)</span> </span>&#123;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span>(head == <span class="keyword">null</span>)</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">int</span> len = getLength(head);</span><br><span class="line">        <span class="comment">//新建虚拟头节点，该头节点的next指针永远指向链表的第一个位置</span></span><br><span class="line">        ListNode dummy = <span class="keyword">new</span> ListNode(-<span class="number">1</span>);</span><br><span class="line">        dummy.next = head;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> step = <span class="number">1</span>; step &lt; len; step = step*<span class="number">2</span>)&#123; <span class="comment">//依次将链表分成1块，2块，4块...</span></span><br><span class="line">            </span><br><span class="line">            ListNode pre = dummy; <span class="comment">//每次迭代开始时pre都指向虚拟头节点，并用pre将排序好的链表串联起来</span></span><br><span class="line">            ListNode cur = dummy.next;</span><br><span class="line">            </span><br><span class="line">            <span class="keyword">while</span>(cur != <span class="keyword">null</span>)&#123;</span><br><span class="line">                </span><br><span class="line">                ListNode h1 = cur;</span><br><span class="line">                ListNode h2 = split(h1, step); <span class="comment">//将第一部分数组切割，并返回第二部分数组头</span></span><br><span class="line">                cur = split(h2, step); <span class="comment">//将第二部分数组切割，将cur往后移动</span></span><br><span class="line">                </span><br><span class="line">                ListNode tmp = merge(h1, h2); <span class="comment">//合并两个排序链表</span></span><br><span class="line">                pre.next = tmp; <span class="comment">//用pre将排序链表串起来（首次执行时pre = dummy，则虚拟头永远可以指向链表头）</span></span><br><span class="line">                <span class="keyword">while</span>(pre.next != <span class="keyword">null</span>)</span><br><span class="line">                    pre = pre.next;</span><br><span class="line">                  </span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> dummy.next;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h3 id="合并k个升序链表">23 合并K个升序链表</h3>
 <p><strong>题目描述</strong></p>
 <p>给你一个链表数组，每个链表都已经按升序排列。</p>
