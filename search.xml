@@ -1006,11 +1006,9 @@
 ]]></content>
       <categories>
         <category>Spark</category>
-        <category>Spark Core</category>
       </categories>
       <tags>
         <tag>Spark</tag>
-        <tag>Spark Core</tag>
       </tags>
   </entry>
   <entry>
@@ -2329,11 +2327,9 @@
 ]]></content>
       <categories>
         <category>Spark</category>
-        <category>Spark Core</category>
       </categories>
       <tags>
         <tag>Spark</tag>
-        <tag>Spark Core</tag>
       </tags>
   </entry>
   <entry>
@@ -8404,6 +8400,295 @@
       <tags>
         <tag>数据结构与算法</tag>
         <tag>剑指Offer</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Java基本数据类型</title>
+    <url>/2021/09/23/Java_%E5%9F%BA%E6%9C%AC%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/</url>
+    <content><![CDATA[<table style="width:100%;">
+<colgroup>
+<col style="width: 3%">
+<col style="width: 29%">
+<col style="width: 24%">
+<col style="width: 23%">
+<col style="width: 16%">
+<col style="width: 2%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>占位</th>
+<th>最大值</th>
+<th>最小值</th>
+<th>默认值</th>
+<th>符号</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>byte</td>
+<td>8 bit<br>1 byte</td>
+<td>127（<span class="math inline">\(2^7-1\)</span>）</td>
+<td>-128（<span class="math inline">\(-2^7\)</span>）</td>
+<td>0</td>
+<td>有</td>
+</tr>
+<tr class="even">
+<td>short</td>
+<td>16 bit<br>2 byte</td>
+<td>32767（<span class="math inline">\(2^{15} - 1\)</span>）</td>
+<td>-32768（<span class="math inline">\(-2^{15}\)</span>）</td>
+<td>0</td>
+<td>有</td>
+</tr>
+<tr class="odd">
+<td>int</td>
+<td>32 bit<br>4 byte</td>
+<td>2,147,483,647（<span class="math inline">\(2^{31} - 1\)</span>）</td>
+<td>-2,147,483,648（<span class="math inline">\(-2^{31}\)</span>）</td>
+<td>0</td>
+<td>有</td>
+</tr>
+<tr class="even">
+<td>long</td>
+<td>64 bit<br>8 byte</td>
+<td>9,223,372,036,<br>854,775,807（<span class="math inline">\(2^{63} -1\)</span>）</td>
+<td>-9,223,372,036,<br>854,775,808（<span class="math inline">\(-2^{63}\)</span>）</td>
+<td>0</td>
+<td>有</td>
+</tr>
+<tr class="odd">
+<td>float</td>
+<td>32 bit<br>4 byte</td>
+<td></td>
+<td></td>
+<td>0.0f</td>
+<td>有</td>
+</tr>
+<tr class="even">
+<td>double</td>
+<td>64 bit<br>8 byte</td>
+<td></td>
+<td></td>
+<td>0.0d</td>
+<td>有</td>
+</tr>
+<tr class="odd">
+<td>char</td>
+<td>16 bit<br>2 byte</td>
+<td>（65535）</td>
+<td>（0）</td>
+<td>需要初始化，<br>否则编译错误。</td>
+<td>无</td>
+</tr>
+<tr class="even">
+<td>boolean</td>
+<td>规范情况下<br>单独使用：4 byte<br>boolean数组：1 byte</td>
+<td>true</td>
+<td>false</td>
+<td>false</td>
+<td>无</td>
+</tr>
+</tbody>
+</table>
+<a id="more"></a>
+<h3 id="参考资料">参考资料</h3>
+<p>https://zhuanlan.zhihu.com/p/138648453 (boolean)</p>
+]]></content>
+      <categories>
+        <category>Java</category>
+        <category>Java基础</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
+        <tag>Java基础</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Spark调优</title>
+    <url>/2021/09/24/Spark_%E8%B0%83%E4%BC%98/</url>
+    <content><![CDATA[<p>开发调优</p>
+<table>
+<colgroup>
+<col style="width: 36%">
+<col style="width: 63%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>概念</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1、避免创建重复的RDD</td>
+<td>避免进行多次重复计算来创建同一个RDD增加计算开销。</td>
+</tr>
+<tr class="even">
+<td>2、尽可能复用同一个RDD</td>
+<td>例如有一个RDD的数据格式是key-value类型的。<br>另一个是单value类型的。<br>这两个RDD的value数据是完全一样的。<br>那么此时我们可以只使用key-value类型的那个RDD，<br>因为其中已经包含了另一个的数据。</td>
+</tr>
+<tr class="odd">
+<td>3、对多次使用的RDD进行持久化</td>
+<td>重复出现的RDD会被重复计算<br>rdd.persist(StorageLevel.MEMORY_AND_DISK_SER)</td>
+</tr>
+<tr class="even">
+<td>4、尽量避免使用shuffle类算子</td>
+<td>尽可能避免使用reduceByKey、join、distinct、repartition等会进行shuffle的算子。<br>尽量使用map类的非shuffle算子。<br>如将join转换成Broadcast+map。</td>
+</tr>
+<tr class="odd">
+<td>5、使用map-side预聚合的shuffle算子</td>
+<td>reduceByKey和aggregateByKey算子都会对每个节点本地的相同key进行预聚合。<br>groupByKey算子是不会进行预聚合的，全量的数据会在集群的各个节点之间分发和传输。</td>
+</tr>
+<tr class="even">
+<td>6、使用高性能的算子</td>
+<td>使用mapPartitions替代普通map。<br>使用foreachPartitions替代foreach。<br>使用filter之后进行coalesce操作。<br>使用repartitionAndSortWithinPartitions替代repartition与sort类操作。</td>
+</tr>
+<tr class="odd">
+<td>7、广播大变量</td>
+<td>这样每个Executor只有一个副本，而不是每个Executor中的每个Task都有一个副本。</td>
+</tr>
+<tr class="even">
+<td>8、使用Kryo优化序列化性能</td>
+<td>Kryo序列化类库的性能比Java序列化类库的性能要高很多。</td>
+</tr>
+<tr class="odd">
+<td>9、优化数据结构</td>
+<td>使用字符串替代对象，使用原始类型（比如Int、Long）替代字符串，使用数组替代集合类型。<br>尽可能地减少内存占用，降低GC频率，提升性能。</td>
+</tr>
+</tbody>
+</table>
+<p>数据倾斜调优</p>
+<table>
+<colgroup>
+<col style="width: 23%">
+<col style="width: 76%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>概念</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>数据倾斜发生的现象</td>
+<td>1、绝大多数task执行得都非常快，但个别task执行极慢。<br>2、原本能够正常执行的Spark作业，某天突然报出内存溢出异常。（数据太大资源不足）</td>
+</tr>
+<tr class="even">
+<td>数据倾斜排查</td>
+<td>1、yarn-client模式提交，本地直接看log，在log中找到当前运行到了第几个stage。<br>2、yarn-cluster模式提交，通过Spark Web UI来查看当前运行到了第几个stage。<br>3、两种模式下都可以在Spark Web UI上查看当前stage各个task分配的数据量，从而进一步确定是不是task分配的数据不均匀导致了数据倾斜。<br>4、确定数据倾斜发生在哪个stage后，根据stage划分原理，推算出发生倾斜的那个stage对应代码中的哪一部分，这部分代码中肯定会有一个shuffle类算子。</td>
+</tr>
+<tr class="odd">
+<td>查看Key的分布情况</td>
+<td>1、Spark SQL：group by、join语句导致数据倾斜，直接从源表中查看。<br>2、Spark RDD：shuffle算子，加入查看key分布的代码，比如RDD.countByKey()，然后用collect/take到客户端打印一下。</td>
+</tr>
+<tr class="even">
+<td>数据倾斜解决方案</td>
+<td>1、使用Hive ETL预处理数据。<br>2、过滤少数导致倾斜的key。（null值）<br>3、提高shuffle操作的并行度。<br>4、两阶段聚合（随机前缀局部聚合+全局聚合），仅适用于reduceByKey等聚合操作，不适用于join连接操作。<br>5、将reduce join转为map join。（大表join小表的场景）<br>6、采样找出有数据倾斜的key，拆出来，有数据倾斜的表加随机前缀，无倾斜的表做数据膨胀保证能被join上（大表join大表的场景，表1有数据倾斜，表2没有）<br></td>
+</tr>
+</tbody>
+</table>
+<a id="more"></a>
+<p>资源调优</p>
+<p>对Spark运行过程中各个使用资源的地方，通过调节各种参数，来优化资源使用的效率，从而提升Spark作业的执行性能。</p>
+<table>
+<colgroup>
+<col style="width: 31%">
+<col style="width: 68%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>概念</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>num-executors</td>
+<td>设置Spark作业总共要用多少个Executor进程来执行。（50-100）<br>默认情况下一台机器启动一个Executor进程。</td>
+</tr>
+<tr class="even">
+<td>executor-memory</td>
+<td>设置每个Executor进程的内存。（4G-8G）</td>
+</tr>
+<tr class="odd">
+<td>executor-cores</td>
+<td>每个Executor进程的CPU core数量。（2-4个）<br>这个参数决定了每个Executor进程并行执行task线程的能力。<br>因为每个CPU core同一时间只能执行一个task线程。</td>
+</tr>
+<tr class="even">
+<td>driver-memory</td>
+<td>Driver进程的内存。</td>
+</tr>
+<tr class="odd">
+<td>spark.default.parallelism</td>
+<td>设置每个stage的默认task数量。（500-1000个）<br>默认是一个HDFS block对应一个task。</td>
+</tr>
+<tr class="even">
+<td>spark.storage.memoryFraction</td>
+<td>设置RDD持久化数据在Executor内存中能占的比例，默认是0.6。<br>也就是说，默认Executor 60%的内存，可以用来保存持久化的RDD数据。</td>
+</tr>
+<tr class="odd">
+<td>spark.shuffle.memoryFraction</td>
+<td>该参数用于设置shuffle过程中一个task拉取到上个stage的task的输出后，进行聚合操作时能够使用的Executor内存的比例，默认是0.2。<br>也就是说，Executor默认只有20%的内存用来进行该操作。<br>多余的数据就会溢写到磁盘文件中去，此时就会极大地降低性能。</td>
+</tr>
+</tbody>
+</table>
+<p>shuffle调优</p>
+<table>
+<colgroup>
+<col style="width: 39%">
+<col style="width: 60%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>概念</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>spark.shuffle.file.buffer</td>
+<td>设置shuffle write task在溢写到磁盘文件前的缓冲区大小。</td>
+</tr>
+<tr class="even">
+<td>spark.reducer.maxSizeInFlight</td>
+<td>设置shuffle read task的buffer缓冲大小，而这个buffer缓冲决定了每次能够拉取多少数据。</td>
+</tr>
+<tr class="odd">
+<td>spark.shuffle.io.maxRetries</td>
+<td>Reducer如果因为网络异常导致拉取失败，是会自动进行重试的。<br>该参数就代表了可以重试的最大次数，默认3次。</td>
+</tr>
+<tr class="even">
+<td>spark.shuffle.io.retryWait</td>
+<td>该参数代表了每次重试拉取数据的等待间隔，默认是5s。</td>
+</tr>
+<tr class="odd">
+<td>spark.shuffle.memoryFraction</td>
+<td>Executor内存中，分配给shuffle read task进行聚合操作的内存比例，默认是20%。</td>
+</tr>
+<tr class="even">
+<td>spark.shuffle.manager</td>
+<td>该参数用于设置ShuffleManager的类型。Spark 1.5以后，有三个可选项：hash、sort和tungsten-sort。<br>tungsten-sort与sort类似，但是使用了tungsten计划中的堆外内存管理机制，内存使用效率更高。</td>
+</tr>
+<tr class="odd">
+<td>spark.shuffle.sort.bypassMergeThreshold</td>
+<td>使用bypass sort-base shuffle的shuffle read task的阈值。（默认是200）</td>
+</tr>
+<tr class="even">
+<td>spark.shuffle.consolidateFiles</td>
+<td>如果使用HashShuffleManager，该参数有效。<br>如果设置为true，那么就会开启consolidate机制，会大幅度合并shuffle write的输出文件。<br>对于shuffle read task数量特别多的情况下，这种方法可以极大地减少磁盘IO开销，提升性能。</td>
+</tr>
+</tbody>
+</table>
+<h3 id="参考资料">参考资料</h3>
+<p>https://mp.weixin.qq.com/s/1OZZc3rshA-sSAlsQYGF2Q</p>
+]]></content>
+      <categories>
+        <category>Spark</category>
+      </categories>
+      <tags>
+        <tag>Spark</tag>
       </tags>
   </entry>
 </search>
