@@ -8690,4 +8690,189 @@
         <tag>Spark</tag>
       </tags>
   </entry>
+  <entry>
+    <title>Spark SQL执行原理</title>
+    <url>/2021/09/25/Spark_SparkSQL%E5%8E%9F%E7%90%86/</url>
+    <content><![CDATA[<table style="width:100%;">
+<colgroup>
+<col style="width: 19%">
+<col style="width: 40%">
+<col style="width: 40%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>概念</th>
+<th>解释</th>
+<th>产物</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Parser<br>解析器</td>
+<td>将sql语句利用Antlr4进行词法和语法的解析。</td>
+<td>语法树和Unresolved LogicalPlan。<br>仅仅是一种数据结构，不包含任何数据信息，例如不知道数据源，数据类型，不同的列来自哪张表等。</td>
+</tr>
+<tr class="even">
+<td>Analyzer<br>分析器</td>
+<td>进行规则解析。</td>
+<td>Analyzed Logical Plan。<br>将表解析为具体的字段，确定数据来源，确定聚合函数等。</td>
+</tr>
+<tr class="odd">
+<td>Optimizer<br>优化器</td>
+<td>优化逻辑计划。</td>
+<td>Optimized Logical Plan。<br>谓词下推 + 列剪枝 + 常量替换 + 常量累加。</td>
+</tr>
+<tr class="even">
+<td>Planner<br>计划器</td>
+<td>生成多个物理计划，根据代价模型选择最优。</td>
+<td>Physical Plan。 <br>解析出数据源从JDBC读取，文件路径，数据类型等。</td>
+</tr>
+<tr class="odd">
+<td>Code Generation<br>代码生成</td>
+<td>将 SQL 翻译成一系列的关系代数算子或表达式。<br>然后依赖这些关系代数算子逐条处理输入数据并产生结果。</td>
+<td>Code &amp; DAG<br>在Driver端生成可执行代码和DAG有向无环图。</td>
+</tr>
+<tr class="even">
+<td>Execution<br>执行器</td>
+<td>执行代码。</td>
+<td>计算结果。</td>
+</tr>
+</tbody>
+</table>
+<a id="more"></a>
+<h3 id="参考资料">参考资料</h3>
+<p>https://zhuanlan.zhihu.com/p/127138025 （Hive转MR）</p>
+<p>https://blog.csdn.net/qq_30031221/article/details/109222355 （Spark底层执行原理）</p>
+<p>https://www.cnblogs.com/weiyiming007/p/11313226.html</p>
+]]></content>
+      <categories>
+        <category>Spark</category>
+      </categories>
+      <tags>
+        <tag>Spark</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Hive SQL</title>
+    <url>/2021/09/25/Hive_HiveSQL/</url>
+    <content><![CDATA[<table>
+<colgroup>
+<col style="width: 27%">
+<col style="width: 72%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>概念</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>HiveSQL转MR（普通）</td>
+<td>普通的任务直接用fetch的方式直接读取数据，不需要转MR。</td>
+</tr>
+<tr class="even">
+<td>HiveSQL转MR（Join）</td>
+<td>Map：生成键值对，以JOIN ON条件中的列作为Key，以JOIN之后所关心的列作为Value，在Value中还会包含表的 Tag 信息，用于标明此Value对应于哪个表。<br>Shuffle：将键值对发送至不同的Reducer中。<br>Reduce：Reducer通过 Tag 来识别不同的表中的数据，根据Key值进行Join操作。</td>
+</tr>
+<tr class="odd">
+<td>HiveSQL转MR（Group By）</td>
+<td>Map：生成键值对，以GROUP BY条件中的列作为Key，以聚集函数涉及的字段作为Value。<br>Shuffle：将键值对发送至不同的Reducer中。<br>Reduce：根据SELECT子句的列以及聚集函数进行Reduce。</td>
+</tr>
+<tr class="even">
+<td>HiveSQL转MR（Distinct）</td>
+<td>相当于没有聚集函数的GROUP BY，操作相同，只是键值对中的value可为空。</td>
+</tr>
+<tr class="odd">
+<td>Hive SQL与Spark SQL</td>
+<td>1、Hive SQL底层是MR，Spark SQL底层是RDD的计算。本质上两者的区别变成了MR和Spark的区别（内存、算子、容错）。<br><br>2、对于Hive本身来说，它包括metastore（元数据），就是schema的管理，比如有哪些表，哪些字段，什么数据类型，有没有索引等。而Spark只是一个计算引擎，没有元数据管理工具。<br><br>3、hive有hive on mapreduce和hive on spark。hive on spark 和Spark SQL并没有特别明显的性能优化（毕竟计算引擎都是Spark）。<br><br>4、hive on mapreduce：适合处理离线非实时数据，基于磁盘的处理使得性能上较为稳定。<br>Spark SQL：实时性要求或者速度要求较高的场所，基于内存的处理可能会出现数据倾斜造成反压等问题，导致内存溢出等错误。</td>
+</tr>
+</tbody>
+</table>
+<a id="more"></a>
+<h3 id="参考资料">参考资料</h3>
+<p>https://zhuanlan.zhihu.com/p/87545980 （Hive架构）</p>
+<p>https://zhuanlan.zhihu.com/p/127138025 （SQL转MR）</p>
+<p>https://www.zhihu.com/question/36053025 （Spark SQL和Hive使用场景）</p>
+]]></content>
+      <categories>
+        <category>Hive</category>
+      </categories>
+      <tags>
+        <tag>Hive</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title></title>
+    <url>/2021/09/24/%E9%9D%A2%E8%AF%95_0924CDG%E4%B8%80%E9%9D%A2/</url>
+    <content><![CDATA[<h4 id="海量数据找top-100账号出现次数">海量数据找Top 100账号出现次数</h4>
+<p>1、Hash(账号) % 桶数量 = 小文件id。把账号分离到多个小文件中。</p>
+<blockquote>
+<p>理想情况下每个小文件的大小应该恰好等于内存容量</p>
+</blockquote>
+<p>2、对于每一个小文件，在内存中构建一个账号为Key，统计次数为Value的一个HashMap，统计每个账号的出现次数。</p>
+<p>把HashMap的结果保存在磁盘上。</p>
+<blockquote>
+<p>如果小文件数量远大于100个，那么对每个小文件就只需要保存统计次数最多的那个账号。</p>
+</blockquote>
+<p>3、在内存中构建一个有100个节点的最小堆，堆中的每个节点保存了HashMap中的Key-Value的数据，只是堆调整的依据是Value值，也就是统计次数。</p>
+<p>将每个小文件对应的HashMap读取进入内存，把Key-Value数据入堆，最后剩下的账号就是Top 100。</p>
+<blockquote>
+<p>如果内存足够，也可以直接把账号-次数的数据读取进来做全局排序，因为此时每个小文件只有一个账号。</p>
+<p>如果每个HashMap太大，那么就需要在第2步构建一个按照Value排序的HashMap，然后取前100个数据保存下来即可。</p>
+</blockquote>
+<a id="more"></a>
+<p>如果每个小文件里面的Key的数量很多怎么办？</p>
+<p>增加桶的数量，将文件分的更小，把Key打散。</p>
+<p>如果单个小文件太大怎么办？</p>
+<p>分块读取这个小文件。</p>
+<h4 id="海量数据找账号出现次数的中位数">海量数据找账号出现次数的中位数</h4>
+<p>首先还是得求出每个账号的出现次数，然后利用海量数据找中位数的原理。</p>
+<h4 id="海量数据找中位数">海量数据找中位数</h4>
+<p>1、外部排序</p>
+<p>把所有数据分割成内存能够装载下的大小，每次内存读取一个小文件进行排序，再对所有小文件进行多路归并（2路、3路等，取决于内存大小）。得到所有数据的排序结果后扫描即可得到中位数。</p>
+<p>2、堆排序</p>
+<p>在内存中建立的最大堆（找最小值），然后每次寻找第k大的元素，直到中间。</p>
+<blockquote>
+<p>对于10G的数据，它的中位数就是第5G个元素，按常理来说需要构建一个5G大小的堆，但是允许的内存只有2个G，所以先构建一个1G大小的大顶堆，然后求出第1G个元素（根节点），然后利用该元素构建一个新的1G大小的堆，只有大于第1G个元素的数据才能入堆，最后剩下来的就是1G-2G之间的元素，则根节点就是第2G大的元素。依次类推，求出第5G大的元素。</p>
+<p>每次构建一个堆求第几G大的元素，都需要重新遍历完所有10G的数据，相当于要遍历5 * 10G次，这需要频繁的IO操作，需要不断的从硬盘中读取数据。</p>
+</blockquote>
+<p>3、其他？</p>
+<p>因为涉及到排序，可以用桶排序、或者位图。</p>
+<blockquote>
+<p>https://zhuanlan.zhihu.com/p/75397875</p>
+</blockquote>
+<h4 id="spark-sql底层原理">Spark SQL底层原理</h4>
+<p>https://blog.csdn.net/qq_30031221/article/details/109222355</p>
+<p>https://www.cnblogs.com/code2one/p/10162632.html</p>
+<p>https://juejin.cn/post/6886355913592602631#heading-16</p>
+<h4 id="kafka消费者和消费者组有什么区别">Kafka消费者和消费者组有什么区别</h4>
+<p>消费者组中包含了多个消费者。</p>
+<p>当消息发布到topic后，只会被投递给订阅它的每个消费组中的一个消费者。</p>
+<p>每个topic的一个分区，对应一个消费者组中的一个消费者。</p>
+<p>一个topic，可以被多个消费者组订阅。</p>
+<h4 id="如何设计一个hashmap">如何设计一个HashMap</h4>
+<p>1、Hash函数：运算要快，还需要分布均匀，减少 hash 碰撞。</p>
+<p>2、Hash冲突：链表+红黑树。</p>
+<p>3、Hash扩容：解决Hash冲突的本质方案。（Java8长度扩为原来2倍，所以，元素的位置要么是在原位置，要么是在原位置再移动2次幂的位置。Java7只能根据Key值重新计算数据所在的位置）</p>
+<p>4、高并发：（1）HashTable：直接加锁锁住整个数组。（2）ConcurrentHashMap：读操作volatile，写操作只锁住数组中一个元素，且是cas+synchronized机制（降低锁粒度）。（3）自定义CopyOnWrite的数据结构。</p>
+<blockquote>
+<p>https://tech.meituan.com/2016/06/24/java-hashmap.html</p>
+</blockquote>
+<h4 id="java垃圾回收">Java垃圾回收</h4>
+<h4 id="hdfs副本机制">HDFS副本机制</h4>
+<h4 id="算法题气球游戏">算法题：气球游戏</h4>
+<h4 id="智力题电梯">智力题：电梯</h4>
+<p>两台电梯，如何合理安排使得运输时间较优。</p>
+<h3 id="参考资料">参考资料</h3>
+]]></content>
+      <categories>
+        <category>大数据</category>
+        <category>海量数据</category>
+      </categories>
+      <tags>
+        <tag>其他</tag>
+        <tag>面试</tag>
+      </tags>
+  </entry>
 </search>

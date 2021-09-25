@@ -194,7 +194,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">85</span>
+          <span class="site-state-item-count">88</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -207,7 +207,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">36</span>
+        <span class="site-state-item-count">37</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -241,6 +241,333 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/09/05/Java_%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BIOINSu">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BIOINSu">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/09/05/Java_%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/" class="post-title-link" itemprop="url">Java内存模型</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2021-09-05 10:35:01 / 修改时间：19:08:45" itemprop="dateCreated datePublished" datetime="2021-09-05T10:35:01+08:00">2021-09-05</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Java/Java%E5%8E%9F%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">Java原理</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <table>
+<colgroup>
+<col style="width: 24%">
+<col style="width: 75%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>概念</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>缓存一致性问题</td>
+<td>各个CPU<strong>核中的缓存数据不一致</strong>导致计算结果不正确的问题。</td>
+</tr>
+<tr class="even">
+<td>Java内存模型（JMM）</td>
+<td>是Java 定义的<strong>一套协议</strong>，用来屏蔽各种硬件和操作系统的内存访问差异，让Java 程序在各种平台都能有数据一致性的运行效果，解决缓存一致性的问题。</td>
+</tr>
+<tr class="odd">
+<td>JMM协议的内容</td>
+<td>1、所有的变量都存储在主内存中，每个线程还有自己的工作内存。<br><br>2、线程的工作内存中保存了该线程使用到的变量（主内存的拷贝），线程对变量的所有操作（读取、赋值）都必须在工作内存中进行，而不能直接读写主内存中的变量。<br><br>3、不同线程之间无法直接访问对方工作内存中的变量，线程间变量值的传递均需要在主内存来完成。</td>
+</tr>
+<tr class="even">
+<td>Volatile的作用</td>
+<td>Java语言通过 volatile 修饰变量实现内存可见性，它强制修改后的变量写入主存，避免前后指令的CPU重排序，并及时让其他核中的相应缓存行失效，volatile是利用MESI达到符合预期的效果。</td>
+</tr>
+<tr class="odd">
+<td>可见性</td>
+<td>可见性是指当多个线程访问同一个共享变量时，一个线程修改了这个变量的值，其他线程能够立即看到修改后的值。</td>
+</tr>
+</tbody>
+</table>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/09/05/Java_%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/09/04/Flink08_%E5%8F%8D%E5%8E%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BIOINSu">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BIOINSu">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/09/04/Flink08_%E5%8F%8D%E5%8E%8B/" class="post-title-link" itemprop="url">08 Flink反压</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-09-04 20:21:34" itemprop="dateCreated datePublished" datetime="2021-09-04T20:21:34+08:00">2021-09-04</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-09-05 09:47:24" itemprop="dateModified" datetime="2021-09-05T09:47:24+08:00">2021-09-05</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Flink/" itemprop="url" rel="index"><span itemprop="name">Flink</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <table>
+<colgroup>
+<col style="width: 25%">
+<col style="width: 75%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>概念</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>反压</td>
+<td>某个计算节点的处理速度跟不上上游数据的发送速度，导致该节点成为计算瓶颈。</td>
+</tr>
+<tr class="even">
+<td>Flink 的网络传输架构</td>
+<td>1、每个TaskManager内分为Flink、Netty、Socket三层的Buffer，向Buffer中写入数据。<br>2、TaskManager间采用TCP协议进行数据传输。</td>
+</tr>
+<tr class="odd">
+<td>TCP-based反压机制</td>
+<td>1、当缓冲区被耗尽之后，写入数据和读取数据的组件都分别停止工作，将停止发送数据的信号传递给上层直到Source端。<br>2、TaskManager间采用TCP协议的流控机制（滑动窗口）来告知发送方停止发送数据。</td>
+</tr>
+<tr class="even">
+<td>Credit-based反压机制</td>
+<td>1、ResultSubPartition 向 InputChannel 发送消息的时候都会发送一个 backlog size 告诉下游准备发送多少消息。<br>2、下游计算有多少的 Buffer 去接收消息。<br>3、算完之后如果有充足的 Buffer 就会返还给上游一个 Credit 告知他可以发送消息。</td>
+</tr>
+</tbody>
+</table>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/09/04/Flink08_%E5%8F%8D%E5%8E%8B/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/09/03/Hadoop_%E7%8E%AF%E5%BD%A2%E7%BC%93%E5%86%B2%E5%8C%BA/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BIOINSu">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BIOINSu">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/09/03/Hadoop_%E7%8E%AF%E5%BD%A2%E7%BC%93%E5%86%B2%E5%8C%BA/" class="post-title-link" itemprop="url">环形缓冲区</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-09-03 14:35:24" itemprop="dateCreated datePublished" datetime="2021-09-03T14:35:24+08:00">2021-09-03</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-09-16 09:10:58" itemprop="dateModified" datetime="2021-09-16T09:10:58+08:00">2021-09-16</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Hadoop/" itemprop="url" rel="index"><span itemprop="name">Hadoop</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h3 id="概念">概念</h3>
+<p>环形缓冲区是指数据<strong>被Map处理之后</strong>会先放入内存，内存中的这片区域就是环形缓冲区。</p>
+<p>环形缓冲区其实是一个简单的buffer，即一个byte类型的数组，默认大小是100M。</p>
+<p>当环形缓冲区达到容量的80%时，产生溢写（spill），数据从内存溢出到磁盘上。</p>
+<blockquote>
+<p>阈值太小经常溢写导致IO操作影响性能，阈值太大影响内存并阻塞map的写操作。</p>
+</blockquote>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/09/03/Hadoop_%E7%8E%AF%E5%BD%A2%E7%BC%93%E5%86%B2%E5%8C%BA/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1003,419 +1330,6 @@
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2021/08/03/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93_OLTP%E4%B8%8EOLAP/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/08/02/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E6%B5%B7%E9%87%8F%E5%B0%8F%E6%96%87%E4%BB%B6%E9%97%AE%E9%A2%98/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="BIOINSu">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BIOINSu">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/08/02/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E6%B5%B7%E9%87%8F%E5%B0%8F%E6%96%87%E4%BB%B6%E9%97%AE%E9%A2%98/" class="post-title-link" itemprop="url">海量小文件问题</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-      
-
-      <time title="创建时间：2021-08-02 08:55:08 / 修改时间：08:53:21" itemprop="dateCreated datePublished" datetime="2021-08-02T08:55:08+08:00">2021-08-02</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/" itemprop="url" rel="index"><span itemprop="name">大数据</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <table>
-<colgroup>
-<col style="width: 5%">
-<col style="width: 35%">
-<col style="width: 23%">
-<col style="width: 35%">
-</colgroup>
-<thead>
-<tr class="header">
-<th></th>
-<th>Hadoop</th>
-<th>Hive</th>
-<th>Spark</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>小文件来源</td>
-<td>数据源有大量小文件；reducer太多，每个都生成小文件</td>
-<td>Hive分区表的每个分区数据量很小</td>
-<td>sparkstreaming在每个batch结束后都会重新打开一个新的文件作为输出，因此每个batch下的每个分区生成大量小文件</td>
-</tr>
-<tr class="even">
-<td>解决方案</td>
-<td>1、在数据源处就合并小文件</td>
-<td>1、配置map前合并和reduce后合并小文件</td>
-<td>1、增加batch大小</td>
-</tr>
-<tr class="odd">
-<td></td>
-<td>2、定期运行一个MR任务，读取某一个文件夹中的所有小文件，并通过减少reduce的数量将它们重写为较少数量的大文件</td>
-<td>2、使用HAR归档文件</td>
-<td>2、通过coalesce和repartition减少分区数量</td>
-</tr>
-<tr class="even">
-<td></td>
-<td>3、SequenceFile将数据以KV的形式序列化到文件中，MR任务只需要为每个block启动一个map任务，并且保留文件名</td>
-<td>3、减少分区表中的分区数量</td>
-<td>3、自定义合并脚本</td>
-</tr>
-<tr class="odd">
-<td></td>
-<td>4、使用Hbase进行数据存储，将数据抽取过程从生成大量小HDFS文件更改为以逐条记录写入到HBase表</td>
-<td>4、数据压缩，通过序列化存储方式存储数据</td>
-<td>4、通过foreach输出类追加小文件</td>
-</tr>
-<tr class="even">
-<td></td>
-<td>5、CombineFileInputFormat是Hadoop提供的抽象类，在MR读取时合并小文件。合并的文件不会持久化到磁盘</td>
-<td></td>
-<td></td>
-</tr>
-<tr class="odd">
-<td></td>
-<td>6、自己编写特定的程序通过输出类来追加到现有的小文件</td>
-<td></td>
-<td></td>
-</tr>
-<tr class="even">
-<td></td>
-<td>7、NameNode中通过Hadoop Archive(HAR)和联邦机制解决内存不足的问题</td>
-<td></td>
-<td></td>
-</tr>
-</tbody>
-</table>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/08/02/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E6%B5%B7%E9%87%8F%E5%B0%8F%E6%96%87%E4%BB%B6%E9%97%AE%E9%A2%98/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/08/01/Java_ComparableAndComparator/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="BIOINSu">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BIOINSu">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/08/01/Java_ComparableAndComparator/" class="post-title-link" itemprop="url">Java中Comparable和Comparator</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-      
-
-      <time title="创建时间：2021-08-01 09:07:53 / 修改时间：10:07:22" itemprop="dateCreated datePublished" datetime="2021-08-01T09:07:53+08:00">2021-08-01</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/Java/Java%E5%9F%BA%E7%A1%80/" itemprop="url" rel="index"><span itemprop="name">Java基础</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>Java中Comparable和Comparator两个<strong>接口</strong>的比较。</p>
-<table>
-<colgroup>
-<col style="width: 9%">
-<col style="width: 45%">
-<col style="width: 45%">
-</colgroup>
-<thead>
-<tr class="header">
-<th></th>
-<th>Comparable</th>
-<th>Comparator</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>作用</td>
-<td>可以让实现它的类的对象进行比较大小</td>
-<td>在类对象的外部制定排序规则，然后作为排序策略参数传递给某些类的对象的构造函数，实现比较大小</td>
-</tr>
-<tr class="even">
-<td>位置</td>
-<td>java.lang 包</td>
-<td>java.util 包</td>
-</tr>
-<tr class="odd">
-<td>接口中的方法</td>
-<td>只有一个方法 compareTo()</td>
-<td>JDK 8 以前只有两个方法compare()和equals()，8以后增加多个方法</td>
-</tr>
-<tr class="even">
-<td>使用</td>
-<td>public class Test implements Comparable{} 并重写其中的compareTo()方法</td>
-<td>数组工具类和集合工具类中提供的工具方法sort方法都给出了含有Comparator接口的重载方法。</td>
-</tr>
-<tr class="odd">
-<td>排序规则</td>
-<td>compareTo 方法的返回值有三种情况：e1.compareTo(e2) &gt; 0 即 e1 &gt; e2<br>e1.compareTo(e2) = 0 即 e1 = e2<br>e1.compareTo(e2) &lt; 0 即 e1 &lt; e2</td>
-<td>compare函数返回正数就交换传入参数的位置，否则（负数或0）就不交换两者的位置。</td>
-</tr>
-</tbody>
-</table>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/08/01/Java_ComparableAndComparator/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/29/Kafka_%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%A2%98/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="BIOINSu">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BIOINSu">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/07/29/Kafka_%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%A2%98/" class="post-title-link" itemprop="url">Kafka常见面试题</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-07-29 07:18:40" itemprop="dateCreated datePublished" datetime="2021-07-29T07:18:40+08:00">2021-07-29</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-09-12 09:22:22" itemprop="dateModified" datetime="2021-09-12T09:22:22+08:00">2021-09-12</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/Kafka/" itemprop="url" rel="index"><span itemprop="name">Kafka</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h4 id="总结">总结</h4>
-<table>
-<colgroup>
-<col style="width: 23%">
-<col style="width: 76%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>问题</th>
-<th>解答</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>为什么用</td>
-<td>缓冲、解耦、冗余、健壮与异步</td>
-</tr>
-<tr class="even">
-<td>可靠性</td>
-<td>partition向producer发送ack</td>
-</tr>
-<tr class="odd">
-<td>ack机制</td>
-<td>接收没写入、leader落盘、全部落盘</td>
-</tr>
-<tr class="even">
-<td>Exactly Once</td>
-<td>At Least Once（数据重复） + 幂等性（仅持久化一条） = Exactly Once（数据不重复且不丢失）；对&lt; PID, Partition, SeqNumber&gt;主键做缓存</td>
-</tr>
-<tr class="odd">
-<td>速度快的原因</td>
-<td>磁盘顺序写入、parition中数据分段以及段内索引、内存操作直接映射到物理硬盘</td>
-</tr>
-<tr class="even">
-<td>副本同步策略</td>
-<td>全部follower完成同步，才发送ack，需要的副本数较少（n+1）</td>
-</tr>
-<tr class="odd">
-<td>ISR</td>
-<td>意为和leader保持同步的follower集合，未定期发送ack者被踢出去</td>
-</tr>
-<tr class="even">
-<td>故障处理</td>
-<td>HW之前的数据才会对Consumer可见，所以出现故障的时候，Consumer从HW处继续消费消息</td>
-</tr>
-<tr class="odd">
-<td>读写分离</td>
-<td>延时敏感应用，数据一致性问题和延迟问题（经过磁盘）</td>
-</tr>
-<tr class="even">
-<td>消费者分区分配策略</td>
-<td>range（分区/线程）RoundRobinAssignor（排序加轮询）StickyAssignor（分区数最多差1，与上次分配相同）</td>
-</tr>
-</tbody>
-</table>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/07/29/Kafka_%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%A2%98/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
