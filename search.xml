@@ -8873,4 +8873,74 @@
         <tag>面试</tag>
       </tags>
   </entry>
+  <entry>
+    <title>行列存储的比较</title>
+    <url>/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E8%A1%8C%E5%88%97%E5%AD%98%E5%82%A8%E6%AF%94%E8%BE%83/</url>
+    <content><![CDATA[<table>
+<colgroup>
+<col style="width: 10%">
+<col style="width: 44%">
+<col style="width: 44%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>优点</th>
+<th>缺点</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>行存储（OLTP）</td>
+<td>同一行所属的多个字段被保存在一起，<br>当修改或插入一行数据时IO开销较低。</td>
+<td>获取特定列时本质上还是扫描了所有行，<br>再把特定列取出，存在不必要的IO开销。</td>
+</tr>
+<tr class="even">
+<td>列存储（OLAP）</td>
+<td>1、同一列的数据被保存在一起，能够满足<br>快速读取特定列的需求。（OLAP常用）<br>选取列时降低IO开销，随机读变顺序读。<br>2、列式存储容易实现数据压缩。</td>
+<td>1、插入、删除数据不方便。<br>2、被选择出来的列要重新组装。</td>
+</tr>
+</tbody>
+</table>
+<a id="more"></a>
+<h3 id="行列存储的原理">行列存储的原理</h3>
+<p>数据在存储系统中的基本单位为页，页中的数据是连续存储的。</p>
+<p>页也是进行数据读取时候基本单位，一次读取就是一次IO操作。</p>
+<p>例如一个数据表为：</p>
+<p><img src="/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E8%A1%8C%E5%88%97%E5%AD%98%E5%82%A8%E6%AF%94%E8%BE%83/image-20210926145033057.png" alt="image-20210926145033057" style="zoom:67%;"></p>
+<p>一个数据页用一个4x4的单元格表示：</p>
+<p><img src="/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E8%A1%8C%E5%88%97%E5%AD%98%E5%82%A8%E6%AF%94%E8%BE%83/image-20210926145129243.png" alt="image-20210926145129243" style="zoom:67%;"></p>
+<p>按行存储为：</p>
+<p><img src="/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E8%A1%8C%E5%88%97%E5%AD%98%E5%82%A8%E6%AF%94%E8%BE%83/image-20210926145202849.png" alt="image-20210926145202849" style="zoom: 67%;"></p>
+<p>按列存储为：</p>
+<p><img src="/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E8%A1%8C%E5%88%97%E5%AD%98%E5%82%A8%E6%AF%94%E8%BE%83/image-20210926145242775.png" alt="image-20210926145242775" style="zoom:67%;"></p>
+<p>当执行OLTP查询：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> id,city <span class="keyword">from</span> <span class="keyword">table</span> <span class="keyword">where</span> id <span class="operator">=</span> <span class="number">004</span></span><br></pre></td></tr></table></figure>
+<p>以行方式查询（在有适当的索引情况下)，那么，执行一次以上查询，只需要扫描一次Page 1就可以了。</p>
+<p>以列方式查询，需要投其扫描Page 1和Page 2共2次，分别取得id，city的单行值。</p>
+<p>因此，在OLTP这种以查询一行数据为主的场景下，适合采用行方式进行存储。</p>
+<p>当执行OLAP查询：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="built_in">max</span>(id) <span class="keyword">from</span> <span class="keyword">table</span></span><br></pre></td></tr></table></figure>
+<p>对于行存储，这个查询需要两次IO将全部数据放入内存后，进行页间数据的跳读（类随机读取，因为id被city隔开了)。</p>
+<p>对于列存储，只需要一次IO将Page 1放入内存后进行连续读取，如果id还有多页的话，也是进行的物理连续读取。</p>
+<p>在进行OLAP操作时候，不仅是减小了IO次数，而且把随机读取变为了连续读取。</p>
+<h3 id="列式存储数据压缩">列式存储数据压缩</h3>
+<p>因为列式存储将同一列的数据存储在一起，所以使用压缩算法可以减少存储占用的磁盘空间。</p>
+<p>压缩算法的基本原理其实很简单，它使用基于特定规则的数据表示原数据。</p>
+<p>如下所示的字符串中包含连续的相同字符，就可以使用朴素的压缩算法减少字符串的长度：</p>
+<p><img src="/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E8%A1%8C%E5%88%97%E5%AD%98%E5%82%A8%E6%AF%94%E8%BE%83/image-20210926152828786.png" alt="image-20210926152828786" style="zoom:67%;"></p>
+<p>黄色方块表示前面字符串的重复次数，这种简单的压缩策略可以在保证无损的情况下将字符串的长度压缩 33%，然而压缩率是由压缩算法和数据的特性共同决定的。与面向行的数据存储相比，面向列的数据存储会将相同类型的数据就近存储，这也给压缩算法的提供了更多发挥的空间。</p>
+<p>压缩算法实际上是一种<strong>使用 CPU 时间换取 I/O 时间和空间</strong>的策略，但是在多数情况下，这种生意都是稳赚不赔的。压缩算法通过减少数据的大小、减少磁盘的寻道时间提高 I/O 的性能、减少数据的传输时间并提高缓冲区的命中率，节省的 I/O 时间可以轻易补偿它带来的 CPU 额外开销（IO时间远大于CPU的额外时间）。</p>
+<h3 id="参考资料">参考资料</h3>
+<p>https://www.zhihu.com/question/29380943</p>
+<p>https://draveness.me/whys-the-design-olap-column-oriented/</p>
+<p>https://www.cnblogs.com/ajianbeyourself/p/7771682.html</p>
+]]></content>
+      <categories>
+        <category>大数据</category>
+      </categories>
+      <tags>
+        <tag>大数据</tag>
+      </tags>
+  </entry>
 </search>
