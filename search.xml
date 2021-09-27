@@ -9010,6 +9010,9 @@
 <p>1、通过设置Hive的配置项，在任务结束后对结果文件进行合并。当输出文件的平均大小小于某个设置的阈值时，启动一个独立的map-reduce任务进行文件merge。</p>
 <p>2、通过设置Hive的配置项，启动Hadoop Archive，即Hadoop归档文件HAR，将许多小文件打包到更大的HAR文件中，本质上利用了多级目录。</p>
 <p>3、通过设置Hive的配置项，如果数据存储的格式不是TexFile而是其他的序列化存储格式（SequenceFile），则开启数据压缩。</p>
+<blockquote>
+<p>https://blog.csdn.net/lzm1340458776/article/details/43567209</p>
+</blockquote>
 <h4 id="hive-sql和spark-sql的区别或者是spark为什么比mr快">Hive SQL和Spark SQL的区别？或者是Spark为什么比MR快？</h4>
 <p>MR与Spark的区别，内存、算子、容错。</p>
 <h4 id="hive-order-by单机十倍以上数据怎么排序">Hive Order By单机十倍以上数据怎么排序</h4>
@@ -9026,6 +9029,63 @@
       </categories>
       <tags>
         <tag>面试</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>MySQL慢查询优化与Explain</title>
+    <url>/2021/09/27/MySQL_%E6%85%A2%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96%E4%B8%8EExplain/</url>
+    <content><![CDATA[<a id="more"></a>
+<h3 id="sql的执行过程">SQL的执行过程</h3>
+<p><img src="/2021/09/27/MySQL_%E6%85%A2%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96%E4%B8%8EExplain/image-20210927111125432.png" alt="image-20210927111125432" style="zoom: 67%;"></p>
+<ol type="1">
+<li>客户端发送一条SQL语句给服务端，服务端的连接器先进行账号/密码、权限等环节<strong>验证</strong>，有异常直接拒绝请求。</li>
+<li>服务端查询<strong>缓存</strong>，如果SQL语句命中了缓存，则返回缓存中的结果，否则继续处理。</li>
+<li>服务端对SQL语句进行词法解析、<strong>语法解析</strong>、预处理来检查SQL语句的合法性。</li>
+<li>服务端通过优化器对之前生成的解析树进行<strong>优化</strong>处理，生成最优的<strong>物理执行计划</strong>。</li>
+<li>将生成的物理执行计划调用<strong>存储引擎</strong>的相关接口，进行数据查询和处理。（存储引擎就包括redo log、undo logo等日志）</li>
+<li>处理完成后将结果返回客户端。</li>
+</ol>
+<h3 id="sql物理执行原理">SQL物理执行原理</h3>
+<p>InnoDB存储引擎(Storage Engine)是MySQL默认存储引擎。</p>
+<p>它是面向行存储的，数据都是存储在磁盘的数据页中，数据页里面按照固定的行格式存储着每一行数据。行数据又分为多种格式，默认的Compact格式为：</p>
+<p><img src="/2021/09/27/MySQL_%E6%85%A2%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96%E4%B8%8EExplain/image-20210927111445383.png" alt="image-20210927111445383" style="zoom:50%;"></p>
+<p>同时，在SQL执行的过程中会根据局部性原理采取磁盘预读机制：</p>
+<p>当计算机访问一个数据时，不仅会加载当前数据所在的数据页，还会将当前数据页相邻的数据页一同加载到内存，磁盘预读的长度一般为页的整倍数，从而有效降低磁盘IO的次数。</p>
+<p><img src="/2021/09/27/MySQL_%E6%85%A2%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96%E4%B8%8EExplain/image-20210927111644942.png" alt="image-20210927111644942" style="zoom: 50%;"></p>
+<p>将数据从磁盘读取到内存中进行处理时，需要经过的若干磁盘物理结构大致为：</p>
+<p><img src="/2021/09/27/MySQL_%E6%85%A2%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96%E4%B8%8EExplain/image-20210927111849133.png" alt="image-20210927111849133" style="zoom: 50%;"></p>
+<ul>
+<li>扇区：是硬盘的读写的基本单位，通常情况下每个扇区的大小是 512B</li>
+<li>磁盘块：文件系统读写数据的最小单位，相邻的扇区组合在一起形成一个块，一般是4KB</li>
+<li>页：是内存的最小存储单位，页的大小通常为磁盘块大小的 2^n 倍</li>
+<li>InnoDB页面的默认大小是16KB，是数倍个操作系统的页</li>
+</ul>
+<p>从磁盘读取数据的物理过程是：</p>
+<ul>
+<li>寻道：磁头移动定位到指定磁道</li>
+<li>旋转：等待指定扇区从磁头下旋转经过</li>
+<li>数据传输：数据在磁盘与内存之间的实际传输</li>
+</ul>
+<p>MySQL的数据是一行行存储在磁盘上的，并且这些数据并非物理连续地存储，这样的话要查找数据就无法避免随机在磁盘上读取和写入数据。</p>
+<p>对于MySQL来说，当出现大量磁盘随机IO时，大部分时间都被浪费到寻道上，磁盘不停地转动，但无法传输很多的数据。</p>
+<p>因此，慢查询的一个很大的原因就是太多的随机IO，导致读取数据的性能降低。</p>
+<h3 id="索引">索引</h3>
+<h3 id="慢sql">慢SQL</h3>
+<h4 id="原因">原因</h4>
+<h4 id="索引设置原则">索引设置原则</h4>
+<h4 id="sql优化">SQL优化</h4>
+<h4 id="explain排查">Explain排查</h4>
+<h3 id="参考资料">参考资料</h3>
+<p>https://mp.weixin.qq.com/s/5BmveQZ1_VqgMcCtU1oIyA</p>
+<p>https://mp.weixin.qq.com/s/xf4VRBFLhhIAGGZPhbRetQ</p>
+]]></content>
+      <categories>
+        <category>数据库</category>
+        <category>MySQL</category>
+      </categories>
+      <tags>
+        <tag>数据库</tag>
+        <tag>MySQL</tag>
       </tags>
   </entry>
 </search>
