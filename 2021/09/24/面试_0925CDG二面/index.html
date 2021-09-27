@@ -22,21 +22,21 @@
     var NexT = window.NexT || {};
     var CONFIG = {"hostname":"example.com","root":"/","images":"/images","scheme":"Mist","version":"8.2.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false}};
   </script>
-<meta name="description" content="实习 整个系统的SLA是多少">
+<meta name="description" content="Hive SQL的底层执行原理 Parser、Analyser、Optimizer、Planner、Code Generation、Executor。 Optimizer优化时采用的分区裁剪 分区裁剪就是只读取需要的分区，比如指定时间是今年的分区读取。 谓词下推就是将 SQL 语句中的 where 谓词逻辑都尽可能提前执行。  https:&#x2F;&#x2F;github.com&#x2F;LiuPengKun">
 <meta property="og:type" content="article">
-<meta property="og:title" content="0808字节一面">
-<meta property="og:url" content="http://example.com/2021/08/11/%E9%9D%A2%E8%AF%95_0808%E5%AD%97%E8%8A%82%E4%B8%80%E9%9D%A2/index.html">
+<meta property="og:title" content="0925 CDG二面">
+<meta property="og:url" content="http://example.com/2021/09/24/%E9%9D%A2%E8%AF%95_0925CDG%E4%BA%8C%E9%9D%A2/index.html">
 <meta property="og:site_name" content="BIOINSu">
-<meta property="og:description" content="实习 整个系统的SLA是多少">
+<meta property="og:description" content="Hive SQL的底层执行原理 Parser、Analyser、Optimizer、Planner、Code Generation、Executor。 Optimizer优化时采用的分区裁剪 分区裁剪就是只读取需要的分区，比如指定时间是今年的分区读取。 谓词下推就是将 SQL 语句中的 where 谓词逻辑都尽可能提前执行。  https:&#x2F;&#x2F;github.com&#x2F;LiuPengKun">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2021-08-11T14:23:55.299Z">
-<meta property="article:modified_time" content="2021-09-06T12:24:18.767Z">
+<meta property="article:published_time" content="2021-09-24T13:05:10.622Z">
+<meta property="article:modified_time" content="2021-09-27T02:49:12.470Z">
 <meta property="article:author" content="BIOINSu">
 <meta property="article:tag" content="面试">
 <meta name="twitter:card" content="summary">
 
 
-<link rel="canonical" href="http://example.com/2021/08/11/%E9%9D%A2%E8%AF%95_0808%E5%AD%97%E8%8A%82%E4%B8%80%E9%9D%A2/">
+<link rel="canonical" href="http://example.com/2021/09/24/%E9%9D%A2%E8%AF%95_0925CDG%E4%BA%8C%E9%9D%A2/">
 
 
 <script class="page-configurations">
@@ -48,7 +48,7 @@
     lang   : 'zh-CN'
   };
 </script>
-<title>0808字节一面 | BIOINSu</title>
+<title>0925 CDG二面 | BIOINSu</title>
   
 
 
@@ -186,7 +186,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E4%B9%A0"><span class="nav-number">1.</span> <span class="nav-text">实习</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%A7%E6%95%B0%E6%8D%AE%E6%A1%86%E6%9E%B6"><span class="nav-number">2.</span> <span class="nav-text">大数据框架</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#yarn"><span class="nav-number">2.1.</span> <span class="nav-text">Yarn</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#yarn%E7%9A%84%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B"><span class="nav-number">2.1.1.</span> <span class="nav-text">Yarn的执行流程？</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#applicationmaster%E5%81%9A%E4%BA%86%E4%BB%80%E4%B9%88"><span class="nav-number">2.1.2.</span> <span class="nav-text">ApplicationMaster做了什么</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#nodemanager-%E7%9A%84%E9%87%8D%E5%90%AF%E8%BF%87%E7%A8%8B"><span class="nav-number">2.1.3.</span> <span class="nav-text">NodeManager 的重启过程</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#yarn%E7%9A%84%E5%BF%83%E8%B7%B3%E6%9C%BA%E5%88%B6"><span class="nav-number">2.1.4.</span> <span class="nav-text">Yarn的心跳机制</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#spark"><span class="nav-number">2.2.</span> <span class="nav-text">Spark</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#spark%E7%9A%84%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E6%9C%BA%E5%88%B6"><span class="nav-number">2.2.1.</span> <span class="nav-text">spark的内存管理机制</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#spark%E7%9A%84%E5%89%AF%E6%9C%AC%E6%9C%BA%E5%88%B6"><span class="nav-number">2.2.2.</span> <span class="nav-text">Spark的副本机制？</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#hbase"><span class="nav-number">2.3.</span> <span class="nav-text">Hbase</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%8F%8F%E8%BF%B0%E4%B8%80%E4%B8%8Bhbase%E7%9A%84%E6%9E%B6%E6%9E%84"><span class="nav-number">2.3.1.</span> <span class="nav-text">描述一下Hbase的架构？</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#sql"><span class="nav-number">3.</span> <span class="nav-text">SQL</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#hive-sql%E7%9A%84%E5%BA%95%E5%B1%82%E6%89%A7%E8%A1%8C%E5%8E%9F%E7%90%86"><span class="nav-number">1.</span> <span class="nav-text">Hive SQL的底层执行原理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#optimizer%E4%BC%98%E5%8C%96%E6%97%B6%E9%87%87%E7%94%A8%E7%9A%84%E5%88%86%E5%8C%BA%E8%A3%81%E5%89%AA"><span class="nav-number">2.</span> <span class="nav-text">Optimizer优化时采用的分区裁剪</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#hive%E5%88%86%E5%8C%BA%E8%A6%86%E7%9B%96%E5%B7%B2%E6%9C%89%E5%88%86%E5%8C%BA%E7%9A%84%E6%95%B0%E6%8D%AE%E4%BC%9A%E5%8F%91%E7%94%9F%E4%BB%80%E4%B9%88"><span class="nav-number">3.</span> <span class="nav-text">Hive分区覆盖已有分区的数据会发生什么</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#hive%E4%B8%AD%E6%9F%90%E4%B8%AA%E5%88%86%E5%8C%BA%E6%9C%89%E6%96%87%E4%BB%B6%E6%AD%A3%E5%9C%A8%E8%A2%AB%E8%AF%BB%E5%8F%96%E5%8F%88%E5%90%8C%E6%97%B6%E6%9C%89%E6%95%B0%E6%8D%AE%E5%86%99%E5%85%A5%E4%BC%9A%E5%8F%91%E7%94%9F%E4%BB%80%E4%B9%88"><span class="nav-number">4.</span> <span class="nav-text">Hive中某个分区有文件正在被读取，又同时有数据写入会发生什么</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#hive%E4%B8%AD%E5%AE%9E%E7%8E%B0%E5%A4%A7%E8%A1%A8join%E5%B0%8F%E8%A1%A8map-join"><span class="nav-number">5.</span> <span class="nav-text">Hive中实现大表join小表（Map Join）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#hive%E8%BE%93%E5%87%BA%E7%9A%84%E5%B0%8F%E6%96%87%E4%BB%B6%E8%BF%87%E5%A4%9A%E6%80%8E%E4%B9%88%E8%A7%A3%E5%86%B3"><span class="nav-number">6.</span> <span class="nav-text">Hive输出的小文件过多怎么解决</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#hive-sql%E5%92%8Cspark-sql%E7%9A%84%E5%8C%BA%E5%88%AB%E6%88%96%E8%80%85%E6%98%AFspark%E4%B8%BA%E4%BB%80%E4%B9%88%E6%AF%94mr%E5%BF%AB"><span class="nav-number">7.</span> <span class="nav-text">Hive SQL和Spark SQL的区别？或者是Spark为什么比MR快？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#hive-order-by%E5%8D%95%E6%9C%BA%E5%8D%81%E5%80%8D%E4%BB%A5%E4%B8%8A%E6%95%B0%E6%8D%AE%E6%80%8E%E4%B9%88%E6%8E%92%E5%BA%8F"><span class="nav-number">8.</span> <span class="nav-text">Hive Order By单机十倍以上数据怎么排序</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AE%97%E6%B3%95%E5%8A%9B%E6%89%A3%E5%AD%97%E7%AC%A6%E4%B8%B2%E7%9A%84%E6%8E%92%E5%88%97"><span class="nav-number">9.</span> <span class="nav-text">算法：力扣字符串的排列</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -257,7 +257,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/08/11/%E9%9D%A2%E8%AF%95_0808%E5%AD%97%E8%8A%82%E4%B8%80%E9%9D%A2/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/09/24/%E9%9D%A2%E8%AF%95_0925CDG%E4%BA%8C%E9%9D%A2/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -270,7 +270,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          0808字节一面
+          0925 CDG二面
         </h1>
 
         <div class="post-meta-container">
@@ -281,14 +281,14 @@
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2021-08-11 22:23:55" itemprop="dateCreated datePublished" datetime="2021-08-11T22:23:55+08:00">2021-08-11</time>
+      <time title="创建时间：2021-09-24 21:05:10" itemprop="dateCreated datePublished" datetime="2021-09-24T21:05:10+08:00">2021-09-24</time>
     </span>
       <span class="post-meta-item">
         <span class="post-meta-item-icon">
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-09-06 20:24:18" itemprop="dateModified" datetime="2021-09-06T20:24:18+08:00">2021-09-06</time>
+        <time title="修改时间：2021-09-27 10:49:12" itemprop="dateModified" datetime="2021-09-27T10:49:12+08:00">2021-09-27</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -310,105 +310,81 @@
     
     
     <div class="post-body" itemprop="articleBody">
-        <h3 id="实习">实习</h3>
-<p>整个系统的SLA是多少</p>
-<a id="more"></a>
-<p>存储的数据量？</p>
-<p>大概5亿行数据，200G左右，宽表约150个字段</p>
-<h3 id="大数据框架">大数据框架</h3>
-<h4 id="yarn">Yarn</h4>
-<h5 id="yarn的执行流程">Yarn的执行流程？</h5>
-<p>Yarn是一个资源调度平台，负责为运算程序（MapReduce）分配服务器运算资源。</p>
-<p>ResourceManager：总的管理器</p>
-<ul>
-<li><p>处理客户端的请求</p></li>
-<li><p>启动监控 ApplicationMaster</p></li>
-<li><p>监控 NodeManager</p></li>
-<li><p>资源分配调度</p></li>
-</ul>
-<p>ApplicationMaster：单个Job的管理器</p>
-<ul>
-<li>为应用程序申请资源，分配给任务</li>
-<li>负责任务的监控与容错</li>
-<li>需要与 NM 通信：启动/停止 task，task 是运行在 container 里面，AM 也是运行在 container 里面</li>
-</ul>
-<p>NodeManager：单个节点的管理器</p>
-<ul>
-<li>管理单个节点的资源、任务</li>
-<li>处理来自ResourceManager的请求：启动 Container</li>
-<li>ApplicationMaster的命令：启动task</li>
-<li>定时向RM汇报本节点的资源情况</li>
-</ul>
-<p>Container：资源抽象</p>
-<ul>
-<li>封装了如内存、cpu、磁盘、网络等资源</li>
-</ul>
+        <h4 id="hive-sql的底层执行原理">Hive SQL的底层执行原理</h4>
+<p>Parser、Analyser、Optimizer、Planner、Code Generation、Executor。</p>
+<h4 id="optimizer优化时采用的分区裁剪">Optimizer优化时采用的分区裁剪</h4>
+<p>分区裁剪就是只读取需要的分区，比如指定时间是今年的分区读取。</p>
+<p>谓词下推就是将 SQL 语句中的 where 谓词逻辑都尽可能提前执行。</p>
 <blockquote>
-<p>YARN 的基本思想是将资源管理和作业调度/监控的功能分解为单独的守护进程。这个包括 2 个部分，一个全局的资源调度 ResourceManager（RM）和针对每个应用程序的ApplicationMaster（AM）</p>
+<p>https://github.com/LiuPengKun1993/Articles/blob/master/contents/BigData/%E6%B5%85%E8%B0%88%20Hive%20%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96.md</p>
 </blockquote>
-<p>1、开启ApplicationMaster，计算并申请所需资源：</p>
-<p>Client向yarn提交job，首先找ResourceManager分配资源，ResourceManager开启一个Container，在Container中运行一个Application Manager</p>
-<p>Application Manager找一台NodeManager启动ApplicationMaster，计算任务所需的计算资源，然后向Application Manager（Yarn）申请运行任务所需的资源</p>
-<p>2、AM将资源分发给NM，执行计算</p>
-<p>Resource scheduler将资源封装发给ApplicationMaster，ApplicationMaster将获取到的资源分配给各个NodeManager，启动Container执行任务</p>
-<p>3、结果反馈</p>
-<p>将执行结果反馈给ApplicationMaster，ApplicationMaster将任务执行的结果反馈Application Manager</p>
-<h5 id="applicationmaster做了什么">ApplicationMaster做了什么</h5>
-<h5 id="nodemanager-的重启过程">NodeManager 的重启过程</h5>
-<h5 id="yarn的心跳机制">Yarn的心跳机制</h5>
-<h4 id="spark">Spark</h4>
-<h5 id="spark的内存管理机制">spark的内存管理机制</h5>
-<p>Spark1.6之后引入统一内存管理机制，与静态内存管理的区别在于存储内存和执行内存共享同一块空间，可以动态占用对方的空闲区域。</p>
-<p>总的内存可以分为：</p>
-<ul>
-<li>堆内存
-<ul>
-<li>存储内存：缓存RDD数据和广播变量的数据</li>
-<li>执行内存：缓存shuffle操作（reduce by、join）产生的中间数据</li>
-<li>系统保留内存：作为存储内存和执行内存的缓冲区，防止OOM</li>
-<li>其他内存：用户自定义数据结构及Spark元数据</li>
-</ul></li>
-<li>堆外内存
-<ul>
-<li>存储内存</li>
-<li>执行内存</li>
-</ul></li>
-</ul>
-<h5 id="spark的副本机制">Spark的副本机制？</h5>
-<p>副本的作用是在数据丢失的情况下依然保持服务可用。</p>
-<p>Spark防止数据丢之的机制是血统容错机制和Checkpoint机制。通过用父RDD再次执行相应操作得到现有RDD。</p>
-<p>一般来说，在已经有RDD容错机制的情况下，没有必要再牺牲内存设计RDD副本容错机制。</p>
-<p>但是，在执行缓存的情况下，可以产生副本，向persist方法中传入StorageLevel参数，可以实现不同的缓存级别。其中DISK_ONLY_2、MEMORY_ONLY_2、MEMORY_ONLY_SER_2、MEMORY_AND_DISK_SER_2缓存级别，可以是实现缓存副本数为2，即将所有数据都复制一份副本，并发送到其他节点上。</p>
-<h4 id="hbase">Hbase</h4>
-<h5 id="描述一下hbase的架构">描述一下Hbase的架构？</h5>
-<ul>
-<li>Master：建表、删表、移动Region、合并等操作(HBase中即使Master宕机了，集群依然可以正常地运行，依然可以存储和删除数据)</li>
-<li>RegionServer:服务器上的一个服务，真正存储数据的节点，客户端可以直接从这里获取数据
-<ul>
-<li>Region：一个RegionServer中有多个Region，Region就是一段数据的集合，每一个Region都有起始rowkey和结束rowkey，代表了它所存储的row范围。一个Region对应了一张表。
-<ul>
-<li>Store：在一个Region内部，包括多个store，其中一个store对应一个列族。如果一个表中有N个列族，那么它对应的每一个region中有N个store。</li>
-<li>MemStore：不是为了加快写速度，而是按照Row Key对这个列族中的数据进行排序（LSM树）</li>
-<li>HFile：存储在硬盘上的文件，真正被持久化到硬盘上</li>
-</ul></li>
-<li>WAL：修改并不直接写入到数据库文件中，而是写入到另外一个称为 WAL 的文件中；如果事务失败，WAL 中的记录会被忽略，撤销修改；如果事务成功，它将在随后的某个时间被写回到数据库文件中，提交修改。</li>
-<li>BlockCache：读数据时进行缓存</li>
-</ul></li>
-<li>ZooKeeper：管理了HBase所有RegionServer的信息，具体的数据段存放在哪个RegionServer上；客户端先和zk通信才能获取数据；取数据所需要的元数据表hbase:meata的位置存储在zk上</li>
-</ul>
-<h3 id="sql">SQL</h3>
-<p>整个系统的SLA是多少 存储的数据量</p>
-<p>yarn的整个执行流程 am做了什么 yarn的心跳机制</p>
-<p>node manager 的重启过程</p>
-<p>spark的内存管理机制 DD</p>
-<p>sql分别有哪些连接</p>
-<p>sql是怎么转为map reduce执行的</p>
-<p>Hfile是怎么存储文件的</p>
-<p>LSM是什么？英文全程是什么？</p>
-<p>spark的副本机制？ DD</p>
-<p>HdFS宕机，断点续传功能</p>
-<p>连续n天登陆 新用户表和旧用户表，怎么判断新用户在旧用户表中出现？（where条件？）</p>
-<p>hbase介绍</p>
+<h4 id="hive分区覆盖已有分区的数据会发生什么">Hive分区覆盖已有分区的数据会发生什么</h4>
+<p>Hive不支持对同一张表或分区进行并发数据插入，这样会导致多个任务操作同一个数据临时目录，一个任务将另一个任务的数据移走，导致任务失败。</p>
+<p>只能在单个任务下对同一个分区的数据采用insert overwrite语句实现分区覆盖：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">INSERT</span> overwrite <span class="keyword">TABLE</span> test <span class="keyword">PARTITION</span> (<span class="keyword">month</span> <span class="operator">=</span> ‘<span class="number">2015</span><span class="number">-06</span>′,<span class="keyword">day</span> <span class="operator">=</span> ‘<span class="number">2015</span><span class="number">-06</span><span class="number">-15</span>′)</span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> dual;</span><br></pre></td></tr></table></figure>
+<p>insert into 则是以追加的方式写入数据。</p>
+<a id="more"></a>
+<h4 id="hive中某个分区有文件正在被读取又同时有数据写入会发生什么">Hive中某个分区有文件正在被读取，又同时有数据写入会发生什么</h4>
+<p>Hive不支持并发的读写操作，同时进行读写的话会抛出异常（读的时候文件消失了读不到）。</p>
+<p>当 A 用户执行 select count 过程中，B 用户提交 insert overwrite。B 用户的命令不会被阻塞，会立即执行，而 A 用户执行到一半的 MapReduce 就会<strong>出错抛出异常</strong>。而在关系型数据库里，B 的命令同样不阻塞，但由于 MVCC 机制，A 的结果不受 B 影响。</p>
+<p>又比如 A 用户在执行 insert overwrite 操作过程中，B 用户提交了 drop table，B 的命令也会立即执行，而 A 的操作就会<strong>出错抛出异常</strong>。在 mysql 中，只有 A 提交了 commit，B 的命令才会执行。</p>
+<p>hive 并发问题的解决思路：</p>
+<p>读操作需要共享锁，写操作需要排他锁。即利用锁机制来解决并发的问题。</p>
+<p>元信息和数据的变更需要互斥锁，数据的读取需要共享锁。</p>
+<p>关闭锁机制会造成下面影响：</p>
+<p>并发读写同一份数据时，读操作可能会随机失败。</p>
+<p>并发写操作的结果在随机出现，后完成的任务覆盖之前完成任务的结果。</p>
+<blockquote>
+<p>https://www.dazhuanlan.com/al23256/topics/1062367</p>
+<p>https://www.modb.pro/db/43858</p>
+<p>https://zhuanlan.zhihu.com/p/82039596</p>
+</blockquote>
+<h4 id="hive中实现大表join小表map-join">Hive中实现大表join小表（Map Join）</h4>
+<p>实现原理：</p>
+<p>因为Hive底层就是基于HDFS的，所以它的Map Join的实现原理不是像Spark一样去广播小表，而是直接从HDFS中将这个小表读取到每个机器节点的内存中，这样就可以实现在Map端进行Join的操作。</p>
+<p>开启方法：</p>
+<p>在Hive早期的版本中，需要使用hint提示/<em>+ mapjoin(table) </em>/才会执行Map Join。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span><span class="comment">/*+MAPJOIN(smalltable)*/</span></span><br><span class="line">		big.key <span class="keyword">AS</span> key,</span><br><span class="line">		big.value <span class="keyword">AS</span> <span class="keyword">value</span></span><br><span class="line"><span class="keyword">FROM</span> smalltable small</span><br><span class="line"><span class="keyword">JOIN</span> bigtable big</span><br><span class="line"><span class="keyword">ON</span> small.key<span class="operator">=</span>big.key</span><br></pre></td></tr></table></figure>
+<p>在Hive现在的版本中，通过配置属性来设置Map Join的触发时机：</p>
+<table>
+<colgroup>
+<col style="width: 34%">
+<col style="width: 65%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>属性</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>hive.auto.convert.join</td>
+<td>默认值为true，自动开户MAPJOIN优化</td>
+</tr>
+<tr class="even">
+<td>hive.mapjoin.smalltable.filesize</td>
+<td>默认值为2500000(25M),通过配置该属性来确定使用该优化的表的大小，如果表的大小小于此值就会被加载进内存中</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>https://blog.csdn.net/qq_41018861/article/details/112238592</p>
+</blockquote>
+<h4 id="hive输出的小文件过多怎么解决">Hive输出的小文件过多怎么解决</h4>
+<p>1、通过设置Hive的配置项，在任务结束后对结果文件进行合并。当输出文件的平均大小小于某个设置的阈值时，启动一个独立的map-reduce任务进行文件merge。</p>
+<p>2、通过设置Hive的配置项，启动Hadoop Archive，即Hadoop归档文件HAR，将许多小文件打包到更大的HAR文件中，本质上利用了多级目录。</p>
+<p>3、通过设置Hive的配置项，如果数据存储的格式不是TexFile而是其他的序列化存储格式（SequenceFile），则开启数据压缩。</p>
+<h4 id="hive-sql和spark-sql的区别或者是spark为什么比mr快">Hive SQL和Spark SQL的区别？或者是Spark为什么比MR快？</h4>
+<p>MR与Spark的区别，内存、算子、容错。</p>
+<h4 id="hive-order-by单机十倍以上数据怎么排序">Hive Order By单机十倍以上数据怎么排序</h4>
+<p>1、就是采用桶排序的策略啊！按照某个字段分桶，把数据打散到多台机器上进行排序，然后加上统计的偏移量就可以得到啊！</p>
+<blockquote>
+<p>不知道当时为什么讲了桶排序之后又问了一个一摸一样的问题。。。</p>
+</blockquote>
+<p>2、使用sort by，先让每个reducer输出有序的文件，再采用外部排序的方法获得全局有序的文件。</p>
+<p>3、增加单台机器的资源。</p>
+<h4 id="算法力扣字符串的排列">算法：力扣字符串的排列</h4>
 
     </div>
 
@@ -425,13 +401,13 @@
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/2021/08/08/%E9%9D%A2%E8%AF%95_0807%E8%99%BE%E7%9A%AE%E4%B8%80%E9%9D%A2/" rel="prev" title="0807虾皮一面">
-                  <i class="fa fa-chevron-left"></i> 0807虾皮一面
+                <a href="/2021/09/24/Spark_%E8%B0%83%E4%BC%98/" rel="prev" title="Spark调优">
+                  <i class="fa fa-chevron-left"></i> Spark调优
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/2021/08/14/Flink07_CheckpointAndState/" rel="next" title="07 Flink四大基石：检查点与状态">
-                  07 Flink四大基石：检查点与状态 <i class="fa fa-chevron-right"></i>
+                <a href="/2021/09/24/%E9%9D%A2%E8%AF%95_0924CDG%E4%B8%80%E9%9D%A2/" rel="next" title="0924 CDG一面">
+                  0924 CDG一面 <i class="fa fa-chevron-right"></i>
                 </a>
             </div>
           </div>

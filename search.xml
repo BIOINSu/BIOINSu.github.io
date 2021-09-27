@@ -8864,7 +8864,6 @@
 <h4 id="算法题气球游戏">算法题：气球游戏</h4>
 <h4 id="智力题电梯">智力题：电梯</h4>
 <p>两台电梯，如何合理安排使得运输时间较优。</p>
-<h3 id="参考资料">参考资料</h3>
 ]]></content>
       <categories>
         <category>面试</category>
@@ -8941,6 +8940,92 @@
       </categories>
       <tags>
         <tag>大数据</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>0925 CDG二面</title>
+    <url>/2021/09/24/%E9%9D%A2%E8%AF%95_0925CDG%E4%BA%8C%E9%9D%A2/</url>
+    <content><![CDATA[<h4 id="hive-sql的底层执行原理">Hive SQL的底层执行原理</h4>
+<p>Parser、Analyser、Optimizer、Planner、Code Generation、Executor。</p>
+<h4 id="optimizer优化时采用的分区裁剪">Optimizer优化时采用的分区裁剪</h4>
+<p>分区裁剪就是只读取需要的分区，比如指定时间是今年的分区读取。</p>
+<p>谓词下推就是将 SQL 语句中的 where 谓词逻辑都尽可能提前执行。</p>
+<blockquote>
+<p>https://github.com/LiuPengKun1993/Articles/blob/master/contents/BigData/%E6%B5%85%E8%B0%88%20Hive%20%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96.md</p>
+</blockquote>
+<h4 id="hive分区覆盖已有分区的数据会发生什么">Hive分区覆盖已有分区的数据会发生什么</h4>
+<p>Hive不支持对同一张表或分区进行并发数据插入，这样会导致多个任务操作同一个数据临时目录，一个任务将另一个任务的数据移走，导致任务失败。</p>
+<p>只能在单个任务下对同一个分区的数据采用insert overwrite语句实现分区覆盖：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">INSERT</span> overwrite <span class="keyword">TABLE</span> test <span class="keyword">PARTITION</span> (<span class="keyword">month</span> <span class="operator">=</span> ‘<span class="number">2015</span><span class="number">-06</span>′,<span class="keyword">day</span> <span class="operator">=</span> ‘<span class="number">2015</span><span class="number">-06</span><span class="number">-15</span>′)</span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> dual;</span><br></pre></td></tr></table></figure>
+<p>insert into 则是以追加的方式写入数据。</p>
+<a id="more"></a>
+<h4 id="hive中某个分区有文件正在被读取又同时有数据写入会发生什么">Hive中某个分区有文件正在被读取，又同时有数据写入会发生什么</h4>
+<p>Hive不支持并发的读写操作，同时进行读写的话会抛出异常（读的时候文件消失了读不到）。</p>
+<p>当 A 用户执行 select count 过程中，B 用户提交 insert overwrite。B 用户的命令不会被阻塞，会立即执行，而 A 用户执行到一半的 MapReduce 就会<strong>出错抛出异常</strong>。而在关系型数据库里，B 的命令同样不阻塞，但由于 MVCC 机制，A 的结果不受 B 影响。</p>
+<p>又比如 A 用户在执行 insert overwrite 操作过程中，B 用户提交了 drop table，B 的命令也会立即执行，而 A 的操作就会<strong>出错抛出异常</strong>。在 mysql 中，只有 A 提交了 commit，B 的命令才会执行。</p>
+<p>hive 并发问题的解决思路：</p>
+<p>读操作需要共享锁，写操作需要排他锁。即利用锁机制来解决并发的问题。</p>
+<p>元信息和数据的变更需要互斥锁，数据的读取需要共享锁。</p>
+<p>关闭锁机制会造成下面影响：</p>
+<p>并发读写同一份数据时，读操作可能会随机失败。</p>
+<p>并发写操作的结果在随机出现，后完成的任务覆盖之前完成任务的结果。</p>
+<blockquote>
+<p>https://www.dazhuanlan.com/al23256/topics/1062367</p>
+<p>https://www.modb.pro/db/43858</p>
+<p>https://zhuanlan.zhihu.com/p/82039596</p>
+</blockquote>
+<h4 id="hive中实现大表join小表map-join">Hive中实现大表join小表（Map Join）</h4>
+<p>实现原理：</p>
+<p>因为Hive底层就是基于HDFS的，所以它的Map Join的实现原理不是像Spark一样去广播小表，而是直接从HDFS中将这个小表读取到每个机器节点的内存中，这样就可以实现在Map端进行Join的操作。</p>
+<p>开启方法：</p>
+<p>在Hive早期的版本中，需要使用hint提示/<em>+ mapjoin(table) </em>/才会执行Map Join。</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span><span class="comment">/*+MAPJOIN(smalltable)*/</span></span><br><span class="line">		big.key <span class="keyword">AS</span> key,</span><br><span class="line">		big.value <span class="keyword">AS</span> <span class="keyword">value</span></span><br><span class="line"><span class="keyword">FROM</span> smalltable small</span><br><span class="line"><span class="keyword">JOIN</span> bigtable big</span><br><span class="line"><span class="keyword">ON</span> small.key<span class="operator">=</span>big.key</span><br></pre></td></tr></table></figure>
+<p>在Hive现在的版本中，通过配置属性来设置Map Join的触发时机：</p>
+<table>
+<colgroup>
+<col style="width: 34%">
+<col style="width: 65%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>属性</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>hive.auto.convert.join</td>
+<td>默认值为true，自动开户MAPJOIN优化</td>
+</tr>
+<tr class="even">
+<td>hive.mapjoin.smalltable.filesize</td>
+<td>默认值为2500000(25M),通过配置该属性来确定使用该优化的表的大小，如果表的大小小于此值就会被加载进内存中</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>https://blog.csdn.net/qq_41018861/article/details/112238592</p>
+</blockquote>
+<h4 id="hive输出的小文件过多怎么解决">Hive输出的小文件过多怎么解决</h4>
+<p>1、通过设置Hive的配置项，在任务结束后对结果文件进行合并。当输出文件的平均大小小于某个设置的阈值时，启动一个独立的map-reduce任务进行文件merge。</p>
+<p>2、通过设置Hive的配置项，启动Hadoop Archive，即Hadoop归档文件HAR，将许多小文件打包到更大的HAR文件中，本质上利用了多级目录。</p>
+<p>3、通过设置Hive的配置项，如果数据存储的格式不是TexFile而是其他的序列化存储格式（SequenceFile），则开启数据压缩。</p>
+<h4 id="hive-sql和spark-sql的区别或者是spark为什么比mr快">Hive SQL和Spark SQL的区别？或者是Spark为什么比MR快？</h4>
+<p>MR与Spark的区别，内存、算子、容错。</p>
+<h4 id="hive-order-by单机十倍以上数据怎么排序">Hive Order By单机十倍以上数据怎么排序</h4>
+<p>1、就是采用桶排序的策略啊！按照某个字段分桶，把数据打散到多台机器上进行排序，然后加上统计的偏移量就可以得到啊！</p>
+<blockquote>
+<p>不知道当时为什么讲了桶排序之后又问了一个一摸一样的问题。。。</p>
+</blockquote>
+<p>2、使用sort by，先让每个reducer输出有序的文件，再采用外部排序的方法获得全局有序的文件。</p>
+<p>3、增加单台机器的资源。</p>
+<h4 id="算法力扣字符串的排列">算法：力扣字符串的排列</h4>
+]]></content>
+      <categories>
+        <category>面试</category>
+      </categories>
+      <tags>
+        <tag>面试</tag>
       </tags>
   </entry>
 </search>
