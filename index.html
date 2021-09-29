@@ -273,10 +273,16 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2021-09-27 10:51:35 / 修改时间：12:27:27" itemprop="dateCreated datePublished" datetime="2021-09-27T10:51:35+08:00">2021-09-27</time>
+      <time title="创建时间：2021-09-27 10:51:35" itemprop="dateCreated datePublished" datetime="2021-09-27T10:51:35+08:00">2021-09-27</time>
     </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-09-29 19:24:01" itemprop="dateModified" datetime="2021-09-29T19:24:01+08:00">2021-09-29</time>
+      </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
         <i class="far fa-folder"></i>
@@ -301,16 +307,40 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h3 id="sql的执行过程">SQL的执行过程</h3>
-<p><img src="/2021/09/27/MySQL_%E6%85%A2%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96%E4%B8%8EExplain/image-20210927111125432.png" alt="image-20210927111125432" style="zoom: 67%;"></p>
-<ol type="1">
-<li>客户端发送一条SQL语句给服务端，服务端的连接器先进行账号/密码、权限等环节<strong>验证</strong>，有异常直接拒绝请求。</li>
-<li>服务端查询<strong>缓存</strong>，如果SQL语句命中了缓存，则返回缓存中的结果，否则继续处理。</li>
-<li>服务端对SQL语句进行词法解析、<strong>语法解析</strong>、预处理来检查SQL语句的合法性。</li>
-<li>服务端通过优化器对之前生成的解析树进行<strong>优化</strong>处理，生成最优的<strong>物理执行计划</strong>。</li>
-<li>将生成的物理执行计划调用<strong>存储引擎</strong>的相关接口，进行数据查询和处理。（存储引擎就包括redo log、undo logo等日志）</li>
-<li>处理完成后将结果返回客户端。</li>
-</ol>
+          <table>
+<colgroup>
+<col style="width: 18%">
+<col style="width: 81%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>概念</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>慢查询物理原因</td>
+<td>出现大量磁盘随机IO时，大部分时间都被浪费在寻址而非传输数据。<br>解决方案为建立索引，减少随机IO。</td>
+</tr>
+<tr class="even">
+<td>慢查询索引原因</td>
+<td>1、索引分区度低。<br>2、索引创建太多。<br>3、常用字段/排序字段没有创建索引。</td>
+</tr>
+<tr class="odd">
+<td>慢查询SQL原因</td>
+<td>1、对索引进行运算、使用函数、模糊匹配、隐式转换等。<br>2、联合索引不包含前面的索引，根据最左匹配原则会导致索引失效。</td>
+</tr>
+<tr class="even">
+<td>SQL优化</td>
+<td>1、使用join代替子查询。<br>2、使用覆盖索引，减少回表。<br>3、where将过滤数据多的条件放在前面。<br>4、使用联合索引，而不是建立多个索引。</td>
+</tr>
+<tr class="odd">
+<td>Explain排查</td>
+<td>使用Explain关键字查看SQL语句的执行信息。<br>type、key、extra字段观察是否使用了索引，是否进行的是全表扫描。</td>
+</tr>
+</tbody>
+</table>
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2021/09/27/MySQL_%E6%85%A2%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96%E4%B8%8EExplain/#more" rel="contents">
@@ -1322,10 +1352,16 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2021-09-18 09:46:20 / 修改时间：11:26:49" itemprop="dateCreated datePublished" datetime="2021-09-18T09:46:20+08:00">2021-09-18</time>
+      <time title="创建时间：2021-09-18 09:46:20" itemprop="dateCreated datePublished" datetime="2021-09-18T09:46:20+08:00">2021-09-18</time>
     </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-09-29 09:28:43" itemprop="dateModified" datetime="2021-09-29T09:28:43+08:00">2021-09-29</time>
+      </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
         <i class="far fa-folder"></i>
