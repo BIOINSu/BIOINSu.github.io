@@ -194,7 +194,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">91</span>
+          <span class="site-state-item-count">92</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -241,6 +241,122 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/09/10/%E5%88%86%E5%B8%83%E5%BC%8F_%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C%E7%AE%97%E6%B3%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BIOINSu">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BIOINSu">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/09/10/%E5%88%86%E5%B8%83%E5%BC%8F_%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C%E7%AE%97%E6%B3%95/" class="post-title-link" itemprop="url">一致性哈希算法</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-09-10 11:02:32" itemprop="dateCreated datePublished" datetime="2021-09-10T11:02:32+08:00">2021-09-10</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-09-11 10:24:39" itemprop="dateModified" datetime="2021-09-11T10:24:39+08:00">2021-09-11</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F/" itemprop="url" rel="index"><span itemprop="name">分布式</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <table>
+<colgroup>
+<col style="width: 18%">
+<col style="width: 81%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>概念</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>一致性哈希算法</td>
+<td>一致性哈希算法就是将哈希缓存的除数改为<span class="math inline">\(2^{32}\)</span>，将映射空间看成一个hash环，把服务器和缓存数据看作是上面的每个点。<br>缓存数据会分配到沿顺时针方向遇到的第一个服务器上。</td>
+</tr>
+<tr class="even">
+<td>优点</td>
+<td>服务器的数量如果发生改变，并不是所有缓存都会失效，而是<strong>只有部分缓存会失效</strong>。</td>
+</tr>
+<tr class="odd">
+<td>hash环偏斜</td>
+<td>服务器可能会不均匀地被映射到hash环上。<br>大量缓存数据可能会被映射到同一个服务器上。</td>
+</tr>
+<tr class="even">
+<td>虚拟节点</td>
+<td>实际节点虚拟复制而来的节点，其实就是在hash环上再设置多个服务器的映射。<br>解决hash环偏斜导致缓存数据分配不均的问题。</td>
+</tr>
+</tbody>
+</table>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/09/10/%E5%88%86%E5%B8%83%E5%BC%8F_%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C%E7%AE%97%E6%B3%95/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1199,94 +1315,6 @@
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2021/08/14/Flink07_CheckpointAndState/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/08/11/%E9%9D%A2%E8%AF%95_0808%E5%AD%97%E8%8A%82%E4%B8%80%E9%9D%A2/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="BIOINSu">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BIOINSu">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/08/11/%E9%9D%A2%E8%AF%95_0808%E5%AD%97%E8%8A%82%E4%B8%80%E9%9D%A2/" class="post-title-link" itemprop="url">0808字节一面</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-08-11 22:23:55" itemprop="dateCreated datePublished" datetime="2021-08-11T22:23:55+08:00">2021-08-11</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-09-06 20:24:18" itemprop="dateModified" datetime="2021-09-06T20:24:18+08:00">2021-09-06</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E9%9D%A2%E8%AF%95/" itemprop="url" rel="index"><span itemprop="name">面试</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h3 id="实习">实习</h3>
-<p>整个系统的SLA是多少</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/08/11/%E9%9D%A2%E8%AF%95_0808%E5%AD%97%E8%8A%82%E4%B8%80%E9%9D%A2/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>

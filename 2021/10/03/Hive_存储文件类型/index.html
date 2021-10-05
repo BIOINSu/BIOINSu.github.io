@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.3.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/maze.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/maze.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/maze.png">
+  <link rel="mask-icon" href="/images/maze.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","images":"/images","scheme":"Mist","version":"8.2.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false}};
+  </script>
+<meta name="description" content="概念 解释     TEXTFILE 默认格式，建表时不指定默认为这个格式，导入数据时会直接把数据文件拷贝到hdfs上不进行处理。   SEQUENCEFILE    RCFILE    ORCFILE    Parquet">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hive存储文件类型">
+<meta property="og:url" content="http://example.com/2021/10/03/Hive_%E5%AD%98%E5%82%A8%E6%96%87%E4%BB%B6%E7%B1%BB%E5%9E%8B/index.html">
+<meta property="og:site_name" content="BIOINSu">
+<meta property="og:description" content="概念 解释     TEXTFILE 默认格式，建表时不指定默认为这个格式，导入数据时会直接把数据文件拷贝到hdfs上不进行处理。   SEQUENCEFILE    RCFILE    ORCFILE    Parquet">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2021/10/03/Hive_%E5%AD%98%E5%82%A8%E6%96%87%E4%BB%B6%E7%B1%BB%E5%9E%8B/image-20211003201055725.png">
+<meta property="og:image" content="http://example.com/2021/10/03/Hive_%E5%AD%98%E5%82%A8%E6%96%87%E4%BB%B6%E7%B1%BB%E5%9E%8B/image-20211003203325562.png">
+<meta property="og:image" content="http://example.com/2021/10/03/Hive_%E5%AD%98%E5%82%A8%E6%96%87%E4%BB%B6%E7%B1%BB%E5%9E%8B/image-20211003205451080.png">
+<meta property="article:published_time" content="2021-10-03T12:10:41.538Z">
+<meta property="article:modified_time" content="2021-10-03T13:36:18.930Z">
+<meta property="article:author" content="BIOINSu">
+<meta property="article:tag" content="Hive">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2021/10/03/Hive_%E5%AD%98%E5%82%A8%E6%96%87%E4%BB%B6%E7%B1%BB%E5%9E%8B/image-20211003201055725.png">
+
+
+<link rel="canonical" href="http://example.com/2021/10/03/Hive_%E5%AD%98%E5%82%A8%E6%96%87%E4%BB%B6%E7%B1%BB%E5%9E%8B/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+<title>Hive存储文件类型 | BIOINSu</title>
+  
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BIOINSu</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#textfile"><span class="nav-number">1.</span> <span class="nav-text">TEXTFILE</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#sequencefile"><span class="nav-number">2.</span> <span class="nav-text">SequenceFile</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0"><span class="nav-number">2.1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84"><span class="nav-number">2.2.</span> <span class="nav-text">存储结构</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#rcfile"><span class="nav-number">3.</span> <span class="nav-text">RCFile</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0-1"><span class="nav-number">3.1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84-1"><span class="nav-number">3.2.</span> <span class="nav-text">存储结构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B3%A8%E6%84%8F"><span class="nav-number">3.3.</span> <span class="nav-text">注意</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%B4%A2%E5%BC%95%E6%9C%BA%E5%88%B6"><span class="nav-number">3.4.</span> <span class="nav-text">索引机制</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#rcfile%E7%9A%84sync%E6%9C%BA%E5%88%B6%E4%B8%8Ehdfs%E5%88%87%E7%89%87%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="nav-number">3.5.</span> <span class="nav-text">RCFile的Sync机制（与HDFS切片的关系）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E8%AF%BB%E5%8F%96%E5%92%8Clazy%E8%A7%A3%E5%8E%8Bmr%E8%AF%BB%E5%8F%96%E6%96%87%E4%BB%B6"><span class="nav-number">3.6.</span> <span class="nav-text">数据读取和Lazy解压（MR读取文件）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BC%B9%E6%80%A7%E7%9A%84%E8%A1%8C%E7%BB%84%E5%A4%A7%E5%B0%8F"><span class="nav-number">3.7.</span> <span class="nav-text">弹性的行组大小</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">4.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">BIOINSu</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">92</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">32</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">36</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/BIOINSu" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;BIOINSu" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/10/03/Hive_%E5%AD%98%E5%82%A8%E6%96%87%E4%BB%B6%E7%B1%BB%E5%9E%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BIOINSu">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BIOINSu">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Hive存储文件类型
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2021-10-03 20:10:41 / 修改时间：21:36:18" itemprop="dateCreated datePublished" datetime="2021-10-03T20:10:41+08:00">2021-10-03</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Hive/" itemprop="url" rel="index"><span itemprop="name">Hive</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <table>
+<thead>
+<tr class="header">
+<th>概念</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>TEXTFILE</td>
+<td><strong>默认格式</strong>，建表时不指定默认为这个格式，导入数据时会直接把数据文件拷贝到hdfs上不进行处理。</td>
+</tr>
+<tr class="even">
+<td>SEQUENCEFILE</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>RCFILE</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>ORCFILE</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Parquet</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<a id="more"></a>
+<h3 id="textfile">TEXTFILE</h3>
+<p>每一行都是一条记录，每行都以换行符（）结尾。</p>
+<p>默认格式，数据不做压缩，磁盘开销大，数据解析开销大。</p>
+<p>可结合Gzip、Bzip2使用(系统自动检查，执行查询时自动解压)，但使用这种方式，hive不会对数据进行切分，从而无法对数据进行并行操作。</p>
+<p>缺点：</p>
+<p>1、磁盘开销大</p>
+<p>2、解析不方便，如JSON/Xml，比二进制格式解析更消耗资源</p>
+<p>3、不具备类型和模式，如数值或者日期类型的数据，无法使用mr排序，需要转换为有模式的二进制文件。</p>
+<h3 id="sequencefile">SequenceFile</h3>
+<h4 id="概述">概述</h4>
+<p>SequenceFile是Hadoop用来存储二进制形式的&lt;Key,Value&gt;对而设计的一种平面文件(Flat File)。它将数据以&lt;Key,Value&gt;的形式序列化到文件中。Hive中的SequenceFile与Hadoop API中的MapFile 是互相兼容的。并且Hive 中的SequenceFile 继承自Hadoop API 的SequenceFile，不过它的key为空，使用value 存放实际的值， 这样是为了避免MR 在运行map 阶段的排序过程。</p>
+<p>可以把SequenceFile当做是一个容器，把所有的文件打包到SequenceFile类中可以高效的对小文件进行存储和处理。SequenceFile文件并不按照其存储的Key进行排序存储。</p>
+<p>SequenceFile文件使用Hadoop 标准的Writable 接口实现序列化和反序列化。其中的Key和Value可以是任意类型Writable或者是自定义Writable。</p>
+<h4 id="存储结构">存储结构</h4>
+<p>存储结构上，SequenceFile主要由一个Header后跟多条Record组成。</p>
+<p>Header主要包含了Key ClassName，Value ClassName，存储压缩算法，用户自定义元数据等信息，此外还包含了一些同步标识，用于快速定位到记录的边界。</p>
+<p>每条Record以键值对的方式进行存储，用来表示它的字符数组可以一次解析成：记录的长度、Key的长度、Key值和Value值，并且Value值的结构取决于该记录是否被压缩。</p>
+<p>SequenceFIle的内部格式取决于是否启用压缩，如果是压缩，则又可以分为记录压缩和块压缩。记录压缩压缩率低，一般使用块压缩。</p>
+<p>无压缩类型：如果没有启用压缩(默认设置)那么每个Record就由它的记录长度(字节数)、键的长度，键和值组成。长度字段为4字节。</p>
+<p>记录压缩类型：记录压缩格式与无压缩格式基本相同，不同的是值字节是用定义在头部的编码器来压缩。注意：键是不压缩的。下图为记录压缩：</p>
+<p><img src="/2021/10/03/Hive_%E5%AD%98%E5%82%A8%E6%96%87%E4%BB%B6%E7%B1%BB%E5%9E%8B/image-20211003201055725.png" alt="image-20211003201055725" style="zoom:67%;"></p>
+<p>块压缩类型：块压缩一次压缩多个记录，因此它比记录压缩更紧凑，而且一般优先选择。当记录的字节数达到最小大小，才会添加到块。该最小值由io.seqfile.compress.blocksize中的属性定义。默认值是1000000字节。格式为记录数、键长度、键、值长度、值。下图为块压缩：</p>
+<p><img src="/2021/10/03/Hive_%E5%AD%98%E5%82%A8%E6%96%87%E4%BB%B6%E7%B1%BB%E5%9E%8B/image-20211003203325562.png" alt="image-20211003203325562" style="zoom:67%;"></p>
+<p>优点：</p>
+<p>1、可切分，可压缩。</p>
+<p>2、难度低，因为是Hadoop框架提供的API，所以业务侧修改比较简单。</p>
+<p>缺点：</p>
+<p>1、不支持append操作，序列化后存储的kv数据不是按照key的某个顺序存储的。</p>
+<p>2、需要合并文件，且合并后不方便查看。</p>
+<h3 id="rcfile">RCFile</h3>
+<h4 id="概述-1">概述</h4>
+<p>RCFile全称Record Columnar File，列式记录文件，是一种类似于SequenceFile的键值对（Key/Value Pairs）数据文件。但其实它是Facebook提出的行列存储相结合的RCFile文件存储格式。</p>
+<h4 id="存储结构-1">存储结构</h4>
+<p>它将数据按行分块（HDFS Block），保证同一行在一个数据块上，避免读一行数据需要读取多个HDFS Block。若干行共同构成一个Row Group，一个块上可能存在多个Row Group。然后，每个Row Group的数据按列存储，有利于数据压缩和快速的列存取。</p>
+<p>一个Row Group包括三个部分。</p>
+<p>第一部分是Row Group头部的同步标识，主要用于分隔HDFS块中的两个连续Row Group；</p>
+<p>第二部分是Row Group的元数据头部，用于存储Row Group单元的信息，包括Row Group中的记录数、每个列的字节数、列中每个域（域的概念？）的字节数；</p>
+<p>第三部分是表格数据段，即实际的列存储数据。在该部分中，同一列的所有域顺序存储。从图可以看出，首先存储了列A的所有域，然后存储列B的所有域等。</p>
+<p><img src="/2021/10/03/Hive_%E5%AD%98%E5%82%A8%E6%96%87%E4%BB%B6%E7%B1%BB%E5%9E%8B/image-20211003205451080.png" alt="image-20211003205451080" style="zoom:50%;"></p>
+<h4 id="注意">注意</h4>
+<p>1、RCFile是在Hadoop HDFS之上的存储结构，表是水平划分的，分为多个Row Group，每个Row Group再被垂直划分，以便<strong>每列单独存储</strong>。</p>
+<p>2、RCFile支持<strong>弹性的</strong>Row Group大小，Row Group大小需要权衡数据压缩性能和查询性能两方面。</p>
+<p>3、每个Row Group中，元数据头部和表格数据段（每个列被独立压缩）分别进行压缩和解压。压缩算法使用的是重量级的<strong>Gzip压缩算法</strong>，是为了获得较好的压缩比。解压算法使用的是被称为<strong>Lazy解压</strong>（decompression）技术来在查询执行时避免不必要的列解压，即当处理一个Row Group时，RCFile只需要解压使用到的列，因此相对较高的Gzip解压开销可以减少。</p>
+<p>优点：</p>
+<p>RCFile具备相当于行存储的<strong>数据加载速度</strong>和负载适应能力，在读数据时可以在扫描表格时<strong>避免不必要的列读取</strong>，它比其他结构拥有更好的性能，使用列维度的压缩能够有效提升存储空间利用率。</p>
+<h4 id="索引机制">索引机制</h4>
+<p>元数据MetaData中columnValueLen/columnUncompressedValueLen字段保存着每个列的总长度，Column_x_row_y_value_plain_length字段保存着每个列中对应这个Row Group中每一行的数据长度。</p>
+<p>如果只需要第n列的数据，可以根据ColumnValueLen/ColumnUncompressedValueLen字段跳过前面n-1列的数据。</p>
+<h4 id="rcfile的sync机制与hdfs切片的关系">RCFile的Sync机制（与HDFS切片的关系）</h4>
+<p>切片，指的是MR程序允许指定某个阈值作为切片，来一次性地读取该阈值大小的文件来作为一个块进行处理。</p>
+<p>Hadoop MapReduce在提交Job之前会将这个大的文本文件根据“切片”大小（假设为128M）进行“切片”，每一个MapTask处理这个文件的一个“切片”（这里不考虑处理多个切片的情况），也就是这个文件的一部分数据。文本文件是按行进行存储的，那么MapTask从某个“切片”的起始处读取文件数据时，如何定位一行记录的起始位置呢？</p>
+<p>毕竟“切片”是按照字节大小直接切分的，很有可能正好将某行记录“切断”。这时就需要有这样的一个“sync”，相当于一个标志位的作用，让我们可以识别一行记录的起始位置，对于普通的文本文件而言，这个“sync”就是换行符。所以，MapTask从某个“切片”的起始处读取数据时，首先会“过滤”数据，直到遇到一个换行符，然后才开始读取数据；如果读取某行数据结束之后，发现“文件游标”超过该“切片”的范围，则读取结束。</p>
+<p>RCFile同样也有这样的一个“sync”，对于文本文件而言，是每行文本一个“sync”；RCFile是以Record为单位进行存储的，但是并没有每个Record使用一个“sync”，而是两个“sync”之间有一个间隔限制SYNC_INTERVAL（SYNC_INTERVAL = 100 * （4 + 16））。每次开始输出下一个Record的数据之前，都会计算当前文件的输出位置相对于上个“sync”的偏移量，如果超过SYNC_INTERVAL就输出一个“sync”作为RCFile的Record间隔。</p>
+<h4 id="数据读取和lazy解压mr读取文件">数据读取和Lazy解压（MR读取文件）</h4>
+<p>在MapReduce框架中，Mapper将顺序处理HDFS块中的每个Row Group。当处理一个Row Group时，RCFile无需全部读取行组的全部内容到内存。相反，它仅仅读元数据头部和给定查询需要的列。因此，它可以跳过不必要的列以获得列存储的I/O优势。</p>
+<p>例如，表tbl(c1, c2, c3, c4)有4个列，做一次查询“SELECT c1 FROM tbl WHERE c4 = 1”，<strong>对每个Row Group，RCFile仅仅读取c1和c4列的内容</strong>。在元数据头部和需要的列数据加载到内存中后，它们需要解压。元数据头部总会解压并在内存中维护直到RCFile处理下一个行组。然而，RCFile不会解压所有加载的列，相反，它使用一种Lazy解压技术。</p>
+<p>Lazy解压意味着只有那些被真正用到的列才会在内存中解压。如果一个WHERE条件不能被Row Group中的所有记录满足，那么RCFile将不会解压WHERE条件中不满足的列。例如，在上述查询中，所有行组中的列c4都解压了。然而，对于一个行组，<strong>如果列c4中没有值为1的域，那么就无需解压列c1</strong>。</p>
+<h4 id="弹性的行组大小">弹性的行组大小</h4>
+<p>I/O性能是RCFile关注的重点，因此RCFile需要行组够大并且大小可变。行组大小和下面几个因素相关。</p>
+<p>1、行组大的话，数据压缩效率会比行组小时更有效。根据对Facebook日常应用的观察，当行组大小达到一个阈值后，增加行组大小并不能进一步增加Gzip算法下的压缩比。</p>
+<p>2、行组变大能够提升数据压缩效率并减少存储量。因此，如果对缩减存储空间方面有强烈需求，则不建议选择使用小行组。需要注意的是，当行组的大小超过4MB，数据的压缩比将趋于一致。</p>
+<p>3、尽管行组变大有助于减少表格的存储规模，但是可能会损害数据的读性能，因为这样减少了Lazy解压带来的性能提升。而且行组变大会占用更多的内存，这会影响并发执行的其他MapReduce作业。考虑到存储空间和查询效率两个方面，Facebook选择4MB作为默认的行组大小，当然也允许用户自行选择参数进行配置。</p>
+<h3 id="参考资料">参考资料</h3>
+<p>综合总结：</p>
+<p>https://www.cnblogs.com/sunpengblog/p/11912958.html#%E4%B8%80%E3%80%81TEXTFILE</p>
+<p>sequencefile：</p>
+<p>https://www.cnblogs.com/bigdatafly/articles/5037776.html</p>
+<p>https://www.aboutyun.com/thread-19639-1-1.html</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Hive/" rel="tag"># Hive</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/09/27/MySQL_%E6%85%A2%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96%E4%B8%8EExplain/" rel="prev" title="MySQL慢查询优化与Explain">
+                  <i class="fa fa-chevron-left"></i> MySQL慢查询优化与Explain
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">BIOINSu</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+  <script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'none'
+      },
+      options: {
+        renderActions: {
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              const target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3.1.2/es5/tex-mml-chtml.js';
+    script.defer = true;
+    document.head.appendChild(script);
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.typesetClear();
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+
+
+</body>
+</html>
