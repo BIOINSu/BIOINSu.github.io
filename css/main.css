@@ -182,7 +182,7 @@ body {
   background: var(--body-bg-color);
   color: var(--text-color);
   font-family: Lato, 'PingFang SC', 'Microsoft YaHei', sans-serif;
-  font-size: 0.85em;
+  font-size: 14px;
   line-height: 1.7;
   min-height: 100%;
   position: relative;
@@ -200,22 +200,22 @@ h6 {
   margin: 20px 0 15px;
 }
 h1 {
-  font-size: 1.5em;
+  font-size: $font-size-headings-base -0.125em;
 }
 h2 {
-  font-size: 1.375em;
+  font-size: $font-size-headings-base -0.25em;
 }
 h3 {
-  font-size: 1.25em;
+  font-size: $font-size-headings-base -0.375em;
 }
 h4 {
-  font-size: 1.125em;
+  font-size: $font-size-headings-base -0.5em;
 }
 h5 {
-  font-size: 1em;
+  font-size: $font-size-headings-base -0.625em;
 }
 h6 {
-  font-size: 0.875em;
+  font-size: $font-size-headings-base -0.75em;
 }
 p {
   margin: 0 0 20px;
@@ -2824,7 +2824,7 @@ hr {
   vertical-align: middle;
 }
 .links-of-author a::before {
-  background: #d920b4;
+  background: #40d65d;
   display: inline-block;
   margin-right: 3px;
   transform: translateY(-2px);

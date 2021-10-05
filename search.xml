@@ -435,6 +435,51 @@
       </tags>
   </entry>
   <entry>
+    <title>Hadoop Shuffle与Spark Shuffle</title>
+    <url>/2021/09/15/Hadoop_Shuffle%E4%B8%8ESparkShuffle/</url>
+    <content><![CDATA[<table>
+<colgroup>
+<col style="width: 3%">
+<col style="width: 48%">
+<col style="width: 48%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>Hadoop Shuffle</th>
+<th>Spark Shuffle</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>流程</td>
+<td>Hadoop的Shuffle操作发生在Map之后，Reduce之前。<br>将流程分为溢写（spill）、合并（merge）、拉取（copy）、排序（sort）、合并（合并）。</td>
+<td>Spark的Shuffle操作是发生在宽依赖之间。<br>Shuffle Write：形成磁盘文件和索引。<br>Shuffle Read：Reducer拉取数据。</td>
+</tr>
+<tr class="even">
+<td>排序</td>
+<td>在四个阶段均会发生数据排序。<br>目的是将Key相同的数据聚合在一起。</td>
+<td>Spark 1.2之后，Sort-Based Shuffle变为默认的Shuffle实现。<br>普通：和Hadoop类似；内存数据结构reduceByKey用Map，join用Array；Reducer从索引文件内读取自己应该拉取的范围。<br>bypass：按key哈希写入磁盘文件，最后将磁盘文件合并，但不排序。</td>
+</tr>
+<tr class="odd">
+<td>功能</td>
+<td>没有差别，目的都是将Key相同的数据拉取到同一个Reducer。</td>
+<td>没有差别，目的都是将Key相同的数据拉取到同一个Reducer。</td>
+</tr>
+</tbody>
+</table>
+<a id="more"></a>
+<h3 id="参考资料">参考资料</h3>
+<p>https://tech.meituan.com/2016/05/12/spark-tuning-pro.html</p>
+]]></content>
+      <categories>
+        <category>Hadoop</category>
+      </categories>
+      <tags>
+        <tag>Hadoop</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>HDFS容错</title>
     <url>/2021/09/14/HDFS_%E5%AE%B9%E9%94%99/</url>
     <content><![CDATA[<table>
@@ -494,51 +539,6 @@
 <p>http://article.docway.net/details?id=5f33d50ab4f20b6366ff6676#215NameNode_25</p>
 <p>https://blog.csdn.net/ThreeAspects/article/details/105983047?utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7Edefault-2.no_search_link&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7Edefault-2.no_search_link</p>
 <p>https://www.cnblogs.com/zeq912/p/9606105.html（NFS网络文件系统）</p>
-]]></content>
-      <categories>
-        <category>Hadoop</category>
-      </categories>
-      <tags>
-        <tag>Hadoop</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Hadoop Shuffle与Spark Shuffle</title>
-    <url>/2021/09/15/Hadoop_Shuffle%E4%B8%8ESparkShuffle/</url>
-    <content><![CDATA[<table>
-<colgroup>
-<col style="width: 3%">
-<col style="width: 48%">
-<col style="width: 48%">
-</colgroup>
-<thead>
-<tr class="header">
-<th></th>
-<th>Hadoop Shuffle</th>
-<th>Spark Shuffle</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>流程</td>
-<td>Hadoop的Shuffle操作发生在Map之后，Reduce之前。<br>将流程分为溢写（spill）、合并（merge）、拉取（copy）、排序（sort）、合并（合并）。</td>
-<td>Spark的Shuffle操作是发生在宽依赖之间。<br>Shuffle Write：形成磁盘文件和索引。<br>Shuffle Read：Reducer拉取数据。</td>
-</tr>
-<tr class="even">
-<td>排序</td>
-<td>在四个阶段均会发生数据排序。<br>目的是将Key相同的数据聚合在一起。</td>
-<td>Spark 1.2之后，Sort-Based Shuffle变为默认的Shuffle实现。<br>普通：和Hadoop类似；内存数据结构reduceByKey用Map，join用Array；Reducer从索引文件内读取自己应该拉取的范围。<br>bypass：按key哈希写入磁盘文件，最后将磁盘文件合并，但不排序。</td>
-</tr>
-<tr class="odd">
-<td>功能</td>
-<td>没有差别，目的都是将Key相同的数据拉取到同一个Reducer。</td>
-<td>没有差别，目的都是将Key相同的数据拉取到同一个Reducer。</td>
-</tr>
-</tbody>
-</table>
-<a id="more"></a>
-<h3 id="参考资料">参考资料</h3>
-<p>https://tech.meituan.com/2016/05/12/spark-tuning-pro.html</p>
 ]]></content>
       <categories>
         <category>Hadoop</category>
@@ -2425,66 +2425,6 @@
       </tags>
   </entry>
   <entry>
-    <title>OR-Net 论文阅读</title>
-    <url>/2021/02/16/SR_ORNet/</url>
-    <content><![CDATA[<p>《Learning Omni-frequency Region-adaptive Representations for Real Image Super-Resolution》 2021</p>
-<h3 id="背景">背景</h3>
-<p>Real World数据包含不同的、复杂的退化方式，例如模糊、噪声和降采样，因此导致传统深度学习方法在真实数据集上表现不好。</p>
-<p>RealSR和DRealSR不仅提出了两个真实数据集，还提出了两种真实超分方法 laplacian pyramid based kernel prediction network (LP-KPN) 和 component divide-and- conquer (CDC)。然而，它们都是在像素水平上进行重建（区域、边缘和角落），没有利用到频率信息。</p>
-<a id="more"></a>
-<p>图像的频率是表征图像中灰度变化剧烈程度的指标，是灰度在平面空间上的梯度。图像的主要成分是低频信息，它形成了图像的基本灰度等级，对图像结构的决定作用较小；中频信息决定了图像的基本结构，形成了图像的主要边缘结构；高频信息形成了图像的边缘和细节，是在中频信息上对图像内容的进一步强化。</p>
-<p><img src="/2021/02/16/SR_ORNet/0.png" style="zoom: 50%;"></p>
-<p>作者观察到，对于图a可以看出，LR的退化在各个频率上都存在。对于图b可以看出，在不同区域中的不同频率组件内，真实LR的退化也是不同的。</p>
-<p>因此，本文作者提出ORNet，在图像的不同频率上增强相应的频率因子，最终通过区域自适应频率聚合模块，结合动态卷积和空间注意力机制，针对HR图像的不同位置，有选择性地重建不同的频率分量。</p>
-<h3 id="方法">方法</h3>
-<p><img src="/2021/02/16/SR_ORNet/1.png" style="zoom: 67%;"></p>
-<h4 id="框架的组件">框架的组件</h4>
-<ul>
-<li><p>Frequency Decomposition (FD) Module</p>
-<p>对图像进行频率分离，可以在传统的信号处理方法中采用小波变换或离散余弦变换来实现。然而，由于数学运算的确定性和任务无关性，这种转换不可避免地为low-level恢复任务丢弃了一些关键、详细的信息。为了在模拟小波变换的同时避免关键信息丢失，作者提出通过可学习的隐空间下采样，来分解混合特征表示。类似的操作可以参考OctConv。</p>
-<p>具体来说，作者首先利用步长较大的卷积层(如stride= 2)对特征表示进行下采样，提取粗特征，即低频分量。然后，从原始特征(下采样前)中减去这些相对低频的分量，以获得其余相对高频的特征表示。</p></li>
-<li><p>Frequency Enhancement Unit (FEU)</p>
-<p>该单元对不同频率的信息进行增强。如b种所示结构，将CA的结果和普通卷积的结果相拼接，并加入dense connection。目的是有助于各分支在不同阶段选择性融合相应的频率分量，从而提高各分支在不同频域的表示能力。</p></li>
-<li><p>Region-adaptive Frequency Aggregation (RFA) Module</p>
-<p>该模块对不同频率组件进行自适应聚合。</p>
-<p><img src="/2021/02/16/SR_ORNet/4.png" style="zoom:50%;"></p>
-<p>即预测多个动态卷积核，并设置一个可学习的权重向量，将多个卷积核组合在一起形成动态卷积核，通过它生成attention map并与原来的特征图做乘法。</p></li>
-</ul>
-<h4 id="框架的执行">框架的执行</h4>
-<p>首先将输入图像进行频率分离。用大步长卷积提取低频特征，并不断减去低频特征获得高频特征。</p>
-<p><img src="/2021/02/16/SR_ORNet/2.png" style="zoom: 67%;"></p>
-<p>上箭头表示双线性插值上采样，下箭头表示带步长卷积进行下采样。</p>
-<p>接着，通过FEU来增强不同频率的表示，以弥补低/中/高频信息的丢失，并将低频信息与不同高频信息相结合。</p>
-<p><img src="/2021/02/16/SR_ORNet/3.png" style="zoom: 60%;"></p>
-<p>真实LR图像中不同区域的频率信息丢失是不同的。因此，有必要对不同区域的全频分量进行自适应聚合，以恢复更真实、纹理细节更丰富的HR图像。通过作者提出的RFA模块，使用动态卷积核的方式生成attention map来组合多个频率下的组件，最终通过pixel shuffle提高分辨率。</p>
-<p><img src="/2021/02/16/SR_ORNet/5.png" style="zoom:60%;"></p>
-<h3 id="实验结果">实验结果</h3>
-<p>是一种有监督方法，使用DRealSR进行训练，动态核的数量设置为5个，使用L1损失优化网络。</p>
-<h4 id="不同频率的可视化">不同频率的可视化</h4>
-<p><img src="/2021/02/16/SR_ORNet/6.png" style="zoom: 67%;"></p>
-<p>对于FD模块，首先在图6(a)中对三个频率尺度的特征进行可视化，可以看到高频分支的特征包含更多的细节和纹理信息。然后根据图6(b)中的小波变换对低/中/高频特征进行分析。从左到右，频率范围从1增加到6中，低频特征的能量几乎完全集中在低频域，高频特征和中频特征的能量集中在相对更高的频率域。</p>
-<h4 id="不同频率数量的比较">不同频率数量的比较</h4>
-<p><img src="/2021/02/16/SR_ORNet/7.png" style="zoom:50%;"></p>
-<p>提高频率分割的数量一定程度上能够提高效果。</p>
-<h4 id="消融实验">消融实验</h4>
-<p><img src="/2021/02/16/SR_ORNet/8.png" style="zoom: 50%;"></p>
-<h4 id="与sota相比较">与SOTA相比较</h4>
-<p><img src="/2021/02/16/SR_ORNet/9.png" style="zoom: 50%;"></p>
-<p>其他方法除了CDC外均没有在DRealSR上训练，因此除了CDC外本质上无法证明该方法的有效性。</p>
-<h3 id="结论">结论</h3>
-<p>作者提出一种全频域自适应网络(OR-Net)来实现真实图像超分辨率。比较有贡献的地方在于分析了真实图像与图像频率的关系，以及频率在网络中的影响。然而现在RealSR大部分流行的方式是无监督学习（或unpaired的方式），而该文是完全的有监督学习。</p>
-<p>有文章显示基于卷积的频率分离操作在PSNR和SSIM上稍高于基于小波变换的方法，但在视觉感知上（LPIPS指标）会稍差。对图像进行不同频率分离的方式会导致最终的重建效果有所不同。</p>
-]]></content>
-      <categories>
-        <category>超分辨率</category>
-        <category>SISR</category>
-      </categories>
-      <tags>
-        <tag>SISR</tag>
-        <tag>RealSR</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>DualSR 论文阅读</title>
     <url>/2021/02/05/SR_DualSR/</url>
     <content><![CDATA[<p>《DualSR: Zero-Shot Dual Learning for Real-World Super-Resolution》 WACV 2021</p>
@@ -2540,6 +2480,66 @@
 <h3 id="结论">结论</h3>
 <p>本文提出提出了DualSR，一个轻量级的dual架构，它学习每个图像特定的LR-HR关系。它由下采样器和上采样器组成，在训练中使用循环一致性损失来相互改进。此外，论文提出了掩码插值损失，消除了图像低频区域的伪影，而不会导致边缘过于平滑。</p>
 <p>该方法是Zero-Shot的，无需HR图像进行监督，但本质上就是用了Bicubic上采样的低频部分来进行监督。之前的文章DynaVSR是用了元学习的思想，在测试时同样使用了类似循环一致性的方法，但在训练时为了更好的效果仍然使用了HR的图像。因此，可以思考如何将Zero-Shot的思想（目前来看还是想办法在Bicubic上采样的结果做文章），应用到VSR上，来达到完全无监督的效果。</p>
+]]></content>
+      <categories>
+        <category>超分辨率</category>
+        <category>SISR</category>
+      </categories>
+      <tags>
+        <tag>SISR</tag>
+        <tag>RealSR</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>OR-Net 论文阅读</title>
+    <url>/2021/02/16/SR_ORNet/</url>
+    <content><![CDATA[<p>《Learning Omni-frequency Region-adaptive Representations for Real Image Super-Resolution》 2021</p>
+<h3 id="背景">背景</h3>
+<p>Real World数据包含不同的、复杂的退化方式，例如模糊、噪声和降采样，因此导致传统深度学习方法在真实数据集上表现不好。</p>
+<p>RealSR和DRealSR不仅提出了两个真实数据集，还提出了两种真实超分方法 laplacian pyramid based kernel prediction network (LP-KPN) 和 component divide-and- conquer (CDC)。然而，它们都是在像素水平上进行重建（区域、边缘和角落），没有利用到频率信息。</p>
+<a id="more"></a>
+<p>图像的频率是表征图像中灰度变化剧烈程度的指标，是灰度在平面空间上的梯度。图像的主要成分是低频信息，它形成了图像的基本灰度等级，对图像结构的决定作用较小；中频信息决定了图像的基本结构，形成了图像的主要边缘结构；高频信息形成了图像的边缘和细节，是在中频信息上对图像内容的进一步强化。</p>
+<p><img src="/2021/02/16/SR_ORNet/0.png" style="zoom: 50%;"></p>
+<p>作者观察到，对于图a可以看出，LR的退化在各个频率上都存在。对于图b可以看出，在不同区域中的不同频率组件内，真实LR的退化也是不同的。</p>
+<p>因此，本文作者提出ORNet，在图像的不同频率上增强相应的频率因子，最终通过区域自适应频率聚合模块，结合动态卷积和空间注意力机制，针对HR图像的不同位置，有选择性地重建不同的频率分量。</p>
+<h3 id="方法">方法</h3>
+<p><img src="/2021/02/16/SR_ORNet/1.png" style="zoom: 67%;"></p>
+<h4 id="框架的组件">框架的组件</h4>
+<ul>
+<li><p>Frequency Decomposition (FD) Module</p>
+<p>对图像进行频率分离，可以在传统的信号处理方法中采用小波变换或离散余弦变换来实现。然而，由于数学运算的确定性和任务无关性，这种转换不可避免地为low-level恢复任务丢弃了一些关键、详细的信息。为了在模拟小波变换的同时避免关键信息丢失，作者提出通过可学习的隐空间下采样，来分解混合特征表示。类似的操作可以参考OctConv。</p>
+<p>具体来说，作者首先利用步长较大的卷积层(如stride= 2)对特征表示进行下采样，提取粗特征，即低频分量。然后，从原始特征(下采样前)中减去这些相对低频的分量，以获得其余相对高频的特征表示。</p></li>
+<li><p>Frequency Enhancement Unit (FEU)</p>
+<p>该单元对不同频率的信息进行增强。如b种所示结构，将CA的结果和普通卷积的结果相拼接，并加入dense connection。目的是有助于各分支在不同阶段选择性融合相应的频率分量，从而提高各分支在不同频域的表示能力。</p></li>
+<li><p>Region-adaptive Frequency Aggregation (RFA) Module</p>
+<p>该模块对不同频率组件进行自适应聚合。</p>
+<p><img src="/2021/02/16/SR_ORNet/4.png" style="zoom:50%;"></p>
+<p>即预测多个动态卷积核，并设置一个可学习的权重向量，将多个卷积核组合在一起形成动态卷积核，通过它生成attention map并与原来的特征图做乘法。</p></li>
+</ul>
+<h4 id="框架的执行">框架的执行</h4>
+<p>首先将输入图像进行频率分离。用大步长卷积提取低频特征，并不断减去低频特征获得高频特征。</p>
+<p><img src="/2021/02/16/SR_ORNet/2.png" style="zoom: 67%;"></p>
+<p>上箭头表示双线性插值上采样，下箭头表示带步长卷积进行下采样。</p>
+<p>接着，通过FEU来增强不同频率的表示，以弥补低/中/高频信息的丢失，并将低频信息与不同高频信息相结合。</p>
+<p><img src="/2021/02/16/SR_ORNet/3.png" style="zoom: 60%;"></p>
+<p>真实LR图像中不同区域的频率信息丢失是不同的。因此，有必要对不同区域的全频分量进行自适应聚合，以恢复更真实、纹理细节更丰富的HR图像。通过作者提出的RFA模块，使用动态卷积核的方式生成attention map来组合多个频率下的组件，最终通过pixel shuffle提高分辨率。</p>
+<p><img src="/2021/02/16/SR_ORNet/5.png" style="zoom:60%;"></p>
+<h3 id="实验结果">实验结果</h3>
+<p>是一种有监督方法，使用DRealSR进行训练，动态核的数量设置为5个，使用L1损失优化网络。</p>
+<h4 id="不同频率的可视化">不同频率的可视化</h4>
+<p><img src="/2021/02/16/SR_ORNet/6.png" style="zoom: 67%;"></p>
+<p>对于FD模块，首先在图6(a)中对三个频率尺度的特征进行可视化，可以看到高频分支的特征包含更多的细节和纹理信息。然后根据图6(b)中的小波变换对低/中/高频特征进行分析。从左到右，频率范围从1增加到6中，低频特征的能量几乎完全集中在低频域，高频特征和中频特征的能量集中在相对更高的频率域。</p>
+<h4 id="不同频率数量的比较">不同频率数量的比较</h4>
+<p><img src="/2021/02/16/SR_ORNet/7.png" style="zoom:50%;"></p>
+<p>提高频率分割的数量一定程度上能够提高效果。</p>
+<h4 id="消融实验">消融实验</h4>
+<p><img src="/2021/02/16/SR_ORNet/8.png" style="zoom: 50%;"></p>
+<h4 id="与sota相比较">与SOTA相比较</h4>
+<p><img src="/2021/02/16/SR_ORNet/9.png" style="zoom: 50%;"></p>
+<p>其他方法除了CDC外均没有在DRealSR上训练，因此除了CDC外本质上无法证明该方法的有效性。</p>
+<h3 id="结论">结论</h3>
+<p>作者提出一种全频域自适应网络(OR-Net)来实现真实图像超分辨率。比较有贡献的地方在于分析了真实图像与图像频率的关系，以及频率在网络中的影响。然而现在RealSR大部分流行的方式是无监督学习（或unpaired的方式），而该文是完全的有监督学习。</p>
+<p>有文章显示基于卷积的频率分离操作在PSNR和SSIM上稍高于基于小波变换的方法，但在视觉感知上（LPIPS指标）会稍差。对图像进行不同频率分离的方式会导致最终的重建效果有所不同。</p>
 ]]></content>
       <categories>
         <category>超分辨率</category>
@@ -3374,76 +3374,6 @@
       </tags>
   </entry>
   <entry>
-    <title>行列存储的比较</title>
-    <url>/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E8%A1%8C%E5%88%97%E5%AD%98%E5%82%A8%E6%AF%94%E8%BE%83/</url>
-    <content><![CDATA[<table>
-<colgroup>
-<col style="width: 10%">
-<col style="width: 44%">
-<col style="width: 44%">
-</colgroup>
-<thead>
-<tr class="header">
-<th></th>
-<th>优点</th>
-<th>缺点</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>行存储（OLTP）</td>
-<td>同一行所属的多个字段被保存在一起，<br>当修改或插入一行数据时IO开销较低。</td>
-<td>获取特定列时本质上还是扫描了所有行，<br>再把特定列取出，存在不必要的IO开销。</td>
-</tr>
-<tr class="even">
-<td>列存储（OLAP）</td>
-<td>1、同一列的数据被保存在一起，能够满足<br>快速读取特定列的需求。（OLAP常用）<br>选取列时降低IO开销，随机读变顺序读。<br>2、列式存储容易实现数据压缩。</td>
-<td>1、插入、删除数据不方便。<br>2、被选择出来的列要重新组装。</td>
-</tr>
-</tbody>
-</table>
-<a id="more"></a>
-<h3 id="行列存储的原理">行列存储的原理</h3>
-<p>数据在存储系统中的基本单位为页，页中的数据是连续存储的。</p>
-<p>页也是进行数据读取时候基本单位，一次读取就是一次IO操作。</p>
-<p>例如一个数据表为：</p>
-<p><img src="/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E8%A1%8C%E5%88%97%E5%AD%98%E5%82%A8%E6%AF%94%E8%BE%83/image-20210926145033057.png" alt="image-20210926145033057" style="zoom:67%;"></p>
-<p>一个数据页用一个4x4的单元格表示：</p>
-<p><img src="/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E8%A1%8C%E5%88%97%E5%AD%98%E5%82%A8%E6%AF%94%E8%BE%83/image-20210926145129243.png" alt="image-20210926145129243" style="zoom:67%;"></p>
-<p>按行存储为：</p>
-<p><img src="/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E8%A1%8C%E5%88%97%E5%AD%98%E5%82%A8%E6%AF%94%E8%BE%83/image-20210926145202849.png" alt="image-20210926145202849" style="zoom: 67%;"></p>
-<p>按列存储为：</p>
-<p><img src="/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E8%A1%8C%E5%88%97%E5%AD%98%E5%82%A8%E6%AF%94%E8%BE%83/image-20210926145242775.png" alt="image-20210926145242775" style="zoom:67%;"></p>
-<p>当执行OLTP查询：</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> id,city <span class="keyword">from</span> <span class="keyword">table</span> <span class="keyword">where</span> id <span class="operator">=</span> <span class="number">004</span></span><br></pre></td></tr></table></figure>
-<p>以行方式查询（在有适当的索引情况下)，那么，执行一次以上查询，只需要扫描一次Page 1就可以了。</p>
-<p>以列方式查询，需要投其扫描Page 1和Page 2共2次，分别取得id，city的单行值。</p>
-<p>因此，在OLTP这种以查询一行数据为主的场景下，适合采用行方式进行存储。</p>
-<p>当执行OLAP查询：</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="built_in">max</span>(id) <span class="keyword">from</span> <span class="keyword">table</span></span><br></pre></td></tr></table></figure>
-<p>对于行存储，这个查询需要两次IO将全部数据放入内存后，进行页间数据的跳读（类随机读取，因为id被city隔开了)。</p>
-<p>对于列存储，只需要一次IO将Page 1放入内存后进行连续读取，如果id还有多页的话，也是进行的物理连续读取。</p>
-<p>在进行OLAP操作时候，不仅是减小了IO次数，而且把随机读取变为了连续读取。</p>
-<h3 id="列式存储数据压缩">列式存储数据压缩</h3>
-<p>因为列式存储将同一列的数据存储在一起，所以使用压缩算法可以减少存储占用的磁盘空间。</p>
-<p>压缩算法的基本原理其实很简单，它使用基于特定规则的数据表示原数据。</p>
-<p>如下所示的字符串中包含连续的相同字符，就可以使用朴素的压缩算法减少字符串的长度：</p>
-<p><img src="/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E8%A1%8C%E5%88%97%E5%AD%98%E5%82%A8%E6%AF%94%E8%BE%83/image-20210926152828786.png" alt="image-20210926152828786" style="zoom:67%;"></p>
-<p>黄色方块表示前面字符串的重复次数，这种简单的压缩策略可以在保证无损的情况下将字符串的长度压缩 33%，然而压缩率是由压缩算法和数据的特性共同决定的。与面向行的数据存储相比，面向列的数据存储会将相同类型的数据就近存储，这也给压缩算法的提供了更多发挥的空间。</p>
-<p>压缩算法实际上是一种<strong>使用 CPU 时间换取 I/O 时间和空间</strong>的策略，但是在多数情况下，这种生意都是稳赚不赔的。压缩算法通过减少数据的大小、减少磁盘的寻道时间提高 I/O 的性能、减少数据的传输时间并提高缓冲区的命中率，节省的 I/O 时间可以轻易补偿它带来的 CPU 额外开销（IO时间远大于CPU的额外时间）。</p>
-<h3 id="参考资料">参考资料</h3>
-<p>https://www.zhihu.com/question/29380943</p>
-<p>https://draveness.me/whys-the-design-olap-column-oriented/</p>
-<p>https://www.cnblogs.com/ajianbeyourself/p/7771682.html</p>
-]]></content>
-      <categories>
-        <category>大数据</category>
-      </categories>
-      <tags>
-        <tag>大数据</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>常用Linux命令</title>
     <url>/2021/04/19/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F_Linux%E5%91%BD%E4%BB%A4/</url>
     <content><![CDATA[<p>常用Linux命令：top</p>
@@ -3521,6 +3451,76 @@
       </categories>
       <tags>
         <tag>操作系统</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>行列存储的比较</title>
+    <url>/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E8%A1%8C%E5%88%97%E5%AD%98%E5%82%A8%E6%AF%94%E8%BE%83/</url>
+    <content><![CDATA[<table>
+<colgroup>
+<col style="width: 10%">
+<col style="width: 44%">
+<col style="width: 44%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>优点</th>
+<th>缺点</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>行存储（OLTP）</td>
+<td>同一行所属的多个字段被保存在一起，<br>当修改或插入一行数据时IO开销较低。</td>
+<td>获取特定列时本质上还是扫描了所有行，<br>再把特定列取出，存在不必要的IO开销。</td>
+</tr>
+<tr class="even">
+<td>列存储（OLAP）</td>
+<td>1、同一列的数据被保存在一起，能够满足<br>快速读取特定列的需求。（OLAP常用）<br>选取列时降低IO开销，随机读变顺序读。<br>2、列式存储容易实现数据压缩。</td>
+<td>1、插入、删除数据不方便。<br>2、被选择出来的列要重新组装。</td>
+</tr>
+</tbody>
+</table>
+<a id="more"></a>
+<h3 id="行列存储的原理">行列存储的原理</h3>
+<p>数据在存储系统中的基本单位为页，页中的数据是连续存储的。</p>
+<p>页也是进行数据读取时候基本单位，一次读取就是一次IO操作。</p>
+<p>例如一个数据表为：</p>
+<p><img src="/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E8%A1%8C%E5%88%97%E5%AD%98%E5%82%A8%E6%AF%94%E8%BE%83/image-20210926145033057.png" alt="image-20210926145033057" style="zoom:67%;"></p>
+<p>一个数据页用一个4x4的单元格表示：</p>
+<p><img src="/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E8%A1%8C%E5%88%97%E5%AD%98%E5%82%A8%E6%AF%94%E8%BE%83/image-20210926145129243.png" alt="image-20210926145129243" style="zoom:67%;"></p>
+<p>按行存储为：</p>
+<p><img src="/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E8%A1%8C%E5%88%97%E5%AD%98%E5%82%A8%E6%AF%94%E8%BE%83/image-20210926145202849.png" alt="image-20210926145202849" style="zoom: 67%;"></p>
+<p>按列存储为：</p>
+<p><img src="/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E8%A1%8C%E5%88%97%E5%AD%98%E5%82%A8%E6%AF%94%E8%BE%83/image-20210926145242775.png" alt="image-20210926145242775" style="zoom:67%;"></p>
+<p>当执行OLTP查询：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> id,city <span class="keyword">from</span> <span class="keyword">table</span> <span class="keyword">where</span> id <span class="operator">=</span> <span class="number">004</span></span><br></pre></td></tr></table></figure>
+<p>以行方式查询（在有适当的索引情况下)，那么，执行一次以上查询，只需要扫描一次Page 1就可以了。</p>
+<p>以列方式查询，需要投其扫描Page 1和Page 2共2次，分别取得id，city的单行值。</p>
+<p>因此，在OLTP这种以查询一行数据为主的场景下，适合采用行方式进行存储。</p>
+<p>当执行OLAP查询：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="built_in">max</span>(id) <span class="keyword">from</span> <span class="keyword">table</span></span><br></pre></td></tr></table></figure>
+<p>对于行存储，这个查询需要两次IO将全部数据放入内存后，进行页间数据的跳读（类随机读取，因为id被city隔开了)。</p>
+<p>对于列存储，只需要一次IO将Page 1放入内存后进行连续读取，如果id还有多页的话，也是进行的物理连续读取。</p>
+<p>在进行OLAP操作时候，不仅是减小了IO次数，而且把随机读取变为了连续读取。</p>
+<h3 id="列式存储数据压缩">列式存储数据压缩</h3>
+<p>因为列式存储将同一列的数据存储在一起，所以使用压缩算法可以减少存储占用的磁盘空间。</p>
+<p>压缩算法的基本原理其实很简单，它使用基于特定规则的数据表示原数据。</p>
+<p>如下所示的字符串中包含连续的相同字符，就可以使用朴素的压缩算法减少字符串的长度：</p>
+<p><img src="/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E8%A1%8C%E5%88%97%E5%AD%98%E5%82%A8%E6%AF%94%E8%BE%83/image-20210926152828786.png" alt="image-20210926152828786" style="zoom:67%;"></p>
+<p>黄色方块表示前面字符串的重复次数，这种简单的压缩策略可以在保证无损的情况下将字符串的长度压缩 33%，然而压缩率是由压缩算法和数据的特性共同决定的。与面向行的数据存储相比，面向列的数据存储会将相同类型的数据就近存储，这也给压缩算法的提供了更多发挥的空间。</p>
+<p>压缩算法实际上是一种<strong>使用 CPU 时间换取 I/O 时间和空间</strong>的策略，但是在多数情况下，这种生意都是稳赚不赔的。压缩算法通过减少数据的大小、减少磁盘的寻道时间提高 I/O 的性能、减少数据的传输时间并提高缓冲区的命中率，节省的 I/O 时间可以轻易补偿它带来的 CPU 额外开销（IO时间远大于CPU的额外时间）。</p>
+<h3 id="参考资料">参考资料</h3>
+<p>https://www.zhihu.com/question/29380943</p>
+<p>https://draveness.me/whys-the-design-olap-column-oriented/</p>
+<p>https://www.cnblogs.com/ajianbeyourself/p/7771682.html</p>
+]]></content>
+      <categories>
+        <category>大数据</category>
+      </categories>
+      <tags>
+        <tag>大数据</tag>
       </tags>
   </entry>
   <entry>
@@ -3775,6 +3775,30 @@
       </tags>
   </entry>
   <entry>
+    <title>数据建模</title>
+    <url>/2021/08/03/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93_%E6%95%B0%E6%8D%AE%E5%BB%BA%E6%A8%A1/</url>
+    <content><![CDATA[<h3 id="基本概念">基本概念</h3>
+<h4 id="事实表">事实表</h4>
+<p>事实表（Fact Table）用来记录具体事件，包含了每个事件的具体要素，以及具体发生的事情。<strong>也就是每一条数据记录了发生的一件事情</strong>。例子中就通过一条事实表记录说明了某个地方（地域ID）的某人（用户ID）在某个时间（时间ID）通过某种方式（支付ID）买了某产品（产品ID）。</p>
+<p><img src="/2021/08/03/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93_%E6%95%B0%E6%8D%AE%E5%BB%BA%E6%A8%A1/image-20210803085511700.png" alt="image-20210803085511700" style="zoom:67%;"></p>
+<a id="more"></a>
+<h4 id="维度表">维度表</h4>
+<p>维度表（Dimension Table ）是依赖事实表而存在的，没有事实表数据，维度表也就没有存在的意义。每个维度表都是对事实表中的每个列/字段进行展开描述。</p>
+<p>比如事实表中的用户ID，就可以进一步展开成一张维度表，记录该用户ID实体的用户名、联系信息、地址信息、年龄、性别和注册方式等等。</p>
+<p><img src="/2021/08/03/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93_%E6%95%B0%E6%8D%AE%E5%BB%BA%E6%A8%A1/image-20210803085631465.png" alt="image-20210803085631465" style="zoom:67%;"></p>
+<h4 id="事实表与维度表">事实表与维度表</h4>
+<p>事实表的增删改操作相比维度表更为频繁，模型建立后，维度表中的数据保持相对稳定。商品销售行为是一直在发生的，而用户注册和产品更新不总是随时有的。再说到地域和支付方式，那就更少变化了。</p>
+<p><img src="/2021/08/03/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93_%E6%95%B0%E6%8D%AE%E5%BB%BA%E6%A8%A1/image-20210803085828180.png" alt="image-20210803085828180" style="zoom:50%;"></p>
+<p>通过事实表和维度表组织起来的数仓多维数据模型（上图为星型模型），相比原本分散在数据库等各处的数据，能够有更有目的更高效的查询效率，比如可以查询汇总地域维度中某个省的商品销售情况，也可以通过时间维度分析每个季度的某类商品销售趋势。<strong>将多个维度表跟事实表进行不同程度的关联，可以展开得到各种各样的分析结果</strong>，满足商品运营等数据使用者的不同需求。</p>
+]]></content>
+      <categories>
+        <category>数据仓库</category>
+      </categories>
+      <tags>
+        <tag>数据仓库</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>数据仓库与数据库</title>
     <url>/2021/05/03/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93_%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93%E4%B8%8E%E6%95%B0%E6%8D%AE%E5%BA%93/</url>
     <content><![CDATA[<p>数据仓库，英文名称为Data Warehouse，可简写为DW或DWH，是一种用于报告和数据分析的系统，被认为是商业智慧（BI，Business Intelligence）的核心组件。 数据仓库将一个或多个数据源的数据集成到中央存储库中，将当前和历史数据存储在一起，用于创建分析报告。 存储在仓库中的数据从运行系统（例如营销或销售）上传。</p>
@@ -3899,30 +3923,6 @@
 </table>
 <h3 id="参考资料">参考资料</h3>
 <p>转载自： https://www.zhihu.com/question/20623931/answer/750367153</p>
-]]></content>
-      <categories>
-        <category>数据仓库</category>
-      </categories>
-      <tags>
-        <tag>数据仓库</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>数据建模</title>
-    <url>/2021/08/03/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93_%E6%95%B0%E6%8D%AE%E5%BB%BA%E6%A8%A1/</url>
-    <content><![CDATA[<h3 id="基本概念">基本概念</h3>
-<h4 id="事实表">事实表</h4>
-<p>事实表（Fact Table）用来记录具体事件，包含了每个事件的具体要素，以及具体发生的事情。<strong>也就是每一条数据记录了发生的一件事情</strong>。例子中就通过一条事实表记录说明了某个地方（地域ID）的某人（用户ID）在某个时间（时间ID）通过某种方式（支付ID）买了某产品（产品ID）。</p>
-<p><img src="/2021/08/03/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93_%E6%95%B0%E6%8D%AE%E5%BB%BA%E6%A8%A1/image-20210803085511700.png" alt="image-20210803085511700" style="zoom:67%;"></p>
-<a id="more"></a>
-<h4 id="维度表">维度表</h4>
-<p>维度表（Dimension Table ）是依赖事实表而存在的，没有事实表数据，维度表也就没有存在的意义。每个维度表都是对事实表中的每个列/字段进行展开描述。</p>
-<p>比如事实表中的用户ID，就可以进一步展开成一张维度表，记录该用户ID实体的用户名、联系信息、地址信息、年龄、性别和注册方式等等。</p>
-<p><img src="/2021/08/03/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93_%E6%95%B0%E6%8D%AE%E5%BB%BA%E6%A8%A1/image-20210803085631465.png" alt="image-20210803085631465" style="zoom:67%;"></p>
-<h4 id="事实表与维度表">事实表与维度表</h4>
-<p>事实表的增删改操作相比维度表更为频繁，模型建立后，维度表中的数据保持相对稳定。商品销售行为是一直在发生的，而用户注册和产品更新不总是随时有的。再说到地域和支付方式，那就更少变化了。</p>
-<p><img src="/2021/08/03/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93_%E6%95%B0%E6%8D%AE%E5%BB%BA%E6%A8%A1/image-20210803085828180.png" alt="image-20210803085828180" style="zoom:50%;"></p>
-<p>通过事实表和维度表组织起来的数仓多维数据模型（上图为星型模型），相比原本分散在数据库等各处的数据，能够有更有目的更高效的查询效率，比如可以查询汇总地域维度中某个省的商品销售情况，也可以通过时间维度分析每个季度的某类商品销售趋势。<strong>将多个维度表跟事实表进行不同程度的关联，可以展开得到各种各样的分析结果</strong>，满足商品运营等数据使用者的不同需求。</p>
 ]]></content>
       <categories>
         <category>数据仓库</category>
@@ -5266,158 +5266,6 @@
       </tags>
   </entry>
   <entry>
-    <title>0902字节一面</title>
-    <url>/2021/09/06/%E9%9D%A2%E8%AF%95_0902%E5%AD%97%E8%8A%82%E4%B8%80%E9%9D%A2/</url>
-    <content><![CDATA[<h3 id="计网">计网</h3>
-<h4 id="syn攻击">Syn攻击</h4>
-<p><strong>是什么</strong></p>
-<p>TCP三次握手中，攻击者向服务器发送连接请求，服务器回复ACK确认后，攻击者并不返回ACK确认，即使得第三次握手无法完成，导致消耗服务器的资源，使得正常的SYN请求被丢弃。</p>
-<p><strong>怎么检测</strong></p>
-<p>当发现大量的大量的半连接状态时，特别是源IP地址是随机的时候，可以检测为是Sync攻击。</p>
-<p><strong>怎么防范</strong></p>
-<p>1、降低超时时间，使得主机尽快释放半连接的占用。</p>
-<p>2、使用代理服务器。当客户端SYN包到达代理服务器时，SYN代理服务器并不转发SYN包，而是以服务器的名义主动回复SYN/ACK包给客户，如果收到客户的ACK包，表明这是正常的访问，此时代理服务器向服务器发送ACK包并完成三次握手。</p>
-<a id="more"></a>
-<h3 id="操作系统">操作系统</h3>
-<h4 id="进程的通信方式"><strong>进程的通信方式</strong></h4>
-<p>1、管道：本质上是内存中的缓冲区，匿名管道用于有亲缘关系的进程通信，有名管道用于无关进程的进程间通信。</p>
-<p>2、信号：一个进程通知另一个进程某个事件已经发生。信号量：计数器，用于多进程对共享数据的访问。</p>
-<p>3、消息队列：内核中的消息列表。</p>
-<p>4、共享内存。</p>
-<p>5、套接字：不同主机间进程间的通信。</p>
-<h4 id="线程的锁"><strong>线程的锁</strong></h4>
-<p>1、互斥量：只有拥有互斥对象的线程才有访问公共资源的权限，互斥对象通常只有一个，比如Java中的synchronized关键字和locks都是类似的机制。</p>
-<p>2、信号量：信号量本质上是计数器，允许多个线程访问同一个公共资源。</p>
-<p>3、信号：Wait/Notify，通过发送通知的方式来保持多线程同步。</p>
-<h3 id="数据库">数据库</h3>
-<h4 id="隔离级别"><strong>隔离级别</strong></h4>
-<table>
-<thead>
-<tr class="header">
-<th>级别</th>
-<th>说明</th>
-<th>读写数据</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>未提交读</td>
-<td>事务的修改，在提交之前对其他事务也可见。</td>
-<td>当前读</td>
-</tr>
-<tr class="even">
-<td>提交读</td>
-<td>事务的修改，在提交之前对其他事务不可见。</td>
-<td>当前读<br>（也可以是快照读，每次都读取最新的快照）</td>
-</tr>
-<tr class="odd">
-<td>可重复读（MySQL默认）</td>
-<td>保证一个事务多次读取同一数据的结果是相同的。</td>
-<td>快照读</td>
-</tr>
-<tr class="even">
-<td>可串行化</td>
-<td>强制事务串行执行，不会出现并发一致性问题。</td>
-<td>当前读</td>
-</tr>
-</tbody>
-</table>
-<p>mysql读取数据实际上有两种读取模式：当前读和快照读</p>
-<p>当前读：每次读取的都是当前最新的数据，但是读的时候不允许写，写的时候也不允许读。（加锁）</p>
-<p>快照读：读写不冲突，每次读取的是快照数据。（版本控制）</p>
-<h3 id="大数据">大数据</h3>
-<h4 id="flink-exactly-once">Flink Exactly Once</h4>
-<p><strong>流程</strong></p>
-<p>一条数据只影响一次最终结果。</p>
-<p>1、Source：保存读取数据的偏移量。</p>
-<p>2、Flink：Checkpoint机制保证系统的一致性。</p>
-<p>3、Sink：两阶段提交，当所有算子的快照完成的时候才真正提交。</p>
-<p><strong>两阶段提交怎么提交</strong></p>
-<p>1、预提交：sink 收到 barrier，保存当前状态，存入 checkpoint，通知 jobmanager，并开启下一阶段的事务，用于提交下个检查点的数据。（<strong>本质上是在目的文件系统中创建了一个临时文件，并向里面写入数据，然后停止写入并关闭该文件</strong>）</p>
-<p>2、正式提交：jobmanager 收到所有算子返回的确认消息，向sink发出确认，表示 checkpoint 完成，则sink正式提交这段时间的数据。外部kafka关闭事务，提交的数据就可以正常消费了。（<strong>本质上是通过原子操作将临时文件移动到目的文件夹</strong>）</p>
-<h4 id="flink-反压">Flink 反压</h4>
-<p><strong>怎么排查</strong></p>
-<p>1、通过 Flink Web UI 自带的反压监控面板</p>
-<p>Flink Web UI 的反压监控提供了 SubTask 级别的反压监控。原理是通过周期性对 Task 线程的栈信息采样，得到<strong>线程被阻塞在请求 Buffer的频率</strong>来判断该节点是否处于反压状态。默认配置下，这个频率在 0.1 以下则为 OK，0.1 至 0.5 为 LOW，而超过 0.5 则为 HIGH。</p>
-<p><img src="/2021/09/06/%E9%9D%A2%E8%AF%95_0902%E5%AD%97%E8%8A%82%E4%B8%80%E9%9D%A2/image-20210906103911274.png" alt="image-20210906103911274" style="zoom: 50%;"></p>
-<p>如果处于反压状态，那么有两种可能性：</p>
-<p>1、该节点的发送速率跟不上它的产生数据速率。这一般会发生在一条输入多条输出的 Operator（比如 flatmap）。</p>
-<p>2、下游的节点接受速率较慢，通过反压机制限制了该节点的发送速率。</p>
-<p>如果是第一种状况，那么该节点则为反压的根源节点，它是从 Source Task 到 Sink Task 的第一个出现反压的节点。如果是第二种情况，则需要继续排查下游节点。</p>
-<p>2、通过 Flink Task Metrics</p>
-<p>Flink本身提供了大量的REST API来获取任务的各种状态，通过各个buffer的使用率情况来进行判定是否产生了反压。</p>
-<blockquote>
-<p>https://www.cnblogs.com/zhaowei121/p/11950759.html</p>
-<p>https://blog.csdn.net/u013411339/article/details/112756701</p>
-</blockquote>
-<p><strong>解决方案</strong></p>
-<p>1、数据倾斜</p>
-<p>2、GC（频繁地垃圾回收导致buffer无法被分配）</p>
-<p>3、代码问题（算子被阻塞或者性能太低）</p>
-<h4 id="kafka">Kafka</h4>
-<p><strong>Kafka是什么语义的</strong></p>
-<p>三种语义都支持，通过参数进行控制。</p>
-<table>
-<colgroup>
-<col style="width: 17%">
-<col style="width: 82%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>语义</th>
-<th>实现</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>at-least-once</td>
-<td>这种方式是在消费数据之后，异步提交offset。<br>有可能消费者的消息处理完并输出时，offset还没提交，消费者挂掉了，再重启的时候会重新消费并处理消息。<br>所以至少会处理一次。<br><strong>先消费数据，再提交offset。</strong></td>
-</tr>
-<tr class="even">
-<td>at-most-once</td>
-<td>消费者的offset已经提交，但是消息还在处理中(还没有处理完)。<br>这个时候程序挂了，导致数据没有被成功处理。<br>再重启的时候会从上次提交的offset处消费，导致上次没有被成功处理的消息就丢失了。<br><strong>先提交offset，再消费数据。</strong></td>
-</tr>
-<tr class="odd">
-<td>exactly-once</td>
-<td>以原子事务的方式保存offset和处理的消息结果，这个时候相当于自己保存offset信息。<br>把offset和具体的数据绑定到一块，数据真正处理成功的时候才会保存offset信息。<br><strong>原子性地绑定消息处理和offset提交。</strong></td>
-</tr>
-</tbody>
-</table>
-<blockquote>
-<p>https://blog.csdn.net/lt326030434/article/details/119881907</p>
-</blockquote>
-<p><strong>kafka会不会丢失数据</strong></p>
-<p>1、生产者发送数据。</p>
-<p>ack机制。为保证producer发送的数据，能可靠的发送到指定的topic，topic的每个partition收到producer发送的数据后，都需要向producer发送ack（acknowledgement确认收到），如果producer收到ack，就会进行下一轮的发送，否则重新发送数据。</p>
-<p>ack应答机制。Kafka提供三种可靠性级别，根据对可靠性和延迟的要求进行权衡。acks参数配置：</p>
-<p>0：producer不等待broker的ack，最低的延迟，broker一接收到还没有写入磁盘就已经返回，当broker故障时有可能丢失数据。</p>
-<p>1：producer等待broker的ack，partition的leader落盘成功后返回ack，如果在follower同步成功之前leader故障，那么follower将会丢失数据。</p>
-<p>2、Kafka Broker 存储数据。</p>
-<p>Kafka把数据写入磁盘时是先写缓存再刷盘，如果数据已经写入系统 cache 中但是还没来得及刷入磁盘，此时突然机器宕机或者掉电那就丢了。</p>
-<p>理论上，要完全让kafka保证单个broker不丢失消息是做不到的，只能通过调整刷盘机制的参数缓解该情况。</p>
-<p>3、消费者消费数据。</p>
-<p>取决于支持的语义，at-least-once和exactly-once 不会，但是at-most-once 会发生丢失。</p>
-<p>at-most-once先提交offset，再消费数据，如果数据并未成功被消费的话，呢么数据就丢失了。</p>
-<blockquote>
-<p>https://www.cnblogs.com/jmcui/p/14032488.html#_label1</p>
-</blockquote>
-<p><strong>flink+kafka实现两阶段提交</strong></p>
-<p>就是flink的两阶段提交过程，再通过幂等性来防止重复提交。</p>
-<p>幂等性的Producer在初始化的时候会被分配一个PID，发往同一Partition的消息会附带序列号。而Broker端会对&lt; PID, Partition, 序列号&gt;做缓存，当具有相同主键的消息提交时，Broker只会持久化一条。</p>
-<blockquote>
-<p>https://blog.csdn.net/longlovefilm/article/details/104908006</p>
-</blockquote>
-<h3 id="算法">算法</h3>
-<p>leetcode 重排链表</p>
-]]></content>
-      <categories>
-        <category>面试</category>
-      </categories>
-      <tags>
-        <tag>面试</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>0906网易互娱一面</title>
     <url>/2021/09/06/%E9%9D%A2%E8%AF%95_0906%E7%BD%91%E6%98%93%E4%BA%92%E5%A8%B1%E4%B8%80%E9%9D%A2/</url>
     <content><![CDATA[<h3 id="hive">Hive</h3>
@@ -5589,67 +5437,149 @@
       </tags>
   </entry>
   <entry>
-    <title>0924 CDG一面</title>
-    <url>/2021/09/24/%E9%9D%A2%E8%AF%95_0924CDG%E4%B8%80%E9%9D%A2/</url>
-    <content><![CDATA[<h4 id="海量数据找top-100账号出现次数">海量数据找Top 100账号出现次数</h4>
-<p>1、Hash(账号) % 桶数量 = 小文件id。把账号分离到多个小文件中。</p>
-<blockquote>
-<p>理想情况下每个小文件的大小应该恰好等于内存容量</p>
-</blockquote>
-<p>2、对于每一个小文件，在内存中构建一个账号为Key，统计次数为Value的一个HashMap，统计每个账号的出现次数。</p>
-<p>把HashMap的结果保存在磁盘上。</p>
-<blockquote>
-<p>如果小文件数量远大于100个，那么对每个小文件就只需要保存统计次数最多的那个账号。</p>
-</blockquote>
-<p>3、在内存中构建一个有100个节点的最小堆，堆中的每个节点保存了HashMap中的Key-Value的数据，只是堆调整的依据是Value值，也就是统计次数。</p>
-<p>将每个小文件对应的HashMap读取进入内存，把Key-Value数据入堆，最后剩下的账号就是Top 100。</p>
-<blockquote>
-<p>如果内存足够，也可以直接把账号-次数的数据读取进来做全局排序，因为此时每个小文件只有一个账号。</p>
-<p>如果每个HashMap太大，那么就需要在第2步构建一个按照Value排序的HashMap，然后取前100个数据保存下来即可。</p>
-</blockquote>
+    <title>0902字节一面</title>
+    <url>/2021/09/06/%E9%9D%A2%E8%AF%95_0902%E5%AD%97%E8%8A%82%E4%B8%80%E9%9D%A2/</url>
+    <content><![CDATA[<h3 id="计网">计网</h3>
+<h4 id="syn攻击">Syn攻击</h4>
+<p><strong>是什么</strong></p>
+<p>TCP三次握手中，攻击者向服务器发送连接请求，服务器回复ACK确认后，攻击者并不返回ACK确认，即使得第三次握手无法完成，导致消耗服务器的资源，使得正常的SYN请求被丢弃。</p>
+<p><strong>怎么检测</strong></p>
+<p>当发现大量的大量的半连接状态时，特别是源IP地址是随机的时候，可以检测为是Sync攻击。</p>
+<p><strong>怎么防范</strong></p>
+<p>1、降低超时时间，使得主机尽快释放半连接的占用。</p>
+<p>2、使用代理服务器。当客户端SYN包到达代理服务器时，SYN代理服务器并不转发SYN包，而是以服务器的名义主动回复SYN/ACK包给客户，如果收到客户的ACK包，表明这是正常的访问，此时代理服务器向服务器发送ACK包并完成三次握手。</p>
 <a id="more"></a>
-<p>如果每个小文件里面的Key的数量很多怎么办？</p>
-<p>增加桶的数量，将文件分的更小，把Key打散。</p>
-<p>如果单个小文件太大怎么办？</p>
-<p>分块读取这个小文件。</p>
-<h4 id="海量数据找账号出现次数的中位数">海量数据找账号出现次数的中位数</h4>
-<p>首先还是得求出每个账号的出现次数，然后利用海量数据找中位数的原理。</p>
-<h4 id="海量数据找中位数">海量数据找中位数</h4>
-<p>1、外部排序</p>
-<p>把所有数据分割成内存能够装载下的大小，每次内存读取一个小文件进行排序，再对所有小文件进行多路归并（2路、3路等，取决于内存大小）。得到所有数据的排序结果后扫描即可得到中位数。</p>
-<p>2、堆排序</p>
-<p>在内存中建立的最大堆（找最小值），然后每次寻找第k大的元素，直到中间。</p>
+<h3 id="操作系统">操作系统</h3>
+<h4 id="进程的通信方式"><strong>进程的通信方式</strong></h4>
+<p>1、管道：本质上是内存中的缓冲区，匿名管道用于有亲缘关系的进程通信，有名管道用于无关进程的进程间通信。</p>
+<p>2、信号：一个进程通知另一个进程某个事件已经发生。信号量：计数器，用于多进程对共享数据的访问。</p>
+<p>3、消息队列：内核中的消息列表。</p>
+<p>4、共享内存。</p>
+<p>5、套接字：不同主机间进程间的通信。</p>
+<h4 id="线程的锁"><strong>线程的锁</strong></h4>
+<p>1、互斥量：只有拥有互斥对象的线程才有访问公共资源的权限，互斥对象通常只有一个，比如Java中的synchronized关键字和locks都是类似的机制。</p>
+<p>2、信号量：信号量本质上是计数器，允许多个线程访问同一个公共资源。</p>
+<p>3、信号：Wait/Notify，通过发送通知的方式来保持多线程同步。</p>
+<h3 id="数据库">数据库</h3>
+<h4 id="隔离级别"><strong>隔离级别</strong></h4>
+<table>
+<thead>
+<tr class="header">
+<th>级别</th>
+<th>说明</th>
+<th>读写数据</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>未提交读</td>
+<td>事务的修改，在提交之前对其他事务也可见。</td>
+<td>当前读</td>
+</tr>
+<tr class="even">
+<td>提交读</td>
+<td>事务的修改，在提交之前对其他事务不可见。</td>
+<td>当前读<br>（也可以是快照读，每次都读取最新的快照）</td>
+</tr>
+<tr class="odd">
+<td>可重复读（MySQL默认）</td>
+<td>保证一个事务多次读取同一数据的结果是相同的。</td>
+<td>快照读</td>
+</tr>
+<tr class="even">
+<td>可串行化</td>
+<td>强制事务串行执行，不会出现并发一致性问题。</td>
+<td>当前读</td>
+</tr>
+</tbody>
+</table>
+<p>mysql读取数据实际上有两种读取模式：当前读和快照读</p>
+<p>当前读：每次读取的都是当前最新的数据，但是读的时候不允许写，写的时候也不允许读。（加锁）</p>
+<p>快照读：读写不冲突，每次读取的是快照数据。（版本控制）</p>
+<h3 id="大数据">大数据</h3>
+<h4 id="flink-exactly-once">Flink Exactly Once</h4>
+<p><strong>流程</strong></p>
+<p>一条数据只影响一次最终结果。</p>
+<p>1、Source：保存读取数据的偏移量。</p>
+<p>2、Flink：Checkpoint机制保证系统的一致性。</p>
+<p>3、Sink：两阶段提交，当所有算子的快照完成的时候才真正提交。</p>
+<p><strong>两阶段提交怎么提交</strong></p>
+<p>1、预提交：sink 收到 barrier，保存当前状态，存入 checkpoint，通知 jobmanager，并开启下一阶段的事务，用于提交下个检查点的数据。（<strong>本质上是在目的文件系统中创建了一个临时文件，并向里面写入数据，然后停止写入并关闭该文件</strong>）</p>
+<p>2、正式提交：jobmanager 收到所有算子返回的确认消息，向sink发出确认，表示 checkpoint 完成，则sink正式提交这段时间的数据。外部kafka关闭事务，提交的数据就可以正常消费了。（<strong>本质上是通过原子操作将临时文件移动到目的文件夹</strong>）</p>
+<h4 id="flink-反压">Flink 反压</h4>
+<p><strong>怎么排查</strong></p>
+<p>1、通过 Flink Web UI 自带的反压监控面板</p>
+<p>Flink Web UI 的反压监控提供了 SubTask 级别的反压监控。原理是通过周期性对 Task 线程的栈信息采样，得到<strong>线程被阻塞在请求 Buffer的频率</strong>来判断该节点是否处于反压状态。默认配置下，这个频率在 0.1 以下则为 OK，0.1 至 0.5 为 LOW，而超过 0.5 则为 HIGH。</p>
+<p><img src="/2021/09/06/%E9%9D%A2%E8%AF%95_0902%E5%AD%97%E8%8A%82%E4%B8%80%E9%9D%A2/image-20210906103911274.png" alt="image-20210906103911274" style="zoom: 50%;"></p>
+<p>如果处于反压状态，那么有两种可能性：</p>
+<p>1、该节点的发送速率跟不上它的产生数据速率。这一般会发生在一条输入多条输出的 Operator（比如 flatmap）。</p>
+<p>2、下游的节点接受速率较慢，通过反压机制限制了该节点的发送速率。</p>
+<p>如果是第一种状况，那么该节点则为反压的根源节点，它是从 Source Task 到 Sink Task 的第一个出现反压的节点。如果是第二种情况，则需要继续排查下游节点。</p>
+<p>2、通过 Flink Task Metrics</p>
+<p>Flink本身提供了大量的REST API来获取任务的各种状态，通过各个buffer的使用率情况来进行判定是否产生了反压。</p>
 <blockquote>
-<p>对于10G的数据，它的中位数就是第5G个元素，按常理来说需要构建一个5G大小的堆，但是允许的内存只有2个G，所以先构建一个1G大小的大顶堆，然后求出第1G个元素（根节点），然后利用该元素构建一个新的1G大小的堆，只有大于第1G个元素的数据才能入堆，最后剩下来的就是1G-2G之间的元素，则根节点就是第2G大的元素。依次类推，求出第5G大的元素。</p>
-<p>每次构建一个堆求第几G大的元素，都需要重新遍历完所有10G的数据，相当于要遍历5 * 10G次，这需要频繁的IO操作，需要不断的从硬盘中读取数据。</p>
+<p>https://www.cnblogs.com/zhaowei121/p/11950759.html</p>
+<p>https://blog.csdn.net/u013411339/article/details/112756701</p>
 </blockquote>
-<p>3、其他？</p>
-<p>因为涉及到排序，可以用桶排序、或者位图。</p>
+<p><strong>解决方案</strong></p>
+<p>1、数据倾斜</p>
+<p>2、GC（频繁地垃圾回收导致buffer无法被分配）</p>
+<p>3、代码问题（算子被阻塞或者性能太低）</p>
+<h4 id="kafka">Kafka</h4>
+<p><strong>Kafka是什么语义的</strong></p>
+<p>三种语义都支持，通过参数进行控制。</p>
+<table>
+<colgroup>
+<col style="width: 17%">
+<col style="width: 82%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>语义</th>
+<th>实现</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>at-least-once</td>
+<td>这种方式是在消费数据之后，异步提交offset。<br>有可能消费者的消息处理完并输出时，offset还没提交，消费者挂掉了，再重启的时候会重新消费并处理消息。<br>所以至少会处理一次。<br><strong>先消费数据，再提交offset。</strong></td>
+</tr>
+<tr class="even">
+<td>at-most-once</td>
+<td>消费者的offset已经提交，但是消息还在处理中(还没有处理完)。<br>这个时候程序挂了，导致数据没有被成功处理。<br>再重启的时候会从上次提交的offset处消费，导致上次没有被成功处理的消息就丢失了。<br><strong>先提交offset，再消费数据。</strong></td>
+</tr>
+<tr class="odd">
+<td>exactly-once</td>
+<td>以原子事务的方式保存offset和处理的消息结果，这个时候相当于自己保存offset信息。<br>把offset和具体的数据绑定到一块，数据真正处理成功的时候才会保存offset信息。<br><strong>原子性地绑定消息处理和offset提交。</strong></td>
+</tr>
+</tbody>
+</table>
 <blockquote>
-<p>https://zhuanlan.zhihu.com/p/75397875</p>
+<p>https://blog.csdn.net/lt326030434/article/details/119881907</p>
 </blockquote>
-<h4 id="spark-sql底层原理">Spark SQL底层原理</h4>
-<p>https://blog.csdn.net/qq_30031221/article/details/109222355</p>
-<p>https://www.cnblogs.com/code2one/p/10162632.html</p>
-<p>https://juejin.cn/post/6886355913592602631#heading-16</p>
-<h4 id="kafka消费者和消费者组有什么区别">Kafka消费者和消费者组有什么区别</h4>
-<p>消费者组中包含了多个消费者。</p>
-<p>当消息发布到topic后，只会被投递给订阅它的每个消费组中的一个消费者。</p>
-<p>每个topic的一个分区，对应一个消费者组中的一个消费者。</p>
-<p>一个topic，可以被多个消费者组订阅。</p>
-<h4 id="如何设计一个hashmap">如何设计一个HashMap</h4>
-<p>1、Hash函数：运算要快，还需要分布均匀，减少 hash 碰撞。</p>
-<p>2、Hash冲突：链表+红黑树。</p>
-<p>3、Hash扩容：解决Hash冲突的本质方案。（Java8长度扩为原来2倍，所以，元素的位置要么是在原位置，要么是在原位置再移动2次幂的位置。Java7只能根据Key值重新计算数据所在的位置）</p>
-<p>4、高并发：（1）HashTable：直接加锁锁住整个数组。（2）ConcurrentHashMap：读操作volatile，写操作只锁住数组中一个元素，且是cas+synchronized机制（降低锁粒度）。（3）自定义CopyOnWrite的数据结构。</p>
+<p><strong>kafka会不会丢失数据</strong></p>
+<p>1、生产者发送数据。</p>
+<p>ack机制。为保证producer发送的数据，能可靠的发送到指定的topic，topic的每个partition收到producer发送的数据后，都需要向producer发送ack（acknowledgement确认收到），如果producer收到ack，就会进行下一轮的发送，否则重新发送数据。</p>
+<p>ack应答机制。Kafka提供三种可靠性级别，根据对可靠性和延迟的要求进行权衡。acks参数配置：</p>
+<p>0：producer不等待broker的ack，最低的延迟，broker一接收到还没有写入磁盘就已经返回，当broker故障时有可能丢失数据。</p>
+<p>1：producer等待broker的ack，partition的leader落盘成功后返回ack，如果在follower同步成功之前leader故障，那么follower将会丢失数据。</p>
+<p>2、Kafka Broker 存储数据。</p>
+<p>Kafka把数据写入磁盘时是先写缓存再刷盘，如果数据已经写入系统 cache 中但是还没来得及刷入磁盘，此时突然机器宕机或者掉电那就丢了。</p>
+<p>理论上，要完全让kafka保证单个broker不丢失消息是做不到的，只能通过调整刷盘机制的参数缓解该情况。</p>
+<p>3、消费者消费数据。</p>
+<p>取决于支持的语义，at-least-once和exactly-once 不会，但是at-most-once 会发生丢失。</p>
+<p>at-most-once先提交offset，再消费数据，如果数据并未成功被消费的话，呢么数据就丢失了。</p>
 <blockquote>
-<p>https://tech.meituan.com/2016/06/24/java-hashmap.html</p>
+<p>https://www.cnblogs.com/jmcui/p/14032488.html#_label1</p>
 </blockquote>
-<h4 id="java垃圾回收">Java垃圾回收</h4>
-<h4 id="hdfs副本机制">HDFS副本机制</h4>
-<h4 id="算法题气球游戏">算法题：气球游戏</h4>
-<h4 id="智力题电梯">智力题：电梯</h4>
-<p>两台电梯，如何合理安排使得运输时间较优。</p>
+<p><strong>flink+kafka实现两阶段提交</strong></p>
+<p>就是flink的两阶段提交过程，再通过幂等性来防止重复提交。</p>
+<p>幂等性的Producer在初始化的时候会被分配一个PID，发往同一Partition的消息会附带序列号。而Broker端会对&lt; PID, Partition, 序列号&gt;做缓存，当具有相同主键的消息提交时，Broker只会持久化一条。</p>
+<blockquote>
+<p>https://blog.csdn.net/longlovefilm/article/details/104908006</p>
+</blockquote>
+<h3 id="算法">算法</h3>
+<p>leetcode 重排链表</p>
 ]]></content>
       <categories>
         <category>面试</category>
@@ -5746,6 +5676,76 @@
 <p>岛屿问题</p>
 <h3 id="实习">实习</h3>
 <p>介绍实习项目。</p>
+]]></content>
+      <categories>
+        <category>面试</category>
+      </categories>
+      <tags>
+        <tag>面试</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>0924 CDG一面</title>
+    <url>/2021/09/24/%E9%9D%A2%E8%AF%95_0924CDG%E4%B8%80%E9%9D%A2/</url>
+    <content><![CDATA[<h4 id="海量数据找top-100账号出现次数">海量数据找Top 100账号出现次数</h4>
+<p>1、Hash(账号) % 桶数量 = 小文件id。把账号分离到多个小文件中。</p>
+<blockquote>
+<p>理想情况下每个小文件的大小应该恰好等于内存容量</p>
+</blockquote>
+<p>2、对于每一个小文件，在内存中构建一个账号为Key，统计次数为Value的一个HashMap，统计每个账号的出现次数。</p>
+<p>把HashMap的结果保存在磁盘上。</p>
+<blockquote>
+<p>如果小文件数量远大于100个，那么对每个小文件就只需要保存统计次数最多的那个账号。</p>
+</blockquote>
+<p>3、在内存中构建一个有100个节点的最小堆，堆中的每个节点保存了HashMap中的Key-Value的数据，只是堆调整的依据是Value值，也就是统计次数。</p>
+<p>将每个小文件对应的HashMap读取进入内存，把Key-Value数据入堆，最后剩下的账号就是Top 100。</p>
+<blockquote>
+<p>如果内存足够，也可以直接把账号-次数的数据读取进来做全局排序，因为此时每个小文件只有一个账号。</p>
+<p>如果每个HashMap太大，那么就需要在第2步构建一个按照Value排序的HashMap，然后取前100个数据保存下来即可。</p>
+</blockquote>
+<a id="more"></a>
+<p>如果每个小文件里面的Key的数量很多怎么办？</p>
+<p>增加桶的数量，将文件分的更小，把Key打散。</p>
+<p>如果单个小文件太大怎么办？</p>
+<p>分块读取这个小文件。</p>
+<h4 id="海量数据找账号出现次数的中位数">海量数据找账号出现次数的中位数</h4>
+<p>首先还是得求出每个账号的出现次数，然后利用海量数据找中位数的原理。</p>
+<h4 id="海量数据找中位数">海量数据找中位数</h4>
+<p>1、外部排序</p>
+<p>把所有数据分割成内存能够装载下的大小，每次内存读取一个小文件进行排序，再对所有小文件进行多路归并（2路、3路等，取决于内存大小）。得到所有数据的排序结果后扫描即可得到中位数。</p>
+<p>2、堆排序</p>
+<p>在内存中建立的最大堆（找最小值），然后每次寻找第k大的元素，直到中间。</p>
+<blockquote>
+<p>对于10G的数据，它的中位数就是第5G个元素，按常理来说需要构建一个5G大小的堆，但是允许的内存只有2个G，所以先构建一个1G大小的大顶堆，然后求出第1G个元素（根节点），然后利用该元素构建一个新的1G大小的堆，只有大于第1G个元素的数据才能入堆，最后剩下来的就是1G-2G之间的元素，则根节点就是第2G大的元素。依次类推，求出第5G大的元素。</p>
+<p>每次构建一个堆求第几G大的元素，都需要重新遍历完所有10G的数据，相当于要遍历5 * 10G次，这需要频繁的IO操作，需要不断的从硬盘中读取数据。</p>
+</blockquote>
+<p>3、其他？</p>
+<p>因为涉及到排序，可以用桶排序、或者位图。</p>
+<blockquote>
+<p>https://zhuanlan.zhihu.com/p/75397875</p>
+</blockquote>
+<h4 id="spark-sql底层原理">Spark SQL底层原理</h4>
+<p>https://blog.csdn.net/qq_30031221/article/details/109222355</p>
+<p>https://www.cnblogs.com/code2one/p/10162632.html</p>
+<p>https://juejin.cn/post/6886355913592602631#heading-16</p>
+<h4 id="kafka消费者和消费者组有什么区别">Kafka消费者和消费者组有什么区别</h4>
+<p>消费者组中包含了多个消费者。</p>
+<p>当消息发布到topic后，只会被投递给订阅它的每个消费组中的一个消费者。</p>
+<p>每个topic的一个分区，对应一个消费者组中的一个消费者。</p>
+<p>一个topic，可以被多个消费者组订阅。</p>
+<h4 id="如何设计一个hashmap">如何设计一个HashMap</h4>
+<p>1、Hash函数：运算要快，还需要分布均匀，减少 hash 碰撞。</p>
+<p>2、Hash冲突：链表+红黑树。</p>
+<p>3、Hash扩容：解决Hash冲突的本质方案。（Java8长度扩为原来2倍，所以，元素的位置要么是在原位置，要么是在原位置再移动2次幂的位置。Java7只能根据Key值重新计算数据所在的位置）</p>
+<p>4、高并发：（1）HashTable：直接加锁锁住整个数组。（2）ConcurrentHashMap：读操作volatile，写操作只锁住数组中一个元素，且是cas+synchronized机制（降低锁粒度）。（3）自定义CopyOnWrite的数据结构。</p>
+<blockquote>
+<p>https://tech.meituan.com/2016/06/24/java-hashmap.html</p>
+</blockquote>
+<h4 id="java垃圾回收">Java垃圾回收</h4>
+<h4 id="hdfs副本机制">HDFS副本机制</h4>
+<h4 id="算法题气球游戏">算法题：气球游戏</h4>
+<h4 id="智力题电梯">智力题：电梯</h4>
+<p>两台电梯，如何合理安排使得运输时间较优。</p>
 ]]></content>
       <categories>
         <category>面试</category>
