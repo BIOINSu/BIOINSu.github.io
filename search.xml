@@ -435,51 +435,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Hadoop Shuffle与Spark Shuffle</title>
-    <url>/2021/09/15/Hadoop_Shuffle%E4%B8%8ESparkShuffle/</url>
-    <content><![CDATA[<table>
-<colgroup>
-<col style="width: 3%">
-<col style="width: 48%">
-<col style="width: 48%">
-</colgroup>
-<thead>
-<tr class="header">
-<th></th>
-<th>Hadoop Shuffle</th>
-<th>Spark Shuffle</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>流程</td>
-<td>Hadoop的Shuffle操作发生在Map之后，Reduce之前。<br>将流程分为溢写（spill）、合并（merge）、拉取（copy）、排序（sort）、合并（合并）。</td>
-<td>Spark的Shuffle操作是发生在宽依赖之间。<br>Shuffle Write：形成磁盘文件和索引。<br>Shuffle Read：Reducer拉取数据。</td>
-</tr>
-<tr class="even">
-<td>排序</td>
-<td>在四个阶段均会发生数据排序。<br>目的是将Key相同的数据聚合在一起。</td>
-<td>Spark 1.2之后，Sort-Based Shuffle变为默认的Shuffle实现。<br>普通：和Hadoop类似；内存数据结构reduceByKey用Map，join用Array；Reducer从索引文件内读取自己应该拉取的范围。<br>bypass：按key哈希写入磁盘文件，最后将磁盘文件合并，但不排序。</td>
-</tr>
-<tr class="odd">
-<td>功能</td>
-<td>没有差别，目的都是将Key相同的数据拉取到同一个Reducer。</td>
-<td>没有差别，目的都是将Key相同的数据拉取到同一个Reducer。</td>
-</tr>
-</tbody>
-</table>
-<a id="more"></a>
-<h3 id="参考资料">参考资料</h3>
-<p>https://tech.meituan.com/2016/05/12/spark-tuning-pro.html</p>
-]]></content>
-      <categories>
-        <category>Hadoop</category>
-      </categories>
-      <tags>
-        <tag>Hadoop</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>HDFS容错</title>
     <url>/2021/09/14/HDFS_%E5%AE%B9%E9%94%99/</url>
     <content><![CDATA[<table>
@@ -539,6 +494,51 @@
 <p>http://article.docway.net/details?id=5f33d50ab4f20b6366ff6676#215NameNode_25</p>
 <p>https://blog.csdn.net/ThreeAspects/article/details/105983047?utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7Edefault-2.no_search_link&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7Edefault-2.no_search_link</p>
 <p>https://www.cnblogs.com/zeq912/p/9606105.html（NFS网络文件系统）</p>
+]]></content>
+      <categories>
+        <category>Hadoop</category>
+      </categories>
+      <tags>
+        <tag>Hadoop</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Hadoop Shuffle与Spark Shuffle</title>
+    <url>/2021/09/15/Hadoop_Shuffle%E4%B8%8ESparkShuffle/</url>
+    <content><![CDATA[<table>
+<colgroup>
+<col style="width: 3%">
+<col style="width: 48%">
+<col style="width: 48%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>Hadoop Shuffle</th>
+<th>Spark Shuffle</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>流程</td>
+<td>Hadoop的Shuffle操作发生在Map之后，Reduce之前。<br>将流程分为溢写（spill）、合并（merge）、拉取（copy）、排序（sort）、合并（合并）。</td>
+<td>Spark的Shuffle操作是发生在宽依赖之间。<br>Shuffle Write：形成磁盘文件和索引。<br>Shuffle Read：Reducer拉取数据。</td>
+</tr>
+<tr class="even">
+<td>排序</td>
+<td>在四个阶段均会发生数据排序。<br>目的是将Key相同的数据聚合在一起。</td>
+<td>Spark 1.2之后，Sort-Based Shuffle变为默认的Shuffle实现。<br>普通：和Hadoop类似；内存数据结构reduceByKey用Map，join用Array；Reducer从索引文件内读取自己应该拉取的范围。<br>bypass：按key哈希写入磁盘文件，最后将磁盘文件合并，但不排序。</td>
+</tr>
+<tr class="odd">
+<td>功能</td>
+<td>没有差别，目的都是将Key相同的数据拉取到同一个Reducer。</td>
+<td>没有差别，目的都是将Key相同的数据拉取到同一个Reducer。</td>
+</tr>
+</tbody>
+</table>
+<a id="more"></a>
+<h3 id="参考资料">参考资料</h3>
+<p>https://tech.meituan.com/2016/05/12/spark-tuning-pro.html</p>
 ]]></content>
       <categories>
         <category>Hadoop</category>
@@ -711,6 +711,72 @@
       </tags>
   </entry>
   <entry>
+    <title>Java中Comparable和Comparator</title>
+    <url>/2021/08/01/Java_ComparableAndComparator/</url>
+    <content><![CDATA[<p>Java中Comparable和Comparator两个<strong>接口</strong>的比较。</p>
+<table>
+<colgroup>
+<col style="width: 9%">
+<col style="width: 45%">
+<col style="width: 45%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>Comparable</th>
+<th>Comparator</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>作用</td>
+<td>可以让实现它的类的对象进行比较大小</td>
+<td>在类对象的外部制定排序规则，然后作为排序策略参数传递给某些类的对象的构造函数，实现比较大小</td>
+</tr>
+<tr class="even">
+<td>位置</td>
+<td>java.lang 包</td>
+<td>java.util 包</td>
+</tr>
+<tr class="odd">
+<td>接口中的方法</td>
+<td>只有一个方法 compareTo()</td>
+<td>JDK 8 以前只有两个方法compare()和equals()，8以后增加多个方法</td>
+</tr>
+<tr class="even">
+<td>使用</td>
+<td>public class Test implements Comparable{} 并重写其中的compareTo()方法</td>
+<td>数组工具类和集合工具类中提供的工具方法sort方法都给出了含有Comparator接口的重载方法。</td>
+</tr>
+<tr class="odd">
+<td>排序规则</td>
+<td>compareTo 方法的返回值有三种情况：e1.compareTo(e2) &gt; 0 即 e1 &gt; e2<br>e1.compareTo(e2) = 0 即 e1 = e2<br>e1.compareTo(e2) &lt; 0 即 e1 &lt; e2</td>
+<td>compare函数返回正数就交换传入参数的位置，否则（负数或0）就不交换两者的位置。</td>
+</tr>
+</tbody>
+</table>
+<a id="more"></a>
+<h3 id="comparable">Comparable</h3>
+<p>使用方法</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> java.io.Serializable;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BookBean</span> <span class="keyword">implements</span> <span class="title">Serializable</span>, <span class="title">Comparable</span> </span>&#123;</span><br><span class="line">    <span class="comment">//名字与价格</span></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> count;</span><br><span class="line"></span><br><span class="line">	<span class="comment">//构造函数</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Solution</span><span class="params">(String name, <span class="keyword">int</span> count)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">        <span class="keyword">this</span>.count = count;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getName</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setName</span><span class="params">(String name)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getCount</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> count;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setCount</span><span class="params">(<span class="keyword">int</span> count)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.count = count;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 当向 TreeSet 中添加 BookBean 时，会调用这个方法进行排序</span></span><br><span class="line"><span class="comment">     * e1.compareTo(e2) &gt; 0 即 e1 &gt; e2</span></span><br><span class="line"><span class="comment">     * e1.compareTo(e2) = 0 即 e1 = e2</span></span><br><span class="line"><span class="comment">     * e1.compareTo(e2) &lt; 0 即 e1 &lt; e2</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> another</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compareTo</span><span class="params">(Object another)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (another <span class="keyword">instanceof</span> Solution) &#123;</span><br><span class="line">            Solution anotherBook = (Solution) another;</span><br><span class="line">            <span class="keyword">int</span> result;</span><br><span class="line"></span><br><span class="line">            <span class="comment">//比如这里按照书价排序</span></span><br><span class="line">            result = getCount() - anotherBook.getCount();</span><br><span class="line"></span><br><span class="line">            <span class="comment">//或者按照 String 的比较顺序</span></span><br><span class="line">            <span class="comment">//result = getName().compareTo(anotherBook.getName());</span></span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (result == <span class="number">0</span>) &#123;   <span class="comment">//当书价一致时，再对比书名。 保证所有属性比较一遍</span></span><br><span class="line">                result = getName().compareTo(anotherBook.getName());</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> result;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 一样就返回 0</span></span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 重写 equals</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> o</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">equals</span><span class="params">(Object o)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">this</span> == o) <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">        <span class="keyword">if</span> (!(o <span class="keyword">instanceof</span> Solution)) <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line"></span><br><span class="line">        Solution bean = (Solution) o;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (getCount() != bean.getCount()) <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">        <span class="keyword">return</span> getName().equals(bean.getName());</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 重写 hashCode 的计算方法</span></span><br><span class="line"><span class="comment">     * 根据所有属性进行 迭代计算，避免重复</span></span><br><span class="line"><span class="comment">     * 计算 hashCode 时 计算因子 31 见得很多，是一个质数，不能再被除</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">hashCode</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">//调用 String 的 hashCode(), 唯一表示一个字符串内容</span></span><br><span class="line">        <span class="keyword">int</span> result = getName().hashCode();</span><br><span class="line">        <span class="comment">//乘以 31, 再加上 count</span></span><br><span class="line">        result = <span class="number">31</span> * result + getCount();</span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">toString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;BookBean&#123;&quot;</span> +</span><br><span class="line">                <span class="string">&quot;name=&#x27;&quot;</span> + name + <span class="string">&#x27;\&#x27;&#x27;</span> +</span><br><span class="line">                <span class="string">&quot;, count=&quot;</span> + count +</span><br><span class="line">                <span class="string">&#x27;&#125;&#x27;</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="comparator">Comparator</h3>
+<p>compare函数返回正数就交换传入参数的位置，否则（负数或0）就不交换两者的位置。</p>
+<p>因此，对于compare(Object o1, Object o2)来说，如果写成 return o1 - o2 则为升序，反之为降序。</p>
+<p>案例：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">List&lt;Character&gt; letters = <span class="keyword">new</span> ArrayList&lt;&gt;(str.length());</span><br><span class="line"></span><br><span class="line"><span class="comment">//将英文字母先排序好</span></span><br><span class="line"><span class="comment">//此处的意思是，o1 - o2如果是负数，则o1&lt;o2，不交换两者的位置，小的数o1依旧排在前面，所以这样是升序</span></span><br><span class="line"><span class="comment">//也是默认的</span></span><br><span class="line">letters.sort(<span class="keyword">new</span> Comparator&lt;Character&gt;() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compare</span><span class="params">(Character o1, Character o2)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> Character.toLowerCase(o1) - Character.toLowerCase(o2);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">//此处的意思是，o2 - o1如果是负数，则o2&lt;o1，不交换两者的位置，小的数o2依旧排在后面，所以这样是降序</span></span><br><span class="line"><span class="comment">//o2 - o1如果是正数，则o2&gt;o1，交换两者的位置，大的数o2旧排在前面，所以这样是降序</span></span><br><span class="line">letters.sort(<span class="keyword">new</span> Comparator&lt;Character&gt;() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compare</span><span class="params">(Character o1, Character o2)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> Character.toLowerCase(o2) - Character.toLowerCase(o1);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>数组工具类和集合工具类中提供的工具方法sort方法都给出了含有Comparator接口的重载方法。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Arrays.sort(T[],Comparator&lt;? <span class="keyword">super</span> T&gt; c);</span><br><span class="line">Collections.sort(List&lt;T&gt; list,Comparator&lt;? <span class="keyword">super</span> T&gt; c);</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>Java</category>
+        <category>Java基础</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
+        <tag>Java基础</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Hive存储文件类型</title>
     <url>/2021/10/03/Hive_%E5%AD%98%E5%82%A8%E6%96%87%E4%BB%B6%E7%B1%BB%E5%9E%8B/</url>
     <content><![CDATA[<table>
@@ -818,72 +884,6 @@
       </categories>
       <tags>
         <tag>Hive</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Java中Comparable和Comparator</title>
-    <url>/2021/08/01/Java_ComparableAndComparator/</url>
-    <content><![CDATA[<p>Java中Comparable和Comparator两个<strong>接口</strong>的比较。</p>
-<table>
-<colgroup>
-<col style="width: 9%">
-<col style="width: 45%">
-<col style="width: 45%">
-</colgroup>
-<thead>
-<tr class="header">
-<th></th>
-<th>Comparable</th>
-<th>Comparator</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>作用</td>
-<td>可以让实现它的类的对象进行比较大小</td>
-<td>在类对象的外部制定排序规则，然后作为排序策略参数传递给某些类的对象的构造函数，实现比较大小</td>
-</tr>
-<tr class="even">
-<td>位置</td>
-<td>java.lang 包</td>
-<td>java.util 包</td>
-</tr>
-<tr class="odd">
-<td>接口中的方法</td>
-<td>只有一个方法 compareTo()</td>
-<td>JDK 8 以前只有两个方法compare()和equals()，8以后增加多个方法</td>
-</tr>
-<tr class="even">
-<td>使用</td>
-<td>public class Test implements Comparable{} 并重写其中的compareTo()方法</td>
-<td>数组工具类和集合工具类中提供的工具方法sort方法都给出了含有Comparator接口的重载方法。</td>
-</tr>
-<tr class="odd">
-<td>排序规则</td>
-<td>compareTo 方法的返回值有三种情况：e1.compareTo(e2) &gt; 0 即 e1 &gt; e2<br>e1.compareTo(e2) = 0 即 e1 = e2<br>e1.compareTo(e2) &lt; 0 即 e1 &lt; e2</td>
-<td>compare函数返回正数就交换传入参数的位置，否则（负数或0）就不交换两者的位置。</td>
-</tr>
-</tbody>
-</table>
-<a id="more"></a>
-<h3 id="comparable">Comparable</h3>
-<p>使用方法</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> java.io.Serializable;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BookBean</span> <span class="keyword">implements</span> <span class="title">Serializable</span>, <span class="title">Comparable</span> </span>&#123;</span><br><span class="line">    <span class="comment">//名字与价格</span></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> count;</span><br><span class="line"></span><br><span class="line">	<span class="comment">//构造函数</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Solution</span><span class="params">(String name, <span class="keyword">int</span> count)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">        <span class="keyword">this</span>.count = count;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getName</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setName</span><span class="params">(String name)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getCount</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> count;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setCount</span><span class="params">(<span class="keyword">int</span> count)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.count = count;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 当向 TreeSet 中添加 BookBean 时，会调用这个方法进行排序</span></span><br><span class="line"><span class="comment">     * e1.compareTo(e2) &gt; 0 即 e1 &gt; e2</span></span><br><span class="line"><span class="comment">     * e1.compareTo(e2) = 0 即 e1 = e2</span></span><br><span class="line"><span class="comment">     * e1.compareTo(e2) &lt; 0 即 e1 &lt; e2</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> another</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compareTo</span><span class="params">(Object another)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (another <span class="keyword">instanceof</span> Solution) &#123;</span><br><span class="line">            Solution anotherBook = (Solution) another;</span><br><span class="line">            <span class="keyword">int</span> result;</span><br><span class="line"></span><br><span class="line">            <span class="comment">//比如这里按照书价排序</span></span><br><span class="line">            result = getCount() - anotherBook.getCount();</span><br><span class="line"></span><br><span class="line">            <span class="comment">//或者按照 String 的比较顺序</span></span><br><span class="line">            <span class="comment">//result = getName().compareTo(anotherBook.getName());</span></span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (result == <span class="number">0</span>) &#123;   <span class="comment">//当书价一致时，再对比书名。 保证所有属性比较一遍</span></span><br><span class="line">                result = getName().compareTo(anotherBook.getName());</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> result;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 一样就返回 0</span></span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 重写 equals</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> o</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">equals</span><span class="params">(Object o)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">this</span> == o) <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">        <span class="keyword">if</span> (!(o <span class="keyword">instanceof</span> Solution)) <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line"></span><br><span class="line">        Solution bean = (Solution) o;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (getCount() != bean.getCount()) <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">        <span class="keyword">return</span> getName().equals(bean.getName());</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 重写 hashCode 的计算方法</span></span><br><span class="line"><span class="comment">     * 根据所有属性进行 迭代计算，避免重复</span></span><br><span class="line"><span class="comment">     * 计算 hashCode 时 计算因子 31 见得很多，是一个质数，不能再被除</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">hashCode</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">//调用 String 的 hashCode(), 唯一表示一个字符串内容</span></span><br><span class="line">        <span class="keyword">int</span> result = getName().hashCode();</span><br><span class="line">        <span class="comment">//乘以 31, 再加上 count</span></span><br><span class="line">        result = <span class="number">31</span> * result + getCount();</span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">toString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;BookBean&#123;&quot;</span> +</span><br><span class="line">                <span class="string">&quot;name=&#x27;&quot;</span> + name + <span class="string">&#x27;\&#x27;&#x27;</span> +</span><br><span class="line">                <span class="string">&quot;, count=&quot;</span> + count +</span><br><span class="line">                <span class="string">&#x27;&#125;&#x27;</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="comparator">Comparator</h3>
-<p>compare函数返回正数就交换传入参数的位置，否则（负数或0）就不交换两者的位置。</p>
-<p>因此，对于compare(Object o1, Object o2)来说，如果写成 return o1 - o2 则为升序，反之为降序。</p>
-<p>案例：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">List&lt;Character&gt; letters = <span class="keyword">new</span> ArrayList&lt;&gt;(str.length());</span><br><span class="line"></span><br><span class="line"><span class="comment">//将英文字母先排序好</span></span><br><span class="line"><span class="comment">//此处的意思是，o1 - o2如果是负数，则o1&lt;o2，不交换两者的位置，小的数o1依旧排在前面，所以这样是升序</span></span><br><span class="line"><span class="comment">//也是默认的</span></span><br><span class="line">letters.sort(<span class="keyword">new</span> Comparator&lt;Character&gt;() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compare</span><span class="params">(Character o1, Character o2)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> Character.toLowerCase(o1) - Character.toLowerCase(o2);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">//此处的意思是，o2 - o1如果是负数，则o2&lt;o1，不交换两者的位置，小的数o2依旧排在后面，所以这样是降序</span></span><br><span class="line"><span class="comment">//o2 - o1如果是正数，则o2&gt;o1，交换两者的位置，大的数o2旧排在前面，所以这样是降序</span></span><br><span class="line">letters.sort(<span class="keyword">new</span> Comparator&lt;Character&gt;() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compare</span><span class="params">(Character o1, Character o2)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> Character.toLowerCase(o2) - Character.toLowerCase(o1);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
-<p>数组工具类和集合工具类中提供的工具方法sort方法都给出了含有Comparator接口的重载方法。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Arrays.sort(T[],Comparator&lt;? <span class="keyword">super</span> T&gt; c);</span><br><span class="line">Collections.sort(List&lt;T&gt; list,Comparator&lt;? <span class="keyword">super</span> T&gt; c);</span><br></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>Java</category>
-        <category>Java基础</category>
-      </categories>
-      <tags>
-        <tag>Java</tag>
-        <tag>Java基础</tag>
       </tags>
   </entry>
   <entry>
@@ -3374,6 +3374,76 @@
       </tags>
   </entry>
   <entry>
+    <title>行列存储的比较</title>
+    <url>/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E8%A1%8C%E5%88%97%E5%AD%98%E5%82%A8%E6%AF%94%E8%BE%83/</url>
+    <content><![CDATA[<table>
+<colgroup>
+<col style="width: 10%">
+<col style="width: 44%">
+<col style="width: 44%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>优点</th>
+<th>缺点</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>行存储（OLTP）</td>
+<td>同一行所属的多个字段被保存在一起，<br>当修改或插入一行数据时IO开销较低。</td>
+<td>获取特定列时本质上还是扫描了所有行，<br>再把特定列取出，存在不必要的IO开销。</td>
+</tr>
+<tr class="even">
+<td>列存储（OLAP）</td>
+<td>1、同一列的数据被保存在一起，能够满足<br>快速读取特定列的需求。（OLAP常用）<br>选取列时降低IO开销，随机读变顺序读。<br>2、列式存储容易实现数据压缩。</td>
+<td>1、插入、删除数据不方便。<br>2、被选择出来的列要重新组装。</td>
+</tr>
+</tbody>
+</table>
+<a id="more"></a>
+<h3 id="行列存储的原理">行列存储的原理</h3>
+<p>数据在存储系统中的基本单位为页，页中的数据是连续存储的。</p>
+<p>页也是进行数据读取时候基本单位，一次读取就是一次IO操作。</p>
+<p>例如一个数据表为：</p>
+<p><img src="/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E8%A1%8C%E5%88%97%E5%AD%98%E5%82%A8%E6%AF%94%E8%BE%83/image-20210926145033057.png" alt="image-20210926145033057" style="zoom:67%;"></p>
+<p>一个数据页用一个4x4的单元格表示：</p>
+<p><img src="/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E8%A1%8C%E5%88%97%E5%AD%98%E5%82%A8%E6%AF%94%E8%BE%83/image-20210926145129243.png" alt="image-20210926145129243" style="zoom:67%;"></p>
+<p>按行存储为：</p>
+<p><img src="/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E8%A1%8C%E5%88%97%E5%AD%98%E5%82%A8%E6%AF%94%E8%BE%83/image-20210926145202849.png" alt="image-20210926145202849" style="zoom: 67%;"></p>
+<p>按列存储为：</p>
+<p><img src="/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E8%A1%8C%E5%88%97%E5%AD%98%E5%82%A8%E6%AF%94%E8%BE%83/image-20210926145242775.png" alt="image-20210926145242775" style="zoom:67%;"></p>
+<p>当执行OLTP查询：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> id,city <span class="keyword">from</span> <span class="keyword">table</span> <span class="keyword">where</span> id <span class="operator">=</span> <span class="number">004</span></span><br></pre></td></tr></table></figure>
+<p>以行方式查询（在有适当的索引情况下)，那么，执行一次以上查询，只需要扫描一次Page 1就可以了。</p>
+<p>以列方式查询，需要投其扫描Page 1和Page 2共2次，分别取得id，city的单行值。</p>
+<p>因此，在OLTP这种以查询一行数据为主的场景下，适合采用行方式进行存储。</p>
+<p>当执行OLAP查询：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="built_in">max</span>(id) <span class="keyword">from</span> <span class="keyword">table</span></span><br></pre></td></tr></table></figure>
+<p>对于行存储，这个查询需要两次IO将全部数据放入内存后，进行页间数据的跳读（类随机读取，因为id被city隔开了)。</p>
+<p>对于列存储，只需要一次IO将Page 1放入内存后进行连续读取，如果id还有多页的话，也是进行的物理连续读取。</p>
+<p>在进行OLAP操作时候，不仅是减小了IO次数，而且把随机读取变为了连续读取。</p>
+<h3 id="列式存储数据压缩">列式存储数据压缩</h3>
+<p>因为列式存储将同一列的数据存储在一起，所以使用压缩算法可以减少存储占用的磁盘空间。</p>
+<p>压缩算法的基本原理其实很简单，它使用基于特定规则的数据表示原数据。</p>
+<p>如下所示的字符串中包含连续的相同字符，就可以使用朴素的压缩算法减少字符串的长度：</p>
+<p><img src="/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E8%A1%8C%E5%88%97%E5%AD%98%E5%82%A8%E6%AF%94%E8%BE%83/image-20210926152828786.png" alt="image-20210926152828786" style="zoom:67%;"></p>
+<p>黄色方块表示前面字符串的重复次数，这种简单的压缩策略可以在保证无损的情况下将字符串的长度压缩 33%，然而压缩率是由压缩算法和数据的特性共同决定的。与面向行的数据存储相比，面向列的数据存储会将相同类型的数据就近存储，这也给压缩算法的提供了更多发挥的空间。</p>
+<p>压缩算法实际上是一种<strong>使用 CPU 时间换取 I/O 时间和空间</strong>的策略，但是在多数情况下，这种生意都是稳赚不赔的。压缩算法通过减少数据的大小、减少磁盘的寻道时间提高 I/O 的性能、减少数据的传输时间并提高缓冲区的命中率，节省的 I/O 时间可以轻易补偿它带来的 CPU 额外开销（IO时间远大于CPU的额外时间）。</p>
+<h3 id="参考资料">参考资料</h3>
+<p>https://www.zhihu.com/question/29380943</p>
+<p>https://draveness.me/whys-the-design-olap-column-oriented/</p>
+<p>https://www.cnblogs.com/ajianbeyourself/p/7771682.html</p>
+]]></content>
+      <categories>
+        <category>大数据</category>
+      </categories>
+      <tags>
+        <tag>大数据</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>常用Linux命令</title>
     <url>/2021/04/19/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F_Linux%E5%91%BD%E4%BB%A4/</url>
     <content><![CDATA[<p>常用Linux命令：top</p>
@@ -3451,76 +3521,6 @@
       </categories>
       <tags>
         <tag>操作系统</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>行列存储的比较</title>
-    <url>/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E8%A1%8C%E5%88%97%E5%AD%98%E5%82%A8%E6%AF%94%E8%BE%83/</url>
-    <content><![CDATA[<table>
-<colgroup>
-<col style="width: 10%">
-<col style="width: 44%">
-<col style="width: 44%">
-</colgroup>
-<thead>
-<tr class="header">
-<th></th>
-<th>优点</th>
-<th>缺点</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>行存储（OLTP）</td>
-<td>同一行所属的多个字段被保存在一起，<br>当修改或插入一行数据时IO开销较低。</td>
-<td>获取特定列时本质上还是扫描了所有行，<br>再把特定列取出，存在不必要的IO开销。</td>
-</tr>
-<tr class="even">
-<td>列存储（OLAP）</td>
-<td>1、同一列的数据被保存在一起，能够满足<br>快速读取特定列的需求。（OLAP常用）<br>选取列时降低IO开销，随机读变顺序读。<br>2、列式存储容易实现数据压缩。</td>
-<td>1、插入、删除数据不方便。<br>2、被选择出来的列要重新组装。</td>
-</tr>
-</tbody>
-</table>
-<a id="more"></a>
-<h3 id="行列存储的原理">行列存储的原理</h3>
-<p>数据在存储系统中的基本单位为页，页中的数据是连续存储的。</p>
-<p>页也是进行数据读取时候基本单位，一次读取就是一次IO操作。</p>
-<p>例如一个数据表为：</p>
-<p><img src="/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E8%A1%8C%E5%88%97%E5%AD%98%E5%82%A8%E6%AF%94%E8%BE%83/image-20210926145033057.png" alt="image-20210926145033057" style="zoom:67%;"></p>
-<p>一个数据页用一个4x4的单元格表示：</p>
-<p><img src="/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E8%A1%8C%E5%88%97%E5%AD%98%E5%82%A8%E6%AF%94%E8%BE%83/image-20210926145129243.png" alt="image-20210926145129243" style="zoom:67%;"></p>
-<p>按行存储为：</p>
-<p><img src="/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E8%A1%8C%E5%88%97%E5%AD%98%E5%82%A8%E6%AF%94%E8%BE%83/image-20210926145202849.png" alt="image-20210926145202849" style="zoom: 67%;"></p>
-<p>按列存储为：</p>
-<p><img src="/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E8%A1%8C%E5%88%97%E5%AD%98%E5%82%A8%E6%AF%94%E8%BE%83/image-20210926145242775.png" alt="image-20210926145242775" style="zoom:67%;"></p>
-<p>当执行OLTP查询：</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> id,city <span class="keyword">from</span> <span class="keyword">table</span> <span class="keyword">where</span> id <span class="operator">=</span> <span class="number">004</span></span><br></pre></td></tr></table></figure>
-<p>以行方式查询（在有适当的索引情况下)，那么，执行一次以上查询，只需要扫描一次Page 1就可以了。</p>
-<p>以列方式查询，需要投其扫描Page 1和Page 2共2次，分别取得id，city的单行值。</p>
-<p>因此，在OLTP这种以查询一行数据为主的场景下，适合采用行方式进行存储。</p>
-<p>当执行OLAP查询：</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="built_in">max</span>(id) <span class="keyword">from</span> <span class="keyword">table</span></span><br></pre></td></tr></table></figure>
-<p>对于行存储，这个查询需要两次IO将全部数据放入内存后，进行页间数据的跳读（类随机读取，因为id被city隔开了)。</p>
-<p>对于列存储，只需要一次IO将Page 1放入内存后进行连续读取，如果id还有多页的话，也是进行的物理连续读取。</p>
-<p>在进行OLAP操作时候，不仅是减小了IO次数，而且把随机读取变为了连续读取。</p>
-<h3 id="列式存储数据压缩">列式存储数据压缩</h3>
-<p>因为列式存储将同一列的数据存储在一起，所以使用压缩算法可以减少存储占用的磁盘空间。</p>
-<p>压缩算法的基本原理其实很简单，它使用基于特定规则的数据表示原数据。</p>
-<p>如下所示的字符串中包含连续的相同字符，就可以使用朴素的压缩算法减少字符串的长度：</p>
-<p><img src="/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E8%A1%8C%E5%88%97%E5%AD%98%E5%82%A8%E6%AF%94%E8%BE%83/image-20210926152828786.png" alt="image-20210926152828786" style="zoom:67%;"></p>
-<p>黄色方块表示前面字符串的重复次数，这种简单的压缩策略可以在保证无损的情况下将字符串的长度压缩 33%，然而压缩率是由压缩算法和数据的特性共同决定的。与面向行的数据存储相比，面向列的数据存储会将相同类型的数据就近存储，这也给压缩算法的提供了更多发挥的空间。</p>
-<p>压缩算法实际上是一种<strong>使用 CPU 时间换取 I/O 时间和空间</strong>的策略，但是在多数情况下，这种生意都是稳赚不赔的。压缩算法通过减少数据的大小、减少磁盘的寻道时间提高 I/O 的性能、减少数据的传输时间并提高缓冲区的命中率，节省的 I/O 时间可以轻易补偿它带来的 CPU 额外开销（IO时间远大于CPU的额外时间）。</p>
-<h3 id="参考资料">参考资料</h3>
-<p>https://www.zhihu.com/question/29380943</p>
-<p>https://draveness.me/whys-the-design-olap-column-oriented/</p>
-<p>https://www.cnblogs.com/ajianbeyourself/p/7771682.html</p>
-]]></content>
-      <categories>
-        <category>大数据</category>
-      </categories>
-      <tags>
-        <tag>大数据</tag>
       </tags>
   </entry>
   <entry>
@@ -3775,30 +3775,6 @@
       </tags>
   </entry>
   <entry>
-    <title>数据建模</title>
-    <url>/2021/08/03/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93_%E6%95%B0%E6%8D%AE%E5%BB%BA%E6%A8%A1/</url>
-    <content><![CDATA[<h3 id="基本概念">基本概念</h3>
-<h4 id="事实表">事实表</h4>
-<p>事实表（Fact Table）用来记录具体事件，包含了每个事件的具体要素，以及具体发生的事情。<strong>也就是每一条数据记录了发生的一件事情</strong>。例子中就通过一条事实表记录说明了某个地方（地域ID）的某人（用户ID）在某个时间（时间ID）通过某种方式（支付ID）买了某产品（产品ID）。</p>
-<p><img src="/2021/08/03/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93_%E6%95%B0%E6%8D%AE%E5%BB%BA%E6%A8%A1/image-20210803085511700.png" alt="image-20210803085511700" style="zoom:67%;"></p>
-<a id="more"></a>
-<h4 id="维度表">维度表</h4>
-<p>维度表（Dimension Table ）是依赖事实表而存在的，没有事实表数据，维度表也就没有存在的意义。每个维度表都是对事实表中的每个列/字段进行展开描述。</p>
-<p>比如事实表中的用户ID，就可以进一步展开成一张维度表，记录该用户ID实体的用户名、联系信息、地址信息、年龄、性别和注册方式等等。</p>
-<p><img src="/2021/08/03/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93_%E6%95%B0%E6%8D%AE%E5%BB%BA%E6%A8%A1/image-20210803085631465.png" alt="image-20210803085631465" style="zoom:67%;"></p>
-<h4 id="事实表与维度表">事实表与维度表</h4>
-<p>事实表的增删改操作相比维度表更为频繁，模型建立后，维度表中的数据保持相对稳定。商品销售行为是一直在发生的，而用户注册和产品更新不总是随时有的。再说到地域和支付方式，那就更少变化了。</p>
-<p><img src="/2021/08/03/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93_%E6%95%B0%E6%8D%AE%E5%BB%BA%E6%A8%A1/image-20210803085828180.png" alt="image-20210803085828180" style="zoom:50%;"></p>
-<p>通过事实表和维度表组织起来的数仓多维数据模型（上图为星型模型），相比原本分散在数据库等各处的数据，能够有更有目的更高效的查询效率，比如可以查询汇总地域维度中某个省的商品销售情况，也可以通过时间维度分析每个季度的某类商品销售趋势。<strong>将多个维度表跟事实表进行不同程度的关联，可以展开得到各种各样的分析结果</strong>，满足商品运营等数据使用者的不同需求。</p>
-]]></content>
-      <categories>
-        <category>数据仓库</category>
-      </categories>
-      <tags>
-        <tag>数据仓库</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>数据仓库与数据库</title>
     <url>/2021/05/03/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93_%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93%E4%B8%8E%E6%95%B0%E6%8D%AE%E5%BA%93/</url>
     <content><![CDATA[<p>数据仓库，英文名称为Data Warehouse，可简写为DW或DWH，是一种用于报告和数据分析的系统，被认为是商业智慧（BI，Business Intelligence）的核心组件。 数据仓库将一个或多个数据源的数据集成到中央存储库中，将当前和历史数据存储在一起，用于创建分析报告。 存储在仓库中的数据从运行系统（例如营销或销售）上传。</p>
@@ -3923,6 +3899,30 @@
 </table>
 <h3 id="参考资料">参考资料</h3>
 <p>转载自： https://www.zhihu.com/question/20623931/answer/750367153</p>
+]]></content>
+      <categories>
+        <category>数据仓库</category>
+      </categories>
+      <tags>
+        <tag>数据仓库</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>数据建模</title>
+    <url>/2021/08/03/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93_%E6%95%B0%E6%8D%AE%E5%BB%BA%E6%A8%A1/</url>
+    <content><![CDATA[<h3 id="基本概念">基本概念</h3>
+<h4 id="事实表">事实表</h4>
+<p>事实表（Fact Table）用来记录具体事件，包含了每个事件的具体要素，以及具体发生的事情。<strong>也就是每一条数据记录了发生的一件事情</strong>。例子中就通过一条事实表记录说明了某个地方（地域ID）的某人（用户ID）在某个时间（时间ID）通过某种方式（支付ID）买了某产品（产品ID）。</p>
+<p><img src="/2021/08/03/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93_%E6%95%B0%E6%8D%AE%E5%BB%BA%E6%A8%A1/image-20210803085511700.png" alt="image-20210803085511700" style="zoom:67%;"></p>
+<a id="more"></a>
+<h4 id="维度表">维度表</h4>
+<p>维度表（Dimension Table ）是依赖事实表而存在的，没有事实表数据，维度表也就没有存在的意义。每个维度表都是对事实表中的每个列/字段进行展开描述。</p>
+<p>比如事实表中的用户ID，就可以进一步展开成一张维度表，记录该用户ID实体的用户名、联系信息、地址信息、年龄、性别和注册方式等等。</p>
+<p><img src="/2021/08/03/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93_%E6%95%B0%E6%8D%AE%E5%BB%BA%E6%A8%A1/image-20210803085631465.png" alt="image-20210803085631465" style="zoom:67%;"></p>
+<h4 id="事实表与维度表">事实表与维度表</h4>
+<p>事实表的增删改操作相比维度表更为频繁，模型建立后，维度表中的数据保持相对稳定。商品销售行为是一直在发生的，而用户注册和产品更新不总是随时有的。再说到地域和支付方式，那就更少变化了。</p>
+<p><img src="/2021/08/03/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93_%E6%95%B0%E6%8D%AE%E5%BB%BA%E6%A8%A1/image-20210803085828180.png" alt="image-20210803085828180" style="zoom:50%;"></p>
+<p>通过事实表和维度表组织起来的数仓多维数据模型（上图为星型模型），相比原本分散在数据库等各处的数据，能够有更有目的更高效的查询效率，比如可以查询汇总地域维度中某个省的商品销售情况，也可以通过时间维度分析每个季度的某类商品销售趋势。<strong>将多个维度表跟事实表进行不同程度的关联，可以展开得到各种各样的分析结果</strong>，满足商品运营等数据使用者的不同需求。</p>
 ]]></content>
       <categories>
         <category>数据仓库</category>
@@ -5266,177 +5266,6 @@
       </tags>
   </entry>
   <entry>
-    <title>0906网易互娱一面</title>
-    <url>/2021/09/06/%E9%9D%A2%E8%AF%95_0906%E7%BD%91%E6%98%93%E4%BA%92%E5%A8%B1%E4%B8%80%E9%9D%A2/</url>
-    <content><![CDATA[<h3 id="hive">Hive</h3>
-<h4 id="分区">分区</h4>
-<p><strong>分区表是如何加速的</strong></p>
-<p>将数据按字段值划分开。</p>
-<p>从文件上来看，每个分区就是HDFS上的一个目录。（可以指定多个分区形成多级分区）</p>
-<p>查询时通过where进行分区过滤，查询指定分区的数据，避免全表扫描，加快查询速度。</p>
-<p><strong>分区表分区字段的指导原则</strong></p>
-<p>1、分区字段名称不能是表中已经存在的字段名称，因为分区字段最终也会以虚拟字段的形式显示在表结构上。</p>
-<p>2、最好选用那些字段值分布均匀的字段来作为分区字段，否则单个文件可能会过大，失去了分区表的意义。</p>
-<a id="more"></a>
-<h4 id="数据倾斜">数据倾斜</h4>
-<p><strong>数据倾斜有哪几种情况及其解决方案</strong></p>
-<p>问题：大表join小表且某个key数据量大</p>
-<p>导致大表和小表中，该key对应的数据被分发到同一台机器上，该机器节点成为计算瓶颈。</p>
-<p>解决方案：</p>
-<p>将小表广播到其他机器上，在map端做join操作，不需要再进行reduce。</p>
-<p>hive.map.aggr=true 即可指定Map 端聚合。</p>
-<p>问题：大表join大表且某个key对应的数据量大</p>
-<p>该key对应的数据被分发到同一台机器上，该机器节点成为计算瓶颈。</p>
-<p>解决方案：</p>
-<p>将有数据倾斜的这些key的数据拿出来，加上随机前缀，做两阶段join。</p>
-<p>问题：group by中某个key对应的数据量大</p>
-<p>该key对应的数据被分发到同一台机器上进行聚合</p>
-<p>解决方案：</p>
-<p>当设定hive.groupby.skewindata为true时，生成的查询计划会有两个MapReduce任务。</p>
-<p>在第一个MapReduce 中，map的输出结果集合会随机分布到 reduce 中， 每个 reduce 做部分聚合操作，这样处理之后，相同的 Group By Key 有可能分发到不同的 reduce 中，从而达到负载均衡的目的。</p>
-<p>在第二个 MapReduce 任务再根据第一步中处理的数据按照Group By Key分布到reduce中，（这一步中相同的key在同一个reduce中），最终生成聚合操作结果。</p>
-<blockquote>
-<p>https://zhuanlan.zhihu.com/p/115005700</p>
-</blockquote>
-<p>问题：字段中null值较多（不管对于join还是group by）</p>
-<p>null值或者空值，都会产生数据倾斜的问题</p>
-<p>解决方案：</p>
-<p>1、用where条件筛选掉null值。</p>
-<p>2、给null值赋值上随机数，将数据分散到多个机器上，因为不关心null值的聚合结果，所以没关系。</p>
-<p>问题：Count Distinct</p>
-<p>Hive中 count(distinct id) 这样的操作，仅生成一个Reduce 任务，该任务会对全部数据进行去重统计，因此会成为瓶颈。</p>
-<p>解决方案：</p>
-<p>先group by，将数据分散到多个机器上进行去重，最后再count进行统计。</p>
-<p><img src="/2021/09/06/%E9%9D%A2%E8%AF%95_0906%E7%BD%91%E6%98%93%E4%BA%92%E5%A8%B1%E4%B8%80%E9%9D%A2/image-20210909221725804.png" alt="image-20210909221725804" style="zoom:50%;"></p>
-<blockquote>
-<p>https://zhuanlan.zhihu.com/p/29276028</p>
-<p>https://blog.csdn.net/u013630349/article/details/103660545</p>
-</blockquote>
-<h4 id="数据建模">数据建模</h4>
-<p>维度表、事实表</p>
-<p>星型模型、雪花模型</p>
-<h4 id="hdfs">HDFS</h4>
-<p>如何存储文件的</p>
-<h3 id="操作系统">操作系统</h3>
-<p>Top命令下CPU占用率能不能超过100%</p>
-<p>可以，这里显示的所有的cpu加起来的使用率，说明CPU是多核，运行top后按大键盘1，可以显示每个cpu的使用率，top里显示的是把所有使用率加起来。</p>
-<h3 id="kafka">Kafka</h3>
-<p><strong>数据是否可以乱序</strong></p>
-<p>可以，因为一个topic有多个分区，只能保证每个分区内的数据是有序的，不能保证多个分区内的数据是全局有序的。</p>
-<blockquote>
-<p>如果Kafka要保证多个partition有序，不仅broker保存的数据要保持顺序，消费时也要按序消费。假设partition1堵了，为了有序，那partition2以及后续的分区也不能被消费，这种情况下，Kafka 就退化成了单一队列，毫无并发性可言，极大降低系统性能。因此Kafka使用多partition的概念，并且只保证单partition有序。这样不同partiiton之间不会干扰对方。</p>
-</blockquote>
-<p><strong>如何保证数据有序消费</strong></p>
-<p>发送端 发送端不能异步发送</p>
-<p>存储端 对于存储端，要保证消息顺序，会有以下几个问题： （1）<strong>消息不能分区</strong>。也就是1个topic，只能有1个队列。在Kafka中，它叫做partition；在RocketMQ中，它叫做queue。 如果你有多个队列，那同一个topic的消息，会分散到多个分区里面，自然不能保证顺序。</p>
-<p>（2）即使只有一个队列的情况下，会有第二个问题。该机器挂了之后，能否切换到其他机器，也就是高可用问题。比如你当前的机器挂了，上面还有消息没有消费完。此时切换到其他机器，可用性保证了。但消息顺序就乱掉了。要想保证，一方面要<strong>同步复制</strong>，不能异步复制；另一方面得保证，切机器之前，挂掉的机器上面，所有消息必须消费完了，不能有残留。难以实现。</p>
-<p>接收端 对于接收端，不能并行消费，也即不能开多线程或者多个客户端消费同1个队列。</p>
-<p>因此，实际使用中，只需要在存储端控制消息不分区，且接收端只有一个线程去消费，就能保证消息有序消费。</p>
-<blockquote>
-<p>Kafka经典三大问：</p>
-<p>数据有序：不分区，只有一个消费线程</p>
-<p>数据丢失：发送端、存储端、接收端</p>
-<p>数据重复：Exactly Once</p>
-<p>https://cloud.tencent.com/developer/article/1682566</p>
-<p>https://blog.csdn.net/weixin_39877754/article/details/108558016</p>
-<p>https://www.cnblogs.com/yisany/p/14736360.html</p>
-</blockquote>
-<p><strong>消费者分配策略</strong></p>
-<p>1、Range：用partition数除以消费者线程的总数来决定每个消费者线程消费几个partition，每一个消费者都能获得尽可能多的分区。（比如消费者1就直接消费partitiion 0,1,2,3）</p>
-<p>2、RoundRobinAssignor：所有topic的partition按照字典序排序，然后通过轮询方式逐个将分区以此分配给每个消费者，即先排序后轮询分配。</p>
-<p>3、StickyAssignor：分区的分配尽可能的与上次分配的保持相同。（sticky，粘性）</p>
-<h3 id="java">Java</h3>
-<h4 id="静态">静态</h4>
-<p><strong>静态类的加载过程</strong></p>
-<p>Java源码到执行的过程，从JVM的角度看可以总结为四个步骤：编译-&gt;加载-&gt;解释-&gt;执行。</p>
-<p>编译后的class文件加载到JVM中。</p>
-<p>加载又可以细分步骤为：加载-&gt;连接-&gt;初始化。</p>
-<p>加载：通过双亲委派机制把.class文件加载至JVM。</p>
-<p>连接：对.class的信息进行验证，为类的静态变量分配内存空间并对其赋默认值。</p>
-<p>初始化：为类的静态变量赋值为正确的初始值。收集.class的静态变量、静态代码块、静态方法到clinit()方法，然后初始化。</p>
-<p><strong>静态方法和非静态方法的区别</strong></p>
-<table>
-<thead>
-<tr class="header">
-<th></th>
-<th>静态方法</th>
-<th>非静态方法</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>访问变量</td>
-<td>可以访问static修饰的变量<br>不能访问非static修饰的变量</td>
-<td>都可以访问</td>
-</tr>
-<tr class="even">
-<td>调用方法</td>
-<td>只能调用static修饰的方法</td>
-<td>都可以调用</td>
-</tr>
-<tr class="odd">
-<td>是否实例化才能调用</td>
-<td>不需要类实例化出对象，就能通过 类名.方法名 调用</td>
-<td>需要实例化对象，通过 对象.方法名 调用</td>
-</tr>
-<tr class="even">
-<td>super和this关键字</td>
-<td>不能使用</td>
-<td>可以使用</td>
-</tr>
-</tbody>
-</table>
-<h4 id="单例模式">单例模式</h4>
-<p><strong>单例模式是什么</strong></p>
-<p>单例（Singleton）模式：某个类只能生成一个实例，该类提供了一个全局访问点供外部获取该实例。</p>
-<p>该类包括：</p>
-<p>1、持有私有静态实例</p>
-<p>2、私有构造方法，防止被实例化</p>
-<p>3、静态公共获取方法，创建实例</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span> </span>&#123;</span><br><span class="line"> </span><br><span class="line">	<span class="comment">/* 持有私有静态实例，防止被引用，此处赋值为null，目的是实现延迟加载 */</span></span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> Singleton instance = <span class="keyword">null</span>;</span><br><span class="line"> </span><br><span class="line">	<span class="comment">/* 私有构造方法，防止被实例化 */</span></span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="title">Singleton</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	&#125;</span><br><span class="line"> </span><br><span class="line">	<span class="comment">/* 静态公共方法，创建实例 */</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">if</span> (instance == <span class="keyword">null</span>) &#123;</span><br><span class="line">			instance = <span class="keyword">new</span> Singleton();</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> instance;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">/* 线程安全</span></span><br><span class="line"><span class="comment">	public static Singleton getInstance() &#123;</span></span><br><span class="line"><span class="comment">		if (instance == null) &#123;</span></span><br><span class="line"><span class="comment">			synchronized (instance) &#123;</span></span><br><span class="line"><span class="comment">				if (instance == null) &#123;</span></span><br><span class="line"><span class="comment">					instance = new Singleton();</span></span><br><span class="line"><span class="comment">				&#125;</span></span><br><span class="line"><span class="comment">			&#125;</span></span><br><span class="line"><span class="comment">		&#125;</span></span><br><span class="line"><span class="comment">		return instance;</span></span><br><span class="line"><span class="comment">	&#125;</span></span><br><span class="line"><span class="comment">	*/</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">/* 如果该对象被用于序列化，可以保证对象在序列化前后保持一致 */</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> Object <span class="title">readResolve</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> instance;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><strong>懒汉式和饿汉式</strong></p>
-<p>1、饿汉式：在程序启动或单件模式类被加载的时候，单件模式实例就已经被创建。</p>
-<p>2、懒汉式：当程序第一次访问单件模式实例时才进行创建。</p>
-<p>如何选择：如果单件模式实例在系统中经常会被用到，饿汉式是一个不错的选择。</p>
-<p><strong>单例模式构造函数有参数是否可行</strong></p>
-<p>不可行，单例模式本身就要求只有一个实例，传入不同参数意味着需要多种不同的实例，而且本身构造方法就是私有化的不可以传入参数。</p>
-<p><strong>单例模式下多线程访问单例</strong></p>
-<p>懒汉式：</p>
-<p>优点：实例在被使用的时候才被创建，可以节省系统资源，体现了延迟加载的思想。</p>
-<p>缺点：由于系统刚启动时且未被外部调用时，实例没有创建；如果同一时间有多个线程同时调用方法获取单例很有可能会产生多个实例。</p>
-<p>因此，需要使用双重检查机制</p>
-<p>1、第一次检查实例是否存在，如果不存在才进入同步块</p>
-<p>2、第二次进入同步块之后再次检查实例是否存在，如果不存在才真正地创建实例</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">publicstaticLazySingletongetLazyInstance()&#123;</span><br><span class="line">     <span class="comment">//先检查实例是否存在，如果不存在才进入下面的同步块</span></span><br><span class="line">    <span class="keyword">if</span>(lazyInstance==<span class="keyword">null</span>)&#123;</span><br><span class="line">         <span class="comment">//同步块，线程安全地创建实例</span></span><br><span class="line">         <span class="keyword">synchronized</span>（LazySingleton.class）&#123;</span><br><span class="line">             <span class="comment">//再次检查实例是否存在，如果不存在才真正地创建实例</span></span><br><span class="line">             <span class="keyword">if</span>(lazyInstance == <span class="keyword">null</span>)&#123;</span><br><span class="line">              	lazyInstance = newLazySingleton();</span><br><span class="line">              &#125;</span><br><span class="line">         &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> lazyInstance;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>双重检查得以成功的过程：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">线程 <span class="number">1</span> 进入 getInstance() 方法。 </span><br><span class="line"></span><br><span class="line">由于 instance 为 <span class="keyword">null</span>，线程 <span class="number">1</span> 进入 <span class="keyword">synchronized</span> 块。 </span><br><span class="line"></span><br><span class="line">线程 <span class="number">1</span> 被线程 <span class="number">2</span> 预占</span><br><span class="line"></span><br><span class="line">线程 <span class="number">2</span> 进入 getInstance() 方法。</span><br><span class="line"></span><br><span class="line">由于 instance 仍旧为 <span class="keyword">null</span>，线程 <span class="number">2</span> 试图获取锁。然而，由于线程 <span class="number">1</span> 持有该锁，线程 <span class="number">2</span> 阻塞。</span><br><span class="line"></span><br><span class="line">线程 <span class="number">2</span> 被线程 <span class="number">1</span> 预占。</span><br><span class="line"></span><br><span class="line">线程 <span class="number">1</span> 执行，由于实例仍旧为 <span class="keyword">null</span>，线程 <span class="number">1</span> 还创建一个 Singleton 对象并将其引用赋值给 instance。</span><br><span class="line"></span><br><span class="line">线程 <span class="number">1</span> 退出 <span class="keyword">synchronized</span> 块并从 getInstance() 方法返回实例。 </span><br><span class="line"></span><br><span class="line">线程 <span class="number">1</span> 被线程 <span class="number">2</span> 预占。</span><br><span class="line"></span><br><span class="line">线程 <span class="number">2</span> 获取锁并检查 instance 是否为 <span class="keyword">null</span>。 </span><br><span class="line"></span><br><span class="line">由于 instance 是非 <span class="keyword">null</span> 的，并没有创建第二个 Singleton 对象，由线程 <span class="number">1</span> 创建的对象被返回。</span><br></pre></td></tr></table></figure>
-<h4 id="垃圾回收">垃圾回收</h4>
-<p><strong>垃圾回收方法</strong></p>
-<p>回收那些没有被引用的对象占用的内存空间。</p>
-<p>标记清除：通过可达性算法，将存活的对象进行标记，将要被回收的空间用空闲链表连接，分配给其他对象。</p>
-<p>标记整理：通过可达性算法，将存活的对象进行标记，移动它们到一侧，并用空闲指针指向可以分配的位置。</p>
-<p>复制算法：Eden区和两个Survior区，每次只使用一个Survior区，然后GC的时候将仍然存活的对象复制到空闲的Survior区。</p>
-<p><strong>垃圾收集器</strong></p>
-<p>CMS</p>
-<p>CMS全称 Concurrent Mark Sweep（并发的标记-清除算法）垃圾回收器，该回收器是针对老年代垃圾回收，以响应速度优先为目的，常用于B/S结构（Browser/Server，浏览器/服务器模式）中服务器端的垃圾回收，主要分为四个步骤：</p>
-<p>1、初始标记 ：stw，标记GC Roots能直接关联到的对象。</p>
-<p>2、并发标记 ：以 GC Roots 为起始点进行搜索，将可达的存活对象标记。该阶段与工作线程并发执行。</p>
-<p>3、重新标记 ：stw，修正并发标记期间因用户程序继续运作而导致标记产生变动的那一部分对象的标记。</p>
-<p>（这个阶段的停顿时间一般会比初始标记阶段稍长一些，但远比并发标记的时间短）</p>
-<p>4、并发清理 ：内存回收阶段，将死亡的内存对象占用的空间增加到一个空闲列表(free list)，供以后的分配使用。</p>
-<blockquote>
-<p>当Stop-the-world发生时，除了GC所需的线程以外，所有线程都处于等待状态直到GC任务完成。</p>
-</blockquote>
-<p>G1</p>
-]]></content>
-      <categories>
-        <category>面试</category>
-      </categories>
-      <tags>
-        <tag>面试</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>0902字节一面</title>
     <url>/2021/09/06/%E9%9D%A2%E8%AF%95_0902%E5%AD%97%E8%8A%82%E4%B8%80%E9%9D%A2/</url>
     <content><![CDATA[<h3 id="计网">计网</h3>
@@ -5676,6 +5505,177 @@
 <p>岛屿问题</p>
 <h3 id="实习">实习</h3>
 <p>介绍实习项目。</p>
+]]></content>
+      <categories>
+        <category>面试</category>
+      </categories>
+      <tags>
+        <tag>面试</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>0906网易互娱一面</title>
+    <url>/2021/09/06/%E9%9D%A2%E8%AF%95_0906%E7%BD%91%E6%98%93%E4%BA%92%E5%A8%B1%E4%B8%80%E9%9D%A2/</url>
+    <content><![CDATA[<h3 id="hive">Hive</h3>
+<h4 id="分区">分区</h4>
+<p><strong>分区表是如何加速的</strong></p>
+<p>将数据按字段值划分开。</p>
+<p>从文件上来看，每个分区就是HDFS上的一个目录。（可以指定多个分区形成多级分区）</p>
+<p>查询时通过where进行分区过滤，查询指定分区的数据，避免全表扫描，加快查询速度。</p>
+<p><strong>分区表分区字段的指导原则</strong></p>
+<p>1、分区字段名称不能是表中已经存在的字段名称，因为分区字段最终也会以虚拟字段的形式显示在表结构上。</p>
+<p>2、最好选用那些字段值分布均匀的字段来作为分区字段，否则单个文件可能会过大，失去了分区表的意义。</p>
+<a id="more"></a>
+<h4 id="数据倾斜">数据倾斜</h4>
+<p><strong>数据倾斜有哪几种情况及其解决方案</strong></p>
+<p>问题：大表join小表且某个key数据量大</p>
+<p>导致大表和小表中，该key对应的数据被分发到同一台机器上，该机器节点成为计算瓶颈。</p>
+<p>解决方案：</p>
+<p>将小表广播到其他机器上，在map端做join操作，不需要再进行reduce。</p>
+<p>hive.map.aggr=true 即可指定Map 端聚合。</p>
+<p>问题：大表join大表且某个key对应的数据量大</p>
+<p>该key对应的数据被分发到同一台机器上，该机器节点成为计算瓶颈。</p>
+<p>解决方案：</p>
+<p>将有数据倾斜的这些key的数据拿出来，加上随机前缀，做两阶段join。</p>
+<p>问题：group by中某个key对应的数据量大</p>
+<p>该key对应的数据被分发到同一台机器上进行聚合</p>
+<p>解决方案：</p>
+<p>当设定hive.groupby.skewindata为true时，生成的查询计划会有两个MapReduce任务。</p>
+<p>在第一个MapReduce 中，map的输出结果集合会随机分布到 reduce 中， 每个 reduce 做部分聚合操作，这样处理之后，相同的 Group By Key 有可能分发到不同的 reduce 中，从而达到负载均衡的目的。</p>
+<p>在第二个 MapReduce 任务再根据第一步中处理的数据按照Group By Key分布到reduce中，（这一步中相同的key在同一个reduce中），最终生成聚合操作结果。</p>
+<blockquote>
+<p>https://zhuanlan.zhihu.com/p/115005700</p>
+</blockquote>
+<p>问题：字段中null值较多（不管对于join还是group by）</p>
+<p>null值或者空值，都会产生数据倾斜的问题</p>
+<p>解决方案：</p>
+<p>1、用where条件筛选掉null值。</p>
+<p>2、给null值赋值上随机数，将数据分散到多个机器上，因为不关心null值的聚合结果，所以没关系。</p>
+<p>问题：Count Distinct</p>
+<p>Hive中 count(distinct id) 这样的操作，仅生成一个Reduce 任务，该任务会对全部数据进行去重统计，因此会成为瓶颈。</p>
+<p>解决方案：</p>
+<p>先group by，将数据分散到多个机器上进行去重，最后再count进行统计。</p>
+<p><img src="/2021/09/06/%E9%9D%A2%E8%AF%95_0906%E7%BD%91%E6%98%93%E4%BA%92%E5%A8%B1%E4%B8%80%E9%9D%A2/image-20210909221725804.png" alt="image-20210909221725804" style="zoom:50%;"></p>
+<blockquote>
+<p>https://zhuanlan.zhihu.com/p/29276028</p>
+<p>https://blog.csdn.net/u013630349/article/details/103660545</p>
+</blockquote>
+<h4 id="数据建模">数据建模</h4>
+<p>维度表、事实表</p>
+<p>星型模型、雪花模型</p>
+<h4 id="hdfs">HDFS</h4>
+<p>如何存储文件的</p>
+<h3 id="操作系统">操作系统</h3>
+<p>Top命令下CPU占用率能不能超过100%</p>
+<p>可以，这里显示的所有的cpu加起来的使用率，说明CPU是多核，运行top后按大键盘1，可以显示每个cpu的使用率，top里显示的是把所有使用率加起来。</p>
+<h3 id="kafka">Kafka</h3>
+<p><strong>数据是否可以乱序</strong></p>
+<p>可以，因为一个topic有多个分区，只能保证每个分区内的数据是有序的，不能保证多个分区内的数据是全局有序的。</p>
+<blockquote>
+<p>如果Kafka要保证多个partition有序，不仅broker保存的数据要保持顺序，消费时也要按序消费。假设partition1堵了，为了有序，那partition2以及后续的分区也不能被消费，这种情况下，Kafka 就退化成了单一队列，毫无并发性可言，极大降低系统性能。因此Kafka使用多partition的概念，并且只保证单partition有序。这样不同partiiton之间不会干扰对方。</p>
+</blockquote>
+<p><strong>如何保证数据有序消费</strong></p>
+<p>发送端 发送端不能异步发送</p>
+<p>存储端 对于存储端，要保证消息顺序，会有以下几个问题： （1）<strong>消息不能分区</strong>。也就是1个topic，只能有1个队列。在Kafka中，它叫做partition；在RocketMQ中，它叫做queue。 如果你有多个队列，那同一个topic的消息，会分散到多个分区里面，自然不能保证顺序。</p>
+<p>（2）即使只有一个队列的情况下，会有第二个问题。该机器挂了之后，能否切换到其他机器，也就是高可用问题。比如你当前的机器挂了，上面还有消息没有消费完。此时切换到其他机器，可用性保证了。但消息顺序就乱掉了。要想保证，一方面要<strong>同步复制</strong>，不能异步复制；另一方面得保证，切机器之前，挂掉的机器上面，所有消息必须消费完了，不能有残留。难以实现。</p>
+<p>接收端 对于接收端，不能并行消费，也即不能开多线程或者多个客户端消费同1个队列。</p>
+<p>因此，实际使用中，只需要在存储端控制消息不分区，且接收端只有一个线程去消费，就能保证消息有序消费。</p>
+<blockquote>
+<p>Kafka经典三大问：</p>
+<p>数据有序：不分区，只有一个消费线程</p>
+<p>数据丢失：发送端、存储端、接收端</p>
+<p>数据重复：Exactly Once</p>
+<p>https://cloud.tencent.com/developer/article/1682566</p>
+<p>https://blog.csdn.net/weixin_39877754/article/details/108558016</p>
+<p>https://www.cnblogs.com/yisany/p/14736360.html</p>
+</blockquote>
+<p><strong>消费者分配策略</strong></p>
+<p>1、Range：用partition数除以消费者线程的总数来决定每个消费者线程消费几个partition，每一个消费者都能获得尽可能多的分区。（比如消费者1就直接消费partitiion 0,1,2,3）</p>
+<p>2、RoundRobinAssignor：所有topic的partition按照字典序排序，然后通过轮询方式逐个将分区以此分配给每个消费者，即先排序后轮询分配。</p>
+<p>3、StickyAssignor：分区的分配尽可能的与上次分配的保持相同。（sticky，粘性）</p>
+<h3 id="java">Java</h3>
+<h4 id="静态">静态</h4>
+<p><strong>静态类的加载过程</strong></p>
+<p>Java源码到执行的过程，从JVM的角度看可以总结为四个步骤：编译-&gt;加载-&gt;解释-&gt;执行。</p>
+<p>编译后的class文件加载到JVM中。</p>
+<p>加载又可以细分步骤为：加载-&gt;连接-&gt;初始化。</p>
+<p>加载：通过双亲委派机制把.class文件加载至JVM。</p>
+<p>连接：对.class的信息进行验证，为类的静态变量分配内存空间并对其赋默认值。</p>
+<p>初始化：为类的静态变量赋值为正确的初始值。收集.class的静态变量、静态代码块、静态方法到clinit()方法，然后初始化。</p>
+<p><strong>静态方法和非静态方法的区别</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th>静态方法</th>
+<th>非静态方法</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>访问变量</td>
+<td>可以访问static修饰的变量<br>不能访问非static修饰的变量</td>
+<td>都可以访问</td>
+</tr>
+<tr class="even">
+<td>调用方法</td>
+<td>只能调用static修饰的方法</td>
+<td>都可以调用</td>
+</tr>
+<tr class="odd">
+<td>是否实例化才能调用</td>
+<td>不需要类实例化出对象，就能通过 类名.方法名 调用</td>
+<td>需要实例化对象，通过 对象.方法名 调用</td>
+</tr>
+<tr class="even">
+<td>super和this关键字</td>
+<td>不能使用</td>
+<td>可以使用</td>
+</tr>
+</tbody>
+</table>
+<h4 id="单例模式">单例模式</h4>
+<p><strong>单例模式是什么</strong></p>
+<p>单例（Singleton）模式：某个类只能生成一个实例，该类提供了一个全局访问点供外部获取该实例。</p>
+<p>该类包括：</p>
+<p>1、持有私有静态实例</p>
+<p>2、私有构造方法，防止被实例化</p>
+<p>3、静态公共获取方法，创建实例</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span> </span>&#123;</span><br><span class="line"> </span><br><span class="line">	<span class="comment">/* 持有私有静态实例，防止被引用，此处赋值为null，目的是实现延迟加载 */</span></span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> Singleton instance = <span class="keyword">null</span>;</span><br><span class="line"> </span><br><span class="line">	<span class="comment">/* 私有构造方法，防止被实例化 */</span></span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="title">Singleton</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	&#125;</span><br><span class="line"> </span><br><span class="line">	<span class="comment">/* 静态公共方法，创建实例 */</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">if</span> (instance == <span class="keyword">null</span>) &#123;</span><br><span class="line">			instance = <span class="keyword">new</span> Singleton();</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> instance;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">/* 线程安全</span></span><br><span class="line"><span class="comment">	public static Singleton getInstance() &#123;</span></span><br><span class="line"><span class="comment">		if (instance == null) &#123;</span></span><br><span class="line"><span class="comment">			synchronized (instance) &#123;</span></span><br><span class="line"><span class="comment">				if (instance == null) &#123;</span></span><br><span class="line"><span class="comment">					instance = new Singleton();</span></span><br><span class="line"><span class="comment">				&#125;</span></span><br><span class="line"><span class="comment">			&#125;</span></span><br><span class="line"><span class="comment">		&#125;</span></span><br><span class="line"><span class="comment">		return instance;</span></span><br><span class="line"><span class="comment">	&#125;</span></span><br><span class="line"><span class="comment">	*/</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">/* 如果该对象被用于序列化，可以保证对象在序列化前后保持一致 */</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> Object <span class="title">readResolve</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> instance;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>懒汉式和饿汉式</strong></p>
+<p>1、饿汉式：在程序启动或单件模式类被加载的时候，单件模式实例就已经被创建。</p>
+<p>2、懒汉式：当程序第一次访问单件模式实例时才进行创建。</p>
+<p>如何选择：如果单件模式实例在系统中经常会被用到，饿汉式是一个不错的选择。</p>
+<p><strong>单例模式构造函数有参数是否可行</strong></p>
+<p>不可行，单例模式本身就要求只有一个实例，传入不同参数意味着需要多种不同的实例，而且本身构造方法就是私有化的不可以传入参数。</p>
+<p><strong>单例模式下多线程访问单例</strong></p>
+<p>懒汉式：</p>
+<p>优点：实例在被使用的时候才被创建，可以节省系统资源，体现了延迟加载的思想。</p>
+<p>缺点：由于系统刚启动时且未被外部调用时，实例没有创建；如果同一时间有多个线程同时调用方法获取单例很有可能会产生多个实例。</p>
+<p>因此，需要使用双重检查机制</p>
+<p>1、第一次检查实例是否存在，如果不存在才进入同步块</p>
+<p>2、第二次进入同步块之后再次检查实例是否存在，如果不存在才真正地创建实例</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">publicstaticLazySingletongetLazyInstance()&#123;</span><br><span class="line">     <span class="comment">//先检查实例是否存在，如果不存在才进入下面的同步块</span></span><br><span class="line">    <span class="keyword">if</span>(lazyInstance==<span class="keyword">null</span>)&#123;</span><br><span class="line">         <span class="comment">//同步块，线程安全地创建实例</span></span><br><span class="line">         <span class="keyword">synchronized</span>（LazySingleton.class）&#123;</span><br><span class="line">             <span class="comment">//再次检查实例是否存在，如果不存在才真正地创建实例</span></span><br><span class="line">             <span class="keyword">if</span>(lazyInstance == <span class="keyword">null</span>)&#123;</span><br><span class="line">              	lazyInstance = newLazySingleton();</span><br><span class="line">              &#125;</span><br><span class="line">         &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> lazyInstance;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>双重检查得以成功的过程：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">线程 <span class="number">1</span> 进入 getInstance() 方法。 </span><br><span class="line"></span><br><span class="line">由于 instance 为 <span class="keyword">null</span>，线程 <span class="number">1</span> 进入 <span class="keyword">synchronized</span> 块。 </span><br><span class="line"></span><br><span class="line">线程 <span class="number">1</span> 被线程 <span class="number">2</span> 预占</span><br><span class="line"></span><br><span class="line">线程 <span class="number">2</span> 进入 getInstance() 方法。</span><br><span class="line"></span><br><span class="line">由于 instance 仍旧为 <span class="keyword">null</span>，线程 <span class="number">2</span> 试图获取锁。然而，由于线程 <span class="number">1</span> 持有该锁，线程 <span class="number">2</span> 阻塞。</span><br><span class="line"></span><br><span class="line">线程 <span class="number">2</span> 被线程 <span class="number">1</span> 预占。</span><br><span class="line"></span><br><span class="line">线程 <span class="number">1</span> 执行，由于实例仍旧为 <span class="keyword">null</span>，线程 <span class="number">1</span> 还创建一个 Singleton 对象并将其引用赋值给 instance。</span><br><span class="line"></span><br><span class="line">线程 <span class="number">1</span> 退出 <span class="keyword">synchronized</span> 块并从 getInstance() 方法返回实例。 </span><br><span class="line"></span><br><span class="line">线程 <span class="number">1</span> 被线程 <span class="number">2</span> 预占。</span><br><span class="line"></span><br><span class="line">线程 <span class="number">2</span> 获取锁并检查 instance 是否为 <span class="keyword">null</span>。 </span><br><span class="line"></span><br><span class="line">由于 instance 是非 <span class="keyword">null</span> 的，并没有创建第二个 Singleton 对象，由线程 <span class="number">1</span> 创建的对象被返回。</span><br></pre></td></tr></table></figure>
+<h4 id="垃圾回收">垃圾回收</h4>
+<p><strong>垃圾回收方法</strong></p>
+<p>回收那些没有被引用的对象占用的内存空间。</p>
+<p>标记清除：通过可达性算法，将存活的对象进行标记，将要被回收的空间用空闲链表连接，分配给其他对象。</p>
+<p>标记整理：通过可达性算法，将存活的对象进行标记，移动它们到一侧，并用空闲指针指向可以分配的位置。</p>
+<p>复制算法：Eden区和两个Survior区，每次只使用一个Survior区，然后GC的时候将仍然存活的对象复制到空闲的Survior区。</p>
+<p><strong>垃圾收集器</strong></p>
+<p>CMS</p>
+<p>CMS全称 Concurrent Mark Sweep（并发的标记-清除算法）垃圾回收器，该回收器是针对老年代垃圾回收，以响应速度优先为目的，常用于B/S结构（Browser/Server，浏览器/服务器模式）中服务器端的垃圾回收，主要分为四个步骤：</p>
+<p>1、初始标记 ：stw，标记GC Roots能直接关联到的对象。</p>
+<p>2、并发标记 ：以 GC Roots 为起始点进行搜索，将可达的存活对象标记。该阶段与工作线程并发执行。</p>
+<p>3、重新标记 ：stw，修正并发标记期间因用户程序继续运作而导致标记产生变动的那一部分对象的标记。</p>
+<p>（这个阶段的停顿时间一般会比初始标记阶段稍长一些，但远比并发标记的时间短）</p>
+<p>4、并发清理 ：内存回收阶段，将死亡的内存对象占用的空间增加到一个空闲列表(free list)，供以后的分配使用。</p>
+<blockquote>
+<p>当Stop-the-world发生时，除了GC所需的线程以外，所有线程都处于等待状态直到GC任务完成。</p>
+</blockquote>
+<p>G1</p>
 ]]></content>
       <categories>
         <category>面试</category>
