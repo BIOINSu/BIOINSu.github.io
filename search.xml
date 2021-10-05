@@ -320,74 +320,6 @@
       </tags>
   </entry>
   <entry>
-    <title>HDFS容错</title>
-    <url>/2021/09/14/HDFS_%E5%AE%B9%E9%94%99/</url>
-    <content><![CDATA[<table>
-<colgroup>
-<col style="width: 16%">
-<col style="width: 83%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>概念</th>
-<th>解释</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>NameNode容错</td>
-<td>1、持久化的元数据（fsimage、edit log）进行备份到远程网络文件系统（NFS）<br>2、SecondaryNamenode中存有前一个时间点的fsimage的备份，结合NFS形成Namenode<br>3、搭建HDFS高可用模式，直接切换成StandbyNamenode</td>
-</tr>
-<tr class="even">
-<td>DataNode容错</td>
-<td>1、副本机制<br>2、心跳机制<br>3、安全模式<br>4、校验和</td>
-</tr>
-<tr class="odd">
-<td>HDFS写容错</td>
-<td>将出错的DataNode移除，剩余的继续传输，最后维持副本的数量。</td>
-</tr>
-<tr class="even">
-<td>HDFS读容错</td>
-<td>直接更换DataNode读数据。</td>
-</tr>
-</tbody>
-</table>
-<a id="more"></a>
-<h3 id="namenode容错">NameNode容错</h3>
-<p>没有Namenode，HDFS就不能工作。事实上，如果运行namenode的机器坏掉的话，系统中的文件将会完全丢失，因为没有其他方法能够将位于不同datanode上的文件块(blocks)重建文件。因此，namenode的容错机制非常重要，Hadoop提供了两种机制。</p>
-<p>第一种方式是将持久化存储在本地硬盘的文件系统元数据备份。Hadoop可以通过配置来让Namenode将他的持久化状态文件写到不同的文件系统中。这种写操作是同步并且是原子化的。比较常见的配置是在将持久化状态写到本地硬盘的同时，也写入到一个远程挂载的网络文件系统（NFS）。</p>
-<p>第二种方式是运行一个SecondaryNamenode。 事实上SecondaryNamenode并不能直接被用作Namenode。它的主要作用是定期的将元数据镜像（fsimage）与操作日志文件（edit log）合并，以防止操作日志文件(edit log)变得过大。通常，SecondaryNamenode 运行在一个单独的物理机上，因为合并操作需要占用大量的CPU时间以及和Namenode相当的内存。SecondaryNamenode保存着合并后的元数据镜像（fsimage）的一个备份，万一哪天Namenode宕机了，这个备份就可以用上了。</p>
-<p>但是SecondaryNamenode总是落后于主Namenode，所以在Namenode宕机时，数据丢失是不可避免的。在这种情况下，一般的，要结合第一种方式中提到的远程挂载的网络文件系统(NFS)中的Namenode的元数据文件来使用，把NFS中的Namenode元数据文件，拷贝到SecondaryNamenode，并把SecondaryNamenode作为主Namenode来运行。</p>
-<p>第三种方式就是在高可用模式下直接切换成StandbyNamenode。</p>
-<h3 id="datanode容错">DataNode容错</h3>
-<p>1、副本机制</p>
-<p>2、心跳机制</p>
-<p>DataNode启动后向NameNode注册，心跳是每3秒一次，目的是告诉Namenode存活状态以及可用空间。心跳返回结果带有NameNode给该DataNode的命令如复制块数据到另一台机器，或删除某个数据块。</p>
-<p>3、安全模式</p>
-<p>NameNode启动后会进入一个称为安全模式的特殊状态。处于安全模式的NameNode对于客户端来说是只读的。NameNode从所有的DataNode接收心跳信号和块状态报告（blockreport）。</p>
-<p>每个数据块都有一个指定的最小副本数（dfs.replication.min），当NameNode检测确认某个数据块的副本数目达到这个最小值，那么该数据块就会被认为是副本安全(safely replicated)的。</p>
-<p>在一定百分比（这个参数配置于dfs.safemode.threshold.pct，默认值是99.9%）的数据块被NameNode检测确认是安全之后，再过若干时间后（这个参数配置于dfs.safemode.extension，默认值是30秒），NameNode将退出安全模式状态。接下来NameNode会确定还有哪些数据块的副本没有达到指定数目，并将这些数据块复制到其他DataNode上。</p>
-<p>4、校验和</p>
-<p>HDFS会对写入的所有数据计算校验和（checksum）和数据本身一并存储，在读取数据时再次计算校验和并且验证和写入时是否相同。</p>
-<p>此外Datanode还会定期运行一个进程检验本身存在的数据块是否和校验和一致。</p>
-<h3 id="hdfs读写容错">HDFS读写容错</h3>
-<h4 id="写容错">写容错</h4>
-<p>如果传输过程中，有某个 datanode 出现了故障，那么当前的 pipeline 会被关闭，出现故 障的 datanode 会从当前的 pipeline 中移除，剩余的 block 会继续剩下的 datanode 中继续 以 pipeline 的形式传输，同时 namenode 会分配一个新的 datanode，保持 replicas 设定的 数量。</p>
-<h4 id="读容错">读容错</h4>
-<p>由于在读HDFS的过程中会从NameNode获取到数据块位置列表，如果某个DataNode失效，从可用列表中更换另一个DataNode进行读取即可。</p>
-<h3 id="参考资料">参考资料</h3>
-<p>http://article.docway.net/details?id=5f33d50ab4f20b6366ff6676#215NameNode_25</p>
-<p>https://blog.csdn.net/ThreeAspects/article/details/105983047?utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7Edefault-2.no_search_link&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7Edefault-2.no_search_link</p>
-<p>https://www.cnblogs.com/zeq912/p/9606105.html（NFS网络文件系统）</p>
-]]></content>
-      <categories>
-        <category>Hadoop</category>
-      </categories>
-      <tags>
-        <tag>Hadoop</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>08 Flink反压</title>
     <url>/2021/09/04/Flink08_%E5%8F%8D%E5%8E%8B/</url>
     <content><![CDATA[<table>
@@ -500,6 +432,74 @@
       </categories>
       <tags>
         <tag>Flink</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>HDFS容错</title>
+    <url>/2021/09/14/HDFS_%E5%AE%B9%E9%94%99/</url>
+    <content><![CDATA[<table>
+<colgroup>
+<col style="width: 16%">
+<col style="width: 83%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>概念</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>NameNode容错</td>
+<td>1、持久化的元数据（fsimage、edit log）进行备份到远程网络文件系统（NFS）<br>2、SecondaryNamenode中存有前一个时间点的fsimage的备份，结合NFS形成Namenode<br>3、搭建HDFS高可用模式，直接切换成StandbyNamenode</td>
+</tr>
+<tr class="even">
+<td>DataNode容错</td>
+<td>1、副本机制<br>2、心跳机制<br>3、安全模式<br>4、校验和</td>
+</tr>
+<tr class="odd">
+<td>HDFS写容错</td>
+<td>将出错的DataNode移除，剩余的继续传输，最后维持副本的数量。</td>
+</tr>
+<tr class="even">
+<td>HDFS读容错</td>
+<td>直接更换DataNode读数据。</td>
+</tr>
+</tbody>
+</table>
+<a id="more"></a>
+<h3 id="namenode容错">NameNode容错</h3>
+<p>没有Namenode，HDFS就不能工作。事实上，如果运行namenode的机器坏掉的话，系统中的文件将会完全丢失，因为没有其他方法能够将位于不同datanode上的文件块(blocks)重建文件。因此，namenode的容错机制非常重要，Hadoop提供了两种机制。</p>
+<p>第一种方式是将持久化存储在本地硬盘的文件系统元数据备份。Hadoop可以通过配置来让Namenode将他的持久化状态文件写到不同的文件系统中。这种写操作是同步并且是原子化的。比较常见的配置是在将持久化状态写到本地硬盘的同时，也写入到一个远程挂载的网络文件系统（NFS）。</p>
+<p>第二种方式是运行一个SecondaryNamenode。 事实上SecondaryNamenode并不能直接被用作Namenode。它的主要作用是定期的将元数据镜像（fsimage）与操作日志文件（edit log）合并，以防止操作日志文件(edit log)变得过大。通常，SecondaryNamenode 运行在一个单独的物理机上，因为合并操作需要占用大量的CPU时间以及和Namenode相当的内存。SecondaryNamenode保存着合并后的元数据镜像（fsimage）的一个备份，万一哪天Namenode宕机了，这个备份就可以用上了。</p>
+<p>但是SecondaryNamenode总是落后于主Namenode，所以在Namenode宕机时，数据丢失是不可避免的。在这种情况下，一般的，要结合第一种方式中提到的远程挂载的网络文件系统(NFS)中的Namenode的元数据文件来使用，把NFS中的Namenode元数据文件，拷贝到SecondaryNamenode，并把SecondaryNamenode作为主Namenode来运行。</p>
+<p>第三种方式就是在高可用模式下直接切换成StandbyNamenode。</p>
+<h3 id="datanode容错">DataNode容错</h3>
+<p>1、副本机制</p>
+<p>2、心跳机制</p>
+<p>DataNode启动后向NameNode注册，心跳是每3秒一次，目的是告诉Namenode存活状态以及可用空间。心跳返回结果带有NameNode给该DataNode的命令如复制块数据到另一台机器，或删除某个数据块。</p>
+<p>3、安全模式</p>
+<p>NameNode启动后会进入一个称为安全模式的特殊状态。处于安全模式的NameNode对于客户端来说是只读的。NameNode从所有的DataNode接收心跳信号和块状态报告（blockreport）。</p>
+<p>每个数据块都有一个指定的最小副本数（dfs.replication.min），当NameNode检测确认某个数据块的副本数目达到这个最小值，那么该数据块就会被认为是副本安全(safely replicated)的。</p>
+<p>在一定百分比（这个参数配置于dfs.safemode.threshold.pct，默认值是99.9%）的数据块被NameNode检测确认是安全之后，再过若干时间后（这个参数配置于dfs.safemode.extension，默认值是30秒），NameNode将退出安全模式状态。接下来NameNode会确定还有哪些数据块的副本没有达到指定数目，并将这些数据块复制到其他DataNode上。</p>
+<p>4、校验和</p>
+<p>HDFS会对写入的所有数据计算校验和（checksum）和数据本身一并存储，在读取数据时再次计算校验和并且验证和写入时是否相同。</p>
+<p>此外Datanode还会定期运行一个进程检验本身存在的数据块是否和校验和一致。</p>
+<h3 id="hdfs读写容错">HDFS读写容错</h3>
+<h4 id="写容错">写容错</h4>
+<p>如果传输过程中，有某个 datanode 出现了故障，那么当前的 pipeline 会被关闭，出现故 障的 datanode 会从当前的 pipeline 中移除，剩余的 block 会继续剩下的 datanode 中继续 以 pipeline 的形式传输，同时 namenode 会分配一个新的 datanode，保持 replicas 设定的 数量。</p>
+<h4 id="读容错">读容错</h4>
+<p>由于在读HDFS的过程中会从NameNode获取到数据块位置列表，如果某个DataNode失效，从可用列表中更换另一个DataNode进行读取即可。</p>
+<h3 id="参考资料">参考资料</h3>
+<p>http://article.docway.net/details?id=5f33d50ab4f20b6366ff6676#215NameNode_25</p>
+<p>https://blog.csdn.net/ThreeAspects/article/details/105983047?utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7Edefault-2.no_search_link&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7Edefault-2.no_search_link</p>
+<p>https://www.cnblogs.com/zeq912/p/9606105.html（NFS网络文件系统）</p>
+]]></content>
+      <categories>
+        <category>Hadoop</category>
+      </categories>
+      <tags>
+        <tag>Hadoop</tag>
       </tags>
   </entry>
   <entry>
@@ -2425,6 +2425,66 @@
       </tags>
   </entry>
   <entry>
+    <title>OR-Net 论文阅读</title>
+    <url>/2021/02/16/SR_ORNet/</url>
+    <content><![CDATA[<p>《Learning Omni-frequency Region-adaptive Representations for Real Image Super-Resolution》 2021</p>
+<h3 id="背景">背景</h3>
+<p>Real World数据包含不同的、复杂的退化方式，例如模糊、噪声和降采样，因此导致传统深度学习方法在真实数据集上表现不好。</p>
+<p>RealSR和DRealSR不仅提出了两个真实数据集，还提出了两种真实超分方法 laplacian pyramid based kernel prediction network (LP-KPN) 和 component divide-and- conquer (CDC)。然而，它们都是在像素水平上进行重建（区域、边缘和角落），没有利用到频率信息。</p>
+<a id="more"></a>
+<p>图像的频率是表征图像中灰度变化剧烈程度的指标，是灰度在平面空间上的梯度。图像的主要成分是低频信息，它形成了图像的基本灰度等级，对图像结构的决定作用较小；中频信息决定了图像的基本结构，形成了图像的主要边缘结构；高频信息形成了图像的边缘和细节，是在中频信息上对图像内容的进一步强化。</p>
+<p><img src="/2021/02/16/SR_ORNet/0.png" style="zoom: 50%;"></p>
+<p>作者观察到，对于图a可以看出，LR的退化在各个频率上都存在。对于图b可以看出，在不同区域中的不同频率组件内，真实LR的退化也是不同的。</p>
+<p>因此，本文作者提出ORNet，在图像的不同频率上增强相应的频率因子，最终通过区域自适应频率聚合模块，结合动态卷积和空间注意力机制，针对HR图像的不同位置，有选择性地重建不同的频率分量。</p>
+<h3 id="方法">方法</h3>
+<p><img src="/2021/02/16/SR_ORNet/1.png" style="zoom: 67%;"></p>
+<h4 id="框架的组件">框架的组件</h4>
+<ul>
+<li><p>Frequency Decomposition (FD) Module</p>
+<p>对图像进行频率分离，可以在传统的信号处理方法中采用小波变换或离散余弦变换来实现。然而，由于数学运算的确定性和任务无关性，这种转换不可避免地为low-level恢复任务丢弃了一些关键、详细的信息。为了在模拟小波变换的同时避免关键信息丢失，作者提出通过可学习的隐空间下采样，来分解混合特征表示。类似的操作可以参考OctConv。</p>
+<p>具体来说，作者首先利用步长较大的卷积层(如stride= 2)对特征表示进行下采样，提取粗特征，即低频分量。然后，从原始特征(下采样前)中减去这些相对低频的分量，以获得其余相对高频的特征表示。</p></li>
+<li><p>Frequency Enhancement Unit (FEU)</p>
+<p>该单元对不同频率的信息进行增强。如b种所示结构，将CA的结果和普通卷积的结果相拼接，并加入dense connection。目的是有助于各分支在不同阶段选择性融合相应的频率分量，从而提高各分支在不同频域的表示能力。</p></li>
+<li><p>Region-adaptive Frequency Aggregation (RFA) Module</p>
+<p>该模块对不同频率组件进行自适应聚合。</p>
+<p><img src="/2021/02/16/SR_ORNet/4.png" style="zoom:50%;"></p>
+<p>即预测多个动态卷积核，并设置一个可学习的权重向量，将多个卷积核组合在一起形成动态卷积核，通过它生成attention map并与原来的特征图做乘法。</p></li>
+</ul>
+<h4 id="框架的执行">框架的执行</h4>
+<p>首先将输入图像进行频率分离。用大步长卷积提取低频特征，并不断减去低频特征获得高频特征。</p>
+<p><img src="/2021/02/16/SR_ORNet/2.png" style="zoom: 67%;"></p>
+<p>上箭头表示双线性插值上采样，下箭头表示带步长卷积进行下采样。</p>
+<p>接着，通过FEU来增强不同频率的表示，以弥补低/中/高频信息的丢失，并将低频信息与不同高频信息相结合。</p>
+<p><img src="/2021/02/16/SR_ORNet/3.png" style="zoom: 60%;"></p>
+<p>真实LR图像中不同区域的频率信息丢失是不同的。因此，有必要对不同区域的全频分量进行自适应聚合，以恢复更真实、纹理细节更丰富的HR图像。通过作者提出的RFA模块，使用动态卷积核的方式生成attention map来组合多个频率下的组件，最终通过pixel shuffle提高分辨率。</p>
+<p><img src="/2021/02/16/SR_ORNet/5.png" style="zoom:60%;"></p>
+<h3 id="实验结果">实验结果</h3>
+<p>是一种有监督方法，使用DRealSR进行训练，动态核的数量设置为5个，使用L1损失优化网络。</p>
+<h4 id="不同频率的可视化">不同频率的可视化</h4>
+<p><img src="/2021/02/16/SR_ORNet/6.png" style="zoom: 67%;"></p>
+<p>对于FD模块，首先在图6(a)中对三个频率尺度的特征进行可视化，可以看到高频分支的特征包含更多的细节和纹理信息。然后根据图6(b)中的小波变换对低/中/高频特征进行分析。从左到右，频率范围从1增加到6中，低频特征的能量几乎完全集中在低频域，高频特征和中频特征的能量集中在相对更高的频率域。</p>
+<h4 id="不同频率数量的比较">不同频率数量的比较</h4>
+<p><img src="/2021/02/16/SR_ORNet/7.png" style="zoom:50%;"></p>
+<p>提高频率分割的数量一定程度上能够提高效果。</p>
+<h4 id="消融实验">消融实验</h4>
+<p><img src="/2021/02/16/SR_ORNet/8.png" style="zoom: 50%;"></p>
+<h4 id="与sota相比较">与SOTA相比较</h4>
+<p><img src="/2021/02/16/SR_ORNet/9.png" style="zoom: 50%;"></p>
+<p>其他方法除了CDC外均没有在DRealSR上训练，因此除了CDC外本质上无法证明该方法的有效性。</p>
+<h3 id="结论">结论</h3>
+<p>作者提出一种全频域自适应网络(OR-Net)来实现真实图像超分辨率。比较有贡献的地方在于分析了真实图像与图像频率的关系，以及频率在网络中的影响。然而现在RealSR大部分流行的方式是无监督学习（或unpaired的方式），而该文是完全的有监督学习。</p>
+<p>有文章显示基于卷积的频率分离操作在PSNR和SSIM上稍高于基于小波变换的方法，但在视觉感知上（LPIPS指标）会稍差。对图像进行不同频率分离的方式会导致最终的重建效果有所不同。</p>
+]]></content>
+      <categories>
+        <category>超分辨率</category>
+        <category>SISR</category>
+      </categories>
+      <tags>
+        <tag>SISR</tag>
+        <tag>RealSR</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>DualSR 论文阅读</title>
     <url>/2021/02/05/SR_DualSR/</url>
     <content><![CDATA[<p>《DualSR: Zero-Shot Dual Learning for Real-World Super-Resolution》 WACV 2021</p>
@@ -2480,66 +2540,6 @@
 <h3 id="结论">结论</h3>
 <p>本文提出提出了DualSR，一个轻量级的dual架构，它学习每个图像特定的LR-HR关系。它由下采样器和上采样器组成，在训练中使用循环一致性损失来相互改进。此外，论文提出了掩码插值损失，消除了图像低频区域的伪影，而不会导致边缘过于平滑。</p>
 <p>该方法是Zero-Shot的，无需HR图像进行监督，但本质上就是用了Bicubic上采样的低频部分来进行监督。之前的文章DynaVSR是用了元学习的思想，在测试时同样使用了类似循环一致性的方法，但在训练时为了更好的效果仍然使用了HR的图像。因此，可以思考如何将Zero-Shot的思想（目前来看还是想办法在Bicubic上采样的结果做文章），应用到VSR上，来达到完全无监督的效果。</p>
-]]></content>
-      <categories>
-        <category>超分辨率</category>
-        <category>SISR</category>
-      </categories>
-      <tags>
-        <tag>SISR</tag>
-        <tag>RealSR</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>OR-Net 论文阅读</title>
-    <url>/2021/02/16/SR_ORNet/</url>
-    <content><![CDATA[<p>《Learning Omni-frequency Region-adaptive Representations for Real Image Super-Resolution》 2021</p>
-<h3 id="背景">背景</h3>
-<p>Real World数据包含不同的、复杂的退化方式，例如模糊、噪声和降采样，因此导致传统深度学习方法在真实数据集上表现不好。</p>
-<p>RealSR和DRealSR不仅提出了两个真实数据集，还提出了两种真实超分方法 laplacian pyramid based kernel prediction network (LP-KPN) 和 component divide-and- conquer (CDC)。然而，它们都是在像素水平上进行重建（区域、边缘和角落），没有利用到频率信息。</p>
-<a id="more"></a>
-<p>图像的频率是表征图像中灰度变化剧烈程度的指标，是灰度在平面空间上的梯度。图像的主要成分是低频信息，它形成了图像的基本灰度等级，对图像结构的决定作用较小；中频信息决定了图像的基本结构，形成了图像的主要边缘结构；高频信息形成了图像的边缘和细节，是在中频信息上对图像内容的进一步强化。</p>
-<p><img src="/2021/02/16/SR_ORNet/0.png" style="zoom: 50%;"></p>
-<p>作者观察到，对于图a可以看出，LR的退化在各个频率上都存在。对于图b可以看出，在不同区域中的不同频率组件内，真实LR的退化也是不同的。</p>
-<p>因此，本文作者提出ORNet，在图像的不同频率上增强相应的频率因子，最终通过区域自适应频率聚合模块，结合动态卷积和空间注意力机制，针对HR图像的不同位置，有选择性地重建不同的频率分量。</p>
-<h3 id="方法">方法</h3>
-<p><img src="/2021/02/16/SR_ORNet/1.png" style="zoom: 67%;"></p>
-<h4 id="框架的组件">框架的组件</h4>
-<ul>
-<li><p>Frequency Decomposition (FD) Module</p>
-<p>对图像进行频率分离，可以在传统的信号处理方法中采用小波变换或离散余弦变换来实现。然而，由于数学运算的确定性和任务无关性，这种转换不可避免地为low-level恢复任务丢弃了一些关键、详细的信息。为了在模拟小波变换的同时避免关键信息丢失，作者提出通过可学习的隐空间下采样，来分解混合特征表示。类似的操作可以参考OctConv。</p>
-<p>具体来说，作者首先利用步长较大的卷积层(如stride= 2)对特征表示进行下采样，提取粗特征，即低频分量。然后，从原始特征(下采样前)中减去这些相对低频的分量，以获得其余相对高频的特征表示。</p></li>
-<li><p>Frequency Enhancement Unit (FEU)</p>
-<p>该单元对不同频率的信息进行增强。如b种所示结构，将CA的结果和普通卷积的结果相拼接，并加入dense connection。目的是有助于各分支在不同阶段选择性融合相应的频率分量，从而提高各分支在不同频域的表示能力。</p></li>
-<li><p>Region-adaptive Frequency Aggregation (RFA) Module</p>
-<p>该模块对不同频率组件进行自适应聚合。</p>
-<p><img src="/2021/02/16/SR_ORNet/4.png" style="zoom:50%;"></p>
-<p>即预测多个动态卷积核，并设置一个可学习的权重向量，将多个卷积核组合在一起形成动态卷积核，通过它生成attention map并与原来的特征图做乘法。</p></li>
-</ul>
-<h4 id="框架的执行">框架的执行</h4>
-<p>首先将输入图像进行频率分离。用大步长卷积提取低频特征，并不断减去低频特征获得高频特征。</p>
-<p><img src="/2021/02/16/SR_ORNet/2.png" style="zoom: 67%;"></p>
-<p>上箭头表示双线性插值上采样，下箭头表示带步长卷积进行下采样。</p>
-<p>接着，通过FEU来增强不同频率的表示，以弥补低/中/高频信息的丢失，并将低频信息与不同高频信息相结合。</p>
-<p><img src="/2021/02/16/SR_ORNet/3.png" style="zoom: 60%;"></p>
-<p>真实LR图像中不同区域的频率信息丢失是不同的。因此，有必要对不同区域的全频分量进行自适应聚合，以恢复更真实、纹理细节更丰富的HR图像。通过作者提出的RFA模块，使用动态卷积核的方式生成attention map来组合多个频率下的组件，最终通过pixel shuffle提高分辨率。</p>
-<p><img src="/2021/02/16/SR_ORNet/5.png" style="zoom:60%;"></p>
-<h3 id="实验结果">实验结果</h3>
-<p>是一种有监督方法，使用DRealSR进行训练，动态核的数量设置为5个，使用L1损失优化网络。</p>
-<h4 id="不同频率的可视化">不同频率的可视化</h4>
-<p><img src="/2021/02/16/SR_ORNet/6.png" style="zoom: 67%;"></p>
-<p>对于FD模块，首先在图6(a)中对三个频率尺度的特征进行可视化，可以看到高频分支的特征包含更多的细节和纹理信息。然后根据图6(b)中的小波变换对低/中/高频特征进行分析。从左到右，频率范围从1增加到6中，低频特征的能量几乎完全集中在低频域，高频特征和中频特征的能量集中在相对更高的频率域。</p>
-<h4 id="不同频率数量的比较">不同频率数量的比较</h4>
-<p><img src="/2021/02/16/SR_ORNet/7.png" style="zoom:50%;"></p>
-<p>提高频率分割的数量一定程度上能够提高效果。</p>
-<h4 id="消融实验">消融实验</h4>
-<p><img src="/2021/02/16/SR_ORNet/8.png" style="zoom: 50%;"></p>
-<h4 id="与sota相比较">与SOTA相比较</h4>
-<p><img src="/2021/02/16/SR_ORNet/9.png" style="zoom: 50%;"></p>
-<p>其他方法除了CDC外均没有在DRealSR上训练，因此除了CDC外本质上无法证明该方法的有效性。</p>
-<h3 id="结论">结论</h3>
-<p>作者提出一种全频域自适应网络(OR-Net)来实现真实图像超分辨率。比较有贡献的地方在于分析了真实图像与图像频率的关系，以及频率在网络中的影响。然而现在RealSR大部分流行的方式是无监督学习（或unpaired的方式），而该文是完全的有监督学习。</p>
-<p>有文章显示基于卷积的频率分离操作在PSNR和SSIM上稍高于基于小波变换的方法，但在视觉感知上（LPIPS指标）会稍差。对图像进行不同频率分离的方式会导致最终的重建效果有所不同。</p>
 ]]></content>
       <categories>
         <category>超分辨率</category>
@@ -5589,6 +5589,76 @@
       </tags>
   </entry>
   <entry>
+    <title>0924 CDG一面</title>
+    <url>/2021/09/24/%E9%9D%A2%E8%AF%95_0924CDG%E4%B8%80%E9%9D%A2/</url>
+    <content><![CDATA[<h4 id="海量数据找top-100账号出现次数">海量数据找Top 100账号出现次数</h4>
+<p>1、Hash(账号) % 桶数量 = 小文件id。把账号分离到多个小文件中。</p>
+<blockquote>
+<p>理想情况下每个小文件的大小应该恰好等于内存容量</p>
+</blockquote>
+<p>2、对于每一个小文件，在内存中构建一个账号为Key，统计次数为Value的一个HashMap，统计每个账号的出现次数。</p>
+<p>把HashMap的结果保存在磁盘上。</p>
+<blockquote>
+<p>如果小文件数量远大于100个，那么对每个小文件就只需要保存统计次数最多的那个账号。</p>
+</blockquote>
+<p>3、在内存中构建一个有100个节点的最小堆，堆中的每个节点保存了HashMap中的Key-Value的数据，只是堆调整的依据是Value值，也就是统计次数。</p>
+<p>将每个小文件对应的HashMap读取进入内存，把Key-Value数据入堆，最后剩下的账号就是Top 100。</p>
+<blockquote>
+<p>如果内存足够，也可以直接把账号-次数的数据读取进来做全局排序，因为此时每个小文件只有一个账号。</p>
+<p>如果每个HashMap太大，那么就需要在第2步构建一个按照Value排序的HashMap，然后取前100个数据保存下来即可。</p>
+</blockquote>
+<a id="more"></a>
+<p>如果每个小文件里面的Key的数量很多怎么办？</p>
+<p>增加桶的数量，将文件分的更小，把Key打散。</p>
+<p>如果单个小文件太大怎么办？</p>
+<p>分块读取这个小文件。</p>
+<h4 id="海量数据找账号出现次数的中位数">海量数据找账号出现次数的中位数</h4>
+<p>首先还是得求出每个账号的出现次数，然后利用海量数据找中位数的原理。</p>
+<h4 id="海量数据找中位数">海量数据找中位数</h4>
+<p>1、外部排序</p>
+<p>把所有数据分割成内存能够装载下的大小，每次内存读取一个小文件进行排序，再对所有小文件进行多路归并（2路、3路等，取决于内存大小）。得到所有数据的排序结果后扫描即可得到中位数。</p>
+<p>2、堆排序</p>
+<p>在内存中建立的最大堆（找最小值），然后每次寻找第k大的元素，直到中间。</p>
+<blockquote>
+<p>对于10G的数据，它的中位数就是第5G个元素，按常理来说需要构建一个5G大小的堆，但是允许的内存只有2个G，所以先构建一个1G大小的大顶堆，然后求出第1G个元素（根节点），然后利用该元素构建一个新的1G大小的堆，只有大于第1G个元素的数据才能入堆，最后剩下来的就是1G-2G之间的元素，则根节点就是第2G大的元素。依次类推，求出第5G大的元素。</p>
+<p>每次构建一个堆求第几G大的元素，都需要重新遍历完所有10G的数据，相当于要遍历5 * 10G次，这需要频繁的IO操作，需要不断的从硬盘中读取数据。</p>
+</blockquote>
+<p>3、其他？</p>
+<p>因为涉及到排序，可以用桶排序、或者位图。</p>
+<blockquote>
+<p>https://zhuanlan.zhihu.com/p/75397875</p>
+</blockquote>
+<h4 id="spark-sql底层原理">Spark SQL底层原理</h4>
+<p>https://blog.csdn.net/qq_30031221/article/details/109222355</p>
+<p>https://www.cnblogs.com/code2one/p/10162632.html</p>
+<p>https://juejin.cn/post/6886355913592602631#heading-16</p>
+<h4 id="kafka消费者和消费者组有什么区别">Kafka消费者和消费者组有什么区别</h4>
+<p>消费者组中包含了多个消费者。</p>
+<p>当消息发布到topic后，只会被投递给订阅它的每个消费组中的一个消费者。</p>
+<p>每个topic的一个分区，对应一个消费者组中的一个消费者。</p>
+<p>一个topic，可以被多个消费者组订阅。</p>
+<h4 id="如何设计一个hashmap">如何设计一个HashMap</h4>
+<p>1、Hash函数：运算要快，还需要分布均匀，减少 hash 碰撞。</p>
+<p>2、Hash冲突：链表+红黑树。</p>
+<p>3、Hash扩容：解决Hash冲突的本质方案。（Java8长度扩为原来2倍，所以，元素的位置要么是在原位置，要么是在原位置再移动2次幂的位置。Java7只能根据Key值重新计算数据所在的位置）</p>
+<p>4、高并发：（1）HashTable：直接加锁锁住整个数组。（2）ConcurrentHashMap：读操作volatile，写操作只锁住数组中一个元素，且是cas+synchronized机制（降低锁粒度）。（3）自定义CopyOnWrite的数据结构。</p>
+<blockquote>
+<p>https://tech.meituan.com/2016/06/24/java-hashmap.html</p>
+</blockquote>
+<h4 id="java垃圾回收">Java垃圾回收</h4>
+<h4 id="hdfs副本机制">HDFS副本机制</h4>
+<h4 id="算法题气球游戏">算法题：气球游戏</h4>
+<h4 id="智力题电梯">智力题：电梯</h4>
+<p>两台电梯，如何合理安排使得运输时间较优。</p>
+]]></content>
+      <categories>
+        <category>面试</category>
+      </categories>
+      <tags>
+        <tag>面试</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>0907字节二面</title>
     <url>/2021/09/08/%E9%9D%A2%E8%AF%95_0907%E5%AD%97%E8%8A%82%E4%BA%8C%E9%9D%A2/</url>
     <content><![CDATA[<h3 id="操作系统">操作系统</h3>
@@ -5676,76 +5746,6 @@
 <p>岛屿问题</p>
 <h3 id="实习">实习</h3>
 <p>介绍实习项目。</p>
-]]></content>
-      <categories>
-        <category>面试</category>
-      </categories>
-      <tags>
-        <tag>面试</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>0924 CDG一面</title>
-    <url>/2021/09/24/%E9%9D%A2%E8%AF%95_0924CDG%E4%B8%80%E9%9D%A2/</url>
-    <content><![CDATA[<h4 id="海量数据找top-100账号出现次数">海量数据找Top 100账号出现次数</h4>
-<p>1、Hash(账号) % 桶数量 = 小文件id。把账号分离到多个小文件中。</p>
-<blockquote>
-<p>理想情况下每个小文件的大小应该恰好等于内存容量</p>
-</blockquote>
-<p>2、对于每一个小文件，在内存中构建一个账号为Key，统计次数为Value的一个HashMap，统计每个账号的出现次数。</p>
-<p>把HashMap的结果保存在磁盘上。</p>
-<blockquote>
-<p>如果小文件数量远大于100个，那么对每个小文件就只需要保存统计次数最多的那个账号。</p>
-</blockquote>
-<p>3、在内存中构建一个有100个节点的最小堆，堆中的每个节点保存了HashMap中的Key-Value的数据，只是堆调整的依据是Value值，也就是统计次数。</p>
-<p>将每个小文件对应的HashMap读取进入内存，把Key-Value数据入堆，最后剩下的账号就是Top 100。</p>
-<blockquote>
-<p>如果内存足够，也可以直接把账号-次数的数据读取进来做全局排序，因为此时每个小文件只有一个账号。</p>
-<p>如果每个HashMap太大，那么就需要在第2步构建一个按照Value排序的HashMap，然后取前100个数据保存下来即可。</p>
-</blockquote>
-<a id="more"></a>
-<p>如果每个小文件里面的Key的数量很多怎么办？</p>
-<p>增加桶的数量，将文件分的更小，把Key打散。</p>
-<p>如果单个小文件太大怎么办？</p>
-<p>分块读取这个小文件。</p>
-<h4 id="海量数据找账号出现次数的中位数">海量数据找账号出现次数的中位数</h4>
-<p>首先还是得求出每个账号的出现次数，然后利用海量数据找中位数的原理。</p>
-<h4 id="海量数据找中位数">海量数据找中位数</h4>
-<p>1、外部排序</p>
-<p>把所有数据分割成内存能够装载下的大小，每次内存读取一个小文件进行排序，再对所有小文件进行多路归并（2路、3路等，取决于内存大小）。得到所有数据的排序结果后扫描即可得到中位数。</p>
-<p>2、堆排序</p>
-<p>在内存中建立的最大堆（找最小值），然后每次寻找第k大的元素，直到中间。</p>
-<blockquote>
-<p>对于10G的数据，它的中位数就是第5G个元素，按常理来说需要构建一个5G大小的堆，但是允许的内存只有2个G，所以先构建一个1G大小的大顶堆，然后求出第1G个元素（根节点），然后利用该元素构建一个新的1G大小的堆，只有大于第1G个元素的数据才能入堆，最后剩下来的就是1G-2G之间的元素，则根节点就是第2G大的元素。依次类推，求出第5G大的元素。</p>
-<p>每次构建一个堆求第几G大的元素，都需要重新遍历完所有10G的数据，相当于要遍历5 * 10G次，这需要频繁的IO操作，需要不断的从硬盘中读取数据。</p>
-</blockquote>
-<p>3、其他？</p>
-<p>因为涉及到排序，可以用桶排序、或者位图。</p>
-<blockquote>
-<p>https://zhuanlan.zhihu.com/p/75397875</p>
-</blockquote>
-<h4 id="spark-sql底层原理">Spark SQL底层原理</h4>
-<p>https://blog.csdn.net/qq_30031221/article/details/109222355</p>
-<p>https://www.cnblogs.com/code2one/p/10162632.html</p>
-<p>https://juejin.cn/post/6886355913592602631#heading-16</p>
-<h4 id="kafka消费者和消费者组有什么区别">Kafka消费者和消费者组有什么区别</h4>
-<p>消费者组中包含了多个消费者。</p>
-<p>当消息发布到topic后，只会被投递给订阅它的每个消费组中的一个消费者。</p>
-<p>每个topic的一个分区，对应一个消费者组中的一个消费者。</p>
-<p>一个topic，可以被多个消费者组订阅。</p>
-<h4 id="如何设计一个hashmap">如何设计一个HashMap</h4>
-<p>1、Hash函数：运算要快，还需要分布均匀，减少 hash 碰撞。</p>
-<p>2、Hash冲突：链表+红黑树。</p>
-<p>3、Hash扩容：解决Hash冲突的本质方案。（Java8长度扩为原来2倍，所以，元素的位置要么是在原位置，要么是在原位置再移动2次幂的位置。Java7只能根据Key值重新计算数据所在的位置）</p>
-<p>4、高并发：（1）HashTable：直接加锁锁住整个数组。（2）ConcurrentHashMap：读操作volatile，写操作只锁住数组中一个元素，且是cas+synchronized机制（降低锁粒度）。（3）自定义CopyOnWrite的数据结构。</p>
-<blockquote>
-<p>https://tech.meituan.com/2016/06/24/java-hashmap.html</p>
-</blockquote>
-<h4 id="java垃圾回收">Java垃圾回收</h4>
-<h4 id="hdfs副本机制">HDFS副本机制</h4>
-<h4 id="算法题气球游戏">算法题：气球游戏</h4>
-<h4 id="智力题电梯">智力题：电梯</h4>
-<p>两台电梯，如何合理安排使得运输时间较优。</p>
 ]]></content>
       <categories>
         <category>面试</category>
