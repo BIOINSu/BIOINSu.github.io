@@ -320,6 +320,74 @@
       </tags>
   </entry>
   <entry>
+    <title>HDFS容错</title>
+    <url>/2021/09/14/HDFS_%E5%AE%B9%E9%94%99/</url>
+    <content><![CDATA[<table>
+<colgroup>
+<col style="width: 16%">
+<col style="width: 83%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>概念</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>NameNode容错</td>
+<td>1、持久化的元数据（fsimage、edit log）进行备份到远程网络文件系统（NFS）<br>2、SecondaryNamenode中存有前一个时间点的fsimage的备份，结合NFS形成Namenode<br>3、搭建HDFS高可用模式，直接切换成StandbyNamenode</td>
+</tr>
+<tr class="even">
+<td>DataNode容错</td>
+<td>1、副本机制<br>2、心跳机制<br>3、安全模式<br>4、校验和</td>
+</tr>
+<tr class="odd">
+<td>HDFS写容错</td>
+<td>将出错的DataNode移除，剩余的继续传输，最后维持副本的数量。</td>
+</tr>
+<tr class="even">
+<td>HDFS读容错</td>
+<td>直接更换DataNode读数据。</td>
+</tr>
+</tbody>
+</table>
+<a id="more"></a>
+<h3 id="namenode容错">NameNode容错</h3>
+<p>没有Namenode，HDFS就不能工作。事实上，如果运行namenode的机器坏掉的话，系统中的文件将会完全丢失，因为没有其他方法能够将位于不同datanode上的文件块(blocks)重建文件。因此，namenode的容错机制非常重要，Hadoop提供了两种机制。</p>
+<p>第一种方式是将持久化存储在本地硬盘的文件系统元数据备份。Hadoop可以通过配置来让Namenode将他的持久化状态文件写到不同的文件系统中。这种写操作是同步并且是原子化的。比较常见的配置是在将持久化状态写到本地硬盘的同时，也写入到一个远程挂载的网络文件系统（NFS）。</p>
+<p>第二种方式是运行一个SecondaryNamenode。 事实上SecondaryNamenode并不能直接被用作Namenode。它的主要作用是定期的将元数据镜像（fsimage）与操作日志文件（edit log）合并，以防止操作日志文件(edit log)变得过大。通常，SecondaryNamenode 运行在一个单独的物理机上，因为合并操作需要占用大量的CPU时间以及和Namenode相当的内存。SecondaryNamenode保存着合并后的元数据镜像（fsimage）的一个备份，万一哪天Namenode宕机了，这个备份就可以用上了。</p>
+<p>但是SecondaryNamenode总是落后于主Namenode，所以在Namenode宕机时，数据丢失是不可避免的。在这种情况下，一般的，要结合第一种方式中提到的远程挂载的网络文件系统(NFS)中的Namenode的元数据文件来使用，把NFS中的Namenode元数据文件，拷贝到SecondaryNamenode，并把SecondaryNamenode作为主Namenode来运行。</p>
+<p>第三种方式就是在高可用模式下直接切换成StandbyNamenode。</p>
+<h3 id="datanode容错">DataNode容错</h3>
+<p>1、副本机制</p>
+<p>2、心跳机制</p>
+<p>DataNode启动后向NameNode注册，心跳是每3秒一次，目的是告诉Namenode存活状态以及可用空间。心跳返回结果带有NameNode给该DataNode的命令如复制块数据到另一台机器，或删除某个数据块。</p>
+<p>3、安全模式</p>
+<p>NameNode启动后会进入一个称为安全模式的特殊状态。处于安全模式的NameNode对于客户端来说是只读的。NameNode从所有的DataNode接收心跳信号和块状态报告（blockreport）。</p>
+<p>每个数据块都有一个指定的最小副本数（dfs.replication.min），当NameNode检测确认某个数据块的副本数目达到这个最小值，那么该数据块就会被认为是副本安全(safely replicated)的。</p>
+<p>在一定百分比（这个参数配置于dfs.safemode.threshold.pct，默认值是99.9%）的数据块被NameNode检测确认是安全之后，再过若干时间后（这个参数配置于dfs.safemode.extension，默认值是30秒），NameNode将退出安全模式状态。接下来NameNode会确定还有哪些数据块的副本没有达到指定数目，并将这些数据块复制到其他DataNode上。</p>
+<p>4、校验和</p>
+<p>HDFS会对写入的所有数据计算校验和（checksum）和数据本身一并存储，在读取数据时再次计算校验和并且验证和写入时是否相同。</p>
+<p>此外Datanode还会定期运行一个进程检验本身存在的数据块是否和校验和一致。</p>
+<h3 id="hdfs读写容错">HDFS读写容错</h3>
+<h4 id="写容错">写容错</h4>
+<p>如果传输过程中，有某个 datanode 出现了故障，那么当前的 pipeline 会被关闭，出现故 障的 datanode 会从当前的 pipeline 中移除，剩余的 block 会继续剩下的 datanode 中继续 以 pipeline 的形式传输，同时 namenode 会分配一个新的 datanode，保持 replicas 设定的 数量。</p>
+<h4 id="读容错">读容错</h4>
+<p>由于在读HDFS的过程中会从NameNode获取到数据块位置列表，如果某个DataNode失效，从可用列表中更换另一个DataNode进行读取即可。</p>
+<h3 id="参考资料">参考资料</h3>
+<p>http://article.docway.net/details?id=5f33d50ab4f20b6366ff6676#215NameNode_25</p>
+<p>https://blog.csdn.net/ThreeAspects/article/details/105983047?utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7Edefault-2.no_search_link&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7Edefault-2.no_search_link</p>
+<p>https://www.cnblogs.com/zeq912/p/9606105.html（NFS网络文件系统）</p>
+]]></content>
+      <categories>
+        <category>Hadoop</category>
+      </categories>
+      <tags>
+        <tag>Hadoop</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>08 Flink反压</title>
     <url>/2021/09/04/Flink08_%E5%8F%8D%E5%8E%8B/</url>
     <content><![CDATA[<table>
@@ -432,74 +500,6 @@
       </categories>
       <tags>
         <tag>Flink</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>HDFS容错</title>
-    <url>/2021/09/14/HDFS_%E5%AE%B9%E9%94%99/</url>
-    <content><![CDATA[<table>
-<colgroup>
-<col style="width: 16%">
-<col style="width: 83%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>概念</th>
-<th>解释</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>NameNode容错</td>
-<td>1、持久化的元数据（fsimage、edit log）进行备份到远程网络文件系统（NFS）<br>2、SecondaryNamenode中存有前一个时间点的fsimage的备份，结合NFS形成Namenode<br>3、搭建HDFS高可用模式，直接切换成StandbyNamenode</td>
-</tr>
-<tr class="even">
-<td>DataNode容错</td>
-<td>1、副本机制<br>2、心跳机制<br>3、安全模式<br>4、校验和</td>
-</tr>
-<tr class="odd">
-<td>HDFS写容错</td>
-<td>将出错的DataNode移除，剩余的继续传输，最后维持副本的数量。</td>
-</tr>
-<tr class="even">
-<td>HDFS读容错</td>
-<td>直接更换DataNode读数据。</td>
-</tr>
-</tbody>
-</table>
-<a id="more"></a>
-<h3 id="namenode容错">NameNode容错</h3>
-<p>没有Namenode，HDFS就不能工作。事实上，如果运行namenode的机器坏掉的话，系统中的文件将会完全丢失，因为没有其他方法能够将位于不同datanode上的文件块(blocks)重建文件。因此，namenode的容错机制非常重要，Hadoop提供了两种机制。</p>
-<p>第一种方式是将持久化存储在本地硬盘的文件系统元数据备份。Hadoop可以通过配置来让Namenode将他的持久化状态文件写到不同的文件系统中。这种写操作是同步并且是原子化的。比较常见的配置是在将持久化状态写到本地硬盘的同时，也写入到一个远程挂载的网络文件系统（NFS）。</p>
-<p>第二种方式是运行一个SecondaryNamenode。 事实上SecondaryNamenode并不能直接被用作Namenode。它的主要作用是定期的将元数据镜像（fsimage）与操作日志文件（edit log）合并，以防止操作日志文件(edit log)变得过大。通常，SecondaryNamenode 运行在一个单独的物理机上，因为合并操作需要占用大量的CPU时间以及和Namenode相当的内存。SecondaryNamenode保存着合并后的元数据镜像（fsimage）的一个备份，万一哪天Namenode宕机了，这个备份就可以用上了。</p>
-<p>但是SecondaryNamenode总是落后于主Namenode，所以在Namenode宕机时，数据丢失是不可避免的。在这种情况下，一般的，要结合第一种方式中提到的远程挂载的网络文件系统(NFS)中的Namenode的元数据文件来使用，把NFS中的Namenode元数据文件，拷贝到SecondaryNamenode，并把SecondaryNamenode作为主Namenode来运行。</p>
-<p>第三种方式就是在高可用模式下直接切换成StandbyNamenode。</p>
-<h3 id="datanode容错">DataNode容错</h3>
-<p>1、副本机制</p>
-<p>2、心跳机制</p>
-<p>DataNode启动后向NameNode注册，心跳是每3秒一次，目的是告诉Namenode存活状态以及可用空间。心跳返回结果带有NameNode给该DataNode的命令如复制块数据到另一台机器，或删除某个数据块。</p>
-<p>3、安全模式</p>
-<p>NameNode启动后会进入一个称为安全模式的特殊状态。处于安全模式的NameNode对于客户端来说是只读的。NameNode从所有的DataNode接收心跳信号和块状态报告（blockreport）。</p>
-<p>每个数据块都有一个指定的最小副本数（dfs.replication.min），当NameNode检测确认某个数据块的副本数目达到这个最小值，那么该数据块就会被认为是副本安全(safely replicated)的。</p>
-<p>在一定百分比（这个参数配置于dfs.safemode.threshold.pct，默认值是99.9%）的数据块被NameNode检测确认是安全之后，再过若干时间后（这个参数配置于dfs.safemode.extension，默认值是30秒），NameNode将退出安全模式状态。接下来NameNode会确定还有哪些数据块的副本没有达到指定数目，并将这些数据块复制到其他DataNode上。</p>
-<p>4、校验和</p>
-<p>HDFS会对写入的所有数据计算校验和（checksum）和数据本身一并存储，在读取数据时再次计算校验和并且验证和写入时是否相同。</p>
-<p>此外Datanode还会定期运行一个进程检验本身存在的数据块是否和校验和一致。</p>
-<h3 id="hdfs读写容错">HDFS读写容错</h3>
-<h4 id="写容错">写容错</h4>
-<p>如果传输过程中，有某个 datanode 出现了故障，那么当前的 pipeline 会被关闭，出现故 障的 datanode 会从当前的 pipeline 中移除，剩余的 block 会继续剩下的 datanode 中继续 以 pipeline 的形式传输，同时 namenode 会分配一个新的 datanode，保持 replicas 设定的 数量。</p>
-<h4 id="读容错">读容错</h4>
-<p>由于在读HDFS的过程中会从NameNode获取到数据块位置列表，如果某个DataNode失效，从可用列表中更换另一个DataNode进行读取即可。</p>
-<h3 id="参考资料">参考资料</h3>
-<p>http://article.docway.net/details?id=5f33d50ab4f20b6366ff6676#215NameNode_25</p>
-<p>https://blog.csdn.net/ThreeAspects/article/details/105983047?utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7Edefault-2.no_search_link&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7Edefault-2.no_search_link</p>
-<p>https://www.cnblogs.com/zeq912/p/9606105.html（NFS网络文件系统）</p>
-]]></content>
-      <categories>
-        <category>Hadoop</category>
-      </categories>
-      <tags>
-        <tag>Hadoop</tag>
       </tags>
   </entry>
   <entry>
@@ -821,6 +821,72 @@
       </tags>
   </entry>
   <entry>
+    <title>Java中Comparable和Comparator</title>
+    <url>/2021/08/01/Java_ComparableAndComparator/</url>
+    <content><![CDATA[<p>Java中Comparable和Comparator两个<strong>接口</strong>的比较。</p>
+<table>
+<colgroup>
+<col style="width: 9%">
+<col style="width: 45%">
+<col style="width: 45%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>Comparable</th>
+<th>Comparator</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>作用</td>
+<td>可以让实现它的类的对象进行比较大小</td>
+<td>在类对象的外部制定排序规则，然后作为排序策略参数传递给某些类的对象的构造函数，实现比较大小</td>
+</tr>
+<tr class="even">
+<td>位置</td>
+<td>java.lang 包</td>
+<td>java.util 包</td>
+</tr>
+<tr class="odd">
+<td>接口中的方法</td>
+<td>只有一个方法 compareTo()</td>
+<td>JDK 8 以前只有两个方法compare()和equals()，8以后增加多个方法</td>
+</tr>
+<tr class="even">
+<td>使用</td>
+<td>public class Test implements Comparable{} 并重写其中的compareTo()方法</td>
+<td>数组工具类和集合工具类中提供的工具方法sort方法都给出了含有Comparator接口的重载方法。</td>
+</tr>
+<tr class="odd">
+<td>排序规则</td>
+<td>compareTo 方法的返回值有三种情况：e1.compareTo(e2) &gt; 0 即 e1 &gt; e2<br>e1.compareTo(e2) = 0 即 e1 = e2<br>e1.compareTo(e2) &lt; 0 即 e1 &lt; e2</td>
+<td>compare函数返回正数就交换传入参数的位置，否则（负数或0）就不交换两者的位置。</td>
+</tr>
+</tbody>
+</table>
+<a id="more"></a>
+<h3 id="comparable">Comparable</h3>
+<p>使用方法</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> java.io.Serializable;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BookBean</span> <span class="keyword">implements</span> <span class="title">Serializable</span>, <span class="title">Comparable</span> </span>&#123;</span><br><span class="line">    <span class="comment">//名字与价格</span></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> count;</span><br><span class="line"></span><br><span class="line">	<span class="comment">//构造函数</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Solution</span><span class="params">(String name, <span class="keyword">int</span> count)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">        <span class="keyword">this</span>.count = count;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getName</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setName</span><span class="params">(String name)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getCount</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> count;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setCount</span><span class="params">(<span class="keyword">int</span> count)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.count = count;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 当向 TreeSet 中添加 BookBean 时，会调用这个方法进行排序</span></span><br><span class="line"><span class="comment">     * e1.compareTo(e2) &gt; 0 即 e1 &gt; e2</span></span><br><span class="line"><span class="comment">     * e1.compareTo(e2) = 0 即 e1 = e2</span></span><br><span class="line"><span class="comment">     * e1.compareTo(e2) &lt; 0 即 e1 &lt; e2</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> another</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compareTo</span><span class="params">(Object another)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (another <span class="keyword">instanceof</span> Solution) &#123;</span><br><span class="line">            Solution anotherBook = (Solution) another;</span><br><span class="line">            <span class="keyword">int</span> result;</span><br><span class="line"></span><br><span class="line">            <span class="comment">//比如这里按照书价排序</span></span><br><span class="line">            result = getCount() - anotherBook.getCount();</span><br><span class="line"></span><br><span class="line">            <span class="comment">//或者按照 String 的比较顺序</span></span><br><span class="line">            <span class="comment">//result = getName().compareTo(anotherBook.getName());</span></span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (result == <span class="number">0</span>) &#123;   <span class="comment">//当书价一致时，再对比书名。 保证所有属性比较一遍</span></span><br><span class="line">                result = getName().compareTo(anotherBook.getName());</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> result;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 一样就返回 0</span></span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 重写 equals</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> o</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">equals</span><span class="params">(Object o)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">this</span> == o) <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">        <span class="keyword">if</span> (!(o <span class="keyword">instanceof</span> Solution)) <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line"></span><br><span class="line">        Solution bean = (Solution) o;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (getCount() != bean.getCount()) <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">        <span class="keyword">return</span> getName().equals(bean.getName());</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 重写 hashCode 的计算方法</span></span><br><span class="line"><span class="comment">     * 根据所有属性进行 迭代计算，避免重复</span></span><br><span class="line"><span class="comment">     * 计算 hashCode 时 计算因子 31 见得很多，是一个质数，不能再被除</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">hashCode</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">//调用 String 的 hashCode(), 唯一表示一个字符串内容</span></span><br><span class="line">        <span class="keyword">int</span> result = getName().hashCode();</span><br><span class="line">        <span class="comment">//乘以 31, 再加上 count</span></span><br><span class="line">        result = <span class="number">31</span> * result + getCount();</span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">toString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;BookBean&#123;&quot;</span> +</span><br><span class="line">                <span class="string">&quot;name=&#x27;&quot;</span> + name + <span class="string">&#x27;\&#x27;&#x27;</span> +</span><br><span class="line">                <span class="string">&quot;, count=&quot;</span> + count +</span><br><span class="line">                <span class="string">&#x27;&#125;&#x27;</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="comparator">Comparator</h3>
+<p>compare函数返回正数就交换传入参数的位置，否则（负数或0）就不交换两者的位置。</p>
+<p>因此，对于compare(Object o1, Object o2)来说，如果写成 return o1 - o2 则为升序，反之为降序。</p>
+<p>案例：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">List&lt;Character&gt; letters = <span class="keyword">new</span> ArrayList&lt;&gt;(str.length());</span><br><span class="line"></span><br><span class="line"><span class="comment">//将英文字母先排序好</span></span><br><span class="line"><span class="comment">//此处的意思是，o1 - o2如果是负数，则o1&lt;o2，不交换两者的位置，小的数o1依旧排在前面，所以这样是升序</span></span><br><span class="line"><span class="comment">//也是默认的</span></span><br><span class="line">letters.sort(<span class="keyword">new</span> Comparator&lt;Character&gt;() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compare</span><span class="params">(Character o1, Character o2)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> Character.toLowerCase(o1) - Character.toLowerCase(o2);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">//此处的意思是，o2 - o1如果是负数，则o2&lt;o1，不交换两者的位置，小的数o2依旧排在后面，所以这样是降序</span></span><br><span class="line"><span class="comment">//o2 - o1如果是正数，则o2&gt;o1，交换两者的位置，大的数o2旧排在前面，所以这样是降序</span></span><br><span class="line">letters.sort(<span class="keyword">new</span> Comparator&lt;Character&gt;() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compare</span><span class="params">(Character o1, Character o2)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> Character.toLowerCase(o2) - Character.toLowerCase(o1);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>数组工具类和集合工具类中提供的工具方法sort方法都给出了含有Comparator接口的重载方法。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Arrays.sort(T[],Comparator&lt;? <span class="keyword">super</span> T&gt; c);</span><br><span class="line">Collections.sort(List&lt;T&gt; list,Comparator&lt;? <span class="keyword">super</span> T&gt; c);</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>Java</category>
+        <category>Java基础</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
+        <tag>Java基础</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Java FullGC</title>
     <url>/2021/09/18/Java_FullGC/</url>
     <content><![CDATA[<table>
@@ -890,72 +956,6 @@
       <tags>
         <tag>Java</tag>
         <tag>Java原理</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Java中Comparable和Comparator</title>
-    <url>/2021/08/01/Java_ComparableAndComparator/</url>
-    <content><![CDATA[<p>Java中Comparable和Comparator两个<strong>接口</strong>的比较。</p>
-<table>
-<colgroup>
-<col style="width: 9%">
-<col style="width: 45%">
-<col style="width: 45%">
-</colgroup>
-<thead>
-<tr class="header">
-<th></th>
-<th>Comparable</th>
-<th>Comparator</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>作用</td>
-<td>可以让实现它的类的对象进行比较大小</td>
-<td>在类对象的外部制定排序规则，然后作为排序策略参数传递给某些类的对象的构造函数，实现比较大小</td>
-</tr>
-<tr class="even">
-<td>位置</td>
-<td>java.lang 包</td>
-<td>java.util 包</td>
-</tr>
-<tr class="odd">
-<td>接口中的方法</td>
-<td>只有一个方法 compareTo()</td>
-<td>JDK 8 以前只有两个方法compare()和equals()，8以后增加多个方法</td>
-</tr>
-<tr class="even">
-<td>使用</td>
-<td>public class Test implements Comparable{} 并重写其中的compareTo()方法</td>
-<td>数组工具类和集合工具类中提供的工具方法sort方法都给出了含有Comparator接口的重载方法。</td>
-</tr>
-<tr class="odd">
-<td>排序规则</td>
-<td>compareTo 方法的返回值有三种情况：e1.compareTo(e2) &gt; 0 即 e1 &gt; e2<br>e1.compareTo(e2) = 0 即 e1 = e2<br>e1.compareTo(e2) &lt; 0 即 e1 &lt; e2</td>
-<td>compare函数返回正数就交换传入参数的位置，否则（负数或0）就不交换两者的位置。</td>
-</tr>
-</tbody>
-</table>
-<a id="more"></a>
-<h3 id="comparable">Comparable</h3>
-<p>使用方法</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> java.io.Serializable;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BookBean</span> <span class="keyword">implements</span> <span class="title">Serializable</span>, <span class="title">Comparable</span> </span>&#123;</span><br><span class="line">    <span class="comment">//名字与价格</span></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> count;</span><br><span class="line"></span><br><span class="line">	<span class="comment">//构造函数</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Solution</span><span class="params">(String name, <span class="keyword">int</span> count)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">        <span class="keyword">this</span>.count = count;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getName</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setName</span><span class="params">(String name)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getCount</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> count;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setCount</span><span class="params">(<span class="keyword">int</span> count)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.count = count;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 当向 TreeSet 中添加 BookBean 时，会调用这个方法进行排序</span></span><br><span class="line"><span class="comment">     * e1.compareTo(e2) &gt; 0 即 e1 &gt; e2</span></span><br><span class="line"><span class="comment">     * e1.compareTo(e2) = 0 即 e1 = e2</span></span><br><span class="line"><span class="comment">     * e1.compareTo(e2) &lt; 0 即 e1 &lt; e2</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> another</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compareTo</span><span class="params">(Object another)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (another <span class="keyword">instanceof</span> Solution) &#123;</span><br><span class="line">            Solution anotherBook = (Solution) another;</span><br><span class="line">            <span class="keyword">int</span> result;</span><br><span class="line"></span><br><span class="line">            <span class="comment">//比如这里按照书价排序</span></span><br><span class="line">            result = getCount() - anotherBook.getCount();</span><br><span class="line"></span><br><span class="line">            <span class="comment">//或者按照 String 的比较顺序</span></span><br><span class="line">            <span class="comment">//result = getName().compareTo(anotherBook.getName());</span></span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (result == <span class="number">0</span>) &#123;   <span class="comment">//当书价一致时，再对比书名。 保证所有属性比较一遍</span></span><br><span class="line">                result = getName().compareTo(anotherBook.getName());</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> result;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 一样就返回 0</span></span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 重写 equals</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> o</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">equals</span><span class="params">(Object o)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">this</span> == o) <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">        <span class="keyword">if</span> (!(o <span class="keyword">instanceof</span> Solution)) <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line"></span><br><span class="line">        Solution bean = (Solution) o;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (getCount() != bean.getCount()) <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">        <span class="keyword">return</span> getName().equals(bean.getName());</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 重写 hashCode 的计算方法</span></span><br><span class="line"><span class="comment">     * 根据所有属性进行 迭代计算，避免重复</span></span><br><span class="line"><span class="comment">     * 计算 hashCode 时 计算因子 31 见得很多，是一个质数，不能再被除</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">hashCode</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">//调用 String 的 hashCode(), 唯一表示一个字符串内容</span></span><br><span class="line">        <span class="keyword">int</span> result = getName().hashCode();</span><br><span class="line">        <span class="comment">//乘以 31, 再加上 count</span></span><br><span class="line">        result = <span class="number">31</span> * result + getCount();</span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">toString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;BookBean&#123;&quot;</span> +</span><br><span class="line">                <span class="string">&quot;name=&#x27;&quot;</span> + name + <span class="string">&#x27;\&#x27;&#x27;</span> +</span><br><span class="line">                <span class="string">&quot;, count=&quot;</span> + count +</span><br><span class="line">                <span class="string">&#x27;&#125;&#x27;</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="comparator">Comparator</h3>
-<p>compare函数返回正数就交换传入参数的位置，否则（负数或0）就不交换两者的位置。</p>
-<p>因此，对于compare(Object o1, Object o2)来说，如果写成 return o1 - o2 则为升序，反之为降序。</p>
-<p>案例：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">List&lt;Character&gt; letters = <span class="keyword">new</span> ArrayList&lt;&gt;(str.length());</span><br><span class="line"></span><br><span class="line"><span class="comment">//将英文字母先排序好</span></span><br><span class="line"><span class="comment">//此处的意思是，o1 - o2如果是负数，则o1&lt;o2，不交换两者的位置，小的数o1依旧排在前面，所以这样是升序</span></span><br><span class="line"><span class="comment">//也是默认的</span></span><br><span class="line">letters.sort(<span class="keyword">new</span> Comparator&lt;Character&gt;() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compare</span><span class="params">(Character o1, Character o2)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> Character.toLowerCase(o1) - Character.toLowerCase(o2);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">//此处的意思是，o2 - o1如果是负数，则o2&lt;o1，不交换两者的位置，小的数o2依旧排在后面，所以这样是降序</span></span><br><span class="line"><span class="comment">//o2 - o1如果是正数，则o2&gt;o1，交换两者的位置，大的数o2旧排在前面，所以这样是降序</span></span><br><span class="line">letters.sort(<span class="keyword">new</span> Comparator&lt;Character&gt;() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compare</span><span class="params">(Character o1, Character o2)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> Character.toLowerCase(o2) - Character.toLowerCase(o1);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
-<p>数组工具类和集合工具类中提供的工具方法sort方法都给出了含有Comparator接口的重载方法。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Arrays.sort(T[],Comparator&lt;? <span class="keyword">super</span> T&gt; c);</span><br><span class="line">Collections.sort(List&lt;T&gt; list,Comparator&lt;? <span class="keyword">super</span> T&gt; c);</span><br></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>Java</category>
-        <category>Java基础</category>
-      </categories>
-      <tags>
-        <tag>Java</tag>
-        <tag>Java基础</tag>
       </tags>
   </entry>
   <entry>
@@ -1035,34 +1035,6 @@
         <tag>Java</tag>
         <tag>Java基础</tag>
         <tag>位运算</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Java可重入锁</title>
-    <url>/2021/09/15/Java_%E5%8F%AF%E9%87%8D%E5%85%A5%E9%94%81/</url>
-    <content><![CDATA[<p>可重入锁，指的是以线程为单位，当一个线程获取对象锁之后，这个线程可以再次获取本对象上的锁，而其他的线程是不可以的。</p>
-<p>Java中synchronized关键字和ReentrantLock都是可重入的锁。</p>
-<p>如果锁不可重入，则当有如下情况时会产生死锁：</p>
-<a id="more"></a>
-<p>1、递归调用</p>
-<p>自己调用自己时，因为自身已经获得了这个对象的锁，如果不能再加锁的话，就会导致线程一直在等待自己释放锁，就会产生死锁。</p>
-<p>2、此线程调用同一对象其它synchronized或者有同步锁函数。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Demo</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">method1</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        method2();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">method2</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>两个方法method1和method2都用synchronized修饰了，假如某一时刻，线程A执行到了method1，此时线程A获取了这个对象的锁，而由于method2也是synchronized方法，如果synchronized不具备可重入性，此时线程A需要重新申请锁。但是这就会造成一个问题，因为线程A已经持有了该对象的锁，而又在申请获取该对象的锁，这样就会线程A一直等待永远不会获取到的锁，导致死锁发生。</p>
-<p>为什么说java中的reentrantlock的效率要比synchronise的效率高？</p>
-<p>synchronized和lock在阻塞线程时都需要上下文切换，但是lock锁有优化策略，减少了线程被阻塞的几率。早期的synchronized是一把重量级锁，没有优化机制，可以说只要有线程竞争，竞争失败的线程一定会被阻塞，而reentrantlock对于那些竞争失败的线程，并不会直接阻塞，而是会尝试重新获得锁（自旋锁），如果这时候加锁成功，则线程就无需阻塞，相当于做了一定的优化。直到 jdk1.6 之后，两种锁的性能已经相差无几，甚至 Synchronized 的自动释放锁会更好用。</p>
-<h3 id="参考资料">参考资料</h3>
-<p>https://blog.csdn.net/papamilk/article/details/80836268</p>
-<p>https://www.zhihu.com/question/53444947</p>
-<p>https://zhuanlan.zhihu.com/p/336248650</p>
-]]></content>
-      <categories>
-        <category>Java</category>
-        <category>Java原理</category>
-      </categories>
-      <tags>
-        <tag>Java</tag>
-        <tag>Java原理</tag>
       </tags>
   </entry>
   <entry>
@@ -1232,6 +1204,34 @@
 <p>有序性是指程序执行的顺序按照代码的先后顺序执行。</p>
 <h3 id="参考资料">参考资料</h3>
 <p>https://mp.weixin.qq.com/s/kpOXHhVLFa0_LxjQBhrNvg</p>
+]]></content>
+      <categories>
+        <category>Java</category>
+        <category>Java原理</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
+        <tag>Java原理</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Java可重入锁</title>
+    <url>/2021/09/15/Java_%E5%8F%AF%E9%87%8D%E5%85%A5%E9%94%81/</url>
+    <content><![CDATA[<p>可重入锁，指的是以线程为单位，当一个线程获取对象锁之后，这个线程可以再次获取本对象上的锁，而其他的线程是不可以的。</p>
+<p>Java中synchronized关键字和ReentrantLock都是可重入的锁。</p>
+<p>如果锁不可重入，则当有如下情况时会产生死锁：</p>
+<a id="more"></a>
+<p>1、递归调用</p>
+<p>自己调用自己时，因为自身已经获得了这个对象的锁，如果不能再加锁的话，就会导致线程一直在等待自己释放锁，就会产生死锁。</p>
+<p>2、此线程调用同一对象其它synchronized或者有同步锁函数。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Demo</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">method1</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        method2();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">method2</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>两个方法method1和method2都用synchronized修饰了，假如某一时刻，线程A执行到了method1，此时线程A获取了这个对象的锁，而由于method2也是synchronized方法，如果synchronized不具备可重入性，此时线程A需要重新申请锁。但是这就会造成一个问题，因为线程A已经持有了该对象的锁，而又在申请获取该对象的锁，这样就会线程A一直等待永远不会获取到的锁，导致死锁发生。</p>
+<p>为什么说java中的reentrantlock的效率要比synchronise的效率高？</p>
+<p>synchronized和lock在阻塞线程时都需要上下文切换，但是lock锁有优化策略，减少了线程被阻塞的几率。早期的synchronized是一把重量级锁，没有优化机制，可以说只要有线程竞争，竞争失败的线程一定会被阻塞，而reentrantlock对于那些竞争失败的线程，并不会直接阻塞，而是会尝试重新获得锁（自旋锁），如果这时候加锁成功，则线程就无需阻塞，相当于做了一定的优化。直到 jdk1.6 之后，两种锁的性能已经相差无几，甚至 Synchronized 的自动释放锁会更好用。</p>
+<h3 id="参考资料">参考资料</h3>
+<p>https://blog.csdn.net/papamilk/article/details/80836268</p>
+<p>https://www.zhihu.com/question/53444947</p>
+<p>https://zhuanlan.zhihu.com/p/336248650</p>
 ]]></content>
       <categories>
         <category>Java</category>
@@ -2070,31 +2070,6 @@
       </tags>
   </entry>
   <entry>
-    <title>常用SQL</title>
-    <url>/2021/04/17/SQL_SQL/</url>
-    <content><![CDATA[<p>SQL 是用于访问和处理数据库的标准的计算机语言。</p>
-<a id="more"></a>
-<h3 id="函数">函数</h3>
-<h4 id="lfet-join函数">LFET JOIN函数</h4>
-<p>on和where的区别：</p>
-<p>where 是在两个表join完成后，再附上where条件。</p>
-<p>而 and 则是在表连接前过滤A表或B表里面哪些记录符合连接条件。它会保留左表的全部记录。</p>
-<h4 id="limit-offset函数">LIMIT OFFSET函数</h4>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#选择排名第二高的工资</span><br><span class="line">select</span><br><span class="line">ifnull(</span><br><span class="line">(</span><br><span class="line">    select distinct Salary from Employee order by Salary desc limit 1 offset 1</span><br><span class="line">)</span><br><span class="line">,</span><br><span class="line">null</span><br><span class="line">)</span><br><span class="line">as SecondHighestSalary</span><br></pre></td></tr></table></figure>
-<h4 id="窗口函数">窗口函数</h4>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#每个部门里面工资前三高的员工</span><br><span class="line">select d.name as department, a.name as employee, a.salary as salary</span><br><span class="line">from</span><br><span class="line">(</span><br><span class="line">    #利用排名函数 dense_rank() 获得分区下的排名</span><br><span class="line">    select *, dense_rank() over( partition by departmentid order by salary desc) as t</span><br><span class="line">    from Employee</span><br><span class="line">)</span><br><span class="line">as a </span><br><span class="line">inner join department as d # 用部门id连接</span><br><span class="line">on a.DepartmentId &#x3D; d.Id </span><br><span class="line">where t &lt;&#x3D; 3 #选择排名高的</span><br></pre></td></tr></table></figure>
-<h4 id="case-when">CASE WHEN</h4>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="keyword">distinct</span> <span class="type">Date</span>,</span><br><span class="line"><span class="built_in">sum</span>(<span class="keyword">case</span> <span class="keyword">Result</span> <span class="keyword">when</span> <span class="string">&#x27;胜&#x27;</span> <span class="keyword">then</span> <span class="number">1</span> <span class="keyword">else</span> <span class="number">0</span> <span class="keyword">end</span>) <span class="keyword">as</span> <span class="string">&#x27;胜&#x27;</span>,</span><br><span class="line"><span class="built_in">sum</span>(<span class="keyword">case</span> <span class="keyword">Result</span> <span class="keyword">when</span> <span class="string">&#x27;负&#x27;</span> <span class="keyword">then</span> <span class="number">1</span> <span class="keyword">else</span> <span class="number">0</span> <span class="keyword">end</span>) <span class="keyword">as</span> <span class="string">&#x27;负&#x27;</span></span><br><span class="line"><span class="keyword">from</span> test</span><br><span class="line"><span class="keyword">group</span> <span class="keyword">by</span> <span class="type">date</span></span><br></pre></td></tr></table></figure>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    STUDENT_NAME,</span><br><span class="line">    (<span class="keyword">CASE</span> <span class="keyword">WHEN</span> score <span class="operator">&lt;</span> <span class="number">60</span> <span class="keyword">THEN</span> <span class="string">&#x27;不及格&#x27;</span></span><br><span class="line">        <span class="keyword">WHEN</span> score <span class="operator">&gt;=</span> <span class="number">60</span> <span class="keyword">AND</span> score <span class="operator">&lt;</span> <span class="number">80</span> <span class="keyword">THEN</span> <span class="string">&#x27;及格&#x27;</span></span><br><span class="line">        <span class="keyword">WHEN</span> score <span class="operator">&gt;=</span> <span class="number">80</span> <span class="keyword">THEN</span> <span class="string">&#x27;优秀&#x27;</span></span><br><span class="line">        <span class="keyword">WHEN</span> score <span class="keyword">IS</span> <span class="keyword">NULL</span> <span class="keyword">THEN</span> <span class="string">&#x27;缺席考试&#x27;</span></span><br><span class="line">        <span class="keyword">ELSE</span> <span class="string">&#x27;异常&#x27;</span> <span class="keyword">END</span>) <span class="keyword">AS</span> REMARK</span><br><span class="line"><span class="keyword">FROM</span></span><br><span class="line">    <span class="keyword">TABLE</span></span><br></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>数据库</category>
-      </categories>
-      <tags>
-        <tag>数据库</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>MySQL日志</title>
     <url>/2021/04/02/MySQL_%E6%97%A5%E5%BF%97/</url>
     <content><![CDATA[<p>日志是MySQL数据库的重要组成部分，记录着数据库运行期间各种状态信息。</p>
@@ -2223,6 +2198,31 @@
       <tags>
         <tag>数据库</tag>
         <tag>MySQL</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>常用SQL</title>
+    <url>/2021/04/17/SQL_SQL/</url>
+    <content><![CDATA[<p>SQL 是用于访问和处理数据库的标准的计算机语言。</p>
+<a id="more"></a>
+<h3 id="函数">函数</h3>
+<h4 id="lfet-join函数">LFET JOIN函数</h4>
+<p>on和where的区别：</p>
+<p>where 是在两个表join完成后，再附上where条件。</p>
+<p>而 and 则是在表连接前过滤A表或B表里面哪些记录符合连接条件。它会保留左表的全部记录。</p>
+<h4 id="limit-offset函数">LIMIT OFFSET函数</h4>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#选择排名第二高的工资</span><br><span class="line">select</span><br><span class="line">ifnull(</span><br><span class="line">(</span><br><span class="line">    select distinct Salary from Employee order by Salary desc limit 1 offset 1</span><br><span class="line">)</span><br><span class="line">,</span><br><span class="line">null</span><br><span class="line">)</span><br><span class="line">as SecondHighestSalary</span><br></pre></td></tr></table></figure>
+<h4 id="窗口函数">窗口函数</h4>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#每个部门里面工资前三高的员工</span><br><span class="line">select d.name as department, a.name as employee, a.salary as salary</span><br><span class="line">from</span><br><span class="line">(</span><br><span class="line">    #利用排名函数 dense_rank() 获得分区下的排名</span><br><span class="line">    select *, dense_rank() over( partition by departmentid order by salary desc) as t</span><br><span class="line">    from Employee</span><br><span class="line">)</span><br><span class="line">as a </span><br><span class="line">inner join department as d # 用部门id连接</span><br><span class="line">on a.DepartmentId &#x3D; d.Id </span><br><span class="line">where t &lt;&#x3D; 3 #选择排名高的</span><br></pre></td></tr></table></figure>
+<h4 id="case-when">CASE WHEN</h4>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="keyword">distinct</span> <span class="type">Date</span>,</span><br><span class="line"><span class="built_in">sum</span>(<span class="keyword">case</span> <span class="keyword">Result</span> <span class="keyword">when</span> <span class="string">&#x27;胜&#x27;</span> <span class="keyword">then</span> <span class="number">1</span> <span class="keyword">else</span> <span class="number">0</span> <span class="keyword">end</span>) <span class="keyword">as</span> <span class="string">&#x27;胜&#x27;</span>,</span><br><span class="line"><span class="built_in">sum</span>(<span class="keyword">case</span> <span class="keyword">Result</span> <span class="keyword">when</span> <span class="string">&#x27;负&#x27;</span> <span class="keyword">then</span> <span class="number">1</span> <span class="keyword">else</span> <span class="number">0</span> <span class="keyword">end</span>) <span class="keyword">as</span> <span class="string">&#x27;负&#x27;</span></span><br><span class="line"><span class="keyword">from</span> test</span><br><span class="line"><span class="keyword">group</span> <span class="keyword">by</span> <span class="type">date</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    STUDENT_NAME,</span><br><span class="line">    (<span class="keyword">CASE</span> <span class="keyword">WHEN</span> score <span class="operator">&lt;</span> <span class="number">60</span> <span class="keyword">THEN</span> <span class="string">&#x27;不及格&#x27;</span></span><br><span class="line">        <span class="keyword">WHEN</span> score <span class="operator">&gt;=</span> <span class="number">60</span> <span class="keyword">AND</span> score <span class="operator">&lt;</span> <span class="number">80</span> <span class="keyword">THEN</span> <span class="string">&#x27;及格&#x27;</span></span><br><span class="line">        <span class="keyword">WHEN</span> score <span class="operator">&gt;=</span> <span class="number">80</span> <span class="keyword">THEN</span> <span class="string">&#x27;优秀&#x27;</span></span><br><span class="line">        <span class="keyword">WHEN</span> score <span class="keyword">IS</span> <span class="keyword">NULL</span> <span class="keyword">THEN</span> <span class="string">&#x27;缺席考试&#x27;</span></span><br><span class="line">        <span class="keyword">ELSE</span> <span class="string">&#x27;异常&#x27;</span> <span class="keyword">END</span>) <span class="keyword">AS</span> REMARK</span><br><span class="line"><span class="keyword">FROM</span></span><br><span class="line">    <span class="keyword">TABLE</span></span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>数据库</category>
+      </categories>
+      <tags>
+        <tag>数据库</tag>
       </tags>
   </entry>
   <entry>
@@ -2669,22 +2669,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Spark 案例</title>
-    <url>/2021/04/19/Spark_%E6%A1%88%E4%BE%8B/</url>
-    <content><![CDATA[<p>一些样例代码。</p>
-<a id="more"></a>
-<h3 id="wordcount">WordCount</h3>
-<figure class="highlight scala"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">object</span> <span class="title">WordCounts</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">main</span></span>(args: <span class="type">Array</span>[<span class="type">String</span>]): <span class="type">Unit</span> = &#123;</span><br><span class="line">    <span class="comment">// 1. 创建 Spark Context</span></span><br><span class="line">    <span class="keyword">val</span> conf = <span class="keyword">new</span> <span class="type">SparkConf</span>().setMaster(<span class="string">&quot;local[2]&quot;</span>)</span><br><span class="line">    <span class="keyword">val</span> sc: <span class="type">SparkContext</span> = <span class="keyword">new</span> <span class="type">SparkContext</span>(conf)</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 2. 读取文件并计算词频</span></span><br><span class="line">    <span class="keyword">val</span> source: <span class="type">RDD</span>[<span class="type">String</span>] = sc.textFile(<span class="string">&quot;hdfs://node01:8020/dataset/wordcount.txt&quot;</span>, <span class="number">2</span>)</span><br><span class="line">    <span class="keyword">val</span> words: <span class="type">RDD</span>[<span class="type">String</span>] = source.flatMap &#123; line =&gt; line.split(<span class="string">&quot; &quot;</span>) &#125;</span><br><span class="line">    <span class="keyword">val</span> wordsTuple: <span class="type">RDD</span>[(<span class="type">String</span>, <span class="type">Int</span>)] = words.map &#123; word =&gt; (word, <span class="number">1</span>) &#125;</span><br><span class="line">    <span class="keyword">val</span> wordsCount: <span class="type">RDD</span>[(<span class="type">String</span>, <span class="type">Int</span>)] = wordsTuple.reduceByKey &#123; (x, y) =&gt; x + y &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 3. 查看执行结果</span></span><br><span class="line">    println(wordsCount.collect)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">WordCountMapper</span> <span class="keyword">extends</span> <span class="title">Mapper</span>&lt;<span class="title">LongWritable</span>,<span class="title">Text</span>,<span class="title">Text</span>,<span class="title">LongWritable</span>&gt; </span>&#123;</span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">map</span><span class="params">(LongWritable key, Text value, Context context)</span> <span class="keyword">throws</span> IOException, InterruptedException </span>&#123;</span><br><span class="line">    String line = value.toString();</span><br><span class="line">    String[] split = line.split(<span class="string">&quot; &quot;</span>);</span><br><span class="line">    <span class="keyword">for</span> (String word : split) &#123;</span><br><span class="line">    	context.write(<span class="keyword">new</span> Text(word),<span class="keyword">new</span> LongWritable(<span class="number">1</span>));</span><br><span class="line">    &#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">WordCountReducer</span> <span class="keyword">extends</span> <span class="title">Reducer</span>&lt;<span class="title">Text</span>,<span class="title">LongWritable</span>,<span class="title">Text</span>,<span class="title">LongWritable</span>&gt; </span>&#123;</span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* 自定义我们的reduce逻辑</span></span><br><span class="line"><span class="comment">* 所有的key都是我们的单词，所有的values都是我们单词出现的次数</span></span><br><span class="line"><span class="comment">* <span class="doctag">@param</span> key</span></span><br><span class="line"><span class="comment">* <span class="doctag">@param</span> values</span></span><br><span class="line"><span class="comment">* <span class="doctag">@param</span> context</span></span><br><span class="line"><span class="comment">* <span class="doctag">@throws</span> IOException</span></span><br><span class="line"><span class="comment">* <span class="doctag">@throws</span> InterruptedException</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">reduce</span><span class="params">(Text key, Iterable&lt;LongWritable&gt; values, Context context)</span> <span class="keyword">throws</span> IOException, InterruptedException </span>&#123;</span><br><span class="line">    <span class="keyword">long</span> count = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span> (LongWritable value : values) &#123;</span><br><span class="line">    	count += value.get();</span><br><span class="line">    &#125;</span><br><span class="line">    context.write(key,<span class="keyword">new</span> LongWritable(count));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">JobMain</span> <span class="keyword">extends</span> <span class="title">Configured</span> <span class="keyword">implements</span> <span class="title">Tool</span> </span>&#123;</span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">run</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">	Job job = Job.getInstance(<span class="keyword">super</span>.getConf(),</span><br><span class="line">	JobMain.class.getSimpleName());</span><br><span class="line">	<span class="comment">//打包到集群上面运行时候，必须要添加以下配置，指定程序的main函数</span></span><br><span class="line">	job.setJarByClass(JobMain.class);</span><br><span class="line">    <span class="comment">//第一步：读取输入文件解析成key，value对</span></span><br><span class="line">    job.setInputFormatClass(TextInputFormat.class);</span><br><span class="line">    TextInputFormat.addInputPath(job,<span class="keyword">new</span></span><br><span class="line">    Path(<span class="string">&quot;hdfs://192.168.52.250:8020/wordcount&quot;</span>));</span><br><span class="line">    <span class="comment">//第二步：设置我们的mapper类</span></span><br><span class="line">    job.setMapperClass(WordCountMapper.class);</span><br><span class="line">    <span class="comment">//设置我们map阶段完成之后的输出类型</span></span><br><span class="line">    job.setMapOutputKeyClass(Text.class);</span><br><span class="line">    job.setMapOutputValueClass(LongWritable.class);</span><br><span class="line">    <span class="comment">//第三步，第四步，第五步，第六步，省略</span></span><br><span class="line">    <span class="comment">//第七步：设置我们的reduce类</span></span><br><span class="line">    job.setReducerClass(WordCountReducer.class);</span><br><span class="line">    <span class="comment">//设置我们reduce阶段完成之后的输出类型</span></span><br><span class="line">    job.setOutputKeyClass(Text.class);</span><br><span class="line">    job.setOutputValueClass(LongWritable.class);</span><br><span class="line">    <span class="comment">//第八步：设置输出类以及输出路径</span></span><br><span class="line">    job.setOutputFormatClass(TextOutputFormat.class);</span><br><span class="line">    TextOutputFormat.setOutputPath(job,<span class="keyword">new</span> Path(<span class="string">&quot;hdfs://192.168.52.250:8020/wordcount_out&quot;</span>));</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">boolean</span> b = job.waitForCompletion(<span class="keyword">true</span>);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> b?<span class="number">0</span>:<span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* 程序main函数的入口类</span></span><br><span class="line"><span class="comment">* <span class="doctag">@param</span> args</span></span><br><span class="line"><span class="comment">* <span class="doctag">@throws</span> Exception</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">	Configuration configuration = <span class="keyword">new</span> Configuration();</span><br><span class="line">	Tool tool = <span class="keyword">new</span> JobMain();</span><br><span class="line">	<span class="keyword">int</span> run = ToolRunner.run(configuration, tool, args);</span><br><span class="line">	System.exit(run);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>Spark</category>
-      </categories>
-      <tags>
-        <tag>Spark</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Spark SQL执行原理</title>
     <url>/2021/09/25/Spark_SparkSQL%E5%8E%9F%E7%90%86/</url>
     <content><![CDATA[<table style="width:100%;">
@@ -2738,6 +2722,22 @@
 <p>https://zhuanlan.zhihu.com/p/127138025 （Hive转MR）</p>
 <p>https://blog.csdn.net/qq_30031221/article/details/109222355 （Spark底层执行原理）</p>
 <p>https://www.cnblogs.com/weiyiming007/p/11313226.html</p>
+]]></content>
+      <categories>
+        <category>Spark</category>
+      </categories>
+      <tags>
+        <tag>Spark</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Spark 案例</title>
+    <url>/2021/04/19/Spark_%E6%A1%88%E4%BE%8B/</url>
+    <content><![CDATA[<p>一些样例代码。</p>
+<a id="more"></a>
+<h3 id="wordcount">WordCount</h3>
+<figure class="highlight scala"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">object</span> <span class="title">WordCounts</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">main</span></span>(args: <span class="type">Array</span>[<span class="type">String</span>]): <span class="type">Unit</span> = &#123;</span><br><span class="line">    <span class="comment">// 1. 创建 Spark Context</span></span><br><span class="line">    <span class="keyword">val</span> conf = <span class="keyword">new</span> <span class="type">SparkConf</span>().setMaster(<span class="string">&quot;local[2]&quot;</span>)</span><br><span class="line">    <span class="keyword">val</span> sc: <span class="type">SparkContext</span> = <span class="keyword">new</span> <span class="type">SparkContext</span>(conf)</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 2. 读取文件并计算词频</span></span><br><span class="line">    <span class="keyword">val</span> source: <span class="type">RDD</span>[<span class="type">String</span>] = sc.textFile(<span class="string">&quot;hdfs://node01:8020/dataset/wordcount.txt&quot;</span>, <span class="number">2</span>)</span><br><span class="line">    <span class="keyword">val</span> words: <span class="type">RDD</span>[<span class="type">String</span>] = source.flatMap &#123; line =&gt; line.split(<span class="string">&quot; &quot;</span>) &#125;</span><br><span class="line">    <span class="keyword">val</span> wordsTuple: <span class="type">RDD</span>[(<span class="type">String</span>, <span class="type">Int</span>)] = words.map &#123; word =&gt; (word, <span class="number">1</span>) &#125;</span><br><span class="line">    <span class="keyword">val</span> wordsCount: <span class="type">RDD</span>[(<span class="type">String</span>, <span class="type">Int</span>)] = wordsTuple.reduceByKey &#123; (x, y) =&gt; x + y &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 3. 查看执行结果</span></span><br><span class="line">    println(wordsCount.collect)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">WordCountMapper</span> <span class="keyword">extends</span> <span class="title">Mapper</span>&lt;<span class="title">LongWritable</span>,<span class="title">Text</span>,<span class="title">Text</span>,<span class="title">LongWritable</span>&gt; </span>&#123;</span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">map</span><span class="params">(LongWritable key, Text value, Context context)</span> <span class="keyword">throws</span> IOException, InterruptedException </span>&#123;</span><br><span class="line">    String line = value.toString();</span><br><span class="line">    String[] split = line.split(<span class="string">&quot; &quot;</span>);</span><br><span class="line">    <span class="keyword">for</span> (String word : split) &#123;</span><br><span class="line">    	context.write(<span class="keyword">new</span> Text(word),<span class="keyword">new</span> LongWritable(<span class="number">1</span>));</span><br><span class="line">    &#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">WordCountReducer</span> <span class="keyword">extends</span> <span class="title">Reducer</span>&lt;<span class="title">Text</span>,<span class="title">LongWritable</span>,<span class="title">Text</span>,<span class="title">LongWritable</span>&gt; </span>&#123;</span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* 自定义我们的reduce逻辑</span></span><br><span class="line"><span class="comment">* 所有的key都是我们的单词，所有的values都是我们单词出现的次数</span></span><br><span class="line"><span class="comment">* <span class="doctag">@param</span> key</span></span><br><span class="line"><span class="comment">* <span class="doctag">@param</span> values</span></span><br><span class="line"><span class="comment">* <span class="doctag">@param</span> context</span></span><br><span class="line"><span class="comment">* <span class="doctag">@throws</span> IOException</span></span><br><span class="line"><span class="comment">* <span class="doctag">@throws</span> InterruptedException</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">reduce</span><span class="params">(Text key, Iterable&lt;LongWritable&gt; values, Context context)</span> <span class="keyword">throws</span> IOException, InterruptedException </span>&#123;</span><br><span class="line">    <span class="keyword">long</span> count = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span> (LongWritable value : values) &#123;</span><br><span class="line">    	count += value.get();</span><br><span class="line">    &#125;</span><br><span class="line">    context.write(key,<span class="keyword">new</span> LongWritable(count));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">JobMain</span> <span class="keyword">extends</span> <span class="title">Configured</span> <span class="keyword">implements</span> <span class="title">Tool</span> </span>&#123;</span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">run</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">	Job job = Job.getInstance(<span class="keyword">super</span>.getConf(),</span><br><span class="line">	JobMain.class.getSimpleName());</span><br><span class="line">	<span class="comment">//打包到集群上面运行时候，必须要添加以下配置，指定程序的main函数</span></span><br><span class="line">	job.setJarByClass(JobMain.class);</span><br><span class="line">    <span class="comment">//第一步：读取输入文件解析成key，value对</span></span><br><span class="line">    job.setInputFormatClass(TextInputFormat.class);</span><br><span class="line">    TextInputFormat.addInputPath(job,<span class="keyword">new</span></span><br><span class="line">    Path(<span class="string">&quot;hdfs://192.168.52.250:8020/wordcount&quot;</span>));</span><br><span class="line">    <span class="comment">//第二步：设置我们的mapper类</span></span><br><span class="line">    job.setMapperClass(WordCountMapper.class);</span><br><span class="line">    <span class="comment">//设置我们map阶段完成之后的输出类型</span></span><br><span class="line">    job.setMapOutputKeyClass(Text.class);</span><br><span class="line">    job.setMapOutputValueClass(LongWritable.class);</span><br><span class="line">    <span class="comment">//第三步，第四步，第五步，第六步，省略</span></span><br><span class="line">    <span class="comment">//第七步：设置我们的reduce类</span></span><br><span class="line">    job.setReducerClass(WordCountReducer.class);</span><br><span class="line">    <span class="comment">//设置我们reduce阶段完成之后的输出类型</span></span><br><span class="line">    job.setOutputKeyClass(Text.class);</span><br><span class="line">    job.setOutputValueClass(LongWritable.class);</span><br><span class="line">    <span class="comment">//第八步：设置输出类以及输出路径</span></span><br><span class="line">    job.setOutputFormatClass(TextOutputFormat.class);</span><br><span class="line">    TextOutputFormat.setOutputPath(job,<span class="keyword">new</span> Path(<span class="string">&quot;hdfs://192.168.52.250:8020/wordcount_out&quot;</span>));</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">boolean</span> b = job.waitForCompletion(<span class="keyword">true</span>);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> b?<span class="number">0</span>:<span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* 程序main函数的入口类</span></span><br><span class="line"><span class="comment">* <span class="doctag">@param</span> args</span></span><br><span class="line"><span class="comment">* <span class="doctag">@throws</span> Exception</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">	Configuration configuration = <span class="keyword">new</span> Configuration();</span><br><span class="line">	Tool tool = <span class="keyword">new</span> JobMain();</span><br><span class="line">	<span class="keyword">int</span> run = ToolRunner.run(configuration, tool, args);</span><br><span class="line">	System.exit(run);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 ]]></content>
       <categories>
         <category>Spark</category>
