@@ -711,72 +711,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Java中Comparable和Comparator</title>
-    <url>/2021/08/01/Java_ComparableAndComparator/</url>
-    <content><![CDATA[<p>Java中Comparable和Comparator两个<strong>接口</strong>的比较。</p>
-<table>
-<colgroup>
-<col style="width: 9%">
-<col style="width: 45%">
-<col style="width: 45%">
-</colgroup>
-<thead>
-<tr class="header">
-<th></th>
-<th>Comparable</th>
-<th>Comparator</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>作用</td>
-<td>可以让实现它的类的对象进行比较大小</td>
-<td>在类对象的外部制定排序规则，然后作为排序策略参数传递给某些类的对象的构造函数，实现比较大小</td>
-</tr>
-<tr class="even">
-<td>位置</td>
-<td>java.lang 包</td>
-<td>java.util 包</td>
-</tr>
-<tr class="odd">
-<td>接口中的方法</td>
-<td>只有一个方法 compareTo()</td>
-<td>JDK 8 以前只有两个方法compare()和equals()，8以后增加多个方法</td>
-</tr>
-<tr class="even">
-<td>使用</td>
-<td>public class Test implements Comparable{} 并重写其中的compareTo()方法</td>
-<td>数组工具类和集合工具类中提供的工具方法sort方法都给出了含有Comparator接口的重载方法。</td>
-</tr>
-<tr class="odd">
-<td>排序规则</td>
-<td>compareTo 方法的返回值有三种情况：e1.compareTo(e2) &gt; 0 即 e1 &gt; e2<br>e1.compareTo(e2) = 0 即 e1 = e2<br>e1.compareTo(e2) &lt; 0 即 e1 &lt; e2</td>
-<td>compare函数返回正数就交换传入参数的位置，否则（负数或0）就不交换两者的位置。</td>
-</tr>
-</tbody>
-</table>
-<a id="more"></a>
-<h3 id="comparable">Comparable</h3>
-<p>使用方法</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> java.io.Serializable;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BookBean</span> <span class="keyword">implements</span> <span class="title">Serializable</span>, <span class="title">Comparable</span> </span>&#123;</span><br><span class="line">    <span class="comment">//名字与价格</span></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> count;</span><br><span class="line"></span><br><span class="line">	<span class="comment">//构造函数</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Solution</span><span class="params">(String name, <span class="keyword">int</span> count)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">        <span class="keyword">this</span>.count = count;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getName</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setName</span><span class="params">(String name)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getCount</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> count;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setCount</span><span class="params">(<span class="keyword">int</span> count)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.count = count;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 当向 TreeSet 中添加 BookBean 时，会调用这个方法进行排序</span></span><br><span class="line"><span class="comment">     * e1.compareTo(e2) &gt; 0 即 e1 &gt; e2</span></span><br><span class="line"><span class="comment">     * e1.compareTo(e2) = 0 即 e1 = e2</span></span><br><span class="line"><span class="comment">     * e1.compareTo(e2) &lt; 0 即 e1 &lt; e2</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> another</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compareTo</span><span class="params">(Object another)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (another <span class="keyword">instanceof</span> Solution) &#123;</span><br><span class="line">            Solution anotherBook = (Solution) another;</span><br><span class="line">            <span class="keyword">int</span> result;</span><br><span class="line"></span><br><span class="line">            <span class="comment">//比如这里按照书价排序</span></span><br><span class="line">            result = getCount() - anotherBook.getCount();</span><br><span class="line"></span><br><span class="line">            <span class="comment">//或者按照 String 的比较顺序</span></span><br><span class="line">            <span class="comment">//result = getName().compareTo(anotherBook.getName());</span></span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (result == <span class="number">0</span>) &#123;   <span class="comment">//当书价一致时，再对比书名。 保证所有属性比较一遍</span></span><br><span class="line">                result = getName().compareTo(anotherBook.getName());</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> result;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 一样就返回 0</span></span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 重写 equals</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> o</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">equals</span><span class="params">(Object o)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">this</span> == o) <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">        <span class="keyword">if</span> (!(o <span class="keyword">instanceof</span> Solution)) <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line"></span><br><span class="line">        Solution bean = (Solution) o;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (getCount() != bean.getCount()) <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">        <span class="keyword">return</span> getName().equals(bean.getName());</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 重写 hashCode 的计算方法</span></span><br><span class="line"><span class="comment">     * 根据所有属性进行 迭代计算，避免重复</span></span><br><span class="line"><span class="comment">     * 计算 hashCode 时 计算因子 31 见得很多，是一个质数，不能再被除</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">hashCode</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">//调用 String 的 hashCode(), 唯一表示一个字符串内容</span></span><br><span class="line">        <span class="keyword">int</span> result = getName().hashCode();</span><br><span class="line">        <span class="comment">//乘以 31, 再加上 count</span></span><br><span class="line">        result = <span class="number">31</span> * result + getCount();</span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">toString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;BookBean&#123;&quot;</span> +</span><br><span class="line">                <span class="string">&quot;name=&#x27;&quot;</span> + name + <span class="string">&#x27;\&#x27;&#x27;</span> +</span><br><span class="line">                <span class="string">&quot;, count=&quot;</span> + count +</span><br><span class="line">                <span class="string">&#x27;&#125;&#x27;</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="comparator">Comparator</h3>
-<p>compare函数返回正数就交换传入参数的位置，否则（负数或0）就不交换两者的位置。</p>
-<p>因此，对于compare(Object o1, Object o2)来说，如果写成 return o1 - o2 则为升序，反之为降序。</p>
-<p>案例：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">List&lt;Character&gt; letters = <span class="keyword">new</span> ArrayList&lt;&gt;(str.length());</span><br><span class="line"></span><br><span class="line"><span class="comment">//将英文字母先排序好</span></span><br><span class="line"><span class="comment">//此处的意思是，o1 - o2如果是负数，则o1&lt;o2，不交换两者的位置，小的数o1依旧排在前面，所以这样是升序</span></span><br><span class="line"><span class="comment">//也是默认的</span></span><br><span class="line">letters.sort(<span class="keyword">new</span> Comparator&lt;Character&gt;() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compare</span><span class="params">(Character o1, Character o2)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> Character.toLowerCase(o1) - Character.toLowerCase(o2);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">//此处的意思是，o2 - o1如果是负数，则o2&lt;o1，不交换两者的位置，小的数o2依旧排在后面，所以这样是降序</span></span><br><span class="line"><span class="comment">//o2 - o1如果是正数，则o2&gt;o1，交换两者的位置，大的数o2旧排在前面，所以这样是降序</span></span><br><span class="line">letters.sort(<span class="keyword">new</span> Comparator&lt;Character&gt;() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compare</span><span class="params">(Character o1, Character o2)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> Character.toLowerCase(o2) - Character.toLowerCase(o1);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
-<p>数组工具类和集合工具类中提供的工具方法sort方法都给出了含有Comparator接口的重载方法。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Arrays.sort(T[],Comparator&lt;? <span class="keyword">super</span> T&gt; c);</span><br><span class="line">Collections.sort(List&lt;T&gt; list,Comparator&lt;? <span class="keyword">super</span> T&gt; c);</span><br></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>Java</category>
-        <category>Java基础</category>
-      </categories>
-      <tags>
-        <tag>Java</tag>
-        <tag>Java基础</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Hive存储文件类型</title>
     <url>/2021/10/03/Hive_%E5%AD%98%E5%82%A8%E6%96%87%E4%BB%B6%E7%B1%BB%E5%9E%8B/</url>
     <content><![CDATA[<table>
@@ -884,6 +818,72 @@
       </categories>
       <tags>
         <tag>Hive</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Java中Comparable和Comparator</title>
+    <url>/2021/08/01/Java_ComparableAndComparator/</url>
+    <content><![CDATA[<p>Java中Comparable和Comparator两个<strong>接口</strong>的比较。</p>
+<table>
+<colgroup>
+<col style="width: 9%">
+<col style="width: 45%">
+<col style="width: 45%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>Comparable</th>
+<th>Comparator</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>作用</td>
+<td>可以让实现它的类的对象进行比较大小</td>
+<td>在类对象的外部制定排序规则，然后作为排序策略参数传递给某些类的对象的构造函数，实现比较大小</td>
+</tr>
+<tr class="even">
+<td>位置</td>
+<td>java.lang 包</td>
+<td>java.util 包</td>
+</tr>
+<tr class="odd">
+<td>接口中的方法</td>
+<td>只有一个方法 compareTo()</td>
+<td>JDK 8 以前只有两个方法compare()和equals()，8以后增加多个方法</td>
+</tr>
+<tr class="even">
+<td>使用</td>
+<td>public class Test implements Comparable{} 并重写其中的compareTo()方法</td>
+<td>数组工具类和集合工具类中提供的工具方法sort方法都给出了含有Comparator接口的重载方法。</td>
+</tr>
+<tr class="odd">
+<td>排序规则</td>
+<td>compareTo 方法的返回值有三种情况：e1.compareTo(e2) &gt; 0 即 e1 &gt; e2<br>e1.compareTo(e2) = 0 即 e1 = e2<br>e1.compareTo(e2) &lt; 0 即 e1 &lt; e2</td>
+<td>compare函数返回正数就交换传入参数的位置，否则（负数或0）就不交换两者的位置。</td>
+</tr>
+</tbody>
+</table>
+<a id="more"></a>
+<h3 id="comparable">Comparable</h3>
+<p>使用方法</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> java.io.Serializable;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BookBean</span> <span class="keyword">implements</span> <span class="title">Serializable</span>, <span class="title">Comparable</span> </span>&#123;</span><br><span class="line">    <span class="comment">//名字与价格</span></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> count;</span><br><span class="line"></span><br><span class="line">	<span class="comment">//构造函数</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Solution</span><span class="params">(String name, <span class="keyword">int</span> count)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">        <span class="keyword">this</span>.count = count;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getName</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setName</span><span class="params">(String name)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getCount</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> count;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setCount</span><span class="params">(<span class="keyword">int</span> count)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.count = count;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 当向 TreeSet 中添加 BookBean 时，会调用这个方法进行排序</span></span><br><span class="line"><span class="comment">     * e1.compareTo(e2) &gt; 0 即 e1 &gt; e2</span></span><br><span class="line"><span class="comment">     * e1.compareTo(e2) = 0 即 e1 = e2</span></span><br><span class="line"><span class="comment">     * e1.compareTo(e2) &lt; 0 即 e1 &lt; e2</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> another</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compareTo</span><span class="params">(Object another)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (another <span class="keyword">instanceof</span> Solution) &#123;</span><br><span class="line">            Solution anotherBook = (Solution) another;</span><br><span class="line">            <span class="keyword">int</span> result;</span><br><span class="line"></span><br><span class="line">            <span class="comment">//比如这里按照书价排序</span></span><br><span class="line">            result = getCount() - anotherBook.getCount();</span><br><span class="line"></span><br><span class="line">            <span class="comment">//或者按照 String 的比较顺序</span></span><br><span class="line">            <span class="comment">//result = getName().compareTo(anotherBook.getName());</span></span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (result == <span class="number">0</span>) &#123;   <span class="comment">//当书价一致时，再对比书名。 保证所有属性比较一遍</span></span><br><span class="line">                result = getName().compareTo(anotherBook.getName());</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> result;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 一样就返回 0</span></span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 重写 equals</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> o</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">equals</span><span class="params">(Object o)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">this</span> == o) <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">        <span class="keyword">if</span> (!(o <span class="keyword">instanceof</span> Solution)) <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line"></span><br><span class="line">        Solution bean = (Solution) o;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (getCount() != bean.getCount()) <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">        <span class="keyword">return</span> getName().equals(bean.getName());</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 重写 hashCode 的计算方法</span></span><br><span class="line"><span class="comment">     * 根据所有属性进行 迭代计算，避免重复</span></span><br><span class="line"><span class="comment">     * 计算 hashCode 时 计算因子 31 见得很多，是一个质数，不能再被除</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">hashCode</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">//调用 String 的 hashCode(), 唯一表示一个字符串内容</span></span><br><span class="line">        <span class="keyword">int</span> result = getName().hashCode();</span><br><span class="line">        <span class="comment">//乘以 31, 再加上 count</span></span><br><span class="line">        result = <span class="number">31</span> * result + getCount();</span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">toString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;BookBean&#123;&quot;</span> +</span><br><span class="line">                <span class="string">&quot;name=&#x27;&quot;</span> + name + <span class="string">&#x27;\&#x27;&#x27;</span> +</span><br><span class="line">                <span class="string">&quot;, count=&quot;</span> + count +</span><br><span class="line">                <span class="string">&#x27;&#125;&#x27;</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="comparator">Comparator</h3>
+<p>compare函数返回正数就交换传入参数的位置，否则（负数或0）就不交换两者的位置。</p>
+<p>因此，对于compare(Object o1, Object o2)来说，如果写成 return o1 - o2 则为升序，反之为降序。</p>
+<p>案例：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">List&lt;Character&gt; letters = <span class="keyword">new</span> ArrayList&lt;&gt;(str.length());</span><br><span class="line"></span><br><span class="line"><span class="comment">//将英文字母先排序好</span></span><br><span class="line"><span class="comment">//此处的意思是，o1 - o2如果是负数，则o1&lt;o2，不交换两者的位置，小的数o1依旧排在前面，所以这样是升序</span></span><br><span class="line"><span class="comment">//也是默认的</span></span><br><span class="line">letters.sort(<span class="keyword">new</span> Comparator&lt;Character&gt;() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compare</span><span class="params">(Character o1, Character o2)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> Character.toLowerCase(o1) - Character.toLowerCase(o2);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">//此处的意思是，o2 - o1如果是负数，则o2&lt;o1，不交换两者的位置，小的数o2依旧排在后面，所以这样是降序</span></span><br><span class="line"><span class="comment">//o2 - o1如果是正数，则o2&gt;o1，交换两者的位置，大的数o2旧排在前面，所以这样是降序</span></span><br><span class="line">letters.sort(<span class="keyword">new</span> Comparator&lt;Character&gt;() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compare</span><span class="params">(Character o1, Character o2)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> Character.toLowerCase(o2) - Character.toLowerCase(o1);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>数组工具类和集合工具类中提供的工具方法sort方法都给出了含有Comparator接口的重载方法。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Arrays.sort(T[],Comparator&lt;? <span class="keyword">super</span> T&gt; c);</span><br><span class="line">Collections.sort(List&lt;T&gt; list,Comparator&lt;? <span class="keyword">super</span> T&gt; c);</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>Java</category>
+        <category>Java基础</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
+        <tag>Java基础</tag>
       </tags>
   </entry>
   <entry>
@@ -4688,6 +4688,80 @@
       </tags>
   </entry>
   <entry>
+    <title>快速幂与快速乘法</title>
+    <url>/2021/10/16/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E5%BF%AB%E9%80%9F%E5%B9%82%E4%B8%8E%E5%BF%AB%E9%80%9F%E4%B9%98%E6%B3%95/</url>
+    <content><![CDATA[<table>
+<colgroup>
+<col style="width: 11%">
+<col style="width: 88%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>概念</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>快速幂</td>
+<td>就是将<span class="math inline">\(a^b\)</span>拆解为<span class="math inline">\(a^b=a^{b_01}*a^{b_12}*a^{b_24}*a^{b_38}*...*a^{b_n2^n}\)</span>。<br>即每一次不断地将a平方，并用b的二进制位判断这个平方数是否被乘进结果中。</td>
+</tr>
+<tr class="even">
+<td>快速乘法</td>
+<td>就是将<span class="math inline">\(a*b\)</span>拆解为<span class="math inline">\(a*b=a*b_0*1+a*b_1*2+a*b_2*4+a*b_3*8...+a*b_n*2^n\)</span>。<br>即每一次不断地将a乘上2的平方数，并用b的二进制位判断这个乘积是否被加进结果中。</td>
+</tr>
+</tbody>
+</table>
+<a id="more"></a>
+<h3 id="快速幂">快速幂</h3>
+<p>假设要求 <span class="math inline">\(a^{b}\)</span>，按照朴素算法就是把 a 连乘 b 次，这样一来时间复杂度是 O(b) ，即是 O(n) 级别。</p>
+<p>但快速幂能做到 <strong>O(logn)</strong> 的复杂度。</p>
+<p>具体来说，就是把b转换成二进制表示，假设b的二进制表示有x位，乘法的次数就转换成最多2x次（二进制位为0时，结果不需要乘）。</p>
+<p><strong>举例</strong></p>
+<p>以<span class="math inline">\(a^{11}\)</span>为例。</p>
+<p>常规的乘法次数，需要将a连续乘11次。</p>
+<p>11的二进制为1011，即<span class="math inline">\(11=1*2^0+1*2^1+0*2^2+1*2^3\)</span>。</p>
+<p><span class="math inline">\(a^{11} = a^{2^0+2^1+2^3}=a^{2^0}*a^{2^1}*a^{2^3}=a^1*a^2*a^8\)</span>。</p>
+<p>令<span class="math inline">\(base=a\)</span>。</p>
+<p><span class="math inline">\(base=base*base=a^2\)</span>。</p>
+<p><span class="math inline">\(base=base*base=a^2*a^2=a^4\)</span>。注意，这里<span class="math inline">\(a^2\)</span>已经算过了。</p>
+<p><span class="math inline">\(base=base*base=a^4*a^4=a^8\)</span>。注意，这里<span class="math inline">\(a^4\)</span>已经算过了。</p>
+<p>所以，通过快速幂的方式，将乘法次数转换为3次（计算<span class="math inline">\(a^2、a^4、a^8\)</span>）+2次（计算结果<span class="math inline">\(a^1*a^2*a^8\)</span>）一共5次计算，而非原来的11次计算。</p>
+<p>本质上，就是将<span class="math inline">\(a^b\)</span>拆解为<span class="math inline">\(a^b=a^{b_01}*a^{b_12}*a^{b_24}*a^{b_38}*...*a^{b_n2^n}\)</span>，即每一次不断地将a平方，并用b的二进制位判断这个平方数是否被乘进结果中。</p>
+<p><strong>代码</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">long</span> <span class="keyword">long</span> <span class="title">ksm</span><span class="params">(<span class="keyword">long</span> <span class="keyword">long</span> a, <span class="keyword">long</span> <span class="keyword">long</span> b)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">long</span> <span class="keyword">long</span> res = <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">long</span> <span class="keyword">long</span> base = a;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">while</span>(b != <span class="number">0</span>) &#123; <span class="comment">//当b的二进制位还有数字</span></span><br><span class="line">        </span><br><span class="line">      <span class="keyword">if</span>(b &amp; <span class="number">1</span> != <span class="number">0</span>) <span class="comment">//如果b的二进制，最末尾为1，则需要把a的2次幂结果乘到最终结果中</span></span><br><span class="line">          res *= base;</span><br><span class="line">      </span><br><span class="line">	  base *= base;<span class="comment">//不断地对a进行平方操作</span></span><br><span class="line">	  b &gt;&gt;= <span class="number">1</span>; <span class="comment">//删除b二进制下最末尾的数字</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> res;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>理解 <embed src="https://private.codecogs.com/gif.latex?base%5C%2C*%3D%5C%2Cbase"> 这一步：因为 <embed src="https://private.codecogs.com/gif.latex?base%5C%2C*%5C%2Cbase"> == <embed src="https://private.codecogs.com/gif.latex?base%5E%7B2%7D"> ，下一步再乘，就是 (<embed src="https://private.codecogs.com/gif.latex?base%5E%7B2%7D">) * (<embed src="https://private.codecogs.com/gif.latex?base%5E%7B2%7D">) == <embed src="https://private.codecogs.com/gif.latex?base%5E%7B4%7D"> ，然后同理 (<embed src="https://private.codecogs.com/gif.latex?base%5E%7B4%7D">) * (<embed src="https://private.codecogs.com/gif.latex?base%5E%7B4%7D">) == <embed src="https://private.codecogs.com/gif.latex?base%5E%7B8%7D"> ，由此可以做到 <embed src="https://private.codecogs.com/gif.latex?base">→ <embed src="https://private.codecogs.com/gif.latex?base%5E%7B2%7D"> → <embed src="https://private.codecogs.com/gif.latex?base%5E%7B4%7D"> → <embed src="https://private.codecogs.com/gif.latex?base%5E%7B8%7D"> → <embed src="https://private.codecogs.com/gif.latex?base%5E%7B16%7D"> → <embed src="https://private.codecogs.com/gif.latex?base%5E%7B32%7D">.......指数正好是 <embed src="https://private.codecogs.com/gif.latex?2%5E%7Bi%7D"> 。</p>
+</blockquote>
+<h3 id="快速乘法">快速乘法</h3>
+<p>在计算机中做加法运算会比乘法快得多（参考模电中的加法器），做乘法运算往往会溢出，即使用 long long 类型也拯救不了。因此需要寻找一种能高效完成乘法运算且不会溢出的算法，这就是快速乘算法。</p>
+<p>快速乘法的本质就是用加法和位运算来代替乘法。</p>
+<p>假设要求<span class="math inline">\(a*b\)</span>，就是把b转换成二进制表示，假设b的二进制表示有x位，加法的次数就转换成最多2x次（二进制位为0时，结果不需要加）。</p>
+<p><strong>举例</strong></p>
+<p>以<span class="math inline">\(a*11\)</span>为例。</p>
+<p>11的二进制为1011，即<span class="math inline">\(11=1*2^0+1*2^1+0*2^2+1*2^3\)</span>。</p>
+<p><span class="math inline">\(a*11 = a*1*2^0+a*1*2^1+a*0*2^2+a*1*2^3 = a*1+a*2+a*8\)</span>。</p>
+<p>令<span class="math inline">\(base=a\)</span>。</p>
+<p><span class="math inline">\(base=base+base=a*2\)</span>。</p>
+<p><span class="math inline">\(base=base+base=a*2+a*2=a*4\)</span>。注意，这里<span class="math inline">\(a*2\)</span>已经算过了。</p>
+<p><span class="math inline">\(base=base+base=a*4+a*4=a*8\)</span>。注意，这里<span class="math inline">\(a*4\)</span>已经算过了。</p>
+<p>本质上，就是将<span class="math inline">\(a*b\)</span>拆解为<span class="math inline">\(a*b=a*b_0*1+a*b_1*2+a*b_2*4+a*b_3*8...+a*b_n*2^n\)</span>，即每一次不断地将a乘上2的平方数，并用b的二进制位判断这个乘积是否被加进结果中。</p>
+<p><strong>代码</strong></p>
+<p>就是快速幂的代码，将乘法换成加法。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">long</span> <span class="keyword">long</span> <span class="title">ksc</span><span class="params">(<span class="keyword">long</span> <span class="keyword">long</span> a, <span class="keyword">long</span> <span class="keyword">long</span> b)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">long</span> <span class="keyword">long</span> res = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">long</span> <span class="keyword">long</span> base = a;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">while</span>(b != <span class="number">0</span>) &#123; <span class="comment">//当b的二进制位还有数字</span></span><br><span class="line">        </span><br><span class="line">      <span class="keyword">if</span>(b &amp; <span class="number">1</span> != <span class="number">0</span>)  <span class="comment">//如果b的二进制，最末尾为1，则需要把a乘上2的平方数的结果加到最终结果中</span></span><br><span class="line">          res += base;</span><br><span class="line">      </span><br><span class="line">	  base += base;<span class="comment">//不断地对a乘上2的平方数</span></span><br><span class="line">	  b &gt;&gt;= <span class="number">1</span>; <span class="comment">//删除b二进制下最末尾的数字</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> res;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="参考资料">参考资料</h3>
+<p>https://blog.csdn.net/liangllhahaha/article/details/82119378?utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7Edefault-2.no_search_link&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7Edefault-2.no_search_link</p>
+]]></content>
+      <categories>
+        <category>数据结构与算法</category>
+        <category>算法</category>
+      </categories>
+      <tags>
+        <tag>数据结构与算法</tag>
+        <tag>算法</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>树结构</title>
     <url>/2021/04/17/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E6%A0%91/</url>
     <content><![CDATA[<p>B树、B+树、红黑树、满二叉树、完全二叉树</p>
@@ -5418,102 +5492,6 @@
       </tags>
   </entry>
   <entry>
-    <title>0907字节二面</title>
-    <url>/2021/09/08/%E9%9D%A2%E8%AF%95_0907%E5%AD%97%E8%8A%82%E4%BA%8C%E9%9D%A2/</url>
-    <content><![CDATA[<h3 id="操作系统">操作系统</h3>
-<h4 id="虚拟内存">虚拟内存</h4>
-<p>虚拟内存，是一种内存管理技术，为每个进程提供了⼀个连续私有的地址空间。可以把内存扩展到硬盘空间，使得程序认为它拥有连续的可用的内存（一个连续完整的地址空间），但实际上，它通常是被分隔成多个物理内存碎片，还有部分暂时存储在外部磁盘上，在需要时进行数据交换。</p>
-<p>1、程序可以使⽤相邻的虚拟地址来访问物理内存中不相邻的内存缓冲区。</p>
-<p>2、程序可以使⽤虚拟地址来访问⼤于可⽤物理内存的空间。</p>
-<p>3、不同进程使⽤的虚拟地址彼此隔离，无法修改对方的物理内存。</p>
-<a id="more"></a>
-<h4 id="进程线程">进程线程</h4>
-<p><strong>进程和线程的区别</strong></p>
-<p>1、进程是资源分配的最小单位，线程是CPU调度的最小单位</p>
-<p>2、进程有自己的独立地址空间，线程没有（线程依托进程存在）</p>
-<p>3、进程间的信息难以共享，线程可以通过共享的数据进行通信。</p>
-<blockquote>
-<p>由于除去只读代码段外，父子进程并未共享内存，因此必须采用一些进程间通信（inter-process communication，简称IPC）方式，在进程间进行信息交换。</p>
-<p>线程之间能够方便、快速地共享信息。只需将数据复制到共享（全局或堆）变量中即可。</p>
-</blockquote>
-<p>4、进程切换的开销为什么比线程大。</p>
-<p><strong>进程切换的开销为什么比线程大</strong></p>
-<p>切换和调度是一个概念，都是为了保证所有进程可以得到公平的执行机会，使得多个进程间可以并发执行。</p>
-<p>进程切换：</p>
-<p>进程切换时</p>
-<ul>
-<li>由于不同进程间的虚拟地址是不同的，会涉及到缺页中断和页面置换的问题。</li>
-<li>还需要保存虚拟内存，栈，全局变量等用户空间的资源，以及内核堆栈，寄存器等内核空间的状态。</li>
-</ul>
-<p>所以开销比较大。</p>
-<p>线程切换：</p>
-<p>如果前后两个线程属于同一个进程。</p>
-<ul>
-<li>此时，因为虚拟内存是共享的，所以在切换时，虚拟内存这些资源就保持不动，缺页中断的概率也会降低。</li>
-<li>只需要切换线程的私有数据、寄存器等不共享的数据。</li>
-</ul>
-<blockquote>
-<p>https://www.hiyu.space/2021/01/31/%E9%9D%A2%E8%AF%95%E5%BF%85%E5%A4%87%E7%9F%A5%E8%AF%86-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AF%87/</p>
-<p>https://blog.csdn.net/GMPY_Tiger/article/details/86467830</p>
-<p>https://www.cnblogs.com/qingbaizhinian/p/13775327.html#_label1</p>
-</blockquote>
-<p><strong>线程与页面置换</strong></p>
-<p>前后两个线程属于不同进程。此时，因为资源不共享，所以切换过程就跟进程上下文切换是一样。会涉及到缺页中断和页面置换的问题。</p>
-<h3 id="java">Java</h3>
-<h4 id="arraylist">ArrayList</h4>
-<p><strong>介绍一下ArrayList，要注意一些什么</strong></p>
-<p>ArrayList是一个底层用数组实现的队列，能够动态地增加和减少元素。</p>
-<p><strong>ArrayList扩容</strong></p>
-<p>首先将原元素数组的长度增大1.5倍，然后将旧数组拷贝到扩容后的新数组中。删除元素时是不会导致容量缩减的，因为维护数组容量的变化会带来性能的损耗，因此采用空间换时间的策略牺牲部分内存提高响应速度。</p>
-<p><strong>ArrayList线程安全</strong></p>
-<p>对ArrayList进行添加元素的操作的时候是分两个步骤进行的：</p>
-<p>1、先在object[size]的位置上存放需要添加的元素。</p>
-<p>2、将size的值增加1。</p>
-<p>由于这个过程在多线程的环境下是不能保证具有原子性的，因此ArrayList在多线程的环境下是线程不安全的。</p>
-<p>如果非要在多线程的环境下使用ArrayList，就需要保证它的线程安全性，通常有两种解决办法：</p>
-<p>1、使用synchronized关键字；</p>
-<p>2、换成线程安全的CopyOnWriteArrayList</p>
-<blockquote>
-<p>CopyOnWriteArrayList是个线程安全且读操作无锁的ArrayList。</p>
-<p>读操作是无锁的。至于写操作，比如向容器中添加一个元素，则首先将当前容器复制一份，然后在新副本上执行写操作，结束之后再将原容器的引用指向新容器。</p>
-<p>优点：读多写少的并发场景，在使用迭代器进行遍历时候，若中途有别的线程对容器进行修改，就不会抛出异常了。</p>
-<p>缺点：</p>
-<p>1、内存占用，需要拷贝数组</p>
-<p>2、无法保证实时性，在写操作执行过程中，读不会阻塞但读取到的却是老容器的数据。</p>
-</blockquote>
-<h4 id="垃圾回收">垃圾回收</h4>
-<p><strong>垃圾回收方法</strong></p>
-<p>回收那些没有被引用的对象占用的内存空间。</p>
-<p>标记清除：通过可达性算法，将存活的对象进行标记，将要被回收的空间用空闲链表连接，分配给其他对象。</p>
-<p>标记整理：通过可达性算法，将存活的对象进行标记，移动它们到一侧，并用空闲指针指向可以分配的位置。</p>
-<p>复制算法：Eden区和两个Survior区，每次只使用一个Survior区，然后GC的时候将仍然存活的对象复制到空闲的Survior区。</p>
-<p><strong>算法分别适用于哪些场景</strong></p>
-<p>堆内存被分为新生代和老年代。</p>
-<p>新生代用复制，老年代用标记清除或标记整理。</p>
-<p>新生代用复制：</p>
-<ul>
-<li>新生代中，每次垃圾回收都可以释放大量的对象，只有少部分存活，所以只有少部分对象要被复制到保留区中，这也意味着复制并不会太耗时。</li>
-<li>除此之外，直接释放被使用的空间的全部内存，比一段一段释放的效率也要高很多。</li>
-<li>同时，对象被复制到另外一个区域时，会被整齐地摆放，所以不会出现内存碎片，所以能够更简单地分配空间。</li>
-</ul>
-<p>老年代用标记清除或标记整理：</p>
-<p>对于老年代而言，每次垃圾回收只能释放小部分空间，若使用复制算法，每次将需要做大量复制，所以不适合使用复制算法，因此在老年代中，一般使用标记—清除或者标记—整理算法。</p>
-<blockquote>
-<p>https://www.cnblogs.com/tuyang1129/p/12508216.html</p>
-</blockquote>
-<h3 id="算法">算法</h3>
-<p>岛屿问题</p>
-<h3 id="实习">实习</h3>
-<p>介绍实习项目。</p>
-]]></content>
-      <categories>
-        <category>面试</category>
-      </categories>
-      <tags>
-        <tag>面试</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>0906网易互娱一面</title>
     <url>/2021/09/06/%E9%9D%A2%E8%AF%95_0906%E7%BD%91%E6%98%93%E4%BA%92%E5%A8%B1%E4%B8%80%E9%9D%A2/</url>
     <content><![CDATA[<h3 id="hive">Hive</h3>
@@ -5676,6 +5654,102 @@
 <p>当Stop-the-world发生时，除了GC所需的线程以外，所有线程都处于等待状态直到GC任务完成。</p>
 </blockquote>
 <p>G1</p>
+]]></content>
+      <categories>
+        <category>面试</category>
+      </categories>
+      <tags>
+        <tag>面试</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>0907字节二面</title>
+    <url>/2021/09/08/%E9%9D%A2%E8%AF%95_0907%E5%AD%97%E8%8A%82%E4%BA%8C%E9%9D%A2/</url>
+    <content><![CDATA[<h3 id="操作系统">操作系统</h3>
+<h4 id="虚拟内存">虚拟内存</h4>
+<p>虚拟内存，是一种内存管理技术，为每个进程提供了⼀个连续私有的地址空间。可以把内存扩展到硬盘空间，使得程序认为它拥有连续的可用的内存（一个连续完整的地址空间），但实际上，它通常是被分隔成多个物理内存碎片，还有部分暂时存储在外部磁盘上，在需要时进行数据交换。</p>
+<p>1、程序可以使⽤相邻的虚拟地址来访问物理内存中不相邻的内存缓冲区。</p>
+<p>2、程序可以使⽤虚拟地址来访问⼤于可⽤物理内存的空间。</p>
+<p>3、不同进程使⽤的虚拟地址彼此隔离，无法修改对方的物理内存。</p>
+<a id="more"></a>
+<h4 id="进程线程">进程线程</h4>
+<p><strong>进程和线程的区别</strong></p>
+<p>1、进程是资源分配的最小单位，线程是CPU调度的最小单位</p>
+<p>2、进程有自己的独立地址空间，线程没有（线程依托进程存在）</p>
+<p>3、进程间的信息难以共享，线程可以通过共享的数据进行通信。</p>
+<blockquote>
+<p>由于除去只读代码段外，父子进程并未共享内存，因此必须采用一些进程间通信（inter-process communication，简称IPC）方式，在进程间进行信息交换。</p>
+<p>线程之间能够方便、快速地共享信息。只需将数据复制到共享（全局或堆）变量中即可。</p>
+</blockquote>
+<p>4、进程切换的开销为什么比线程大。</p>
+<p><strong>进程切换的开销为什么比线程大</strong></p>
+<p>切换和调度是一个概念，都是为了保证所有进程可以得到公平的执行机会，使得多个进程间可以并发执行。</p>
+<p>进程切换：</p>
+<p>进程切换时</p>
+<ul>
+<li>由于不同进程间的虚拟地址是不同的，会涉及到缺页中断和页面置换的问题。</li>
+<li>还需要保存虚拟内存，栈，全局变量等用户空间的资源，以及内核堆栈，寄存器等内核空间的状态。</li>
+</ul>
+<p>所以开销比较大。</p>
+<p>线程切换：</p>
+<p>如果前后两个线程属于同一个进程。</p>
+<ul>
+<li>此时，因为虚拟内存是共享的，所以在切换时，虚拟内存这些资源就保持不动，缺页中断的概率也会降低。</li>
+<li>只需要切换线程的私有数据、寄存器等不共享的数据。</li>
+</ul>
+<blockquote>
+<p>https://www.hiyu.space/2021/01/31/%E9%9D%A2%E8%AF%95%E5%BF%85%E5%A4%87%E7%9F%A5%E8%AF%86-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AF%87/</p>
+<p>https://blog.csdn.net/GMPY_Tiger/article/details/86467830</p>
+<p>https://www.cnblogs.com/qingbaizhinian/p/13775327.html#_label1</p>
+</blockquote>
+<p><strong>线程与页面置换</strong></p>
+<p>前后两个线程属于不同进程。此时，因为资源不共享，所以切换过程就跟进程上下文切换是一样。会涉及到缺页中断和页面置换的问题。</p>
+<h3 id="java">Java</h3>
+<h4 id="arraylist">ArrayList</h4>
+<p><strong>介绍一下ArrayList，要注意一些什么</strong></p>
+<p>ArrayList是一个底层用数组实现的队列，能够动态地增加和减少元素。</p>
+<p><strong>ArrayList扩容</strong></p>
+<p>首先将原元素数组的长度增大1.5倍，然后将旧数组拷贝到扩容后的新数组中。删除元素时是不会导致容量缩减的，因为维护数组容量的变化会带来性能的损耗，因此采用空间换时间的策略牺牲部分内存提高响应速度。</p>
+<p><strong>ArrayList线程安全</strong></p>
+<p>对ArrayList进行添加元素的操作的时候是分两个步骤进行的：</p>
+<p>1、先在object[size]的位置上存放需要添加的元素。</p>
+<p>2、将size的值增加1。</p>
+<p>由于这个过程在多线程的环境下是不能保证具有原子性的，因此ArrayList在多线程的环境下是线程不安全的。</p>
+<p>如果非要在多线程的环境下使用ArrayList，就需要保证它的线程安全性，通常有两种解决办法：</p>
+<p>1、使用synchronized关键字；</p>
+<p>2、换成线程安全的CopyOnWriteArrayList</p>
+<blockquote>
+<p>CopyOnWriteArrayList是个线程安全且读操作无锁的ArrayList。</p>
+<p>读操作是无锁的。至于写操作，比如向容器中添加一个元素，则首先将当前容器复制一份，然后在新副本上执行写操作，结束之后再将原容器的引用指向新容器。</p>
+<p>优点：读多写少的并发场景，在使用迭代器进行遍历时候，若中途有别的线程对容器进行修改，就不会抛出异常了。</p>
+<p>缺点：</p>
+<p>1、内存占用，需要拷贝数组</p>
+<p>2、无法保证实时性，在写操作执行过程中，读不会阻塞但读取到的却是老容器的数据。</p>
+</blockquote>
+<h4 id="垃圾回收">垃圾回收</h4>
+<p><strong>垃圾回收方法</strong></p>
+<p>回收那些没有被引用的对象占用的内存空间。</p>
+<p>标记清除：通过可达性算法，将存活的对象进行标记，将要被回收的空间用空闲链表连接，分配给其他对象。</p>
+<p>标记整理：通过可达性算法，将存活的对象进行标记，移动它们到一侧，并用空闲指针指向可以分配的位置。</p>
+<p>复制算法：Eden区和两个Survior区，每次只使用一个Survior区，然后GC的时候将仍然存活的对象复制到空闲的Survior区。</p>
+<p><strong>算法分别适用于哪些场景</strong></p>
+<p>堆内存被分为新生代和老年代。</p>
+<p>新生代用复制，老年代用标记清除或标记整理。</p>
+<p>新生代用复制：</p>
+<ul>
+<li>新生代中，每次垃圾回收都可以释放大量的对象，只有少部分存活，所以只有少部分对象要被复制到保留区中，这也意味着复制并不会太耗时。</li>
+<li>除此之外，直接释放被使用的空间的全部内存，比一段一段释放的效率也要高很多。</li>
+<li>同时，对象被复制到另外一个区域时，会被整齐地摆放，所以不会出现内存碎片，所以能够更简单地分配空间。</li>
+</ul>
+<p>老年代用标记清除或标记整理：</p>
+<p>对于老年代而言，每次垃圾回收只能释放小部分空间，若使用复制算法，每次将需要做大量复制，所以不适合使用复制算法，因此在老年代中，一般使用标记—清除或者标记—整理算法。</p>
+<blockquote>
+<p>https://www.cnblogs.com/tuyang1129/p/12508216.html</p>
+</blockquote>
+<h3 id="算法">算法</h3>
+<p>岛屿问题</p>
+<h3 id="实习">实习</h3>
+<p>介绍实习项目。</p>
 ]]></content>
       <categories>
         <category>面试</category>
