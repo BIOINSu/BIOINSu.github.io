@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.3.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/maze.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/maze.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/maze.png">
+  <link rel="mask-icon" href="/images/maze.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","images":"/images","scheme":"Mist","version":"8.2.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false}};
+  </script>
+<meta name="description" content="简介  最左匹配原则 在有联合索引的情况下，索引文件具有 B-Tree 的最左前缀匹配特性，如果左边的值未确定，那么无法使用此索引。  主键插入顺序   新插入的数据把当前页面分裂成两个页面，把本页中的一些记录移动到新创建的这个页中，意味着产生性能损耗。 所以如果想尽量避免这样无谓的性能损耗，最好让插入的记录的主键值依次递增，这样就不会发生这样的性能损耗了。 因此建议让主键">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL 索引索引失效的情况">
+<meta property="og:url" content="http://example.com/2022/04/26/MySQL_%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96_01%E7%B4%A2%E5%BC%95%E5%A4%B1%E6%95%88/index.html">
+<meta property="og:site_name" content="BIOINSu">
+<meta property="og:description" content="简介  最左匹配原则 在有联合索引的情况下，索引文件具有 B-Tree 的最左前缀匹配特性，如果左边的值未确定，那么无法使用此索引。  主键插入顺序   新插入的数据把当前页面分裂成两个页面，把本页中的一些记录移动到新创建的这个页中，意味着产生性能损耗。 所以如果想尽量避免这样无谓的性能损耗，最好让插入的记录的主键值依次递增，这样就不会发生这样的性能损耗了。 因此建议让主键">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2022/04/26/MySQL_%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96_01%E7%B4%A2%E5%BC%95%E5%A4%B1%E6%95%88/image-20220426203247043.png">
+<meta property="og:image" content="http://example.com/2022/04/26/MySQL_%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96_01%E7%B4%A2%E5%BC%95%E5%A4%B1%E6%95%88/image-20220426211526989.png">
+<meta property="og:image" content="http://example.com/2022/04/26/MySQL_%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96_01%E7%B4%A2%E5%BC%95%E5%A4%B1%E6%95%88/image-20220426211741818.png">
+<meta property="og:image" content="http://example.com/2022/04/26/MySQL_%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96_01%E7%B4%A2%E5%BC%95%E5%A4%B1%E6%95%88/image-20220426211858864.png">
+<meta property="og:image" content="http://example.com/2022/04/26/MySQL_%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96_01%E7%B4%A2%E5%BC%95%E5%A4%B1%E6%95%88/image-20220426223124033.png">
+<meta property="og:image" content="http://example.com/2022/04/26/MySQL_%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96_01%E7%B4%A2%E5%BC%95%E5%A4%B1%E6%95%88/image-20220426223434251.png">
+<meta property="og:image" content="http://example.com/2022/04/26/MySQL_%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96_01%E7%B4%A2%E5%BC%95%E5%A4%B1%E6%95%88/image-20220426223540475.png">
+<meta property="og:image" content="http://example.com/2022/04/26/MySQL_%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96_01%E7%B4%A2%E5%BC%95%E5%A4%B1%E6%95%88/image-20220426224045075.png">
+<meta property="og:image" content="http://example.com/2022/04/26/MySQL_%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96_01%E7%B4%A2%E5%BC%95%E5%A4%B1%E6%95%88/image-20220426224107517.png">
+<meta property="og:image" content="http://example.com/2022/04/26/MySQL_%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96_01%E7%B4%A2%E5%BC%95%E5%A4%B1%E6%95%88/image-20220426224244906.png">
+<meta property="article:published_time" content="2022-04-26T12:13:51.968Z">
+<meta property="article:modified_time" content="2022-04-30T07:24:36.471Z">
+<meta property="article:author" content="BIOINSu">
+<meta property="article:tag" content="数据库">
+<meta property="article:tag" content="MySQL">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2022/04/26/MySQL_%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96_01%E7%B4%A2%E5%BC%95%E5%A4%B1%E6%95%88/image-20220426203247043.png">
+
+
+<link rel="canonical" href="http://example.com/2022/04/26/MySQL_%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96_01%E7%B4%A2%E5%BC%95%E5%A4%B1%E6%95%88/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+<title>MySQL 索引索引失效的情况 | BIOINSu</title>
+  
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BIOINSu</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%80%E4%BB%8B"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%80%E5%B7%A6%E5%8C%B9%E9%85%8D%E5%8E%9F%E5%88%99"><span class="nav-number">2.</span> <span class="nav-text">最左匹配原则</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BB%E9%94%AE%E6%8F%92%E5%85%A5%E9%A1%BA%E5%BA%8F"><span class="nav-number">3.</span> <span class="nav-text">主键插入顺序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%A1%E7%AE%97%E5%87%BD%E6%95%B0%E7%B1%BB%E5%9E%8B%E8%BD%AC%E6%8D%A2%E8%87%AA%E5%8A%A8%E6%88%96%E6%89%8B%E5%8A%A8%E5%AF%BC%E8%87%B4%E7%B4%A2%E5%BC%95%E5%A4%B1%E6%95%88"><span class="nav-number">4.</span> <span class="nav-text">计算、函数、类型转换(自动或手动)导致索引失效</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%8C%83%E5%9B%B4%E6%9D%A1%E4%BB%B6%E5%8F%B3%E8%BE%B9%E7%9A%84%E5%88%97%E7%B4%A2%E5%BC%95%E5%A4%B1%E6%95%88"><span class="nav-number">5.</span> <span class="nav-text">范围条件右边的列索引失效</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8D%E7%AD%89%E4%BA%8E-%E6%88%96%E8%80%85%E7%B4%A2%E5%BC%95%E5%A4%B1%E6%95%88"><span class="nav-number">6.</span> <span class="nav-text">不等于(!&#x3D; 或者&lt;&gt;)索引失效</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#is-null%E5%8F%AF%E4%BB%A5%E4%BD%BF%E7%94%A8%E7%B4%A2%E5%BC%95is-not-null%E6%97%A0%E6%B3%95%E4%BD%BF%E7%94%A8%E7%B4%A2%E5%BC%95"><span class="nav-number">7.</span> <span class="nav-text">is null可以使用索引，is not null无法使用索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#like%E4%BB%A5%E9%80%9A%E9%85%8D%E7%AC%A6%E5%BC%80%E5%A4%B4%E7%B4%A2%E5%BC%95%E5%A4%B1%E6%95%88"><span class="nav-number">8.</span> <span class="nav-text">like以通配符%开头索引失效</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#or-%E5%89%8D%E5%90%8E%E5%AD%98%E5%9C%A8%E9%9D%9E%E7%B4%A2%E5%BC%95%E7%9A%84%E5%88%97%E7%B4%A2%E5%BC%95%E5%A4%B1%E6%95%88"><span class="nav-number">9.</span> <span class="nav-text">OR 前后存在非索引的列，索引失效</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%BA%93%E5%92%8C%E8%A1%A8%E7%9A%84%E5%AD%97%E7%AC%A6%E9%9B%86%E4%B8%8D%E7%BB%9F%E4%B8%80"><span class="nav-number">10.</span> <span class="nav-text">数据库和表的字符集不统一</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">11.</span> <span class="nav-text">小结</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">BIOINSu</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">113</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">38</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/BIOINSu" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;BIOINSu" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/04/26/MySQL_%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96_01%E7%B4%A2%E5%BC%95%E5%A4%B1%E6%95%88/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BIOINSu">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BIOINSu">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          MySQL 索引索引失效的情况
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-04-26 20:13:51" itemprop="dateCreated datePublished" datetime="2022-04-26T20:13:51+08:00">2022-04-26</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2022-04-30 15:24:36" itemprop="dateModified" datetime="2022-04-30T15:24:36+08:00">2022-04-30</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/" itemprop="url" rel="index"><span itemprop="name">数据库</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/MySQL/" itemprop="url" rel="index"><span itemprop="name">MySQL</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <a id="more"></a>
+<h3 id="简介">简介</h3>
+<p><img src="/2022/04/26/MySQL_%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96_01%E7%B4%A2%E5%BC%95%E5%A4%B1%E6%95%88/image-20220426203247043.png" alt="image-20220426203247043" style="zoom:67%;"></p>
+<h3 id="最左匹配原则">最左匹配原则</h3>
+<p>在有联合索引的情况下，索引文件具有 B-Tree 的最左前缀匹配特性，如果左边的值未确定，那么无法使用此索引。</p>
+<p><img src="/2022/04/26/MySQL_%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96_01%E7%B4%A2%E5%BC%95%E5%A4%B1%E6%95%88/image-20220426211526989.png" alt="image-20220426211526989" style="zoom:67%;"></p>
+<h3 id="主键插入顺序">主键插入顺序</h3>
+<p><img src="/2022/04/26/MySQL_%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96_01%E7%B4%A2%E5%BC%95%E5%A4%B1%E6%95%88/image-20220426211741818.png" alt="image-20220426211741818" style="zoom:67%;"></p>
+<p><img src="/2022/04/26/MySQL_%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96_01%E7%B4%A2%E5%BC%95%E5%A4%B1%E6%95%88/image-20220426211858864.png" alt="image-20220426211858864" style="zoom: 50%;"></p>
+<p>新插入的数据把当前页面分裂成两个页面，把本页中的一些记录移动到新创建的这个页中，意味着产生性能损耗。</p>
+<p>所以如果想尽量避免这样无谓的性能损耗，最好让插入的记录的主键值依次递增，这样就不会发生这样的性能损耗了。</p>
+<p>因此建议让主键具有AUTO_INCREMENT ，让存储引擎自己为表生成主键，而不是手动插入 。</p>
+<p>注意，这可能仅针对于非核心业务的表有效，在一些特殊的业务场景下不能让主键自增。</p>
+<h3 id="计算函数类型转换自动或手动导致索引失效">计算、函数、类型转换(自动或手动)导致索引失效</h3>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">#函数</span><br><span class="line"></span><br><span class="line">#索引生效，因为是现根据索引找，然后再判断</span><br><span class="line">EXPLAIN SELECT SQL_NO_CACHE * FROM student WHERE student.name LIKE &#39;abc%&#39;;</span><br><span class="line">#索引失效，因为要一个一个取出来计算</span><br><span class="line">EXPLAIN SELECT SQL_NO_CACHE * FROM student WHERE LEFT(student.name,3) &#x3D; &#39;abc&#39;;</span><br><span class="line"></span><br><span class="line">#索引失效</span><br><span class="line">EXPLAIN SELECT id, stuno, name FROM student WHERE SUBSTRING(name, 1,3)&#x3D;&#39;abc&#39;;</span><br><span class="line">#索引生效</span><br><span class="line">EXPLAIN SELECT id, stuno, NAME FROM student WHERE NAME LIKE &#39;abc%&#39;;</span><br><span class="line"></span><br><span class="line">#计算</span><br><span class="line"></span><br><span class="line">#索引失效，因为发生了计算</span><br><span class="line">EXPLAIN SELECT SQL_NO_CACHE id, stuno, NAME FROM student WHERE stuno+1 &#x3D; 900001;</span><br><span class="line">#索引生效，因为是等值匹配，且表达同一个意思</span><br><span class="line">EXPLAIN SELECT SQL_NO_CACHE id, stuno, NAME FROM student WHERE stuno &#x3D; 900000;</span><br><span class="line"></span><br><span class="line">#类型转换</span><br><span class="line"></span><br><span class="line"># 未使用到索引，name&#x3D;123发生类型转换，索引失效。</span><br><span class="line">EXPLAIN SELECT SQL_NO_CACHE * FROM student WHERE name&#x3D;123;</span><br><span class="line"># 使用到索引</span><br><span class="line">EXPLAIN SELECT SQL_NO_CACHE * FROM student WHERE name&#x3D;&#39;123&#39;;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h3 id="范围条件右边的列索引失效">范围条件右边的列索引失效</h3>
+<p>当使用联合索引时，从遇到范围查询条件开始索引就会失效，因此涉及到范围查询的字段在创建索引时的应当放在最后。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">create index idx_age_name_classid on student(age,name,classid);</span><br><span class="line"></span><br><span class="line">#联合索引只能使用到age</span><br><span class="line">EXPLAIN SELECT SQL_NO_CACHE * FROM student WHERE student.age&#x3D;30 AND student.classId&gt;20 AND student.name &#x3D; &#39;abc&#39; ;</span><br><span class="line">#联合索引可以用age、name</span><br><span class="line">EXPLAIN SELECT SQL_NO_CACHE * FROM student WHERE student.age&#x3D;30 AND student.name &#x3D; &#39;abc&#39; AND student.classId&gt;20 ;</span><br></pre></td></tr></table></figure>
+<h3 id="不等于-或者索引失效">不等于(!= 或者&lt;&gt;)索引失效</h3>
+<p>注意，这里指的是索引可能会失效的情况。</p>
+<p>例如存在覆盖索引时，select的字段刚好能够完全被覆盖时，即使有!= 或者&lt;&gt;，依然会使用到索引，这是由于在索引内进行查找能够免去回表的操作，比起直接遍历整张表性能要好，因此选择使用索引。</p>
+<p>当没有发生覆盖索引时，可能直接遍历全表比使用索引的效率要更高，因此可能会发生索引失效。</p>
+<h3 id="is-null可以使用索引is-not-null无法使用索引">is null可以使用索引，is not null无法使用索引</h3>
+<p><img src="/2022/04/26/MySQL_%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96_01%E7%B4%A2%E5%BC%95%E5%A4%B1%E6%95%88/image-20220426223124033.png" alt="image-20220426223124033" style="zoom:67%;"></p>
+<h3 id="like以通配符开头索引失效">like以通配符%开头索引失效</h3>
+<p><img src="/2022/04/26/MySQL_%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96_01%E7%B4%A2%E5%BC%95%E5%A4%B1%E6%95%88/image-20220426223434251.png" alt="image-20220426223434251" style="zoom:67%;"></p>
+<p>当出现覆盖索引的情况时，由于避免了回表的操作，因此可以使用索引。</p>
+<h3 id="or-前后存在非索引的列索引失效">OR 前后存在非索引的列，索引失效</h3>
+<p><img src="/2022/04/26/MySQL_%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96_01%E7%B4%A2%E5%BC%95%E5%A4%B1%E6%95%88/image-20220426223540475.png" alt="image-20220426223540475" style="zoom:67%;"></p>
+<p>当OR前后的条件都是索引列时，EXPLAIN结果中type字段的值就是index_merge，表示多个索引都被使用到了。</p>
+<h3 id="数据库和表的字符集不统一">数据库和表的字符集不统一</h3>
+<p>MySQL统一使用utf8mb4( 5.5.3版本以上支持)兼容性更好，统一字符集可以避免由于字符集转换产生的乱码。不同的字符集进行比较前需要进行转换会造成索引失效。</p>
+<h3 id="小结">小结</h3>
+<p><img src="/2022/04/26/MySQL_%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96_01%E7%B4%A2%E5%BC%95%E5%A4%B1%E6%95%88/image-20220426224045075.png" alt="image-20220426224045075" style="zoom:67%;"></p>
+<p><img src="/2022/04/26/MySQL_%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96_01%E7%B4%A2%E5%BC%95%E5%A4%B1%E6%95%88/image-20220426224107517.png" alt="image-20220426224107517" style="zoom:67%;"></p>
+<p><img src="/2022/04/26/MySQL_%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96_01%E7%B4%A2%E5%BC%95%E5%A4%B1%E6%95%88/image-20220426224244906.png" alt="image-20220426224244906" style="zoom:67%;"></p>
+<p>1、即区分度更高的字段作为单列索引。</p>
+<p>2、先经过区分度高的字段过滤后，剩余的数据更少。</p>
+<p>3、即选择满足更多过滤条件字段的联合索引。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag"># 数据库</a>
+              <a href="/tags/MySQL/" rel="tag"># MySQL</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2022/04/26/MySQL_%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90_04trace%E5%92%8Csys_schema/" rel="prev" title="MySQL 性能分析：Trace和Sys Schema视图">
+                  <i class="fa fa-chevron-left"></i> MySQL 性能分析：Trace和Sys Schema视图
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2022/04/27/MySQL_%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96_02%E8%BF%9E%E6%8E%A5%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96/" rel="next" title="MySQL 关联查询优化">
+                  MySQL 关联查询优化 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">BIOINSu</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+  <script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'none'
+      },
+      options: {
+        renderActions: {
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              const target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3.1.2/es5/tex-mml-chtml.js';
+    script.defer = true;
+    document.head.appendChild(script);
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.typesetClear();
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+
+
+</body>
+</html>

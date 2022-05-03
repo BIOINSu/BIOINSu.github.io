@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.3.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/maze.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/maze.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/maze.png">
+  <link rel="mask-icon" href="/images/maze.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","images":"/images","scheme":"Mist","version":"8.2.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false}};
+  </script>
+<meta name="description" content="概念 解释     是什么    目的    流程    刷盘机制    redo log buffer存储    redo log file存储    优点">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL事务日志">
+<meta property="og:url" content="http://example.com/2022/03/19/MySQL_%E4%BA%8B%E5%8A%A1%E6%97%A5%E5%BF%97/index.html">
+<meta property="og:site_name" content="BIOINSu">
+<meta property="og:description" content="概念 解释     是什么    目的    流程    刷盘机制    redo log buffer存储    redo log file存储    优点">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2022/03/19/MySQL_%E4%BA%8B%E5%8A%A1%E6%97%A5%E5%BF%97/image-20220319203930683.png">
+<meta property="og:image" content="http://example.com/2022/03/19/MySQL_%E4%BA%8B%E5%8A%A1%E6%97%A5%E5%BF%97/image-20220319204343772.png">
+<meta property="og:image" content="http://example.com/2022/03/19/MySQL_%E4%BA%8B%E5%8A%A1%E6%97%A5%E5%BF%97/image-20220319205438182.png">
+<meta property="og:image" content="http://example.com/2022/03/19/MySQL_%E4%BA%8B%E5%8A%A1%E6%97%A5%E5%BF%97/image-20220319212926282.png">
+<meta property="og:image" content="http://example.com/2022/03/19/MySQL_%E4%BA%8B%E5%8A%A1%E6%97%A5%E5%BF%97/image-20220319213709411.png">
+<meta property="og:image" content="http://example.com/2022/03/19/MySQL_%E4%BA%8B%E5%8A%A1%E6%97%A5%E5%BF%97/image-20220319213854973.png">
+<meta property="og:image" content="http://example.com/2022/03/19/MySQL_%E4%BA%8B%E5%8A%A1%E6%97%A5%E5%BF%97/image-20220319213949141.png">
+<meta property="og:image" content="http://example.com/2022/03/19/MySQL_%E4%BA%8B%E5%8A%A1%E6%97%A5%E5%BF%97/image-20220319214311619.png">
+<meta property="og:image" content="http://example.com/2022/03/19/MySQL_%E4%BA%8B%E5%8A%A1%E6%97%A5%E5%BF%97/image-20220319215001258.png">
+<meta property="og:image" content="http://example.com/2022/03/19/MySQL_%E4%BA%8B%E5%8A%A1%E6%97%A5%E5%BF%97/image-20220319220102374.png">
+<meta property="og:image" content="http://example.com/2022/03/19/MySQL_%E4%BA%8B%E5%8A%A1%E6%97%A5%E5%BF%97/image-20220319215959254.png">
+<meta property="og:image" content="http://example.com/2022/03/19/MySQL_%E4%BA%8B%E5%8A%A1%E6%97%A5%E5%BF%97/image-20220321150453318.png">
+<meta property="og:image" content="http://example.com/2022/03/19/MySQL_%E4%BA%8B%E5%8A%A1%E6%97%A5%E5%BF%97/image-20220321154626169.png">
+<meta property="og:image" content="http://example.com/2022/03/19/MySQL_%E4%BA%8B%E5%8A%A1%E6%97%A5%E5%BF%97/image-20220321154820659.png">
+<meta property="og:image" content="http://example.com/2022/03/19/MySQL_%E4%BA%8B%E5%8A%A1%E6%97%A5%E5%BF%97/image-20220321155126650.png">
+<meta property="og:image" content="http://example.com/2022/03/19/MySQL_%E4%BA%8B%E5%8A%A1%E6%97%A5%E5%BF%97/image-20220321160953880.png">
+<meta property="og:image" content="http://example.com/2022/03/19/MySQL_%E4%BA%8B%E5%8A%A1%E6%97%A5%E5%BF%97/image-20220321161544572.png">
+<meta property="article:published_time" content="2022-03-19T12:27:31.214Z">
+<meta property="article:modified_time" content="2022-03-21T08:16:12.840Z">
+<meta property="article:author" content="BIOINSu">
+<meta property="article:tag" content="数据库">
+<meta property="article:tag" content="MySQL">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2022/03/19/MySQL_%E4%BA%8B%E5%8A%A1%E6%97%A5%E5%BF%97/image-20220319203930683.png">
+
+
+<link rel="canonical" href="http://example.com/2022/03/19/MySQL_%E4%BA%8B%E5%8A%A1%E6%97%A5%E5%BF%97/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+<title>MySQL事务日志 | BIOINSu</title>
+  
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BIOINSu</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#redo%E6%97%A5%E5%BF%97"><span class="nav-number">1.</span> <span class="nav-text">redo日志</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%9B%AE%E7%9A%84"><span class="nav-number">1.1.</span> <span class="nav-text">目的</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BC%98%E7%82%B9%E4%BD%9C%E7%94%A8"><span class="nav-number">1.2.</span> <span class="nav-text">优点（作用）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%84%E6%88%90"><span class="nav-number">1.3.</span> <span class="nav-text">组成</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B5%81%E7%A8%8B"><span class="nav-number">1.4.</span> <span class="nav-text">流程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#redo-log%E5%88%B7%E7%9B%98"><span class="nav-number">1.5.</span> <span class="nav-text">redo log刷盘</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#redo-log%E5%88%B0redo-log-buffer"><span class="nav-number">1.6.</span> <span class="nav-text">redo log到redo log buffer</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%85%B7%E4%BD%93%E5%AD%98%E5%82%A8%E8%BF%87%E7%A8%8B"><span class="nav-number">1.6.1.</span> <span class="nav-text">具体存储过程</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#redo-log-buffer%E7%9A%84%E7%BB%93%E6%9E%84"><span class="nav-number">1.6.2.</span> <span class="nav-text">redo log buffer的结构</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#redo-log-buffer%E5%88%B0redo-log-file"><span class="nav-number">1.7.</span> <span class="nav-text">redo log buffer到redo log file</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%85%B7%E4%BD%93%E5%AD%98%E5%82%A8%E8%BF%87%E7%A8%8B-1"><span class="nav-number">1.7.1.</span> <span class="nav-text">具体存储过程</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#redo-log-file%E7%9A%84%E7%BB%93%E6%9E%84"><span class="nav-number">1.7.2.</span> <span class="nav-text">redo log file的结构</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undo%E6%97%A5%E5%BF%97"><span class="nav-number">2.</span> <span class="nav-text">undo日志</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%9B%AE%E7%9A%84-1"><span class="nav-number">2.1.</span> <span class="nav-text">目的</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BC%98%E7%82%B9%E4%BD%9C%E7%94%A8-1"><span class="nav-number">2.2.</span> <span class="nav-text">优点（作用）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%84%E6%88%90-1"><span class="nav-number">2.3.</span> <span class="nav-text">组成</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%81%E7%A8%8B-1"><span class="nav-number">3.</span> <span class="nav-text">流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">4.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">BIOINSu</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">113</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">38</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/BIOINSu" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;BIOINSu" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/03/19/MySQL_%E4%BA%8B%E5%8A%A1%E6%97%A5%E5%BF%97/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BIOINSu">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BIOINSu">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          MySQL事务日志
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-03-19 20:27:31" itemprop="dateCreated datePublished" datetime="2022-03-19T20:27:31+08:00">2022-03-19</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2022-03-21 16:16:12" itemprop="dateModified" datetime="2022-03-21T16:16:12+08:00">2022-03-21</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/" itemprop="url" rel="index"><span itemprop="name">数据库</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/MySQL/" itemprop="url" rel="index"><span itemprop="name">MySQL</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <table>
+<thead>
+<tr class="header">
+<th>概念</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>是什么</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>目的</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>流程</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>刷盘机制</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>redo log buffer存储</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>redo log file存储</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>优点</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<a id="more"></a>
+<h3 id="redo日志">redo日志</h3>
+<p>redo日志是存储引擎层（Innodb）生成的日志，记录物理级别上页的修改操作，例如“页号xxx，偏移量yyy，写入了zzz数据”。</p>
+<p>以防止脏页还未来得及刷入磁盘时数据库宕机导致数据丢失的问题，可以通过redo log进行数据恢复。</p>
+<h4 id="目的">目的</h4>
+<p>前提知识：</p>
+<p>MySQL在更新数据的过程中，需要将磁盘上的页读取到内存中的Buffer Pool之后，再做修改。缓冲池Buffer Pool中被修改过后的脏页会以一定的频率刷入磁盘（checkpoint机制）。</p>
+<p>刷盘不是每次更新数据就触发的，而是master线程隔一段时间去处理的。</p>
+<blockquote>
+<p>避免小的修改就要进行刷盘，刷盘需要访问磁盘，每次修改都访问磁盘会影响性能。</p>
+<p>在特定的时刻，比如内存不足或空闲时再进行刷盘。</p>
+</blockquote>
+<p>所以最坏的情况就是事务提交后，刚写完缓冲池，数据库宕机了，那么这段数据就是丢失的，无法恢复。</p>
+<p>解决方案：</p>
+<p>为了解决这样的问题，采用WAL（write-ahead logging）技术。先把对磁盘的修改写入日志（redo log），只有日志写入成功时才算事务是提交成功的。</p>
+<p>当发生宕机，脏页还未来得及刷入磁盘时，可以通过redo log进行数据恢复。</p>
+<h4 id="优点作用">优点（作用）</h4>
+<ul>
+<li>解决了脏页没有来得及刷入磁盘导致数据丢失的问题，保证了事务的持久性（D）。</li>
+<li>redo日志是顺序写入磁盘的，速度快，且占用空间较小。（顺序写入磁盘比脏页随机刷盘快，因此可以降低脏页刷盘频率）</li>
+<li>在事务执行的过程中，redo log不断地产生。（binlog是事务提交时才一次性产生的）</li>
+</ul>
+<h4 id="组成">组成</h4>
+<ul>
+<li>重做日志的缓冲 (redo log buffer) ，保存在内存中，是易失的。</li>
+<li>重做日志文件 (redo log file) ，保存在硬盘中，是持久的。</li>
+</ul>
+<h4 id="流程">流程</h4>
+<figure>
+<img src="/2022/03/19/MySQL_%E4%BA%8B%E5%8A%A1%E6%97%A5%E5%BF%97/image-20220319203930683.png" alt="image-20220319203930683"><figcaption aria-hidden="true">image-20220319203930683</figcaption>
+</figure>
+<p>以一个更新事务为例，redo log的过程为：</p>
+<p>第1步：先将原始数据从磁盘中读入内存中来，<strong>修改数据的内存拷贝</strong>。</p>
+<p>第2步：生成一条重做日志并<strong>写入redo log buffer</strong>，记录的是数据被修改后的值。</p>
+<p>第3步：将redo log buffer中的内容按照不同的刷盘策略<strong>刷新</strong>到 redo log file，对 redo log file采用<strong>追加写</strong>的方式。</p>
+<p>第4步：提交事务，定期将内存中修改的数据刷新到磁盘中。</p>
+<h4 id="redo-log刷盘">redo log刷盘</h4>
+<p>redo log的写入并不是直接写入磁盘的，InnoDB引擎会在写redo log的时候先写redo log buffer，之后以一定的频率刷入到真正的redo log file 中。</p>
+<p>此外，redo log buffer刷盘到redo log file的过程也不是直接刷到磁盘中去，只是刷入到文件系统缓存（page cache，这个不属于MySQL管理）中去，这是现代操作系统为了提高文件写入效率做的一个优化，真正的写入会交给系统自己来决定（比如page cache足够大了）。</p>
+<p>那么对于InnoDB来说就存在一个问题，如果交给系统来同步，同样如果系统宕机，那么数据也丢失了（虽然整个系统宕机的概率还是比较小的）。</p>
+<p>因此，MySQL中通过<code>innodb_flush_log_at_trx_commit</code> 参数，控制这两个刷新过程的时机，即刷盘策略。</p>
+<p>总之，就是控制redo log从redo log buffer（MySQL管理的内存）到page cache（操作系统管理的内存）再到redo log file（磁盘）的过程。</p>
+<figure>
+<img src="/2022/03/19/MySQL_%E4%BA%8B%E5%8A%A1%E6%97%A5%E5%BF%97/image-20220319204343772.png" alt="image-20220319204343772"><figcaption aria-hidden="true">image-20220319204343772</figcaption>
+</figure>
+<p>同时注意到，InnoDB存储引擎存在一个后台线程master thread，每隔1s就会将redo log buffer中的内容写入到page cache并刷盘到redo log file中。也就是说，一个没有提交的事务的redo log，也可能会刷盘，因为事务执行过程中会源源不断产生redo log。</p>
+<p><img src="/2022/03/19/MySQL_%E4%BA%8B%E5%8A%A1%E6%97%A5%E5%BF%97/image-20220319205438182.png" alt="image-20220319205438182" style="zoom:67%;"></p>
+<p><code>innodb_flush_log_at_trx_commit</code> 参数的刷盘策略为：</p>
+<ul>
+<li><p>设置为0 ：表示每次事务提交时不进行刷盘操作。（系统默认master thread每隔1s进行一次redo log的刷盘）</p>
+<p>当MySQL宕机时，即出现1s的redo log丢失。</p></li>
+<li><p>设置为1 ：表示每次事务提交时都将进行刷盘操作，从redo log buffer一直到redo log file（ 默认值），成功后事务才算提交成功。</p>
+<p>只要事务提交成功，redo log就不会出现任何丢失，因为已经落盘。效率最差。</p></li>
+<li><p>设置为2 ：表示每次事务提交时都只把 redo log buffer 内容写入 page cache。由os自己决定什么时候同步到磁盘文件。</p>
+<p>事务提交成功时，redo log全部进入page cache。当MySQL宕机时，不会出现数据丢失，但os宕机时，会出现1s数据丢失。效率最高。</p></li>
+</ul>
+<h4 id="redo-log到redo-log-buffer">redo log到redo log buffer</h4>
+<h5 id="具体存储过程">具体存储过程</h5>
+<p>一个事务可以包含若干条语句，每一条语句其实是由若干个Mini-Transaction（mtr）组成，每一个mtr 又可以包含若干条redo日志。</p>
+<p><img src="/2022/03/19/MySQL_%E4%BA%8B%E5%8A%A1%E6%97%A5%E5%BF%97/image-20220319212926282.png" alt="image-20220319212926282" style="zoom:67%;"></p>
+<blockquote>
+<p>MySQL把对底层数据页的一次原子访问的过程称之为一个Mini-Transaction，比如像某个索引对应的B+树中插入一条记录的过程就是mtr。一个mtr可能包含多个redo日志，比如B+树中插入一条记录时可能会涉及到数据的移动等，这就产生了多个redo日志。</p>
+<p>在进行数据恢复时，一个mtr包含的多个redo日志作为一个不可分割的整体。</p>
+</blockquote>
+<p>向redo log buffer中写入redo log的过程是顺序的，也就是先往前面的block body中写，当该block中的空闲空间用完了之后再往下一个block中写，</p>
+<p>InnoDB提供了一个称为buf_free的全局变量，指明后续写入的redo log应该从log buffer中的哪个位置开始写。</p>
+<figure>
+<img src="/2022/03/19/MySQL_%E4%BA%8B%E5%8A%A1%E6%97%A5%E5%BF%97/image-20220319213709411.png" alt="image-20220319213709411"><figcaption aria-hidden="true">image-20220319213709411</figcaption>
+</figure>
+<p>每个mtr都会产生一组redo日志，这些日志的存储必须是相邻的。</p>
+<p>例如有两个事务，每个事务分别有两个mtr：</p>
+<p><img src="/2022/03/19/MySQL_%E4%BA%8B%E5%8A%A1%E6%97%A5%E5%BF%97/image-20220319213854973.png" alt="image-20220319213854973" style="zoom:67%;"></p>
+<p>不同的事务可能是并发执行的，所以T1 、T2 之间的mtr 可能是交替执行的，因此在redo log buffer中可能是交替存储的：</p>
+<p><img src="/2022/03/19/MySQL_%E4%BA%8B%E5%8A%A1%E6%97%A5%E5%BF%97/image-20220319213949141.png" alt="image-20220319213949141" style="zoom:80%;"></p>
+<h5 id="redo-log-buffer的结构">redo log buffer的结构</h5>
+<p>这个buffer由redo log block组成，每个block的结构为：</p>
+<p><img src="/2022/03/19/MySQL_%E4%BA%8B%E5%8A%A1%E6%97%A5%E5%BF%97/image-20220319214311619.png" alt="image-20220319214311619" style="zoom:80%;"></p>
+<blockquote>
+<p>为什么每个block是512B？</p>
+<p>机械磁盘的默认扇区大小就是512B。MySQL按照每个block的大小写入数据，每次刚好写入一个扇区的大小，保证了写入的原子性。如果MySQL将block的大小定义为超过512B，一次写入数据超过512B，就有可能导致多个扇区中有些扇区成功，有些扇区失败，这样MySQL一次写入的操作就不是原子性的。</p>
+</blockquote>
+<p>log block body存储了真正的redo log，其余位置都是存储的一些管理信息。</p>
+<p><img src="/2022/03/19/MySQL_%E4%BA%8B%E5%8A%A1%E6%97%A5%E5%BF%97/image-20220319215001258.png" alt="image-20220319215001258" style="zoom: 50%;"></p>
+<h4 id="redo-log-buffer到redo-log-file">redo log buffer到redo log file</h4>
+<h5 id="具体存储过程-1">具体存储过程</h5>
+<p>redo log file是以日志文件组的形式组织的，包括了多个redo日志文件，每个文件的大小相同。这些文件以ib_logfile[数字]命名，数字从0,1,2...。总共的redo日志文件大小其实就是： innodb_log_file_size × innodb_log_files_in_group 。</p>
+<p>当redo log从redo log buffer或者page cache中刷入redo log file时，先从ib_logfile0开始写入，依次往后类推，写到最后一个文件时再从头开始写入。</p>
+<p>整个日志文件组中还含有两个重要的属性：</p>
+<ul>
+<li>write pos：当前记录的位置，边写边往后移动</li>
+<li>checkpoint：当前要清除的位置，边写边往后移动</li>
+</ul>
+<p>每次redo log被刷入redo log file时，write pos向后移动。</p>
+<p>当MySQL使用redo log file进行数据恢复时，或者内存中脏页已经被刷到磁盘中时，checkpoint向后移动。</p>
+<p>从write pos到checkpoint的位置表示空闲区域，可以继续写入redo log。</p>
+<p><img src="/2022/03/19/MySQL_%E4%BA%8B%E5%8A%A1%E6%97%A5%E5%BF%97/image-20220319220102374.png" alt="image-20220319220102374" style="zoom: 67%;"></p>
+<h5 id="redo-log-file的结构">redo log file的结构</h5>
+<p>实际上就是首尾相接的多个redo log file组成，日志循环写入。</p>
+<p><img src="/2022/03/19/MySQL_%E4%BA%8B%E5%8A%A1%E6%97%A5%E5%BF%97/image-20220319215959254.png" alt="image-20220319215959254" style="zoom:67%;"></p>
+<h3 id="undo日志">undo日志</h3>
+<p>undo日志是存储引擎层（Innodb）生成的日志，记录了逻辑操作的日志，即SQL语句。</p>
+<p>例如INSERT数据时，undo log会记录一个与之相反的DELETE操作。</p>
+<p>主要用于事务的回滚以及一致性非锁定读（MVCC，读取旧版本数据）。</p>
+<h4 id="目的-1">目的</h4>
+<p>事务执行到一半会出现一些情况，比如：</p>
+<ul>
+<li>事务执行过程中可能遇到各种错误，比如服务器本身的错误， 操作系统错误，甚至是突然断电导致的错误。</li>
+<li>程序员可以在事务执行过程中手动输入ROLLBACK 语句结束当前事务的执行。</li>
+</ul>
+<p>出现这些情况时，需要把数据改回原先的样子，此过程称之为回滚。</p>
+<p>SELECT操作不涉及数据的更改，因此没有undo log。此外，undo log会产生redo log，因为undo log也需要持久性的保护。</p>
+<h4 id="优点作用-1">优点（作用）</h4>
+<ul>
+<li><p>回滚数据</p>
+<p>undo log是逻辑日志，只会将数据库逻辑地（在SQL上）恢复到原来的样子，所有修改都被逻辑地取消了，但是数据结构和物理页可能和原来不同。</p>
+<p>原因是数据库是多并发的，有多个事务同时操作一个物理页，假如回滚某个事物则不能简单地将一个页还原，因为这会影响到其他事务。（比如INSERT操作就对应一个DELETE操作即可）</p></li>
+<li><p>MVCC</p>
+<p>多版本并发控制协议，当用户读取一条已经被锁定（正在被修改）的记录时，可以通过undo log读取之前的版本信息实现非锁定读。</p></li>
+</ul>
+<h4 id="组成-1">组成</h4>
+<p>InnoDB对undo log的管理采用段的方式，也就是回滚段（rollback segment） 。每个回滚段记录了1024 个undo log segment ，而在每个undo log segment段中进行undo页的申请，在undo页中真正写入undo log。</p>
+<p>在InnoDB1.1版本之前（不包括1.1版本），只有一个rollback segment，因此支持同时在线的事务限制为1024 。从1.1版本开始InnoDB支持最大128个rollback segment ，故其支持同时在线的事务限制提高到了128*1024 。</p>
+<p>undo页的重用：</p>
+<p><img src="/2022/03/19/MySQL_%E4%BA%8B%E5%8A%A1%E6%97%A5%E5%BF%97/image-20220321150453318.png" alt="image-20220321150453318" style="zoom:50%;"></p>
+<p>回滚段与事物之间的关系：</p>
+<ol type="1">
+<li>每个事务只会使用一个回滚段（undo log segment ），一个回滚段在同一时刻可能会服务于多个事务。</li>
+<li>当一个事务开始的时候，会指定一个回滚段，在事务进行的过程中，当数据被修改时，原始的数据会被复制到回滚段。</li>
+<li>在回滚段中，事务会不断填充盘区，直到事务结束或所有的空间被用完。如果当前的盘区不够用，事务会在段中请求扩展下一个盘区，如果所有已分配的盘区都被用完，事务会覆盖最初的盘区或者在回滚段允许的情况下扩展新的盘区来使用。</li>
+<li>回滚段存在于undo表空间中，在数据库中可以存在多个undo表空间，但同一时刻只能使用一个undo表空间。</li>
+<li>当事务提交时，InnoDB存储引擎会做以下两件事情： 将undo log放入列表中，以供之后的purge操作 判断undo log所在的页是否可以重用，若可以分配给下个事务使用</li>
+</ol>
+<p>回滚段中的数据分类：</p>
+<ul>
+<li><p>未提交的回滚数据(uncommitted undo information)</p>
+<p>事务还没有提交，事务中的更新操作还在往回滚段对应的页写入数据。</p></li>
+<li><p>已经提交但未过期的回滚数据(committed undo information)</p>
+<p>事务已经提交，但是可能有其他事务需要获取记录对应的早期版本，因此不能马上删除undo log及其对应的页。</p>
+<p>事务提交后，将对应的页放入一个链表中，由purge线程负责判定是否删除。</p></li>
+<li><p>事务已经提交并过期的数据(expired undo information)</p>
+<p>事务已经提交，且数据保存时间已经超过undo retention指定的时间，没有其他事物需要使用这个版本的数据。则当回滚段中的数据满了之后就优先覆盖掉这部分的数据。</p></li>
+</ul>
+<p>undo log的分类：</p>
+<ul>
+<li><p>insert undo log</p>
+<p>INSERT操作，只对事务本身可见，对其他事务是不可见的（原本不存在这些数据，是事务隔离性的要求）。因此这一类undo log在事务提交后就可以删除。</p></li>
+<li><p>update undo log</p>
+<p>DELETE和UPDATE操作，其他事务可能需要看到之前版本的数据，因此这些undo log在事务提交后不能立刻删除，要放入链表中等待purge线程判断。</p></li>
+</ul>
+<h3 id="流程-1">流程</h3>
+<p>简要生成流程：</p>
+<p><img src="/2022/03/19/MySQL_%E4%BA%8B%E5%8A%A1%E6%97%A5%E5%BF%97/image-20220321154626169.png" alt="image-20220321154626169" style="zoom: 50%;"></p>
+<p><img src="/2022/03/19/MySQL_%E4%BA%8B%E5%8A%A1%E6%97%A5%E5%BF%97/image-20220321154820659.png" alt="image-20220321154820659" style="zoom:67%;"></p>
+<p>本质上就是在修改数据前，先记录到undo log，然后修改数据，然后记录redo log。假设修改数据中出错了，则可以根据undo log进行恢复。</p>
+<p>详细生成流程：</p>
+<p><img src="/2022/03/19/MySQL_%E4%BA%8B%E5%8A%A1%E6%97%A5%E5%BF%97/image-20220321155126650.png" alt="image-20220321155126650" style="zoom: 50%;"></p>
+<p>每次修改数据时，会把老的记录写入新生成的undo log。当前记录中的回滚指针指向新生成的undo log，新生成的undo log中回滚指针指向老旧的undo log。</p>
+<p><img src="/2022/03/19/MySQL_%E4%BA%8B%E5%8A%A1%E6%97%A5%E5%BF%97/image-20220321160953880.png" alt="image-20220321160953880" style="zoom:67%;"></p>
+<p>回滚过程：</p>
+<p>以上面的例子来说，假设执行rollback，那么对应的流程应该是这样： 1. 通过undo no=3的日志把id=2的数据删除（删除新增主键的记录）</p>
+<ol start="2" type="1">
+<li><p>通过undo no=2的日志把id=1的数据的deletemark还原成0（数据不删除）</p></li>
+<li><p>通过undo no=1的日志把id=1的数据的name还原成Tom</p></li>
+<li><p>通过undo no=0的日志把id=1的数据删除（移除insert的操作）</p></li>
+</ol>
+<blockquote>
+<p><img src="/2022/03/19/MySQL_%E4%BA%8B%E5%8A%A1%E6%97%A5%E5%BF%97/image-20220321161544572.png" alt="image-20220321161544572" style="zoom:67%;"></p>
+</blockquote>
+<h3 id="参考资料">参考资料</h3>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag"># 数据库</a>
+              <a href="/tags/MySQL/" rel="tag"># MySQL</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2022/03/18/MySQL_%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB/" rel="prev" title="MySQL事务隔离级别">
+                  <i class="fa fa-chevron-left"></i> MySQL事务隔离级别
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/" rel="next" title="CSAPP 02 信息的表示与处理">
+                  CSAPP 02 信息的表示与处理 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">BIOINSu</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+  <script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'none'
+      },
+      options: {
+        renderActions: {
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              const target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3.1.2/es5/tex-mml-chtml.js';
+    script.defer = true;
+    document.head.appendChild(script);
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.typesetClear();
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+
+
+</body>
+</html>

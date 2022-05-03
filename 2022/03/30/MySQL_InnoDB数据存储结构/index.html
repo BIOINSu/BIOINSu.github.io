@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.3.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/maze.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/maze.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/maze.png">
+  <link rel="mask-icon" href="/images/maze.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","images":"/images","scheme":"Mist","version":"8.2.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false}};
+  </script>
+<meta name="description" content="数据库的存储结构：页  磁盘与内存交互的基本单位  索引的叶子节点 B+树的叶子节点也是以页的方式进行存储：   页的大小  页的上层结构   表空间可以落地到操作系统中具体的一个文件上了。 页的内部结构   File Header（文件头部）和 File Trailer（文件尾部） 文件头部        文件尾部  User Reco">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL InnoDB数据存储结构">
+<meta property="og:url" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/index.html">
+<meta property="og:site_name" content="BIOINSu">
+<meta property="og:description" content="数据库的存储结构：页  磁盘与内存交互的基本单位  索引的叶子节点 B+树的叶子节点也是以页的方式进行存储：   页的大小  页的上层结构   表空间可以落地到操作系统中具体的一个文件上了。 页的内部结构   File Header（文件头部）和 File Trailer（文件尾部） 文件头部        文件尾部  User Reco">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220330201455929.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220330201529222.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220330201651534.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220330201834369.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220330202324897.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220330202909418.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220330203001934.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331101959874.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331102113042.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331103643971.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331103715031.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331103800114.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331103857126.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331103924381.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331104008024.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331103451933.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331103545816.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331190255249.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331190201358.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331194059907.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331190521089.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331190544474.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331190655455.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331191022889.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331191223149.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331191344682.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331191608973.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331191717847.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331192432327.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331192603915.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331192911104.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331193037689.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331193930717.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331193737787.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331191946180.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331192205546.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331194500416.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331195012000.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331195638911.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331195507847.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331195942356.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331200514900.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331200628989.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331201201657.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331201054849.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220402194227574.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220402194308822.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220402194427160.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220402195308017.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220402195556631.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220402195957984.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220402200037809.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220402200917986.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220402222030416.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220404102424914.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220404102330325.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220404101153461.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220404101241326.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220404101643820.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220404101706864.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220404102140974.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220404102236508.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220404102529969.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220404102637586.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220402194741993.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220404105003148.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220404105709553.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220404105436914.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220404105600300.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220404110410601.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220404110730333.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220404111136077.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220404111613061.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220404111909682.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220404112152138.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220404112639010.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220404112844010.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220404113147502.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220404113340457.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220404113340457.png">
+<meta property="og:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220404113512699.png">
+<meta property="article:published_time" content="2022-03-30T12:14:00.226Z">
+<meta property="article:modified_time" content="2022-04-04T03:35:29.616Z">
+<meta property="article:author" content="BIOINSu">
+<meta property="article:tag" content="数据库">
+<meta property="article:tag" content="MySQL">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220330201455929.png">
+
+
+<link rel="canonical" href="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+<title>MySQL InnoDB数据存储结构 | BIOINSu</title>
+  
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BIOINSu</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84%E9%A1%B5"><span class="nav-number">1.</span> <span class="nav-text">数据库的存储结构：页</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%A3%81%E7%9B%98%E4%B8%8E%E5%86%85%E5%AD%98%E4%BA%A4%E4%BA%92%E7%9A%84%E5%9F%BA%E6%9C%AC%E5%8D%95%E4%BD%8D"><span class="nav-number">1.1.</span> <span class="nav-text">磁盘与内存交互的基本单位</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%B4%A2%E5%BC%95%E7%9A%84%E5%8F%B6%E5%AD%90%E8%8A%82%E7%82%B9"><span class="nav-number">1.2.</span> <span class="nav-text">索引的叶子节点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%A1%B5%E7%9A%84%E5%A4%A7%E5%B0%8F"><span class="nav-number">1.3.</span> <span class="nav-text">页的大小</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%A1%B5%E7%9A%84%E4%B8%8A%E5%B1%82%E7%BB%93%E6%9E%84"><span class="nav-number">1.4.</span> <span class="nav-text">页的上层结构</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A1%B5%E7%9A%84%E5%86%85%E9%83%A8%E7%BB%93%E6%9E%84"><span class="nav-number">2.</span> <span class="nav-text">页的内部结构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#file-header%E6%96%87%E4%BB%B6%E5%A4%B4%E9%83%A8%E5%92%8C-file-trailer%E6%96%87%E4%BB%B6%E5%B0%BE%E9%83%A8"><span class="nav-number">2.1.</span> <span class="nav-text">File Header（文件头部）和 File Trailer（文件尾部）</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%96%87%E4%BB%B6%E5%A4%B4%E9%83%A8"><span class="nav-number">2.1.1.</span> <span class="nav-text">文件头部</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%96%87%E4%BB%B6%E5%B0%BE%E9%83%A8"><span class="nav-number">2.1.2.</span> <span class="nav-text">文件尾部</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#user-records%E7%94%A8%E6%88%B7%E8%AE%B0%E5%BD%95%E6%9C%80%E5%A4%A7%E6%9C%80%E5%B0%8F%E8%AE%B0%E5%BD%95free-space%E7%A9%BA%E9%97%B2%E7%A9%BA%E9%97%B4"><span class="nav-number">2.2.</span> <span class="nav-text">User Records（用户记录）、最大最小记录、Free Space（空闲空间）</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%A9%BA%E9%97%B2%E7%A9%BA%E9%97%B4"><span class="nav-number">2.2.1.</span> <span class="nav-text">空闲空间</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E8%AE%B0%E5%BD%95"><span class="nav-number">2.2.2.</span> <span class="nav-text">用户记录</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%9C%80%E5%A4%A7%E6%9C%80%E5%B0%8F%E8%AE%B0%E5%BD%95"><span class="nav-number">2.2.3.</span> <span class="nav-text">最大最小记录</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#page-directory%E9%A1%B5%E7%9B%AE%E5%BD%95page-header%E9%A1%B5%E9%9D%A2%E5%A4%B4%E9%83%A8"><span class="nav-number">2.3.</span> <span class="nav-text">Page Directory（页目录）、Page Header（页面头部）</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%A1%B5%E7%9B%AE%E5%BD%95"><span class="nav-number">2.3.1.</span> <span class="nav-text">页目录</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%A1%B5%E9%9D%A2%E5%A4%B4%E9%83%A8"><span class="nav-number">2.3.2.</span> <span class="nav-text">页面头部</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#b%E6%A0%91%E7%9A%84%E6%9F%A5%E6%89%BE"><span class="nav-number">3.</span> <span class="nav-text">B+树的查找</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#innodb%E8%A1%8C%E6%A0%BC%E5%BC%8F"><span class="nav-number">4.</span> <span class="nav-text">InnoDB行格式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#compact"><span class="nav-number">4.1.</span> <span class="nav-text">Compact</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8F%98%E9%95%BF%E5%AD%97%E6%AE%B5%E9%95%BF%E5%BA%A6%E5%88%97%E8%A1%A8"><span class="nav-number">4.1.1.</span> <span class="nav-text">变长字段长度列表</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#null%E5%80%BC%E5%88%97%E8%A1%A8"><span class="nav-number">4.1.2.</span> <span class="nav-text">NULL值列表</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%AE%B0%E5%BD%95%E7%9A%84%E7%9C%9F%E5%AE%9E%E6%95%B0%E6%8D%AE"><span class="nav-number">4.1.3.</span> <span class="nav-text">记录的真实数据</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#ibd%E6%96%87%E4%BB%B6%E4%B8%8B%E7%9A%84%E7%9C%9F%E5%AE%9E%E6%8E%92%E5%88%97"><span class="nav-number">4.1.4.</span> <span class="nav-text">ibd文件下的真实排列</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A1%8C%E6%BA%A2%E5%87%BA"><span class="nav-number">4.2.</span> <span class="nav-text">行溢出</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#dynamic%E9%BB%98%E8%AE%A4%E5%92%8Ccompressed"><span class="nav-number">4.3.</span> <span class="nav-text">Dynamic（默认）和Compressed</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#redundant"><span class="nav-number">4.4.</span> <span class="nav-text">Redundant</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8C%87%E5%AE%9A%E8%A1%8C%E6%A0%BC%E5%BC%8F"><span class="nav-number">4.5.</span> <span class="nav-text">指定行格式</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A1%B5%E7%9A%84%E4%B8%8A%E5%B1%82%E7%BB%93%E6%9E%84%E5%8C%BA%E6%AE%B5%E4%B8%8E%E7%A2%8E%E7%89%87%E5%8C%BA"><span class="nav-number">5.</span> <span class="nav-text">页的上层结构：区、段与碎片区</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8C%BA"><span class="nav-number">5.1.</span> <span class="nav-text">区</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%AE%B5"><span class="nav-number">5.2.</span> <span class="nav-text">段</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%A2%8E%E7%89%87%E5%8C%BA"><span class="nav-number">5.3.</span> <span class="nav-text">碎片区</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8C%BA%E7%9A%84%E5%88%86%E7%B1%BB"><span class="nav-number">5.4.</span> <span class="nav-text">区的分类</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A1%A8%E7%A9%BA%E9%97%B4"><span class="nav-number">5.5.</span> <span class="nav-text">表空间</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">6.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">BIOINSu</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">113</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">38</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/BIOINSu" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;BIOINSu" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BIOINSu">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BIOINSu">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          MySQL InnoDB数据存储结构
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-03-30 20:14:00" itemprop="dateCreated datePublished" datetime="2022-03-30T20:14:00+08:00">2022-03-30</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2022-04-04 11:35:29" itemprop="dateModified" datetime="2022-04-04T11:35:29+08:00">2022-04-04</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/" itemprop="url" rel="index"><span itemprop="name">数据库</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/MySQL/" itemprop="url" rel="index"><span itemprop="name">MySQL</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <a id="more"></a>
+<h3 id="数据库的存储结构页">数据库的存储结构：页</h3>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220330201455929.png" alt="image-20220330201455929" style="zoom:67%;"></p>
+<h4 id="磁盘与内存交互的基本单位">磁盘与内存交互的基本单位</h4>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220330201529222.png" alt="image-20220330201529222" style="zoom:67%;"></p>
+<h4 id="索引的叶子节点">索引的叶子节点</h4>
+<p>B+树的叶子节点也是以页的方式进行存储：</p>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220330201651534.png" alt="image-20220330201651534" style="zoom:80%;"></p>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220330201834369.png" alt="image-20220330201834369" style="zoom:67%;"></p>
+<h4 id="页的大小">页的大小</h4>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220330202324897.png" alt="image-20220330202324897" style="zoom:67%;"></p>
+<h4 id="页的上层结构">页的上层结构</h4>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220330202909418.png" alt="image-20220330202909418" style="zoom:67%;"></p>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220330203001934.png" alt="image-20220330203001934" style="zoom:67%;"></p>
+<p>表空间可以落地到操作系统中具体的一个文件上了。</p>
+<h3 id="页的内部结构">页的内部结构</h3>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331101959874.png" alt="image-20220331101959874" style="zoom:67%;"></p>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331102113042.png" alt="image-20220331102113042" style="zoom:67%;"></p>
+<h4 id="file-header文件头部和-file-trailer文件尾部">File Header（文件头部）和 File Trailer（文件尾部）</h4>
+<h5 id="文件头部">文件头部</h5>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331103643971.png" alt="image-20220331103643971" style="zoom:67%;"></p>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331103715031.png" alt="image-20220331103715031" style="zoom:67%;"></p>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331103800114.png" alt="image-20220331103800114" style="zoom:67%;"></p>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331103857126.png" alt="image-20220331103857126" style="zoom:67%;"></p>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331103924381.png" alt="image-20220331103924381" style="zoom:67%;"></p>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331104008024.png" alt="image-20220331104008024" style="zoom:67%;"></p>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331103451933.png" alt="image-20220331103451933" style="zoom:67%;"></p>
+<h5 id="文件尾部">文件尾部</h5>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331103545816.png" alt="image-20220331103545816" style="zoom:67%;"></p>
+<h4 id="user-records用户记录最大最小记录free-space空闲空间">User Records（用户记录）、最大最小记录、Free Space（空闲空间）</h4>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331190255249.png" alt="image-20220331190255249" style="zoom:67%;"></p>
+<h5 id="空闲空间">空闲空间</h5>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331190201358.png" alt="image-20220331190201358" style="zoom:67%;"></p>
+<h5 id="用户记录">用户记录</h5>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331194059907.png" alt="image-20220331194059907" style="zoom:67%;"></p>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331190521089.png" alt="image-20220331190521089" style="zoom:67%;"></p>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331190544474.png" alt="image-20220331190544474" style="zoom:67%;"></p>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331190655455.png" alt="image-20220331190655455" style="zoom:67%;"></p>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331191022889.png" alt="image-20220331191022889" style="zoom:67%;"></p>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331191223149.png" alt="image-20220331191223149" style="zoom:67%;"></p>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331191344682.png" alt="image-20220331191344682" style="zoom:67%;"></p>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331191608973.png" alt="image-20220331191608973" style="zoom:67%;"></p>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331191717847.png" alt="image-20220331191717847" style="zoom:67%;"></p>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331192432327.png" alt="image-20220331192432327" style="zoom:67%;"></p>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331192603915.png" alt="image-20220331192603915" style="zoom:67%;"></p>
+<p>删除一条记录，底层发生的变化：</p>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331192911104.png" alt="image-20220331192911104" style="zoom:67%;"></p>
+<p>​ <img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331193037689.png" alt="image-20220331193037689" style="zoom:67%;"></p>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331193930717.png" alt="image-20220331193930717" style="zoom:67%;"></p>
+<p>添加一条记录，底层发生的变化：</p>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331193737787.png" alt="image-20220331193737787" style="zoom:67%;"></p>
+<p>直接复用原先被删除记录的空间。</p>
+<h5 id="最大最小记录">最大最小记录</h5>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331191946180.png" alt="image-20220331191946180" style="zoom:67%;"></p>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331192205546.png" alt="image-20220331192205546" style="zoom:67%;"></p>
+<p>最大最小记录的heap_no属性分别为0和1，表示最大最小记录在本页中前两个位置。</p>
+<h4 id="page-directory页目录page-header页面头部">Page Directory（页目录）、Page Header（页面头部）</h4>
+<h5 id="页目录">页目录</h5>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331194500416.png" alt="image-20220331194500416" style="zoom:67%;"></p>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331195012000.png" alt="image-20220331195012000" style="zoom:67%;"></p>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331195638911.png" alt="image-20220331195638911" style="zoom:67%;"></p>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331195507847.png" alt="image-20220331195507847" style="zoom:67%;"></p>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331195942356.png" alt="image-20220331195942356" style="zoom:67%;"></p>
+<p>页目录结构下如何查找记录：</p>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331200514900.png" alt="image-20220331200514900" style="zoom:67%;"></p>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331200628989.png" alt="image-20220331200628989" style="zoom:67%;"></p>
+<h5 id="页面头部">页面头部</h5>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331201201657.png" alt="image-20220331201201657" style="zoom:67%;"></p>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220331201054849.png" alt="image-20220331201054849" style="zoom:67%;"></p>
+<h3 id="b树的查找">B+树的查找</h3>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220402194227574.png" alt="image-20220402194227574" style="zoom:67%;"></p>
+<h3 id="innodb行格式">InnoDB行格式</h3>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220402194308822.png" alt="image-20220402194308822" style="zoom:67%;"></p>
+<h4 id="compact">Compact</h4>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220402194427160.png" alt="image-20220402194427160" style="zoom:67%;"></p>
+<h5 id="变长字段长度列表"><strong>变长字段长度列表</strong></h5>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220402195308017.png" alt="image-20220402195308017" style="zoom:67%;"></p>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220402195556631.png" alt="image-20220402195556631" style="zoom:67%;"></p>
+<h5 id="null值列表"><strong>NULL值列表</strong></h5>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220402195957984.png" alt="image-20220402195957984" style="zoom:67%;"></p>
+<p>​ <img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220402200037809.png" alt="image-20220402200037809" style="zoom:67%;"></p>
+<h5 id="记录的真实数据"><strong>记录的真实数据</strong></h5>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220402200917986.png" alt="image-20220402200917986" style="zoom:67%;"></p>
+<h5 id="ibd文件下的真实排列"><strong>ibd文件下的真实排列</strong></h5>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220402222030416.png" alt="image-20220402222030416" style="zoom:80%;"></p>
+<h4 id="行溢出">行溢出</h4>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220404102424914.png" alt="image-20220404102424914" style="zoom:67%;"></p>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220404102330325.png" alt="image-20220404102330325" style="zoom:67%;"></p>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220404101153461.png" alt="image-20220404101153461" style="zoom:67%;"></p>
+<h4 id="dynamic默认和compressed">Dynamic（默认）和Compressed</h4>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220404101241326.png" alt="image-20220404101241326" style="zoom:67%;"></p>
+<p>也就是Dynamic（默认）和Compressed格式下，所有的行数据都存放在溢出页上面，而其他格式的行数据会有一部分前缀数据存储在行中。</p>
+<h4 id="redundant">Redundant</h4>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220404101643820.png" alt="image-20220404101643820" style="zoom:67%;"></p>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220404101706864.png" alt="image-20220404101706864" style="zoom:67%;"></p>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220404102140974.png" alt="image-20220404102140974" style="zoom:67%;"></p>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220404102236508.png" alt="image-20220404102236508" style="zoom:67%;"></p>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220404102529969.png" alt="image-20220404102529969" style="zoom:67%;"></p>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220404102637586.png" alt="image-20220404102637586" style="zoom:67%;"></p>
+<h4 id="指定行格式">指定行格式</h4>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220402194741993.png" alt="image-20220402194741993" style="zoom:67%;"></p>
+<h3 id="页的上层结构区段与碎片区">页的上层结构：区、段与碎片区</h3>
+<h4 id="区">区</h4>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220404105003148.png" alt="image-20220404105003148" style="zoom:67%;"></p>
+<p>从内存中单独读取一个页（1ms/页）：</p>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220404105709553.png" alt="image-20220404105709553" style="zoom:67%;"></p>
+<p>随机I/O（10ms/页）：</p>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220404105436914.png" alt="image-20220404105436914" style="zoom:67%;"></p>
+<p>顺序I/O（0.4ms/页）：</p>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220404105600300.png" alt="image-20220404105600300" style="zoom:67%;"></p>
+<h4 id="段">段</h4>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220404110410601.png" alt="image-20220404110410601" style="zoom:67%;"></p>
+<p>主要是为了让叶子节点和非叶子节点各自都能连续的存储。</p>
+<h4 id="碎片区">碎片区</h4>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220404110730333.png" alt="image-20220404110730333" style="zoom:67%;"></p>
+<p>碎片区不属于任何一个段，是比段更上层的概念。</p>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220404111136077.png" alt="image-20220404111136077" style="zoom:67%;"></p>
+<h4 id="区的分类">区的分类</h4>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220404111613061.png" alt="image-20220404111613061" style="zoom:67%;"></p>
+<h4 id="表空间">表空间</h4>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220404111909682.png" alt="image-20220404111909682" style="zoom:67%;"></p>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220404112152138.png" alt="image-20220404112152138" style="zoom:67%;"></p>
+<p>注意，MySQL 8.0中frm和ibd文件合并起来存储，所以ibd文件占用7个页面共112K大小。</p>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220404112639010.png" alt="image-20220404112639010" style="zoom:67%;"></p>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220404112844010.png" alt="image-20220404112844010" style="zoom:67%;"></p>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220404113147502.png" alt="image-20220404113147502" style="zoom:67%;"></p>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220404113340457.png" alt="image-20220404113340457" style="zoom: 67%;"></p>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220404113340457.png" alt="image-20220404113340457" style="zoom:67%;"></p>
+<p><img src="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/image-20220404113512699.png" alt="image-20220404113512699" style="zoom:67%;"></p>
+<h3 id="参考资料">参考资料</h3>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag"># 数据库</a>
+              <a href="/tags/MySQL/" rel="tag"># MySQL</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2022/03/29/MySQL_MVCC/" rel="prev" title="MySQL多版本并发控制机制（MVCC）">
+                  <i class="fa fa-chevron-left"></i> MySQL多版本并发控制机制（MVCC）
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2022/04/17/MySQL_%E7%B4%A2%E5%BC%95_01%E7%B4%A2%E5%BC%95%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="next" title="MySQL 索引的数据结构">
+                  MySQL 索引的数据结构 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">BIOINSu</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+  <script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'none'
+      },
+      options: {
+        renderActions: {
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              const target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3.1.2/es5/tex-mml-chtml.js';
+    script.defer = true;
+    document.head.appendChild(script);
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.typesetClear();
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+
+
+</body>
+</html>

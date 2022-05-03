@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.3.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/maze.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/maze.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/maze.png">
+  <link rel="mask-icon" href="/images/maze.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","images":"/images","scheme":"Mist","version":"8.2.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false}};
+  </script>
+<meta name="description" content="十六进制表示法 按照一位一位（bit）表示数据的方式称为位模式，即二进制表示法。使用位模式表示法比较冗长，而十进制表示法与位模式之间的转换又比较麻烦。因此，引入十六进制数来表示位模式。也就是本质上用十六进制来表示数据或虚拟地址，是为了减少冗长 十进制数，是由数字0到9组成的。对于十六进制数，则是由数字0到9和字母A到F来表示16个可能的数值：  在C语言中，十六进制数是以0x开头，这个">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CSAPP 02 信息的表示与处理">
+<meta property="og:url" content="http://example.com/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/index.html">
+<meta property="og:site_name" content="BIOINSu">
+<meta property="og:description" content="十六进制表示法 按照一位一位（bit）表示数据的方式称为位模式，即二进制表示法。使用位模式表示法比较冗长，而十进制表示法与位模式之间的转换又比较麻烦。因此，引入十六进制数来表示位模式。也就是本质上用十六进制来表示数据或虚拟地址，是为了减少冗长 十进制数，是由数字0到9组成的。对于十六进制数，则是由数字0到9和字母A到F来表示16个可能的数值：  在C语言中，十六进制数是以0x开头，这个">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220321110131505.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20210506161001366.png">
+<meta property="og:image" content="http://example.com/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220321110334154.png">
+<meta property="og:image" content="http://example.com/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220321110454760.png">
+<meta property="og:image" content="http://example.com/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220321110942559.png">
+<meta property="og:image" content="http://example.com/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220321111226674.png">
+<meta property="og:image" content="http://example.com/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220321112332739.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20210506163433216.png">
+<meta property="og:image" content="http://example.com/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220321131235944.png">
+<meta property="og:image" content="http://example.com/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220321131259612.png">
+<meta property="og:image" content="http://example.com/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220321131513130.png">
+<meta property="og:image" content="http://example.com/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220321131835025.png">
+<meta property="og:image" content="http://example.com/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220321132027351.png">
+<meta property="og:image" content="http://example.com/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220321132214872.png">
+<meta property="og:image" content="http://example.com/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220321132240455.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20210506174326975.png">
+<meta property="og:image" content="http://example.com/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220322191137064.png">
+<meta property="og:image" content="http://example.com/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220322191656369.png">
+<meta property="og:image" content="http://example.com/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220322191856042.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20210506180110995.png">
+<meta property="og:image" content="http://example.com/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220322192558057.png">
+<meta property="og:image" content="http://example.com/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220322192653302.png">
+<meta property="og:image" content="http://example.com/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220322193305715.png">
+<meta property="og:image" content="http://example.com/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220323100700301.png">
+<meta property="og:image" content="http://example.com/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220323100853013.png">
+<meta property="og:image" content="http://example.com/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220323101412430.png">
+<meta property="og:image" content="http://example.com/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220323101710474.png">
+<meta property="og:image" content="http://example.com/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220323102045088.png">
+<meta property="og:image" content="http://example.com/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220323102305296.png">
+<meta property="og:image" content="http://example.com/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220323102335970.png">
+<meta property="og:image" content="http://example.com/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220323104458281.png">
+<meta property="og:image" content="http://example.com/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220323104843342.png">
+<meta property="og:image" content="http://example.com/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220323105304065.png">
+<meta property="article:published_time" content="2022-03-21T02:51:36.136Z">
+<meta property="article:modified_time" content="2022-03-23T02:54:16.305Z">
+<meta property="article:author" content="BIOINSu">
+<meta property="article:tag" content="操作系统">
+<meta property="article:tag" content="CSAPP">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220321110131505.png">
+
+
+<link rel="canonical" href="http://example.com/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+<title>CSAPP 02 信息的表示与处理 | BIOINSu</title>
+  
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BIOINSu</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8D%81%E5%85%AD%E8%BF%9B%E5%88%B6%E8%A1%A8%E7%A4%BA%E6%B3%95"><span class="nav-number">1.</span> <span class="nav-text">十六进制表示法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%8C%E8%BF%9B%E5%88%B6%E4%B8%8E%E5%8D%81%E5%85%AD%E8%BF%9B%E5%88%B6%E8%BD%AC%E6%8D%A2"><span class="nav-number">1.1.</span> <span class="nav-text">二进制与十六进制转换</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8D%81%E8%BF%9B%E5%88%B6%E4%B8%8E%E5%8D%81%E5%85%AD%E8%BF%9B%E5%88%B6%E8%BD%AC%E6%8D%A2"><span class="nav-number">1.2.</span> <span class="nav-text">十进制与十六进制转换</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%A1%E6%81%AF%E5%AD%98%E5%82%A8"><span class="nav-number">2.</span> <span class="nav-text">信息存储</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B%E5%A4%A7%E5%B0%8F"><span class="nav-number">2.1.</span> <span class="nav-text">基本数据类型大小</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%9C%A8%E5%86%85%E5%AD%98%E4%B8%AD%E7%9A%84%E6%8E%92%E5%B8%83%E5%A4%A7%E5%B0%8F%E7%AB%AF%E6%B3%95"><span class="nav-number">2.2.</span> <span class="nav-text">数据在内存中的排布（大小端法）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AD%98%E5%82%A8%E5%AD%97%E7%AC%A6%E4%B8%B2"><span class="nav-number">2.3.</span> <span class="nav-text">存储字符串</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%83%E5%B0%94%E4%BB%A3%E6%95%B0"><span class="nav-number">3.</span> <span class="nav-text">布尔代数</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BD%8D%E8%BF%90%E7%AE%97"><span class="nav-number">3.1.</span> <span class="nav-text">位运算</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%8C%89%E4%BD%8D%E8%BF%9B%E8%A1%8C%E5%B8%83%E5%B0%94%E8%BF%90%E7%AE%97"><span class="nav-number">3.1.1.</span> <span class="nav-text">按位进行布尔运算</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%8E%A9%E7%A0%81%E8%BF%90%E7%AE%97"><span class="nav-number">3.1.2.</span> <span class="nav-text">掩码运算</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%BB%E8%BE%91%E8%BF%90%E7%AE%97"><span class="nav-number">4.</span> <span class="nav-text">逻辑运算</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A7%BB%E4%BD%8D%E8%BF%90%E7%AE%97"><span class="nav-number">5.</span> <span class="nav-text">移位运算</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B4%E6%95%B0%E7%9A%84%E8%A1%A8%E7%A4%BA"><span class="nav-number">6.</span> <span class="nav-text">整数的表示</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%97%A0%E7%AC%A6%E5%8F%B7%E6%95%B0"><span class="nav-number">6.1.</span> <span class="nav-text">无符号数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9C%89%E7%AC%A6%E5%8F%B7%E6%95%B0"><span class="nav-number">6.2.</span> <span class="nav-text">有符号数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%95%B4%E6%95%B0%E7%9A%84%E8%8C%83%E5%9B%B4"><span class="nav-number">6.3.</span> <span class="nav-text">整数的范围</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A1%A5%E7%A0%81%E4%B8%8E%E5%8E%9F%E7%A0%81"><span class="nav-number">6.4.</span> <span class="nav-text">补码与原码</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">7.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">BIOINSu</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">113</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">38</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/BIOINSu" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;BIOINSu" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BIOINSu">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BIOINSu">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          CSAPP 02 信息的表示与处理
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-03-21 10:51:36" itemprop="dateCreated datePublished" datetime="2022-03-21T10:51:36+08:00">2022-03-21</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2022-03-23 10:54:16" itemprop="dateModified" datetime="2022-03-23T10:54:16+08:00">2022-03-23</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" itemprop="url" rel="index"><span itemprop="name">操作系统</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/CSAPP/" itemprop="url" rel="index"><span itemprop="name">CSAPP</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <a id="more"></a>
+<h3 id="十六进制表示法">十六进制表示法</h3>
+<p>按照一位一位（bit）表示数据的方式称为位模式，即二进制表示法。使用位模式表示法比较冗长，而十进制表示法与位模式之间的转换又比较麻烦。因此，引入十六进制数来表示位模式。也就是本质上用十六进制来表示数据或虚拟地址，是为了减少冗长</p>
+<p>十进制数，是由数字0到9组成的。对于十六进制数，则是由数字0到9和字母A到F来表示16个可能的数值：</p>
+<p><img src="/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220321110131505.png" alt="image-20220321110131505" style="zoom:67%;"></p>
+<p>在C语言中，十六进制数是以0x开头，这个x可以是小写，也可以是大写，其中字母部分，既可以全部是大写，也可以全部是小写，甚至是大小写混合也是正确的。</p>
+<p><img src="https://img-blog.csdnimg.cn/20210506161001366.png" alt="在这里插入图片描述" style="zoom:67%;"></p>
+<h4 id="二进制与十六进制转换">二进制与十六进制转换</h4>
+<p>二进制与十六进制的转换比较简单直接，数字之间的转换可以参照这张表：</p>
+<p><img src="/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220321110334154.png" alt="image-20220321110334154" style="zoom: 50%;"></p>
+<p>十六进制转二进制，通过展开每个十六进制数字，然后将它转换成对应的二进制格式即可。</p>
+<p>而二进制转十六进制，从右向左，每四位为一组来转换成相应的十六进制数即可。需要注意的是，如果总位数不是4的倍数，那么最左边的一组会出现小于4位的情况，这时将前面进行补零，然后将每4位为一组的二进制数进行一一转换，即可得到对应的十六进制数。</p>
+<p><img src="/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220321110454760.png" alt="image-20220321110454760" style="zoom: 67%;"></p>
+<p>如何快速地将二进制下的<span class="math inline">\(2^n\)</span>转换为十六进制数：</p>
+<p>可以观察到，<span class="math inline">\(2^n\)</span>在二进制表示下就是1后面跟n个0。</p>
+<p><img src="/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220321110942559.png" alt="image-20220321110942559" style="zoom:50%;"></p>
+<p>由于十六进制下的1个0可以代表4个二进制0。将二进制下 0 的个数 n 分解成 i + 4j，即每4个0为一组。这个式子也可以理解为将 n 除以 4 ， j 是商，而 i 就是余数。因此余数 i 可能的取值为 0,1,2,3。</p>
+<p>i=0时，对应二进制的最高位就是1，因此对应十六进制下的1。</p>
+<p>i=1时，对应二进制的最高位就是10，因此对应十六进制下的2。</p>
+<p>i=3时，对应二进制的最高位就是100，因此对应十六进制下的4。</p>
+<p>i=4时，对应二进制的最高位就是1000，因此对应十六进制下的4。</p>
+<p>得到十六进制下的最高位后，j就是后面0的个数。</p>
+<p><img src="/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220321111226674.png" alt="image-20220321111226674" style="zoom:67%;"></p>
+<p>举例，<span class="math inline">\(2048 = 2^{11}\)</span>，因此 n 就等于 3 + 4 × 2 。即二进制下有 11 个 0 ，其中 8 个二进制 0 变成 2 个十六进制的 0 ，剩余的三个二进制 0 构成 1000b = 0x8 。从而可以快速得到十六进制表示为 0x800 。</p>
+<h4 id="十进制与十六进制转换">十进制与十六进制转换</h4>
+<p>十进制数转十六进制，通过辗转相除法，每次除以16获得余数，然后自下而上将余数换成对应的十六进制符号即可。</p>
+<p><img src="/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220321112332739.png" alt="image-20220321112332739" style="zoom:50%;"></p>
+<p>将一个十六进制数转换成十进制数，可以用16的幂乘以相应位的十六进制数：</p>
+<p><img src="https://img-blog.csdnimg.cn/20210506163433216.png" alt="在这里插入图片描述" style="zoom:50%;"></p>
+<h3 id="信息存储">信息存储</h3>
+<p>通常情况下，进程将内存视为一个非常大的数组，数组的元素是由一个个的字节组成，每个字节都由一个唯一的数字来表示，我们称为地址（address），这些所有的地址的集合就称为虚拟地址空间（virtual address space）。</p>
+<p><img src="/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220321131235944.png" alt="image-20220321131235944" style="zoom:50%;"></p>
+<p>字节（byte）时信息存储的基本单元。一个字节是由8个位（bit）组成，在二进制表示法中，每一个位的值可能有两种状态：0或者1。当这8个位全为0时，表示一个字节的最小值；当这8个位全为1时，表示最大值。如果用十进制来表示，那么一个字节的取值范围就在0~255(包含0和255）之间。</p>
+<p><img src="/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220321131259612.png" alt="image-20220321131259612" style="zoom:67%;"></p>
+<p>字长决定了虚拟地址空间的最大的可以到多少，也就是说，对于一个字长为<span class="math inline">\(w位\)</span>的机器，虚拟地址的范围是0 到 <span class="math inline">\(2^{w - 1}\)</span>。对于32位的机器，虚拟地址空间最大为4GB，而64位的机器，虚拟地址空间最大为16EB。</p>
+<p><img src="/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220321131513130.png" alt="image-20220321131513130" style="zoom: 50%;"></p>
+<p>在迁移的过程中，大多数64位的机器做了向后兼容，因此为32位机器编译的程序也可以运行在64位机器上，反之则不行。对于32位程序和64位程序，主要的区别还是在于程序是如何编译的，而不是运行机器的类型。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">编译32位程序</span></span><br><span class="line"><span class="meta">linux&gt;</span><span class="bash"> gcc -m32 -o hello32 hello.c</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">编译64位程序</span></span><br><span class="line"><span class="meta">linux&gt;</span><span class="bash"> gcc -m64 -o hello64 hello.c</span></span><br></pre></td></tr></table></figure>
+<h4 id="基本数据类型大小">基本数据类型大小</h4>
+<p>C语言中，支持整数和浮点数多种数据格式，下表列式了不同数据类型在32位机器与64位机器上所占字节数的大小。</p>
+<p><img src="/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220321131835025.png" alt="image-20220321131835025" style="zoom:50%;"></p>
+<h4 id="数据在内存中的排布大小端法">数据在内存中的排布（大小端法）</h4>
+<p>可以看出很多数据类型都是占用了多个字节空间。对于需要存储的数据，要搞清楚该数据的地址是什么，以及数据在内存中是如何排布的。</p>
+<p>例如：一个int类型的变量 x（0x01234567），假设地址位于0x100处，由于int类型占4个字节，因此变量x被存储在地址为 0x100，0x101，0x102，0x103 的内存处。十六进制下，一个数字代表4个二进制位，也就是4 bits，因此每个地址可以存储2个十六进制位数字</p>
+<p><img src="/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220321132027351.png" alt="image-20220321132027351" style="zoom:50%;"></p>
+<p>大端法，最高有效字节存储在最前面，也就是低地址处。</p>
+<p><img src="/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220321132214872.png" alt="image-20220321132214872" style="zoom:50%;"></p>
+<p>小端法，最低有效字节存储在在最前面。</p>
+<p><img src="/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220321132240455.png" alt="image-20220321132240455" style="zoom:50%;"></p>
+<p>注意对于变量x，最高有效字节是 0x01,最低有效字节是 0x67。</p>
+<p>大多数 Intel 兼容机采用小端模式，IBM和Sun公司的机器大多数机器采用大端法。对于很多新的处理器，支持双端法，可以配置成大端或者小端运行。例如基于ARM架构的处理器，支持双端法，但是Android系统和iOS系统却只能运行在小端模式。</p>
+<h4 id="存储字符串">存储字符串</h4>
+<p>C语言中的字符串被编码为以NULL字符结尾的字符数组，例如字符串 “abcde" ，这个字符串虽然只有5个字符，但是长度却为6，就是因为结尾字符的存在。</p>
+<p><img src="https://img-blog.csdnimg.cn/20210506174326975.png" alt="在这里插入图片描述" style="zoom:50%;"></p>
+<p>通过以下程序可以得到每个字符在内存中对应的存储信息：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span><span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">unsigned</span> <span class="keyword">char</span> *byte_pointer;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">show_bytes</span><span class="params">(byte_pointer start, <span class="keyword">int</span> len)</span></span>&#123;</span><br><span class="line">	<span class="keyword">int</span> i;</span><br><span class="line">	<span class="keyword">for</span>(i = <span class="number">0</span>; i &lt; len; i++)&#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot; %.2x&quot;</span>, start[i]);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;\n&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">show_int</span><span class="params">(<span class="keyword">int</span> x)</span></span>&#123;</span><br><span class="line">	show_bytes((byte pointer) &amp;x,<span class="keyword">sizeof</span>(×));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>通过这个程序可以观察到在内存中，字符串以十六进制的形式存储，其中结尾字符"NULL"的十六进制表示为0x00：</p>
+<p><img src="/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220322191137064.png" alt="image-20220322191137064" style="zoom:67%;"></p>
+<p>由上文可知，每个char占用1个字节（8 bits），因此对应两个十六进制数。使用ASCII码来表示字符，在任何系统上都会得到相同的结果。因此，文本数据比二进制数据具有更强的平台独立性。</p>
+<h3 id="布尔代数">布尔代数</h3>
+<p>数学家乔治布尔通过将逻辑值 true 和 false 编码成二进制的 1 和 0 ，设计出了布尔代数，作为逻辑推理的基本原则。</p>
+<p><img src="/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220322191656369.png" alt="image-20220322191656369" style="zoom:67%;"></p>
+<ul>
+<li><p>布尔运算中的波浪线对应于逻辑运算的非（NOT），计算机通常将非运算称为取反，当对0进行取反时，运算结果是1，对1进行取反得到0。</p></li>
+<li><p>逻辑运算与（AND），两个参数如果有一个数为0，那么与运算的结果就为0，与运算只有当两个参数都为1时，运算结果才为1。</p></li>
+<li><p>逻辑运算或（OR）只有当两个参数都为0时，或运算结果才为0，如果两个参数都为1，或者有一个参数为1，或运算的结果就为1。</p></li>
+<li><p>异或（EOR）当两个参数同为0，或者同为1时，异或运算的结果为0，当两个参数不同时，异或运算的结果才为1。</p></li>
+</ul>
+<h4 id="位运算">位运算</h4>
+<h5 id="按位进行布尔运算">按位进行布尔运算</h5>
+<p>按位进行布尔运算，确定一个位级表达式结果的最好方法，就是将十六进制扩展成二进制表示，然后按位进行相应的运算，最后再转换回十六进制。</p>
+<p><img src="/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220322191856042.png" alt="image-20220322191856042" style="zoom:67%;"></p>
+<h5 id="掩码运算">掩码运算</h5>
+<p>所谓掩码运算，就是通过位运算得到特定的位序列。</p>
+<p>例如对于操作数0x89ABCDEF，我们想要得到该操作数的最低有效字节的值，可以通过&amp; 0xFF，这样我们就得到了最低有效字节 0x0000 00EF。</p>
+<p><img src="https://img-blog.csdnimg.cn/20210506180110995.png" alt="在这里插入图片描述" style="zoom:67%;"></p>
+<h3 id="逻辑运算">逻辑运算</h3>
+<p>逻辑运算认为所有非零的参数都表示true，只有参数0表示false。逻辑运算的运算符与布尔代数中的位级运算不同：</p>
+<p><img src="/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220322192558057.png" alt="image-20220322192558057" style="zoom:67%;"></p>
+<p>逻辑运算的结果只有两种，true或者false。而位运算只有在特殊的数值条件下才会得到0或者1。</p>
+<p><img src="/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220322192653302.png" alt="image-20220322192653302" style="zoom:50%;"></p>
+<p>对于图中的这个表达式 a &amp;&amp; 5/a，如果a等于0，该逻辑运算的结果即为false，不用再去计算5除以a，这样就可以避免了出现5除以0的情况。</p>
+<h3 id="移位运算">移位运算</h3>
+<p>左移n位就是丢弃最高的n位，并在右端补n个0。</p>
+<p>右移，分为逻辑右移和算术右移。</p>
+<p>逻辑右移和左移只是在方向上存在差异，逻辑右移n位就是丢弃最低的n位，并在左端补n个0。</p>
+<p>算术右移，当算术右移的操作对象的最高位等于0时，算术右移与逻辑右移是一样的，没有任何差别。但是当操作数的最高位为1时，算术右移之后，左端需要补1，而不是补0。</p>
+<p><img src="/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220322193305715.png" alt="image-20220322193305715" style="zoom:50%;"></p>
+<p>实际上，几乎所有的编译器以及机器的组合都是对有符号数使用算术右移，对于无符号数使用逻辑右移。</p>
+<h3 id="整数的表示">整数的表示</h3>
+<p>C语言支持多种整型数据类型，例如 char short int等，这些关键字可以用来指定不同类型数据的大小。</p>
+<p>64位机器上，不同的数据类型所表示数值的范围如下：</p>
+<p><img src="/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220323100700301.png" alt="image-20220323100700301" style="zoom: 50%;"></p>
+<p>不同的数据类型，所占的字节数是不同的，这也是导致数值取围不同的直接原因。关于long类型的大小需要注意一下，这个类型的取值范围是与机器字长相关的，在64位机器上，long类型占8个字节，而在32位机器上，long类型只占4个字节。</p>
+<p>当变量声明带有unsigned关键字时，限制了表示的数字只能为非负数，在计算机领域，非负数通常称为无符号数，C语言中支持无符号数和有符号数，有符号数既可以是正数，也可以是负数。</p>
+<h4 id="无符号数">无符号数</h4>
+<p>假设有一个整数的数据类型有w位，用向量x来表示，如果把向量x看成一个二进制表示的数，向量x中的每一个元素表示一个二进制位，其中每个位的取值为0或者1。用一个函数B2U来表示一个长度为w的0、1串是如何映射到无符号数（十进制）的，B2U的意思是binary to unsigned，具体映射过程如图所示：</p>
+<p><img src="/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220323100853013.png" alt="image-20220323100853013" style="zoom: 67%;"></p>
+<p>为了更加清楚的解释无符号数的表示方法，CSAPP的原书中还介绍了一种图形化的表示方法来帮助读者理解无符号数的编码规则。对于向量的第 <span class="math inline">\(i\)</span> 位，我们用一个长度为 <span class="math inline">\(2^i\)</span> 的蓝色条状图来表示。每个位向量对应的值就等于所有值为1的位，所对应的条状图的长度之和。</p>
+<p>例如：编码0101，就是长度为4(2的2次方)的条状图加上长度为1(2的0次方)的条状图。对于编码1011，则是长度为8，长度为2，以及长度为1的三者相加。</p>
+<p>对于长度为4的编码，所表示的最小值就是所有位都等于0时；最大值就是所有位都等于1时，因此4位编码所能表示的无符号数的取值范围是0~15。</p>
+<p><img src="/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220323101412430.png" alt="image-20220323101412430" style="zoom:67%;"></p>
+<h4 id="有符号数">有符号数</h4>
+<p>计算机中对于有符号数的编码采用补码（two’s-complement）的形式。</p>
+<p>同样利用向量x来表示二进制数，对于采用补码方式进行编码的二进制数与有符号数（十进制）之间的转换过程，主要区别在于最高位的权重是<span class="math inline">\(-2^{w-1}\)</span>，当最高位等于1时，表示负数；当最高位等于0时，表示非负数。因此最高位也称为符号位。</p>
+<p>不要将最高位理解为负号，进行补码转原码的过程太繁琐，直接将符号位理解为负权重进行计算。</p>
+<p><img src="/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220323101710474.png" alt="image-20220323101710474" style="zoom:67%;"></p>
+<p>补码的图形化表示方法，需要注意的是最高位的情况，其中灰色的条状图来表示最高符号位等于1时的情况。</p>
+<p>对于编码0001和0101，当最高符号位等于0，灰色条状图对映射结果没有任何影响。</p>
+<p>但是对于1011和1111，由于最高符号位是1，灰色条状图所代表的负权重使得映射结果一定为负数。对于4位补码，可以表示的最小值是-8，可以表示的最大值是7。</p>
+<p><img src="/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220323102045088.png" alt="image-20220323102045088" style="zoom:67%;"></p>
+<h4 id="整数的范围">整数的范围</h4>
+<p>无符号数的不同字长可以表示整数的范围，减一表示出去0这个值，才是真正的最大正整数：</p>
+<p><img src="/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220323102305296.png" alt="image-20220323102305296" style="zoom:67%;"></p>
+<blockquote>
+<p><span class="math inline">\(2^7+2^6+2^5+...+2^0 = 2^8-1\)</span></p>
+</blockquote>
+<p>有符号数的不同字长可以表示整数的范围，以字长为8举例，因为只能占用7位，因此最大值就是<span class="math inline">\(2^7-1\)</span>，包括0在内可以表示<span class="math inline">\(2^7\)</span>个数：</p>
+<p><img src="/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220323102335970.png" alt="image-20220323102335970" style="zoom:67%;"></p>
+<blockquote>
+<p><span class="math inline">\(2^6+2^5+...+2^0 = 2^7-1\)</span></p>
+</blockquote>
+<p>有符号数的最小值：</p>
+<p><img src="/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220323104458281.png" alt="image-20220323104458281" style="zoom:67%;"></p>
+<blockquote>
+<p><span class="math inline">\(-1*2^7+0*2^6+0*2^5+...+0*2^0 = -2^7\)</span></p>
+</blockquote>
+<p>对于-1，这个需要特别注意一下，无论是字长是8位，还是64位，有符号数-1的补码是一个全为1的串。-1的补码与无符号数的最大值有着相同的二进制位表示。理解了补码编码的含义后，就不会把 -1 看成 1001（四位编码），因为这个是 -1 的原码，计算机表示有符号数用的是补码而不是原码。</p>
+<p><img src="/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220323104843342.png" alt="image-20220323104843342" style="zoom:67%;"></p>
+<h4 id="补码与原码">补码与原码</h4>
+<p>虽然C语言的标准中并没有要求用补码来表示有符号数，但是几乎所有的机器都是<strong>用补码来表示有符号数</strong>。</p>
+<p>例：已知一个有符号数12345的补码表示 0011 0000 0011 1001，求 -12345 的补码。</p>
+<p><img src="/2022/03/21/CSAPP_02_%E4%BF%A1%E6%81%AF%E7%9A%84%E8%A1%A8%E7%A4%BA%E4%B8%8E%E5%A4%84%E7%90%86/image-20220323105304065.png" alt="image-20220323105304065" style="zoom:67%;"></p>
+<p>解：已知<strong>正数的原码和补码相同</strong>，即 12345 的原码也是 0011 0000 0011 1001。<strong>补码和原码相加会刚好溢出，使得结果等于 0</strong>，因此，- 12345 的补码就是 12345 原码对应 0 的位置改为 1，1 的位置改为 0，然后再加 1。</p>
+<p>即：0011 0000 0011 1001 -&gt; 1100 1111 1100 0110 -&gt; 1100 1111 1100 0111。</p>
+<p>因此，-12345 的补码就是 1100 1111 1100 0111。</p>
+<p>与-12345相同位模式的无符号数又是多少呢、？对于无符号数，最高位的1表示的不是负权重，根据无符号数的编码定义可以得到53191。</p>
+<h3 id="参考资料">参考资料</h3>
+<p>https://blog.csdn.net/qq_29051413/article/details/116455308</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" rel="tag"># 操作系统</a>
+              <a href="/tags/CSAPP/" rel="tag"># CSAPP</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2022/03/19/MySQL_%E4%BA%8B%E5%8A%A1%E6%97%A5%E5%BF%97/" rel="prev" title="MySQL事务日志">
+                  <i class="fa fa-chevron-left"></i> MySQL事务日志
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2022/03/21/MySQL_%E9%94%81%E6%9C%BA%E5%88%B6/" rel="next" title="MySQL锁机制">
+                  MySQL锁机制 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">BIOINSu</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+  <script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'none'
+      },
+      options: {
+        renderActions: {
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              const target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3.1.2/es5/tex-mml-chtml.js';
+    script.defer = true;
+    document.head.appendChild(script);
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.typesetClear();
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+
+
+</body>
+</html>

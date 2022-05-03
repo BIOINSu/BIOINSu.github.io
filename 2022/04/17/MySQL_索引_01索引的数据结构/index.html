@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.3.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/maze.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/maze.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/maze.png">
+  <link rel="mask-icon" href="/images/maze.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","images":"/images","scheme":"Mist","version":"8.2.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false}};
+  </script>
+<meta name="description" content="概念 解释     索引 便于存储引擎快速查找数据的数据结构。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL 索引的数据结构">
+<meta property="og:url" content="http://example.com/2022/04/17/MySQL_%E7%B4%A2%E5%BC%95_01%E7%B4%A2%E5%BC%95%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/index.html">
+<meta property="og:site_name" content="BIOINSu">
+<meta property="og:description" content="概念 解释     索引 便于存储引擎快速查找数据的数据结构。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2022/04/17/MySQL_%E7%B4%A2%E5%BC%95_01%E7%B4%A2%E5%BC%95%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/image-20220417153701853.png">
+<meta property="og:image" content="http://example.com/2022/04/17/MySQL_%E7%B4%A2%E5%BC%95_01%E7%B4%A2%E5%BC%95%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/image-20220418152151998.png">
+<meta property="og:image" content="http://example.com/2022/04/17/MySQL_%E7%B4%A2%E5%BC%95_01%E7%B4%A2%E5%BC%95%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/image-20220419195357758.png">
+<meta property="og:image" content="http://example.com/2022/04/17/MySQL_%E7%B4%A2%E5%BC%95_01%E7%B4%A2%E5%BC%95%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/image-20220419194201263.png">
+<meta property="og:image" content="http://example.com/2022/04/17/MySQL_%E7%B4%A2%E5%BC%95_01%E7%B4%A2%E5%BC%95%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/image-20220419205328506.png">
+<meta property="og:image" content="http://example.com/2022/04/17/MySQL_%E7%B4%A2%E5%BC%95_01%E7%B4%A2%E5%BC%95%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/image-20220419205833946.png">
+<meta property="og:image" content="http://example.com/2022/04/17/MySQL_%E7%B4%A2%E5%BC%95_01%E7%B4%A2%E5%BC%95%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/image-20220419205618656.png">
+<meta property="og:image" content="http://example.com/2022/04/17/MySQL_%E7%B4%A2%E5%BC%95_01%E7%B4%A2%E5%BC%95%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/image-20220419210246714.png">
+<meta property="og:image" content="http://example.com/2022/04/17/MySQL_%E7%B4%A2%E5%BC%95_01%E7%B4%A2%E5%BC%95%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/image-20220419221003001.png">
+<meta property="og:image" content="http://example.com/2022/04/17/MySQL_%E7%B4%A2%E5%BC%95_01%E7%B4%A2%E5%BC%95%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/image-20220419221149671.png">
+<meta property="og:image" content="http://example.com/2022/04/17/MySQL_%E7%B4%A2%E5%BC%95_01%E7%B4%A2%E5%BC%95%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/image-20220419221319048.png">
+<meta property="og:image" content="http://example.com/2022/04/17/MySQL_%E7%B4%A2%E5%BC%95_01%E7%B4%A2%E5%BC%95%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/image-20220419221219754.png">
+<meta property="og:image" content="http://example.com/2022/04/17/MySQL_%E7%B4%A2%E5%BC%95_01%E7%B4%A2%E5%BC%95%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/image-20220420201319776.png">
+<meta property="og:image" content="http://example.com/2022/04/17/MySQL_%E7%B4%A2%E5%BC%95_01%E7%B4%A2%E5%BC%95%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/image-20220420201357155.png">
+<meta property="og:image" content="http://example.com/2022/04/17/MySQL_%E7%B4%A2%E5%BC%95_01%E7%B4%A2%E5%BC%95%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/image-20220420201238123.png">
+<meta property="og:image" content="http://example.com/2022/04/17/MySQL_%E7%B4%A2%E5%BC%95_01%E7%B4%A2%E5%BC%95%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/image-20220420201617314.png">
+<meta property="og:image" content="http://example.com/2022/04/17/MySQL_%E7%B4%A2%E5%BC%95_01%E7%B4%A2%E5%BC%95%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/image-20220420202423794.png">
+<meta property="og:image" content="http://example.com/2022/04/17/MySQL_%E7%B4%A2%E5%BC%95_01%E7%B4%A2%E5%BC%95%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/image-20220420202737383.png">
+<meta property="og:image" content="http://example.com/2022/04/17/MySQL_%E7%B4%A2%E5%BC%95_01%E7%B4%A2%E5%BC%95%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/image-20220420203045666.png">
+<meta property="og:image" content="http://example.com/2022/04/17/MySQL_%E7%B4%A2%E5%BC%95_01%E7%B4%A2%E5%BC%95%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/image-20220420203118360.png">
+<meta property="og:image" content="http://example.com/2022/04/17/MySQL_%E7%B4%A2%E5%BC%95_01%E7%B4%A2%E5%BC%95%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/image-20220420203217642.png">
+<meta property="og:image" content="http://example.com/2022/04/17/MySQL_%E7%B4%A2%E5%BC%95_01%E7%B4%A2%E5%BC%95%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/image-20220420203330828.png">
+<meta property="og:image" content="http://example.com/2022/04/17/MySQL_%E7%B4%A2%E5%BC%95_01%E7%B4%A2%E5%BC%95%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/image-20220420203409225.png">
+<meta property="article:published_time" content="2022-04-17T07:10:57.310Z">
+<meta property="article:modified_time" content="2022-04-20T13:26:04.088Z">
+<meta property="article:author" content="BIOINSu">
+<meta property="article:tag" content="数据库">
+<meta property="article:tag" content="MySQL">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2022/04/17/MySQL_%E7%B4%A2%E5%BC%95_01%E7%B4%A2%E5%BC%95%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/image-20220417153701853.png">
+
+
+<link rel="canonical" href="http://example.com/2022/04/17/MySQL_%E7%B4%A2%E5%BC%95_01%E7%B4%A2%E5%BC%95%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+<title>MySQL 索引的数据结构 | BIOINSu</title>
+  
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BIOINSu</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%80%E4%BB%8B"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#innodb%E4%B8%AD%E7%9A%84%E7%B4%A2%E5%BC%95"><span class="nav-number">2.</span> <span class="nav-text">InnoDB中的索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#innodb%E7%B4%A2%E5%BC%95%E7%9A%84%E5%88%86%E7%B1%BB"><span class="nav-number">3.</span> <span class="nav-text">InnoDB索引的分类</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%81%9A%E7%B0%87%E7%B4%A2%E5%BC%95"><span class="nav-number">3.1.</span> <span class="nav-text">聚簇索引</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9D%9E%E8%81%9A%E7%B0%87%E7%B4%A2%E5%BC%95"><span class="nav-number">3.2.</span> <span class="nav-text">非聚簇索引</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%81%94%E5%90%88%E7%B4%A2%E5%BC%95"><span class="nav-number">3.3.</span> <span class="nav-text">联合索引</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#innodb%E7%9A%84b%E6%A0%91%E7%B4%A2%E5%BC%95%E7%9A%84%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9"><span class="nav-number">4.</span> <span class="nav-text">InnoDB的B+树索引的注意事项</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#myisam%E4%B8%AD%E7%9A%84%E7%B4%A2%E5%BC%95"><span class="nav-number">5.</span> <span class="nav-text">MyISAM中的索引</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#myisam%E4%B8%AD%E7%9A%84%E7%B4%A2%E5%BC%95%E4%B8%8Einnodb%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-number">5.1.</span> <span class="nav-text">MyISAM中的索引与InnoDB的区别</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B4%A2%E5%BC%95%E7%9A%84%E4%BB%A3%E4%BB%B7"><span class="nav-number">6.</span> <span class="nav-text">索引的代价</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql%E7%B4%A2%E5%BC%95%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E9%80%89%E6%8B%A9"><span class="nav-number">7.</span> <span class="nav-text">MySQL索引数据结构选择</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#hash%E7%B4%A2%E5%BC%95"><span class="nav-number">7.1.</span> <span class="nav-text">Hash索引</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#b%E6%A0%91"><span class="nav-number">7.2.</span> <span class="nav-text">B树</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#b%E6%A0%91-1"><span class="nav-number">7.3.</span> <span class="nav-text">B+树</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">8.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">BIOINSu</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">113</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">38</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/BIOINSu" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;BIOINSu" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/04/17/MySQL_%E7%B4%A2%E5%BC%95_01%E7%B4%A2%E5%BC%95%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BIOINSu">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BIOINSu">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          MySQL 索引的数据结构
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-04-17 15:10:57" itemprop="dateCreated datePublished" datetime="2022-04-17T15:10:57+08:00">2022-04-17</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2022-04-20 21:26:04" itemprop="dateModified" datetime="2022-04-20T21:26:04+08:00">2022-04-20</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/" itemprop="url" rel="index"><span itemprop="name">数据库</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/MySQL/" itemprop="url" rel="index"><span itemprop="name">MySQL</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <table>
+<thead>
+<tr class="header">
+<th>概念</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>索引</td>
+<td>便于存储引擎快速查找数据的数据结构。</td>
+</tr>
+<tr class="even">
+<td></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<a id="more"></a>
+<h3 id="简介">简介</h3>
+<p>索引（Index）是便于存储引擎快速查找数据的数据结构。</p>
+<p><img src="/2022/04/17/MySQL_%E7%B4%A2%E5%BC%95_01%E7%B4%A2%E5%BC%95%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/image-20220417153701853.png" alt="image-20220417153701853" style="zoom:67%;"></p>
+<p>即不同存储引擎下，索引对应的数据结构可能是不同的。</p>
+<p>索引的优点</p>
+<p>（1）通过降低数据库的IO成本，<strong>提高数据检索的效率</strong>。（最主要）</p>
+<p>（2）通过创建<strong>唯一索引</strong>，可以保证数据库表中每一行数据的唯一性。</p>
+<p>（3）可以<strong>加速表和表之间的连接</strong>。即，对于有依赖关系的子表和父表联合查询时，通过外键可以提高查询速度。</p>
+<p>（4）在使用分组（group by）和排序子句（order by）进行数据查询时，可以显著<strong>减少查询中分组和排序的时间</strong>，降低了CPU的消耗。</p>
+<p>索引的缺点</p>
+<p>（1）<strong>创建索引和维护索引要耗费时间</strong>，并且随着数据量的增加，所耗费的时间也会增加。</p>
+<p>（2）索引需要<strong>占磁盘空间</strong>。除了数据表占数据空间之外，每一个索引还要占一定的物理空间，存储在磁盘上，如果有大量的索引，索引文件就可能比数据文件更快达到最大文件尺寸。</p>
+<p>（3）虽然索引大大提高了查询速度，同时却会<strong>降低更新表的速度</strong>。当对表中的数据进行增加、删除和修改的时候，索引也要动态地维护，这样就降低了数据的维护速度。</p>
+<blockquote>
+<p>一种可行的方案是当存在大量增删改查操作时，先删除索引，操作完数据后再创建索引，因为创建索引的时间比维护索引的时间要小。</p>
+</blockquote>
+<h3 id="innodb中的索引">InnoDB中的索引</h3>
+<p><img src="/2022/04/17/MySQL_%E7%B4%A2%E5%BC%95_01%E7%B4%A2%E5%BC%95%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/image-20220418152151998.png" alt="image-20220418152151998" style="zoom:67%;"></p>
+<p>数据页中的存储内容可以分为<strong>目录项</strong>和<strong>普通记录</strong>。</p>
+<p>目录项记录和普通的用户记录的<strong>不同点</strong>：</p>
+<ul>
+<li><p>目录项记录的record_type（数据页中一条记录中记录头信息中的一个字段）值是1，而普通用户记录的record_type 值是0。</p></li>
+<li><p>目录项记录只有主键值和页号两个列，而普通的用户记录的列是用户自己定义的，可能包含很多列，另外还有InnoDB自己添加的隐藏列。</p></li>
+</ul>
+<blockquote>
+<p>记录头信息（是用户记录中的一个字段，也就是数据页中一条记录中记录头信息中的一个字段）里还有一个叫min_rec_mask 的属性，只有在存储目录项记录的页中的主键值最小的目录项记录的min_rec_mask 值为1 ，其他别的记录的min_rec_mask 值都是0 。</p>
+</blockquote>
+<p>目录项记录和普通的用户记录的<strong>相同点</strong>：</p>
+<ul>
+<li>两者用的是一样的数据页，都会为主键值生成Page Directory （页目录），从而在按照主键值进行查找时可以使用<strong>二分法</strong>来加快查询速度。</li>
+</ul>
+<blockquote>
+<p>根据索引值查找记录的过程大致分为两步：</p>
+<p>1.先到存储目录项记录的页，根据二分法在目录项中快速查询。</p>
+<p>2.根据录项记录的页寻找到叶子节点的数据页，根据二分法快速定位数据。</p>
+</blockquote>
+<p>现在以查找主键为20 的记录为例，根据某个主键值去查找记录的步骤就可以大致拆分成下边两步：</p>
+<ol type="1">
+<li>先到存储目录项记录的页，也就是页30中通过二分法快速定位到对应目录项，因为12 &lt; 20 &lt; 209 ，所以定位到对应的记录所在的页就是页9。</li>
+<li>再到存储用户记录的页9中根据二分法快速定位到主键值为20 的用户记录。</li>
+</ol>
+<p>数据页之间通过双向链表连接，数据页中的记录通过单向链表连接。</p>
+<p>InnoDB下索引的数据结构对应B+树。假设一个数据页中，能够存放n条数据，能够存放m个目录项，通常m多于n。</p>
+<p>如果B+树只有1层，也就是只有1个用于存放用户记录的节点，最多能存放n条记录。</p>
+<p>如果B+树有2层，最多能存放<span class="math inline">\(m×n=mn\)</span>条记录。</p>
+<p>如果B+树有3层，最多能存放<span class="math inline">\(m×m×n= m^2n\)</span> ，当<span class="math inline">\(m=1000,n=100\)</span>时已经达到1,0000,0000 条记录。</p>
+<p>如果B+树有4层，最多能存放<span class="math inline">\(m×m×n= m^3n\)</span> 条记录。</p>
+<p>因此一般情况下，所用到的B+树都不会超过4层，通过索引值去查找某条记录最多只需要做4个页面内的查找（查找3个目录项页和一个用户记录页），又因为在每个页面内有所谓的Page Directory （页目录），所以在页面内也可以通过二分法实现快速定位记录。</p>
+<h3 id="innodb索引的分类">InnoDB索引的分类</h3>
+<p>索引按照物理实现方式，索引可以分为 2 种：聚簇（聚集）和非聚簇（非聚集）索引。</p>
+<p>非聚簇索引称为二级索引或者辅助索引，联合索引是非聚簇索引的一种。</p>
+<h4 id="聚簇索引">聚簇索引</h4>
+<p>就是用主键作为目录项构成的索引，将数据组织成B+树的结构，叶子节点存放完整的记录项。</p>
+<p>一张表只能存在一个聚簇索引，如果没有显示指定主键，则采用隐藏列中的隐式主键构建索引（实际上就是一个自增id）。</p>
+<p>这也是为什么InnoDB引擎下一张表只会产生一个文件.ibd，这其中包含了索引和数据。</p>
+<p>特点： 1. 使用<strong>主键值的大小进行记录和页的排序</strong>，这包括三个方面的含义：</p>
+<ul>
+<li><p>页内的记录是按照主键的大小顺序排成一个<strong>单向链表</strong>。</p></li>
+<li><p>各个存放<strong>用户记录</strong>的页也是根据页中用户记录的主键大小顺序<strong>排成一个双向链表</strong>。</p></li>
+<li><p>存放<strong>目录项记录</strong>的页分为不同的层次，在同一层次中的页也是根据页中目录项记录的主键大小顺序<strong>排成一个双向链表</strong>。</p></li>
+</ul>
+<ol start="2" type="1">
+<li>B+树的<strong>叶子节点存储的是完整的用户记录</strong>。 所谓完整的用户记录，就是指这个记录中存储了所有列的值（包括隐藏列）。</li>
+</ol>
+<p>优点：</p>
+<ul>
+<li><p>数据访问更快，因为聚簇索引将索引和数据保存在同一个B+树中，因此从聚簇索引中获取数据<strong>比非聚簇索引更快（不用回表）。</strong></p></li>
+<li><p>聚簇索引对于主键的<strong>排序查找和范围查找</strong>速度非常快</p></li>
+<li><p>按照聚簇索引排列顺序，查询显示一定范围数据的时候，由于数据都是紧密相连，数据库不用从多个数据块中提取数据，所以<strong>节省了大量的io操作</strong>。</p></li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li><p>插入速度严重依赖于插入顺序，<strong>按照主键的顺序插入是最快的方式</strong>，否则将会出现页分裂，严重影响性能。因此，对于InnoDB表，我们一般都会定义一个自增的ID列为主键</p></li>
+<li><p>更新主键的代价很高，因为将会导致被更新的行移动。因此，对于InnoDB表，我们一般<strong>定义主键为不可更新</strong></p></li>
+</ul>
+<h4 id="非聚簇索引">非聚簇索引</h4>
+<p>就是用非主键字段作为目录项构成的索引，将数据组织成B+树的结构，叶子节点存放该非主键字段和对应的主键字段。</p>
+<p>在查询时，先通过该字段查找到主键，然后再通过聚簇索引中的主键查找到详细数据<strong>（称为回表）</strong>。</p>
+<p>一张表可以存在多个非聚簇索引。</p>
+<p><img src="/2022/04/17/MySQL_%E7%B4%A2%E5%BC%95_01%E7%B4%A2%E5%BC%95%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/image-20220419195357758.png" alt="image-20220419195357758" style="zoom:67%;"></p>
+<h4 id="联合索引">联合索引</h4>
+<p>非聚簇索引的一种特殊情况。是使用多个字段构建的索引。</p>
+<p>在构建B+树时按照多个字段的先后顺序对目录项和数据项进行排序。</p>
+<p>注意其叶子节点依然存放的是主键值。</p>
+<p><img src="/2022/04/17/MySQL_%E7%B4%A2%E5%BC%95_01%E7%B4%A2%E5%BC%95%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/image-20220419194201263.png" alt="image-20220419194201263" style="zoom:67%;"></p>
+<h3 id="innodb的b树索引的注意事项">InnoDB的B+树索引的注意事项</h3>
+<ul>
+<li><p>根页面的位置固定（B+树是自上而下创建的）</p>
+<p><img src="/2022/04/17/MySQL_%E7%B4%A2%E5%BC%95_01%E7%B4%A2%E5%BC%95%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/image-20220419205328506.png" alt="image-20220419205328506" style="zoom:67%;"></p></li>
+<li><p>非聚簇索引中目录项包含索引字段、主键值、页号以保证每个目录项的唯一性</p>
+<p>因为索引字段可能存在重复值，这样就会导致添加索引项时的困惑。因此需要使用主键值保证唯一性，当索引字段重复时即可用主键判断。</p></li>
+<li><p>一个数据页中最少存储2条数据记录（才能使树分叉）</p></li>
+</ul>
+<h3 id="myisam中的索引">MyISAM中的索引</h3>
+<p>MyISAM引擎使用B+Tree 作为索引结构，叶子节点的data域存放的是数据记录的地址。</p>
+<p>即索引和数据是分开存储的（数据不需要排序）。</p>
+<p><img src="/2022/04/17/MySQL_%E7%B4%A2%E5%BC%95_01%E7%B4%A2%E5%BC%95%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/image-20220419205833946.png" alt="image-20220419205833946" style="zoom:67%;"></p>
+<p>其中聚簇索引和非聚簇索引的结构没有任何区别，只是要求建立的索引字段是否唯一的区别。</p>
+<p><img src="/2022/04/17/MySQL_%E7%B4%A2%E5%BC%95_01%E7%B4%A2%E5%BC%95%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/image-20220419205618656.png" alt="image-20220419205618656" style="zoom:67%;"></p>
+<h4 id="myisam中的索引与innodb的区别">MyISAM中的索引与InnoDB的区别</h4>
+<p>① 在InnoDB存储引擎中，只需要根据主键值对聚簇索引进行一次查找就能找到对应的记录，而在MyISAM 中却需要进行一次回表操作，意味着MyISAM中建立的索引相当于全部都是二级索引。</p>
+<p>② InnoDB的<strong>数据文件本身就是索引文件</strong>，而MyISAM索引文件和数据文件是分离的，<strong>索引文件仅保存数据记录的地址</strong>。</p>
+<p>③ InnoDB的非聚簇索引叶子节点存储相应记录主键的值，而MyISAM索引叶子节点记录的是地址。换句话说，InnoDB的所有非聚簇索引都引用主键作为叶子节点。</p>
+<p>④ MyISAM的回表操作是十分快速的，因为是拿着地址偏移量直接到文件中取数据的，反观InnoDB是通过获取主键之后再去聚簇索引里找记录，虽然说也不慢，但还是比不上直接用地址去访问。</p>
+<p>⑤ <strong>InnoDB要求表必须有主键（ MyISAM可以没有）</strong>。如果没有显式指定，则MySQL系统会自动选择一个可以非空且唯一标识数据记录的列作为主键。如果不存在这种列，则MySQL自动为InnoDB表生成一个隐含字段作为主键，这个字段长度为6个字节，类型为长整型。</p>
+<p><img src="/2022/04/17/MySQL_%E7%B4%A2%E5%BC%95_01%E7%B4%A2%E5%BC%95%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/image-20220419210246714.png" alt="image-20220419210246714" style="zoom:50%;"></p>
+<h3 id="索引的代价">索引的代价</h3>
+<ul>
+<li><p>空间上的代价</p>
+<p>每建立一个索引都要为它建立一棵B+树，每一棵B+树的<strong>每一个节点都是一个数据页</strong>，一个页默认会 占用16KB 的存储空间，一棵很大的B+树由许多数据页组成，那就是很大的一片存储空间。</p></li>
+<li><p>时间上的代价</p>
+<p>每次对表中的数据进行增、删、改操作时，都需要去修改各个B+树索引。</p>
+<p>而且，B+树每层节点都是按照索引列的值从小到大的顺序排序而组成了双向链表。不论是叶子节点中的记录，还 是内节点中的记录（也就是不论是用户记录还是目录项记录）都是按照索引列的值从小到大的顺序而形成了一个单向链表。</p>
+<p>增、删、改操作可能会对节点和记录的排序造成破坏，所以存储引擎需要额外的时间进行一些记录移位， 页面分裂、页面回收等操作来维护好节点和记录的排序。</p>
+<p>如果建了许多索引，每个索引对应的B+树都要进行相关的维护操作，会降低性能。</p></li>
+</ul>
+<h3 id="mysql索引数据结构选择">MySQL索引数据结构选择</h3>
+<p>主要就是根据索引对应的数据结构是否能降低磁盘IO次数来考虑索引的数据结构。</p>
+<h4 id="hash索引">Hash索引</h4>
+<p><img src="/2022/04/17/MySQL_%E7%B4%A2%E5%BC%95_01%E7%B4%A2%E5%BC%95%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/image-20220419221003001.png" alt="image-20220419221003001" style="zoom:67%;"></p>
+<p>Hash索引的适用场景：</p>
+<p><img src="/2022/04/17/MySQL_%E7%B4%A2%E5%BC%95_01%E7%B4%A2%E5%BC%95%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/image-20220419221149671.png" alt="image-20220419221149671" style="zoom:67%;"></p>
+<p><img src="/2022/04/17/MySQL_%E7%B4%A2%E5%BC%95_01%E7%B4%A2%E5%BC%95%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/image-20220419221319048.png" alt="image-20220419221319048" style="zoom:67%;"></p>
+<p>采用自适应 Hash 索引目的是方便根据 SQL 的查询条件加速定位到叶子节点，特别是当 B+ 树比较深的时候，通过自适应 Hash 索引可以明显提高数据的检索效率。</p>
+<p><img src="/2022/04/17/MySQL_%E7%B4%A2%E5%BC%95_01%E7%B4%A2%E5%BC%95%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/image-20220419221219754.png" alt="image-20220419221219754" style="zoom:67%;"></p>
+<h4 id="b树">B树</h4>
+<p><img src="/2022/04/17/MySQL_%E7%B4%A2%E5%BC%95_01%E7%B4%A2%E5%BC%95%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/image-20220420201319776.png" alt="image-20220420201319776" style="zoom:67%;"></p>
+<p><img src="/2022/04/17/MySQL_%E7%B4%A2%E5%BC%95_01%E7%B4%A2%E5%BC%95%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/image-20220420201357155.png" alt="image-20220420201357155" style="zoom:67%;"></p>
+<p><img src="/2022/04/17/MySQL_%E7%B4%A2%E5%BC%95_01%E7%B4%A2%E5%BC%95%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/image-20220420201238123.png" alt="image-20220420201238123" style="zoom:67%;"></p>
+<p>在 B 树的搜索过程中，比较的次数并不少，但如果把数据读取出来然后在内存中进行比较，这个时间就是可以忽略不计的。</p>
+<p>而读取磁盘块本身需要进行 I/O 操作，消耗的时间比在内存中进行比较所需要的时间要多，是数据查找用时的重要因素。</p>
+<p>B 树相比于平衡二叉树来说磁盘 I/O 操作要少，在数据查询中比平衡二叉树效率要高。所以只要树的高度足够低，IO次数足够少，就可以提高查询性能。</p>
+<p><img src="/2022/04/17/MySQL_%E7%B4%A2%E5%BC%95_01%E7%B4%A2%E5%BC%95%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/image-20220420201617314.png" alt="image-20220420201617314" style="zoom:67%;"></p>
+<h4 id="b树-1">B+树</h4>
+<p><img src="/2022/04/17/MySQL_%E7%B4%A2%E5%BC%95_01%E7%B4%A2%E5%BC%95%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/image-20220420202423794.png" alt="image-20220420202423794" style="zoom:67%;"></p>
+<p><img src="/2022/04/17/MySQL_%E7%B4%A2%E5%BC%95_01%E7%B4%A2%E5%BC%95%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/image-20220420202737383.png" alt="image-20220420202737383" style="zoom:67%;"><img src="/2022/04/17/MySQL_%E7%B4%A2%E5%BC%95_01%E7%B4%A2%E5%BC%95%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/image-20220420203045666.png" alt="image-20220420203045666"></p>
+<p><img src="/2022/04/17/MySQL_%E7%B4%A2%E5%BC%95_01%E7%B4%A2%E5%BC%95%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/image-20220420203118360.png" alt="image-20220420203118360" style="zoom:67%;"></p>
+<p><img src="/2022/04/17/MySQL_%E7%B4%A2%E5%BC%95_01%E7%B4%A2%E5%BC%95%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/image-20220420203217642.png" alt="image-20220420203217642" style="zoom:67%;"></p>
+<p><img src="/2022/04/17/MySQL_%E7%B4%A2%E5%BC%95_01%E7%B4%A2%E5%BC%95%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/image-20220420203330828.png" alt="image-20220420203330828" style="zoom:67%;"></p>
+<p><img src="/2022/04/17/MySQL_%E7%B4%A2%E5%BC%95_01%E7%B4%A2%E5%BC%95%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/image-20220420203409225.png" alt="image-20220420203409225" style="zoom:67%;"></p>
+<p>索引需要手动指定吗？</p>
+<p>如果是NDB或MEMORY存储引擎，可以手动指定是Hash索引还是B+树索引。其他存储引擎无需手动指定。</p>
+<h3 id="参考资料">参考资料</h3>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag"># 数据库</a>
+              <a href="/tags/MySQL/" rel="tag"># MySQL</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2022/03/30/MySQL_InnoDB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/" rel="prev" title="MySQL InnoDB数据存储结构">
+                  <i class="fa fa-chevron-left"></i> MySQL InnoDB数据存储结构
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2022/04/20/MySQL_%E7%B4%A2%E5%BC%95_02%E7%B4%A2%E5%BC%95%E7%9A%84%E5%88%86%E7%B1%BB%E4%B8%8E%E5%88%9B%E5%BB%BA/" rel="next" title="MySQL 索引的分类与创建">
+                  MySQL 索引的分类与创建 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">BIOINSu</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+  <script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'none'
+      },
+      options: {
+        renderActions: {
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              const target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3.1.2/es5/tex-mml-chtml.js';
+    script.defer = true;
+    document.head.appendChild(script);
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.typesetClear();
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+
+
+</body>
+</html>
