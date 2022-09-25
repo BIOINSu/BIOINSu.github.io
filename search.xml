@@ -149,9 +149,11 @@
 ]]></content>
       <categories>
         <category>Flink</category>
+        <category>Flink快速入门</category>
       </categories>
       <tags>
         <tag>Flink</tag>
+        <tag>Flink快速入门</tag>
       </tags>
   </entry>
   <entry>
@@ -223,9 +225,11 @@
 ]]></content>
       <categories>
         <category>Flink</category>
+        <category>Flink快速入门</category>
       </categories>
       <tags>
         <tag>Flink</tag>
+        <tag>Flink快速入门</tag>
       </tags>
   </entry>
   <entry>
@@ -257,9 +261,11 @@
 ]]></content>
       <categories>
         <category>Flink</category>
+        <category>Flink快速入门</category>
       </categories>
       <tags>
         <tag>Flink</tag>
+        <tag>Flink快速入门</tag>
       </tags>
   </entry>
   <entry>
@@ -368,9 +374,11 @@
 ]]></content>
       <categories>
         <category>Flink</category>
+        <category>Flink快速入门</category>
       </categories>
       <tags>
         <tag>Flink</tag>
+        <tag>Flink快速入门</tag>
       </tags>
   </entry>
   <entry>
@@ -483,9 +491,11 @@
 ]]></content>
       <categories>
         <category>Flink</category>
+        <category>Flink快速入门</category>
       </categories>
       <tags>
         <tag>Flink</tag>
+        <tag>Flink快速入门</tag>
       </tags>
   </entry>
   <entry>
@@ -712,6 +722,33 @@
       </categories>
       <tags>
         <tag>Hadoop</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Hello World</title>
+    <url>/2021/01/28/Hexo%E6%8C%87%E5%8D%97/</url>
+    <content><![CDATA[<p>Welcome to <a href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
+<a id="more"></a>
+<h2 id="quick-start">Quick Start</h2>
+<h3 id="create-a-new-post">Create a new post</h3>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/writing.html">Writing</a></p>
+<h3 id="run-server">Run server</h3>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/server.html">Server</a></p>
+<h3 id="generate-static-files">Generate static files</h3>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/generating.html">Generating</a></p>
+<figure>
+<img src="/2021/01/28/Hexo%E6%8C%87%E5%8D%97/0.png" alt="hello"><figcaption aria-hidden="true">hello</figcaption>
+</figure>
+<h3 id="deploy-to-remote-sites">Deploy to remote sites</h3>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo clean &amp;&amp; hexo g &amp;&amp; hexo d</span><br></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
+]]></content>
+      <tags>
+        <tag>Testing</tag>
+        <tag>Another Tag</tag>
       </tags>
   </entry>
   <entry>
@@ -1322,7 +1359,7 @@
 <tr class="odd">
 <td>byte</td>
 <td>8 bit<br>1 byte</td>
-<td>127（<span class="math inline">\(2^7-1\)</span>）</td>
+<td>127 (<span class="math inline">\(2^7-1\)</span>)</td>
 <td>-128（<span class="math inline">\(-2^7\)</span>）</td>
 <td>0</td>
 <td>有</td>
@@ -1425,6 +1462,134 @@
       <tags>
         <tag>Java</tag>
         <tag>Java多线程</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Java泛型</title>
+    <url>/2022/05/20/Java_%E6%B3%9B%E5%9E%8B/</url>
+    <content><![CDATA[<table>
+<colgroup>
+<col style="width: 18%">
+<col style="width: 81%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>概念</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>泛型</td>
+<td>将数据类型参数化，在使用时再指定具体的值。</td>
+</tr>
+<tr class="even">
+<td>为什么需要泛型</td>
+<td>解耦类或方法与所使用的数据类型之间的约束，使得类或方法具备最宽泛的使用范围。<br>将类型检查工作提前到编译时期，将类型强转工作交给编译器。</td>
+</tr>
+<tr class="odd">
+<td>泛型方法</td>
+<td>在方法的返回值类型前使用<code>&lt;&gt;</code>标记了数据类型的方法，即为泛型方法。</td>
+</tr>
+<tr class="even">
+<td>泛型与静态</td>
+<td>泛型类中的静态方法和静态变量不可以使用泛型类所声明的泛型参数。<br>静态泛型方法可以使用自己声明的泛型参数。</td>
+</tr>
+<tr class="odd">
+<td>泛型擦除</td>
+<td>Java在编译时擦除所有泛型信息，将泛型替换为原始类型。</td>
+</tr>
+<tr class="even">
+<td>通配符 ？</td>
+<td>表示任意的数据类型。<br>防止组件（例如方法）依赖泛型的具体类型，从而与泛型解耦。<br>通常与泛型结合起来设置上下界从而限定传入的具体数据类型和泛型间的继承关系。</td>
+</tr>
+</tbody>
+</table>
+<a id="more"></a>
+<h3 id="概念">概念</h3>
+<p>泛型，指的是将数据类型参数化，在使用时再指定此参数具体的值，则这个数据类型就可以在使用时决定。</p>
+<p>泛型可以用在类、接口和方法中，分别被称为泛型类、泛型接口、泛型方法。</p>
+<h3 id="为什么需要泛型">为什么需要泛型</h3>
+<p><strong>1、解耦类或方法与所使用的数据类型之间的约束，使得类或方法具备最宽泛的使用范围。</strong></p>
+<p>在 Java5 以前，普通的类和方法只能使用特定的类型：基本数据类型或类类型，如果编写的代码需要应用于多种类型，这种严苛的限制对代码的束缚就会很大。引入泛型后，将数据类型作为一个参数在使用时传递，使得编写的组件（通常是集合）可以适用于多种类型。</p>
+<p>2、将<strong>类型检查工作提前到编译时期</strong>，将类型强转（cast）工作交给编译器，从而在编译时期就获得类型转换异常以及去掉源码中的类型强转代码。</p>
+<p>如下案例中，没有泛型前，类型的检查和类型的强转都必须由开发者负责，一旦没有正确判断类型并强制转换，则会发生运行时异常。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">genericTest</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    List arrayList = <span class="keyword">new</span> ArrayList();</span><br><span class="line">    arrayList.add(<span class="string">&quot;A String&quot;</span>);</span><br><span class="line">    arrayList.add(<span class="number">7</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; arrayList.size(); i++) &#123;</span><br><span class="line">        Object item = arrayList.get(i);</span><br><span class="line">        <span class="keyword">if</span> (item <span class="keyword">instanceof</span> String) &#123;</span><br><span class="line">            String str = (String) item;</span><br><span class="line">            System.out.println(<span class="string">&quot;泛型测试 item = &quot;</span> + str);</span><br><span class="line">        &#125;<span class="keyword">else</span> <span class="keyword">if</span> (item <span class="keyword">instanceof</span> Integer)</span><br><span class="line">        &#123;</span><br><span class="line">            Integer inte = (Integer) item;</span><br><span class="line">            System.out.println(<span class="string">&quot;泛型测试 item = &quot;</span> + inte);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>引入泛型后，编译器在编译时期即可完成类型检查工作，并提出错误（其实IDE在代码编辑过程中已经报红了）。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">genericTest2</span><span class="params">()</span> </span>&#123;</span><br><span class="line">     List&lt;String&gt; arrayList = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">     arrayList.add(<span class="string">&quot;A String&quot;</span>);</span><br><span class="line">     arrayList.add(<span class="number">7</span>); <span class="comment">//..(参数不匹配：int 无法转换为String)</span></span><br><span class="line">     ...</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<h3 id="泛型语法">泛型语法</h3>
+<p>泛型有三种使用方式，分别为：泛型类、泛型接口和泛型方法。</p>
+<h4 id="泛型类">泛型类</h4>
+<p><strong>声明</strong></p>
+<p>在类的声明时指定参数，即构成了泛型类。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//如下面代码中就指定T为类型参数，那么在这个类里面就可以使用这个类型了。</span></span><br><span class="line"><span class="comment">//例如申明T类型的变量name，申明T类型的形参param等操作。</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Generic</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> T name;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Generic</span><span class="params">(T param)</span></span>&#123;</span><br><span class="line">        name=param;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> T <span class="title">m</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> name;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//使用类时就可以传入相应的类型，构建不同类型的实例，如下面代码分别传入了String,Integer,Boolean3个类型.</span></span><br><span class="line"><span class="comment">//如果没有泛型，想要达到上面的效果需要定义三个类，或者一个包含三个构造函数，三个取值方法的类。</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">genericClass</span><span class="params">()</span></span></span><br><span class="line"><span class="function"> </span>&#123;</span><br><span class="line">     Generic&lt;String&gt; str=<span class="keyword">new</span> Generic&lt;&gt;(<span class="string">&quot;A String&quot;</span>);</span><br><span class="line">     Generic&lt;Integer&gt; integer=<span class="keyword">new</span> Generic&lt;&gt;(<span class="number">110</span>);</span><br><span class="line">     Generic&lt;Boolean&gt; b=<span class="keyword">new</span> Generic&lt;&gt;(<span class="keyword">true</span>);</span><br><span class="line"></span><br><span class="line">     System.out.println(<span class="string">&quot;传入类型：&quot;</span>+str.name+<span class="string">&quot;  &quot;</span>+integer.name+<span class="string">&quot;  &quot;</span>+b.name);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>继承泛型类</strong></p>
+<p>如果不传入具体的类型，则子类也需要指定类型参数，：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Son</span>&lt;<span class="title">T</span>&gt; <span class="keyword">extends</span> <span class="title">Generic</span>&lt;<span class="title">T</span>&gt;</span>&#123;&#125;</span><br></pre></td></tr></table></figure>
+<p>如果传入具体参数，则子类不需要指定类型参数:</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Son</span> <span class="keyword">extends</span> <span class="title">Generic</span>&lt;<span class="title">String</span>&gt;</span>&#123;&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="泛型接口">泛型接口</h4>
+<p><strong>声明</strong></p>
+<p>泛型接口与泛型类的定义基本一致</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Generator</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> T <span class="title">produce</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>实现泛型接口</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ImageGenerator</span>&lt;<span class="title">T</span>&gt; <span class="keyword">implements</span> <span class="title">Generator</span>&lt;<span class="title">T</span>&gt;</span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> T <span class="title">produce</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="泛型方法">泛型方法</h4>
+<p>在方法的返回值类型前使用<code>&lt;&gt;</code>标记了数据类型的方法，即为泛型方法。</p>
+<p>这个<code>&lt;&gt;</code>里面的类型参数就相当于为这个方法声明了一个类型，这个类型可以在此方法的作用块内自由使用。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Generic</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> T name;</span><br><span class="line">    <span class="function"><span class="keyword">public</span>  <span class="title">Generic</span><span class="params">()</span></span>&#123;&#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Generic</span><span class="params">(T param)</span></span>&#123;</span><br><span class="line">        name=param;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//不是一个泛型方法</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> T <span class="title">m</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> name;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//下面两个都是泛型方法（在返回值类型前用&lt;&gt;标记了数据类型）</span></span><br><span class="line">    <span class="keyword">public</span> &lt;E&gt; <span class="function"><span class="keyword">void</span> <span class="title">m1</span><span class="params">(E e)</span></span>&#123; &#125;</span><br><span class="line">    <span class="comment">//这个T覆盖了类中声明的T，即它们是不同的</span></span><br><span class="line">    <span class="comment">//Generic&lt;String&gt; str=new Generic&lt;&gt;(&quot;A String&quot;);</span></span><br><span class="line">	<span class="comment">//str.m2(123);</span></span><br><span class="line">    <span class="keyword">public</span> &lt;T&gt; <span class="function">T <span class="title">m2</span><span class="params">(T e)</span></span>&#123; &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>调用泛型方法</strong></p>
+<p>与普通方法一致。</p>
+<h3 id="泛型与静态">泛型与静态</h3>
+<p><strong>泛型类中的静态方法和静态变量</strong>不可以使用泛型类所声明的泛型类型参数，因为静态方法和静态变量属于类所有，而泛型类中的泛型参数的实例化是在创建泛型类型对象时指定的，所以如果不创建对象，根本无法确定参数类型。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span>&lt;<span class="title">T</span>&gt; </span>&#123;      </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> T one;   <span class="comment">//编译错误      </span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span>  T <span class="title">show</span><span class="params">(T one)</span></span>&#123; <span class="comment">//编译错误      </span></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">null</span>;      </span><br><span class="line">    &#125;      </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>静态泛型方法</strong>是可以使用的：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">T <span class="title">show</span><span class="params">(T one)</span></span>&#123;   </span><br><span class="line">     <span class="keyword">return</span> <span class="keyword">null</span>;      </span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<h3 id="泛型擦除">泛型擦除</h3>
+<p>Java在编译时<strong>擦除</strong>了所有的泛型信息，不会产生新的数据类型到字节码或者机器码中，所有的泛型类型被替换为<strong>原始类型</strong>表示。</p>
+<p>原始类型就是擦除了泛型信息后，最后在字节码中的类型变量的真正数据类型。擦除的原则是：无限定的泛型用Object类替换，有限定的泛型用限定类型替换。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//泛型类型  </span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Pair</span>&lt;<span class="title">T</span>&gt; </span>&#123;    </span><br><span class="line">    <span class="keyword">private</span> T value;    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> T <span class="title">getValue</span><span class="params">()</span> </span>&#123;    </span><br><span class="line">        <span class="keyword">return</span> value;    </span><br><span class="line">    &#125;    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setValue</span><span class="params">(T  value)</span> </span>&#123;    </span><br><span class="line">        <span class="keyword">this</span>.value = value;    </span><br><span class="line">    &#125;    </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//擦除之后的原始类型  </span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Pair</span> </span>&#123;    </span><br><span class="line">    <span class="keyword">private</span> Object value;    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> Object <span class="title">getValue</span><span class="params">()</span> </span>&#123;    </span><br><span class="line">        <span class="keyword">return</span> value;    </span><br><span class="line">    &#125;    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setValue</span><span class="params">(Object  value)</span> </span>&#123;    </span><br><span class="line">        <span class="keyword">this</span>.value = value;    </span><br><span class="line">    &#125;    </span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>在Pair<T>中，T是一个无限定的类型变量，所以用Object替换。如果是Pair<T extends number>，擦除后，类型变量用Number类型替换。</T></T></p>
+<p>Java编译器编译泛型的步骤：</p>
+<p>1.<strong>检查</strong>泛型的类型 ，获得目标类型。</p>
+<p>2.<strong>擦除</strong>类型变量，并替换为限定类型（T为无限定的类型变量，用Object替换）。</p>
+<p>3.调用相关函数，并将结果<strong>强制转换</strong>为目标类型。</p>
+<p>为什么存在泛型擦除：</p>
+<p>Java 5才引入了范型，在此之前都是没有范型的。当时引入范型只是为了解决遍历集合的时候总要手动强制转型的问题，比如像这样的代码：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">List cats = loadCats();  <span class="comment">// 5之前没有范型哦</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (Object obj : cats) &#123;</span><br><span class="line">  Cat cat = (Cat) obj;  <span class="comment">// 所以这里总是需要强转</span></span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>为了让JVM保持向下兼容，就使用了泛型擦除。</p>
+<p>缺点：<strong>无法在运行时通过反射获取真正的数据类型</strong>。</p>
+<p>如下代码是正确的：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">          List&lt;Integer&gt; my = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line"></span><br><span class="line">          List my2 = my;</span><br><span class="line">          my2.add(<span class="keyword">new</span> String(<span class="string">&quot;123&quot;</span>));</span><br><span class="line">    </span><br><span class="line">          System.out.println(my2.get(<span class="number">0</span>).getClass());<span class="comment">//会发现是String类型</span></span><br><span class="line">      &#125;</span><br></pre></td></tr></table></figure>
+<p>与其他语言对比：C#在泛型方面无疑做的更好，其是真泛型。</p>
+<p>C#泛型类在编译时，先生成中间代码IL，通用类型T只是一个占位符。在实例化类时，根据用户指定的数据类型代替T并由即时编译器（JIT）生成本地代码，这个本地代码中<strong>已经使用了实际的数据类型</strong>，等同于用实际类型写的类，所以不同的封闭类的本地代码是不一样的。其可以在运行时通过反射获得泛型信息，而且C#的泛型大大提高了代码的执行效率。</p>
+<h3 id="通配符">通配符 ?</h3>
+<p>通配符 ？代表任意的数据类型。通常与泛型结合起来设置上下界从而限定传入的具体数据类型和泛型间的继承关系。</p>
+<h4 id="为什么需要通配符">为什么需要通配符</h4>
+<p>它防止组件（例如方法）依赖泛型的具体类型，从而与泛型解耦。</p>
+<p>如下案例中，方法myMethod的参数如果没有通配符时，就会依赖Generic类泛型的具体数据类型，当数据类型改变后（如从Integer变为String），myMethod就会失效。因此使用通配符替代具体的泛型类型，之后不管Generic类的泛型如何变化，该方法都不再需要变动。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Generic</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span></span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">myMethod</span><span class="params">(Generic&lt;?&gt; g)</span></span>&#123;</span><br><span class="line">        ...</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="通配符上界">通配符上界</h4>
+<p>通配符上界使用<strong>&lt;? extends T&gt;</strong>的格式，意思是<strong>需要传入一个T类型或者T类型的子类</strong>，一般T类型都是一个具体的类型。</p>
+<p>这样一来，无论传入的是何种类型的集合，都可以使用其父类进行方法调用。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">printIntValue</span><span class="params">(List&lt;? extends Number&gt; list)</span> </span>&#123;  </span><br><span class="line">    <span class="keyword">for</span> (Number number : list) &#123;  </span><br><span class="line">        System.out.print(number.intValue()+<span class="string">&quot; &quot;</span>);   </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="通配符下界">通配符下界</h4>
+<p>通配符下界使用<strong>&lt;? super T&gt;</strong>的格式，意思是<strong>需要一个T类型或者T类型的父类</strong>，一般T类型都是一个具体的类型。</p>
+<p>这样一来，无论传入的是何种类型的集合，都可以接收其所有父类的对象，即消费多个父类。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">fillNumberList</span><span class="params">(List&lt;? <span class="keyword">super</span> Number&gt; list)</span> </span>&#123;  </span><br><span class="line">    list.add(<span class="keyword">new</span> Integer(<span class="number">0</span>));  </span><br><span class="line">    list.add(<span class="keyword">new</span> Float(<span class="number">1.0</span>));  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>什么时候使用通配符上界，什么时候使用下界，在<strong>《Effective Java》</strong>中有很好的指导意见：遵循<strong>PECS</strong>原则，即<strong>producer-extends,consumer-super.</strong> 换句话说，如果参数化类型表示一个生产者，就使用 <code>&lt;? extends T&gt;</code>；如果参数化类型表示一个消费者，就使用<code>&lt;? super T&gt;</code>。</p>
+<h3 id="参考资料">参考资料</h3>
+<p>https://zhuanlan.zhihu.com/p/64585072</p>
+<p>https://zhuanlan.zhihu.com/p/337324037</p>
+<p>https://www.zhihu.com/question/452958728/answer/1817841881</p>
+]]></content>
+      <categories>
+        <category>Java</category>
+        <category>Java基础</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
+        <tag>Java基础</tag>
       </tags>
   </entry>
   <entry>
@@ -1630,6 +1795,165 @@
       </categories>
       <tags>
         <tag>Kafka</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title></title>
+    <url>/2022/09/25/Maven/</url>
+    <content><![CDATA[<p>Maven是一款用于构建项目的工具，只需要告诉Maven需要哪些Jar 包，它就会帮助用户下载所有的Jar，以提升开发效率。</p>
+<a id="more"></a>
+<p>Maven项目的目录结构</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">maven-project</span><br><span class="line">├── pom.xml  maven项目的配置文件</span><br><span class="line">├── src</span><br><span class="line">│   ├── main</span><br><span class="line">│   │   ├── java  存放项目的源代码</span><br><span class="line">│   │   └── resources  存放项目资源</span><br><span class="line">│   └── test</span><br><span class="line">│       ├── java  存放测试源码</span><br><span class="line">│       └── resources  存放测试资源</span><br><span class="line">└── target  所有编译、打包生成的文件都放在该目录下</span><br></pre></td></tr></table></figure>
+<p>Maven仓库</p>
+<p>Maven仓库用来存放Maven这个工具管理的所有Jar包。分为本地仓库 和 中央仓库。</p>
+<p>本地仓库：Maven本地的Jar包仓库。 中央仓库： Maven官方提供的远程仓库。</p>
+<p>当项目编译时，Maven首先从本地仓库中寻找项目所需的Jar包，若本地仓库没有，再到Maven的中央仓库下载所需Jar包。</p>
+<p>Maven并不会每次都从中央仓库下载jar包。一个jar包一旦被下载过，就会被Maven自动缓存在本地目录（用户主目录的<code>.m2</code>目录），所以，除了第一次编译时因为下载需要时间会比较慢，后续过程因为有本地缓存，并不会重复下载相同的jar包。</p>
+<h2 id="pom文件">pom文件</h2>
+<p>pom文件，即project object model 项目对象模型，包含了项目的各种配置信息。</p>
+<p>一个pom文件中各个节点的配置信息通常包括：</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">project</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://maven.apache.org/POM/4.0.0&quot;</span></span></span><br><span class="line"><span class="tag">         <span class="attr">xmlns:xsi</span>=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span></span></span><br><span class="line"><span class="tag">         <span class="attr">xsi:schemaLocation</span>=<span class="string">&quot;http://maven.apache.org/POM/4.0.0</span></span></span><br><span class="line"><span class="tag"><span class="string">            http://maven.apache.org/xsd/maven-4.0.0.xsd&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">modelVersion</span>&gt;</span>4.0.0<span class="tag">&lt;/<span class="name">modelVersion</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">&lt;!-- 基本配置 --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>...<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>...<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>...<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">packaging</span>&gt;</span>...<span class="tag">&lt;/<span class="name">packaging</span>&gt;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">&lt;!-- 依赖配置 --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependencies</span>&gt;</span>...<span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">parent</span>&gt;</span>...<span class="tag">&lt;/<span class="name">parent</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependencyManagement</span>&gt;</span>...<span class="tag">&lt;/<span class="name">dependencyManagement</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">modules</span>&gt;</span>...<span class="tag">&lt;/<span class="name">modules</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">properties</span>&gt;</span>...<span class="tag">&lt;/<span class="name">properties</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">&lt;!-- 构建配置 --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">build</span>&gt;</span>...<span class="tag">&lt;/<span class="name">build</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">reporting</span>&gt;</span>...<span class="tag">&lt;/<span class="name">reporting</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">&lt;!-- 项目信息 --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">name</span>&gt;</span>...<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">description</span>&gt;</span>...<span class="tag">&lt;/<span class="name">description</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">url</span>&gt;</span>...<span class="tag">&lt;/<span class="name">url</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">inceptionYear</span>&gt;</span>...<span class="tag">&lt;/<span class="name">inceptionYear</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">licenses</span>&gt;</span>...<span class="tag">&lt;/<span class="name">licenses</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">organization</span>&gt;</span>...<span class="tag">&lt;/<span class="name">organization</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">developers</span>&gt;</span>...<span class="tag">&lt;/<span class="name">developers</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">contributors</span>&gt;</span>...<span class="tag">&lt;/<span class="name">contributors</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">&lt;!-- 环境设置 --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">issueManagement</span>&gt;</span>...<span class="tag">&lt;/<span class="name">issueManagement</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">ciManagement</span>&gt;</span>...<span class="tag">&lt;/<span class="name">ciManagement</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">mailingLists</span>&gt;</span>...<span class="tag">&lt;/<span class="name">mailingLists</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">scm</span>&gt;</span>...<span class="tag">&lt;/<span class="name">scm</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">prerequisites</span>&gt;</span>...<span class="tag">&lt;/<span class="name">prerequisites</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">repositories</span>&gt;</span>...<span class="tag">&lt;/<span class="name">repositories</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">pluginRepositories</span>&gt;</span>...<span class="tag">&lt;/<span class="name">pluginRepositories</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">distributionManagement</span>&gt;</span>...<span class="tag">&lt;/<span class="name">distributionManagement</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">profiles</span>&gt;</span>...<span class="tag">&lt;/<span class="name">profiles</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">project</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h3 id="基本配置信息">基本配置信息</h3>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">project</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://maven.apache.org/POM/4.0.0&quot;</span></span></span><br><span class="line"><span class="tag">   <span class="attr">xmlns:xsi</span>=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span></span></span><br><span class="line"><span class="tag">   <span class="attr">xsi:schemaLocation</span>=<span class="string">&quot;http://maven.apache.org/POM/4.0.0</span></span></span><br><span class="line"><span class="tag"><span class="string">   http://maven.apache.org/xsd/maven-4.0.0.xsd&quot;</span>&gt;</span></span><br><span class="line">    </span><br><span class="line">   <span class="comment">&lt;!-- pom模型版本，maven2和3只能为4.0.0--&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">modelVersion</span>&gt;</span>4.0.0<span class="tag">&lt;/<span class="name">modelVersion</span>&gt;</span></span><br><span class="line">   <span class="comment">&lt;!-- 项目的组ID，用于maven定位--&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.flink<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">   <span class="comment">&lt;!-- 项目ID，通常是项目的名称,唯一标识符--&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>flink-parent<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">   <span class="comment">&lt;!-- 项目的版本--&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.17-SNAPSHOT<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">   <span class="comment">&lt;!-- 项目的打包方式--&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">packaging</span>&gt;</span>pom<span class="tag">&lt;/<span class="name">packaging</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">name</span>&gt;</span>Flink : <span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">url</span>&gt;</span>https://flink.apache.org<span class="tag">&lt;/<span class="name">url</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">inceptionYear</span>&gt;</span>2014<span class="tag">&lt;/<span class="name">inceptionYear</span>&gt;</span></span><br><span class="line">    </span><br><span class="line"><span class="tag">&lt;<span class="name">project</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<table>
+<colgroup>
+<col style="width: 16%">
+<col style="width: 83%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>节点</th>
+<th style="text-align: left;">解释说明</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>modelVersion</td>
+<td style="text-align: left;">描述当前 pom 文件遵从哪个pom模型版本，maven2和3只能为4.0.0</td>
+</tr>
+<tr class="even">
+<td>groupId</td>
+<td style="text-align: left;">组织标识，通常是公司域名</td>
+</tr>
+<tr class="odd">
+<td>artifactId</td>
+<td style="text-align: left;">项目名称，又或是模块的名称，类似于Java的类名。</td>
+</tr>
+<tr class="even">
+<td>version</td>
+<td style="text-align: left;">这是项目的版本。定义一个组件/模块为快照版本，只需要在pom文件中在该模块的版本号后加上<strong>-SNAPSHOT</strong>即可(注意这里必须是大写，只能是这种格式)。<br>release版本不允许修改，每次进行release版本修改，发布必须提升版本号。而snapshot一般是开发过程中的迭代版本，snapshot更新后，引用的项目可以不修改版本号自动下载构建。</td>
+</tr>
+<tr class="odd">
+<td>packaging</td>
+<td style="text-align: left;">项目打包方式，有以下值：pom, jar, maven-plugin, ejb, war, ear, rar, par</td>
+</tr>
+</tbody>
+</table>
+<h3 id="依赖配置">依赖配置</h3>
+<h4 id="dependencies">dependencies</h4>
+<p>这个标签声明了当前项目或者模块需要依赖到哪些jar包。</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependencies</span>&gt;</span></span><br><span class="line">	<span class="comment">&lt;!-- dependency 表示依赖--&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!-- 创建项目的组织或团体的唯一 Id --&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.freemarker<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!-- 项目名称 --&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>freemarker<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!-- 产品版本号 --&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">version</span>&gt;</span>2.3.30<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!-- 依赖范围 --&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">scope</span>&gt;</span>compile<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!-- 设置依赖是否传递，默认为 false-依赖传递，true 表示依赖不进行传递 --&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">optional</span>&gt;</span>true<span class="tag">&lt;/<span class="name">optional</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>只有以<code>-SNAPSHOT</code>结尾的版本号会被Maven视为开发版本，开发版本每次都会重复下载。Maven 在本地是进行缓存的，如果使用的是 release 版本的话，一旦包被下载到本地了，Maven 是不会重新下载的，如果希望重新下载的话，你需要手动删除本地中的缓存。如果你使用的是 SNAPSHOT 版本的话，每次在构建的时候都会从定义的新仓库中下载新的版本。</p>
+<blockquote>
+<p>例如项目小组 A 有个包的版本为 0.0.1-SNAPSHOT ，项目小组 B 中有个包是依赖于这个的，但是项目小组 B 发现这个包中有问题，需要进行修改。小组 B 将会通知小组 A 进行修改，小组 A 修改完成后将会 Push 到仓库中，尽管版本号没有变，那么项目小组 B 在编译的时候，也会使用新推送的 0.0.1-SNAPSHOT 版本。</p>
+</blockquote>
+<p><scope>标签声明了当前项目所依赖的这个jar包的作用范围，可选值如下:</scope></p>
+<table>
+<colgroup>
+<col style="width: 11%">
+<col style="width: 88%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>节点</th>
+<th style="text-align: left;">解释说明</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>compile</td>
+<td style="text-align: left;">默认值，表示被依赖的项目需要参与当前项目的编译，当然后续的测试，运行周期也参与其中，是一个比较强的依赖。打包的时候通常需要包含进去。</td>
+</tr>
+<tr class="even">
+<td>provided</td>
+<td style="text-align: left;">表明当前项目打包的时候可以不用将这个依赖的jar包打进去，别的设施(容器、JDK等等)会提供。事实上该依赖可以参与编译，测试，运行等周期。相当于compile，但是在打包阶段做了exclude的动作。</td>
+</tr>
+<tr class="odd">
+<td>runtime</td>
+<td style="text-align: left;">表示被依赖项目无需参与项目的编译，不过后期的测试和运行周期需要其参与。</td>
+</tr>
+<tr class="even">
+<td>test</td>
+<td style="text-align: left;">依赖在一般的编译和运行时都不需要，它们只有在测试编译和测试运行阶段可用。</td>
+</tr>
+</tbody>
+</table>
+<p>compile 、provided 、runtime 的区别</p>
+<p>通过 maven 引入的jar包，里面的类，都是已经编译好的字节码文件。</p>
+<ul>
+<li><p>通过 compile 和 provided 引入的 jar 包，里面的类在项目中可以直接 import 引用使用，编译没问题，</p></li>
+<li><p>通过 runtime 引入的 jar 包中的类，只在运行时生效，所以项目中不能直接 import 使用，只能通过反射等方式使用。</p></li>
+<li><p>通过 compile 和 runtime 引入的 jar 包，会一起打包到自己项目包里，而 provided 引入的 jar 包则不会。</p></li>
+</ul>
+<h4 id="parent">parent</h4>
+<p>这个标签声明了当前项目或者模块的父项目。</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">parent</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.learnPro<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>SIP-parent<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">relativePath</span>&gt;</span><span class="tag">&lt;/<span class="name">relativePath</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>0.0.1-SNAPSHOT<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">parent</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<table>
+<colgroup>
+<col style="width: 16%">
+<col style="width: 83%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>节点</th>
+<th style="text-align: left;">解释说明</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>groupId</td>
+<td style="text-align: left;">父项目的组织标识符</td>
+</tr>
+<tr class="even">
+<td>artifactId</td>
+<td style="text-align: left;">父项目的名称，也是它的唯一标识符</td>
+</tr>
+<tr class="odd">
+<td>relativePath</td>
+<td style="text-align: left;">Maven首先在当前项目中找父项目的pom，然后在文件系统的这个位置（relativePath），然后在本地仓库，再在远程仓库找。</td>
+</tr>
+<tr class="even">
+<td>version</td>
+<td style="text-align: left;">父项目的版本。</td>
+</tr>
+</tbody>
+</table>
+<h4 id="dependencymanagement">dependencyManagement</h4>
+<p>配置写法同dependencies。</p>
+<p>在父项目dependencies中定义的所有依赖，子项目会直接继承，可以直接使用。</p>
+<p>在父项目dependencyManagement中定义的所有依赖，子项目不会直接继承，需要显示地声明，但是可以不用指定版本号。这样的好处是，父项目统一了版本，而且子项目可以在需要的时候才引用对应的依赖。此时子项目也可以自己定义版本号，这样在子项目中使用的就是另一个版本的jar包。</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line">父项目：</span><br><span class="line"><span class="tag">&lt;<span class="name">dependencyManagement</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependencies</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>junit<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>junit<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">version</span>&gt;</span>4.12<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">scope</span>&gt;</span>test<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependencyManagement</span>&gt;</span></span><br><span class="line"></span><br><span class="line">子项目：</span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>junit<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>junit<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h4 id="modules">modules</h4>
+<p>当该maven项目被组织成多个模块时，这个标签用于指定当前项目所包含的所有模块。之后对这个项目进行的maven操作，会让所有子模块也进行相同操作。</p>
+<figure class="highlight ruby"><table><tr><td class="code"><pre><span class="line">&lt;modules&gt;</span><br><span class="line">   &lt;<span class="class"><span class="keyword">module</span>&gt;<span class="title">com</span>-<span class="title">a</span>&lt;/&gt;</span></span><br><span class="line">   &lt;<span class="class"><span class="keyword">module</span>&gt;<span class="title">com</span>-<span class="title">b</span>&lt;/&gt;</span></span><br><span class="line">   &lt;<span class="class"><span class="keyword">module</span>&gt;<span class="title">com</span>-<span class="title">c</span>&lt;/&gt;</span></span><br><span class="line">&lt;modules/&gt;</span><br></pre></td></tr></table></figure>
+<h4 id="properties">properties</h4>
+<p>用于定义该pom文件中的常量</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">properties</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">java.version</span>&gt;</span>1.7<span class="tag">&lt;/<span class="name">java.version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">properties</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>上面这个常量可以在pom文件的任意地方通过${<a href="https://link.jianshu.com?t=http://lib.csdn.net/base/java">Java</a>.version}来引用。</p>
+<h2 id="基本概念">基本概念</h2>
+<h3 id="jar包">jar包</h3>
+<p>jar包即 Java Archive File，它将一系列文件合并为一个文件，类似于ZIP文件。jar包主要是对java项目编译生成的.class文件以及其他静态资源文件如.html、.css以及.js等项目所需的一切进行打包，而.class文件是平台无关的，即就意味着jar包是跨平台的。</p>
+<p>jar 与 zip 高度相似，唯一的区别就是在 jar 文件的内容中，包含了一个 META-INF/MANIFEST.MF 文件，该文件是在生成 jar 文件的时候自动创建的，它包含了该Jar包的版本、创建人和各个类的路径Class-Path等信息，如果是可执行Jar包，会包含Main-Class属性，表明Main方法入口。</p>
+<p>当开发了一个程序以后，程序中有很多的类，如果需要提供给别人使用，发给对方一大堆源文件是非常不好的，因此通常需要把这些类以及相关的资源文件打包成一个 jar 包，把这个 jar 包提供给别人使用，同时提供给使用者清晰的文档。这样他人在拿到我们提供的jar之后，就能方便地进行调用，具体如何调用后面会进行讲解。</p>
+<h3 id="参考资料">参考资料</h3>
+<p>https://www.jianshu.com/p/0e3a1f9c9ce7</p>
+<p>https://www.liaoxuefeng.com/wiki/1252599548343744/1309301196980257</p>
+]]></content>
+      <categories>
+        <category>工具</category>
+      </categories>
+      <tags>
+        <tag>工具</tag>
       </tags>
   </entry>
   <entry>
@@ -4877,76 +5201,6 @@
       </tags>
   </entry>
   <entry>
-    <title>行列存储的比较</title>
-    <url>/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E8%A1%8C%E5%88%97%E5%AD%98%E5%82%A8%E6%AF%94%E8%BE%83/</url>
-    <content><![CDATA[<table>
-<colgroup>
-<col style="width: 10%">
-<col style="width: 44%">
-<col style="width: 44%">
-</colgroup>
-<thead>
-<tr class="header">
-<th></th>
-<th>优点</th>
-<th>缺点</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>行存储（OLTP）</td>
-<td>同一行所属的多个字段被保存在一起，<br>当修改或插入一行数据时IO开销较低。</td>
-<td>获取特定列时本质上还是扫描了所有行，<br>再把特定列取出，存在不必要的IO开销。</td>
-</tr>
-<tr class="even">
-<td>列存储（OLAP）</td>
-<td>1、同一列的数据被保存在一起，能够满足<br>快速读取特定列的需求。（OLAP常用）<br>选取列时降低IO开销，随机读变顺序读。<br>2、列式存储容易实现数据压缩。</td>
-<td>1、插入、删除数据不方便。<br>2、被选择出来的列要重新组装。</td>
-</tr>
-</tbody>
-</table>
-<a id="more"></a>
-<h3 id="行列存储的原理">行列存储的原理</h3>
-<p>数据在存储系统中的基本单位为页，页中的数据是连续存储的。</p>
-<p>页也是进行数据读取时候基本单位，一次读取就是一次IO操作。</p>
-<p>例如一个数据表为：</p>
-<p><img src="/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E8%A1%8C%E5%88%97%E5%AD%98%E5%82%A8%E6%AF%94%E8%BE%83/image-20210926145033057.png" alt="image-20210926145033057" style="zoom:67%;"></p>
-<p>一个数据页用一个4x4的单元格表示：</p>
-<p><img src="/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E8%A1%8C%E5%88%97%E5%AD%98%E5%82%A8%E6%AF%94%E8%BE%83/image-20210926145129243.png" alt="image-20210926145129243" style="zoom:67%;"></p>
-<p>按行存储为：</p>
-<p><img src="/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E8%A1%8C%E5%88%97%E5%AD%98%E5%82%A8%E6%AF%94%E8%BE%83/image-20210926145202849.png" alt="image-20210926145202849" style="zoom: 67%;"></p>
-<p>按列存储为：</p>
-<p><img src="/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E8%A1%8C%E5%88%97%E5%AD%98%E5%82%A8%E6%AF%94%E8%BE%83/image-20210926145242775.png" alt="image-20210926145242775" style="zoom:67%;"></p>
-<p>当执行OLTP查询：</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> id,city <span class="keyword">from</span> <span class="keyword">table</span> <span class="keyword">where</span> id <span class="operator">=</span> <span class="number">004</span></span><br></pre></td></tr></table></figure>
-<p>以行方式查询（在有适当的索引情况下)，那么，执行一次以上查询，只需要扫描一次Page 1就可以了。</p>
-<p>以列方式查询，需要投其扫描Page 1和Page 2共2次，分别取得id，city的单行值。</p>
-<p>因此，在OLTP这种以查询一行数据为主的场景下，适合采用行方式进行存储。</p>
-<p>当执行OLAP查询：</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="built_in">max</span>(id) <span class="keyword">from</span> <span class="keyword">table</span></span><br></pre></td></tr></table></figure>
-<p>对于行存储，这个查询需要两次IO将全部数据放入内存后，进行页间数据的跳读（类随机读取，因为id被city隔开了)。</p>
-<p>对于列存储，只需要一次IO将Page 1放入内存后进行连续读取，如果id还有多页的话，也是进行的物理连续读取。</p>
-<p>在进行OLAP操作时候，不仅是减小了IO次数，而且把随机读取变为了连续读取。</p>
-<h3 id="列式存储数据压缩">列式存储数据压缩</h3>
-<p>因为列式存储将同一列的数据存储在一起，所以使用压缩算法可以减少存储占用的磁盘空间。</p>
-<p>压缩算法的基本原理其实很简单，它使用基于特定规则的数据表示原数据。</p>
-<p>如下所示的字符串中包含连续的相同字符，就可以使用朴素的压缩算法减少字符串的长度：</p>
-<p><img src="/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E8%A1%8C%E5%88%97%E5%AD%98%E5%82%A8%E6%AF%94%E8%BE%83/image-20210926152828786.png" alt="image-20210926152828786" style="zoom:67%;"></p>
-<p>黄色方块表示前面字符串的重复次数，这种简单的压缩策略可以在保证无损的情况下将字符串的长度压缩 33%，然而压缩率是由压缩算法和数据的特性共同决定的。与面向行的数据存储相比，面向列的数据存储会将相同类型的数据就近存储，这也给压缩算法的提供了更多发挥的空间。</p>
-<p>压缩算法实际上是一种<strong>使用 CPU 时间换取 I/O 时间和空间</strong>的策略，但是在多数情况下，这种生意都是稳赚不赔的。压缩算法通过减少数据的大小、减少磁盘的寻道时间提高 I/O 的性能、减少数据的传输时间并提高缓冲区的命中率，节省的 I/O 时间可以轻易补偿它带来的 CPU 额外开销（IO时间远大于CPU的额外时间）。</p>
-<h3 id="参考资料">参考资料</h3>
-<p>https://www.zhihu.com/question/29380943</p>
-<p>https://draveness.me/whys-the-design-olap-column-oriented/</p>
-<p>https://www.cnblogs.com/ajianbeyourself/p/7771682.html</p>
-]]></content>
-      <categories>
-        <category>大数据</category>
-      </categories>
-      <tags>
-        <tag>大数据</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>海量数据问题</title>
     <url>/2021/04/14/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E6%B5%B7%E9%87%8F%E6%95%B0%E6%8D%AE%E9%97%AE%E9%A2%98/</url>
     <content><![CDATA[<p>海量数据问题，就是数据量太大，所以导致要么是无法在较短时间内迅速解决，要么是数据太大导致无法一次性装入内存。</p>
@@ -5034,6 +5288,76 @@
       <tags>
         <tag>大数据</tag>
         <tag>海量数据</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>行列存储的比较</title>
+    <url>/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E8%A1%8C%E5%88%97%E5%AD%98%E5%82%A8%E6%AF%94%E8%BE%83/</url>
+    <content><![CDATA[<table>
+<colgroup>
+<col style="width: 10%">
+<col style="width: 44%">
+<col style="width: 44%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>优点</th>
+<th>缺点</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>行存储（OLTP）</td>
+<td>同一行所属的多个字段被保存在一起，<br>当修改或插入一行数据时IO开销较低。</td>
+<td>获取特定列时本质上还是扫描了所有行，<br>再把特定列取出，存在不必要的IO开销。</td>
+</tr>
+<tr class="even">
+<td>列存储（OLAP）</td>
+<td>1、同一列的数据被保存在一起，能够满足<br>快速读取特定列的需求。（OLAP常用）<br>选取列时降低IO开销，随机读变顺序读。<br>2、列式存储容易实现数据压缩。</td>
+<td>1、插入、删除数据不方便。<br>2、被选择出来的列要重新组装。</td>
+</tr>
+</tbody>
+</table>
+<a id="more"></a>
+<h3 id="行列存储的原理">行列存储的原理</h3>
+<p>数据在存储系统中的基本单位为页，页中的数据是连续存储的。</p>
+<p>页也是进行数据读取时候基本单位，一次读取就是一次IO操作。</p>
+<p>例如一个数据表为：</p>
+<p><img src="/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E8%A1%8C%E5%88%97%E5%AD%98%E5%82%A8%E6%AF%94%E8%BE%83/image-20210926145033057.png" alt="image-20210926145033057" style="zoom:67%;"></p>
+<p>一个数据页用一个4x4的单元格表示：</p>
+<p><img src="/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E8%A1%8C%E5%88%97%E5%AD%98%E5%82%A8%E6%AF%94%E8%BE%83/image-20210926145129243.png" alt="image-20210926145129243" style="zoom:67%;"></p>
+<p>按行存储为：</p>
+<p><img src="/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E8%A1%8C%E5%88%97%E5%AD%98%E5%82%A8%E6%AF%94%E8%BE%83/image-20210926145202849.png" alt="image-20210926145202849" style="zoom: 67%;"></p>
+<p>按列存储为：</p>
+<p><img src="/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E8%A1%8C%E5%88%97%E5%AD%98%E5%82%A8%E6%AF%94%E8%BE%83/image-20210926145242775.png" alt="image-20210926145242775" style="zoom:67%;"></p>
+<p>当执行OLTP查询：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> id,city <span class="keyword">from</span> <span class="keyword">table</span> <span class="keyword">where</span> id <span class="operator">=</span> <span class="number">004</span></span><br></pre></td></tr></table></figure>
+<p>以行方式查询（在有适当的索引情况下)，那么，执行一次以上查询，只需要扫描一次Page 1就可以了。</p>
+<p>以列方式查询，需要投其扫描Page 1和Page 2共2次，分别取得id，city的单行值。</p>
+<p>因此，在OLTP这种以查询一行数据为主的场景下，适合采用行方式进行存储。</p>
+<p>当执行OLAP查询：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="built_in">max</span>(id) <span class="keyword">from</span> <span class="keyword">table</span></span><br></pre></td></tr></table></figure>
+<p>对于行存储，这个查询需要两次IO将全部数据放入内存后，进行页间数据的跳读（类随机读取，因为id被city隔开了)。</p>
+<p>对于列存储，只需要一次IO将Page 1放入内存后进行连续读取，如果id还有多页的话，也是进行的物理连续读取。</p>
+<p>在进行OLAP操作时候，不仅是减小了IO次数，而且把随机读取变为了连续读取。</p>
+<h3 id="列式存储数据压缩">列式存储数据压缩</h3>
+<p>因为列式存储将同一列的数据存储在一起，所以使用压缩算法可以减少存储占用的磁盘空间。</p>
+<p>压缩算法的基本原理其实很简单，它使用基于特定规则的数据表示原数据。</p>
+<p>如下所示的字符串中包含连续的相同字符，就可以使用朴素的压缩算法减少字符串的长度：</p>
+<p><img src="/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E8%A1%8C%E5%88%97%E5%AD%98%E5%82%A8%E6%AF%94%E8%BE%83/image-20210926152828786.png" alt="image-20210926152828786" style="zoom:67%;"></p>
+<p>黄色方块表示前面字符串的重复次数，这种简单的压缩策略可以在保证无损的情况下将字符串的长度压缩 33%，然而压缩率是由压缩算法和数据的特性共同决定的。与面向行的数据存储相比，面向列的数据存储会将相同类型的数据就近存储，这也给压缩算法的提供了更多发挥的空间。</p>
+<p>压缩算法实际上是一种<strong>使用 CPU 时间换取 I/O 时间和空间</strong>的策略，但是在多数情况下，这种生意都是稳赚不赔的。压缩算法通过减少数据的大小、减少磁盘的寻道时间提高 I/O 的性能、减少数据的传输时间并提高缓冲区的命中率，节省的 I/O 时间可以轻易补偿它带来的 CPU 额外开销（IO时间远大于CPU的额外时间）。</p>
+<h3 id="参考资料">参考资料</h3>
+<p>https://www.zhihu.com/question/29380943</p>
+<p>https://draveness.me/whys-the-design-olap-column-oriented/</p>
+<p>https://www.cnblogs.com/ajianbeyourself/p/7771682.html</p>
+]]></content>
+      <categories>
+        <category>大数据</category>
+      </categories>
+      <tags>
+        <tag>大数据</tag>
       </tags>
   </entry>
   <entry>
@@ -5525,6 +5849,35 @@
       </tags>
   </entry>
   <entry>
+    <title>ER模型</title>
+    <url>/2022/05/04/%E6%95%B0%E6%8D%AE%E5%BA%93_ER%E6%A8%A1%E5%9E%8B/</url>
+    <content><![CDATA[<p><img src="/2022/05/04/%E6%95%B0%E6%8D%AE%E5%BA%93_ER%E6%A8%A1%E5%9E%8B/image-20220504104840968.png" alt="image-20220504104840968" style="zoom:67%;"></p>
+<a id="more"></a>
+<h3 id="简介">简介</h3>
+<p><img src="/2022/05/04/%E6%95%B0%E6%8D%AE%E5%BA%93_ER%E6%A8%A1%E5%9E%8B/image-20220504102110063.png" alt="image-20220504102110063" style="zoom:67%;"></p>
+<h3 id="实体属性和关系">实体、属性和关系</h3>
+<p><img src="/2022/05/04/%E6%95%B0%E6%8D%AE%E5%BA%93_ER%E6%A8%A1%E5%9E%8B/image-20220504104428811.png" alt="image-20220504104428811" style="zoom:67%;"></p>
+<h3 id="关系的类型">关系的类型</h3>
+<p><img src="/2022/05/04/%E6%95%B0%E6%8D%AE%E5%BA%93_ER%E6%A8%A1%E5%9E%8B/image-20220504104503241.png" alt="image-20220504104503241" style="zoom:67%;"></p>
+<h3 id="er模型建模步骤">ER模型建模步骤</h3>
+<p>1、确定实体以及实体之间的关系。</p>
+<p>2、确定实体中的属性。</p>
+<p>3、按照规则将ER模型转换成具体的数据表：</p>
+<ul>
+<li>一个实体通常转换成一个数据表。</li>
+<li>一个多对多的关系，通常也转换成一个数据表。</li>
+<li>一个 1 对 1 ，或者 1 对多的关系，往往通过表的外键来表达，而不是设计一个新的数据表。</li>
+<li>属性转换成表的字段。</li>
+</ul>
+]]></content>
+      <categories>
+        <category>数据库</category>
+      </categories>
+      <tags>
+        <tag>数据库</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>SQL面试题</title>
     <url>/2021/09/15/%E6%95%B0%E6%8D%AE%E5%BA%93_SQL%E9%9D%A2%E8%AF%95%E9%A2%98/</url>
     <content><![CDATA[<p>SQL中连续登录问题和在线峰值问题等。</p>
@@ -5595,9 +5948,7 @@
 <p>结构化的数据是指可以使用关系型数据库表示和存储的数据，通常表现为二维表格的形式。</p>
 <p>特点：数据以行为单位，一行数据表示一个实体的信息，每一行数据的字段是相同的。显然，结构化数据的可扩展性不好，比如增加一个字段就非常麻烦。</p>
 <p>数据模型：实体-关系模型</p>
-<figure>
-<img src="/2021/09/12/%E6%95%B0%E6%8D%AE%E5%BA%93_%E7%BB%93%E6%9E%84%E5%8C%96%E5%8D%8A%E7%BB%93%E6%9E%84%E5%8C%96%E9%9D%9E%E7%BB%93%E6%9E%84%E5%8C%96%E6%95%B0%E6%8D%AE/image-20210912171228151.png" alt="image-20210912171228151"><figcaption aria-hidden="true">image-20210912171228151</figcaption>
-</figure>
+<p><img src="/2021/09/12/%E6%95%B0%E6%8D%AE%E5%BA%93_%E7%BB%93%E6%9E%84%E5%8C%96%E5%8D%8A%E7%BB%93%E6%9E%84%E5%8C%96%E9%9D%9E%E7%BB%93%E6%9E%84%E5%8C%96%E6%95%B0%E6%8D%AE/image-20210912171228151.png"></p>
 <h3 id="半结构化数据">半结构化数据</h3>
 <p>半结构化数据是指通过标签或者字段对数据进行分层表示存储的数据。</p>
 <p>特点：它是结构化数据的一种形式，不符合关系型数据库数据模型。一行数据的标签或者字段是不固定的，没有严格的Schema的约束。</p>
@@ -5618,7 +5969,7 @@
       </tags>
   </entry>
   <entry>
-    <title>数据库中键和范式</title>
+    <title>数据库中的键和范式</title>
     <url>/2021/09/01/%E6%95%B0%E6%8D%AE%E5%BA%93_%E9%94%AE%E4%B8%8E%E8%8C%83%E5%BC%8F/</url>
     <content><![CDATA[<h3 id="总结">总结</h3>
 <table>
@@ -5789,21 +6140,13 @@
 <p>（课程名称） → （学分）</p>
 <p>（学号） → （姓名, 年龄）</p>
 <p>造成问题有：</p>
-<ol type="1">
-<li>数据冗余：</li>
-</ol>
+<p>1、数据冗余：</p>
 <p>同一门课程由n个学生选修，"学分"就重复n-1次；同一个学生选修了m门课程，姓名和年龄就重复了m-1次。</p>
-<ol start="2" type="1">
-<li>更新异常：</li>
-</ol>
+<p>2、更新异常：</p>
 <p>若调整了某门课程的学分，数据表中所有行的"学分"值都要更新，否则会出现同一门课程学分不同的情况。</p>
-<ol start="3" type="1">
-<li>插入异常：</li>
-</ol>
+<p>3、插入异常：</p>
 <p>假设要开设一门新的课程，暂时还没有人选修。这样，由于还没有"学号"关键字，课程名称和学分也无法记录入数据库。</p>
-<ol start="4" type="1">
-<li>删除异常：</li>
-</ol>
+<p>4、删除异常：</p>
 <p>假设一批学生已经完成课程的选修，需要从数据库表中删除这些记录。但与此同时，课程名称和学分信息也被删除了。很显然，这也会导致插入异常。</p>
 <p>正例：</p>
 <p>把选课关系表拆分为三个表：</p>
@@ -5856,7 +6199,9 @@
 </tr>
 </tbody>
 </table>
-<p>学生：Student(学号, 姓名, 年龄)； 课程：Course(课程名称, 学分)； 选课关系：SelectCourse(学号, 课程名称, 成绩)。</p>
+<p>学生：Student(学号, 姓名, 年龄)；</p>
+<p>课程：Course(课程名称, 学分)；</p>
+<p>选课关系：SelectCourse(学号, 课程名称, 成绩)。</p>
 <p>这样的数据库表是符合第二范式的， 消除了数据冗余、更新异常、插入异常和删除异常。</p>
 <h4 id="三范式">三范式</h4>
 <p>非主键字段之间无依赖关系。（没有传递依赖）</p>
@@ -5946,17 +6291,11 @@
 <p>但是，存在主属性对候选键的部份依赖。</p>
 <p>主属性(仓库ID) → 候选键(管理员ID,商品ID)中的(管理员ID)</p>
 <p>主属性(管理员ID) → 候选键(仓库ID, 商品ID)中的(仓库ID)</p>
-<ol type="1">
-<li>删除异常：</li>
-</ol>
+<p>1、删除异常：</p>
 <p>当仓库被清空后，所有"存储物品ID"和"数量"信息被删除的同时，"仓库ID"和"管理员ID"信息也被删除了。</p>
-<ol start="2" type="1">
-<li>插入异常：</li>
-</ol>
+<p>2、插入异常：</p>
 <p>当仓库没有存储任何物品时，无法给仓库分配管理员。</p>
-<ol start="3" type="1">
-<li>更新异常：</li>
-</ol>
+<p>3、更新异常：</p>
 <p>如果仓库换了管理员，则表中所有行的管理员ID都要修改。</p>
 <p>正例：</p>
 <p>仓库管理表：</p>
@@ -11018,9 +11357,11 @@
 ]]></content>
       <categories>
         <category>Flink</category>
+        <category>Flink快速入门</category>
       </categories>
       <tags>
         <tag>Flink</tag>
+        <tag>Flink快速入门</tag>
       </tags>
   </entry>
   <entry>
@@ -11175,9 +11516,11 @@
 ]]></content>
       <categories>
         <category>Flink</category>
+        <category>Flink快速入门</category>
       </categories>
       <tags>
         <tag>Flink</tag>
+        <tag>Flink快速入门</tag>
       </tags>
   </entry>
   <entry>
@@ -12254,30 +12597,299 @@
       </tags>
   </entry>
   <entry>
-    <title>Hello World</title>
-    <url>/2021/01/28/Hexo%E6%8C%87%E5%8D%97/</url>
-    <content><![CDATA[<p>Welcome to <a href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
-<a id="more"></a>
-<h2 id="quick-start">Quick Start</h2>
-<h3 id="create-a-new-post">Create a new post</h3>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/writing.html">Writing</a></p>
-<h3 id="run-server">Run server</h3>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/server.html">Server</a></p>
-<h3 id="generate-static-files">Generate static files</h3>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/generating.html">Generating</a></p>
-<figure>
-<img src="/2021/01/28/Hexo%E6%8C%87%E5%8D%97/0.png" alt="hello"><figcaption aria-hidden="true">hello</figcaption>
-</figure>
-<h3 id="deploy-to-remote-sites">Deploy to remote sites</h3>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo clean &amp;&amp; hexo g &amp;&amp; hexo d</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
+    <title>时间与窗口</title>
+    <url>/2022/06/17/Flink1.12_%E6%97%B6%E9%97%B4%E4%B8%8E%E7%AA%97%E5%8F%A3/</url>
+    <content><![CDATA[<a id="more"></a>
+<h3 id="时间语义">时间语义</h3>
+<p>分布式处理系统节点彼此独立、互不影响，因此需要一个统一的时钟衡量标准，数据根据不同的时钟标准进行处理。可以将时钟衡量标准分为以下几种语义：</p>
+<ul>
+<li><p>处理时间</p>
+<p>指执行处理操作的机器的系统时间。数据属于哪个时间窗口就很明显了，只看窗口任务处理这条数据时，当前的系统时间。</p></li>
+<li><p>事件时间</p>
+<p>每个事件（数据）在对应的设备上发生的时间，也就是数据生成的时间。通常这就是每一条数据中的一个属性，这个属性是一个时间戳，代表了这条数据的生成时间。</p>
+<p>由于分布式系统中网络传输延迟的不确定性，实际应用中数据流往往是乱序的。在这种情况下，就不能简单地把数据自带的时间戳当作所有机器的时钟，而需要用另外的标志来表示事件时间进展，在 Flink 中把它叫作<strong>事件时间的“水位线”</strong>（Watermarks）。</p>
+<p>由于数据还可能是乱序的，要想让窗口正确地收集到所有数据，就必须等这些错乱的数据都到齐，这就需要一定的等待时间。所以整体上看，事件时间语义是以一定延迟为代价，换来了处理结果的正确性。<strong>由于网络延迟一般只有毫秒级</strong>，<strong>所以即使是事件时间语义，同样可以完成低延迟实时流处理的任务。</strong></p></li>
+<li><p>摄入时间</p>
+<p>指数据进入 Flink 数据流的时间，也就是 Source 算子读入数据的时间。摄入时间相当于是事件时间和处理时间的一个中和，它是<strong>把 Source 任务的处理时间，当作了数据的产生时间添加到数据里</strong>。这样一来，<strong>水位线（watermark）也就基于这个时间直接生成</strong>，不需要单独指定了。这种时间语义可以保证比较好的正确性，同时又不会引入太大的延迟。它的具体行为跟事件时间非常像，可以当作特殊的事件时间来处理。</p></li>
+</ul>
+<h3 id="水位线">水位线</h3>
+<h4 id="简介">简介</h4>
+<p>在 Flink 中，这种用来衡量事件时间（Event Time）进展的标记，就被称作“水位线”（Watermark）。</p>
+<p>水位线可以看作一条特殊的数据记录，它是<strong>插入到数据流中的一个标记点</strong>， 主要内容就是一个时间戳，用来指示当前的事件时间。而它插入流中的位置，就应该是在某个数据到来之后；这样就可以从这个数据中提取时间戳，作为当前水位线的时间戳了。如果出现下游有多个并行子任务的情形，只要将水位线广播出去，就可以通知到所有下游任务当前的时间进度了。</p>
+<blockquote>
+<p>为什么是采用插入标记点的形式而不是直接使用数据内包含的时间戳？</p>
+<p>1、如果遇到窗口聚合这样的操作，其实是要攒一批数据才会输出一个结果，那么下游的数据就会变少，时间进度的控制就不够精细了。</p>
+<p>2、数据向下游任务传递时，一般只能传输给一个子任务（除广播外），这样其他的并行子任务的时钟就无法推进了。</p>
+</blockquote>
+<h4 id="何时插入水位线"><strong>何时插入水位线</strong></h4>
+<p>如果每来一条数据就提取时间戳、插入水位线就做了大量的无用功。而且即使时间戳不同，同时涌来的数据时间差会非常小（比如几毫秒），往往对处理计算也没什么影响。所以为了提高效率，<strong>一般会每隔一段时间（周期）生成一个水位线</strong>，这个水位线的时间戳，就是当前最新数据的时间戳。这个插入水位线的周期时间是指处理时间（系统时间），而不是事件时间。</p>
+<h4 id="水位线的变化标准"><strong>水位线的变化标准</strong></h4>
+<p>插入新的水位线时，要先判断一下当前数据对应的时间戳是否比当前水位线对应的时钟要大，如果小的话否则就不再生成新的水位线，也就是说，只有数据的时间戳比当前时钟大，才能推动时钟前进，这时才插入水位线。</p>
+<h4 id="延迟数据"><strong>延迟数据</strong></h4>
+<p>当 9 秒产生的数据到来之后，直接将水位线推进到9 秒，则延迟到达的7、8秒等数据就无法参与到窗口0~9s的计算。</p>
+<p><strong>为了等待延迟数据的到达，不是直接将当前最大时间戳作为水位线，而是将当前最大时间戳减去一定的时间作为水位线</strong>。</p>
+<p>这样相当于延迟了时钟推进的时间，即延迟了窗口的关闭时间，等待延迟到达的数据。</p>
+<blockquote>
+<p>为了让窗口能够正确收集到迟到的数据，可以等上 2 秒；也就是用当前已有数据的最大时间戳减去 2 秒，就是要插入的水位线的时间戳。这样的话，9 秒的数据到来之后，事件时钟不会直接推进到 9 秒，而是进展到了 7 秒；必须等到11 秒的数据到来之后，事件时钟才会进展到 9 秒，这时迟到数据也都已收集齐，0~9 秒的窗口就可以正确计算结果了。</p>
+</blockquote>
+<p>当然，这样的策略也无法保证百分百收集到所有数据，只能期待这个延迟到达的数据在等待的时间范围内。</p>
+<h4 id="窗口收集数据的标准"><strong>窗口收集数据的标准</strong></h4>
+<p>一个窗口所收集的数据，并不是之前所有已经到达的数据。因为数据属于哪个窗口，是由数据本身的时间戳决定的，一个窗口只会收集真正属于它的那些数据。例如，尽管水位线 W(20)之前有时间戳为 22 的数据到来，10~20 秒的窗口中也不会收集这个数据，进行计算依然可以得到正确的结果。</p>
+<h4 id="水位线特征"><strong>水位线特征</strong></h4>
+<ul>
+<li><p>水位线是插入到数据流中的一个标记，可以认为是一个特殊的数据</p></li>
+<li><p>水位线主要的内容是一个时间戳，用来表示当前事件时间的进展</p></li>
+<li><p>水位线是基于数据的时间戳生成的</p></li>
+<li><p>水位线的时间戳必须单调递增，以确保任务的事件时间时钟一直向前推进</p></li>
+<li><p>水位线可以通过设置延迟，来保证正确处理乱序数据</p></li>
+<li><p>一个水位线 Watermark(t)，表示在当前流中事件时间已经达到了时间戳 t, 这代表 t 之前的所有数据都到齐了，之后流中不会出现时间戳 t’ ≤ t 的数据</p></li>
+</ul>
+<h3 id="生成水位线">生成水位线</h3>
+<p>在 Flink 的 DataStream API 中 ， 有 一 个 单 独 用 于 生 成 水 位 线 的 方法：.assignTimestampsAndWatermarks()，它主要用来为流中的数据分配时间戳，并生成水位线来指示事件时间。其方法签名为：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> SingleOutputStreamOperator&lt;T&gt; <span class="title">assignTimestampsAndWatermarks</span><span class="params">(WatermarkStrategy&lt;T&gt; watermarkStrategy)</span></span></span><br></pre></td></tr></table></figure>
+<p>直接通过DataStream类的对象调用 方法即可在数据流中插入水位线：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">DataStream&lt;Event&gt; stream = env.addSource(<span class="keyword">new</span> ClickSource()); </span><br><span class="line">DataStream&lt;Event&gt; withTimestampsAndWatermarks = stream.assignTimestampsAndWatermarks(&lt;watermark strategy&gt;);</span><br></pre></td></tr></table></figure>
+<p>.assignTimestampsAndWatermarks()方法需要传入一个 <strong>WatermarkStrategy接口的实例</strong>作为参数，这就是 所 谓 的 “ 水位线生成策略 ” 。 WatermarkStrategy 中包含 了 一 个“ 时间戳分配器"TimestampAssigner"和一个“水位线生成器”WatermarkGenerator"。</p>
+<ul>
+<li><p>TimestampAssigner：主要负责从流中数据的某个字段中提取时间戳。时间戳的分配是生成水位线的基础。</p></li>
+<li><p>WatermarkGenerator： 主要负责按照既定的方式， 基于时间戳生成水位线。在WatermarkGenerator 接口中，主要又有两个方法：onEvent()和 onPeriodicEmit()。</p>
+<ul>
+<li><p>onEvent：每个事件（数据）到来都会调用的方法，它的参数有当前事件、时间戳， 以及允许发出水位线的一个 WatermarkOutput，可以基于事件做各种操作</p></li>
+<li><p>onPeriodicEmit：周期性调用的方法，可以由 WatermarkOutput 发出水位线。周期时间为处理时间，可以调用环境配置的.setAutoWatermarkInterval()方法来设置，默认为200ms。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">env.getConfig().setAutoWatermarkInterval(60 * 1000L);</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">WatermarkStrategy</span>&lt;<span class="title">T</span>&gt; <span class="keyword">extends</span> <span class="title">TimestampAssignerSupplier</span>&lt;<span class="title">T</span>&gt;,<span class="title">WatermarkGeneratorSupplier</span>&lt;<span class="title">T</span>&gt;</span>&#123;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Override</span> </span><br><span class="line"><span class="function">TimestampAssigner&lt;T&gt; <span class="title">createTimestampAssigner</span><span class="params">(TimestampAssignerSupplier.Context context)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Override</span> </span><br><span class="line"><span class="function">WatermarkGenerator&lt;T&gt; <span class="title">createWatermarkGenerator</span><span class="params">(WatermarkGeneratorSupplier.Context context)</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure></li>
+</ul></li>
+</ul>
+<h4 id="flink-内置水位线生成器">Flink 内置水位线生成器</h4>
+<p>Flink实现了一些WatermarkStrategy接口的实例，以便捷地生成水位线。</p>
+<p><strong>有序流</strong></p>
+<p>有序流，主要特点就是时间戳单调增长（Monotonously Increasing Timestamps），所以永远不会出现迟到数据的问题。这是周期性生成水位线的最简单的场景， 直接调用WatermarkStrategy.forMonotonousTimestamps()方法就可以实现。简单来说，就是直接拿当前最大的时间戳作为水位线就可以了。</p>
+<p>如下代码中调用.withTimestampAssigner()方法，将数据中的 timestamp 字段提取出来， 作为时间戳分配给数据元素；然后用内置的有序流水位线生成器构造出了生成策略。这样，提取出的数据时间戳，就是处理计算的事件时间。这里需要注意的是，时间戳和水位线的单位，必须都是毫秒。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">stream.assignTimestampsAndWatermarks( </span><br><span class="line">    WatermarkStrategy</span><br><span class="line">    .&lt;Event&gt;forMonotonousTimestamps()</span><br><span class="line">    .withTimestampAssigner(<span class="keyword">new</span> SerializableTimestampAssigner&lt;Event&gt;()</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">long</span> <span class="title">extractTimestamp</span><span class="params">(Event element, <span class="keyword">long</span> recordTimestamp)</span></span></span><br><span class="line"><span class="function">        </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> element.timestamp;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;)</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+<p><strong>乱序流</strong></p>
+<p>由于乱序流中需要等待迟到数据到齐，所以必须设置一个固定量的延迟时间（ Fixed Amount of Lateness）。这时生成水位线的时间戳，就是当前数据流中最大的时间戳减去延迟的结果，相当于把表调慢，当前时钟会滞后于数据的最大时间戳。通过调用WatermarkStrategy. forBoundedOutOfOrderness()方法就可以实现。</p>
+<p>这个方法需要传入一个 maxOutOfOrderness 参数，表示“最大乱序程度”，它表示数据流中乱序数据时间戳的最大差值；如果我们能确定乱序程度，那么设置对应时间长度的延迟，就可以等到所有的乱序数据了。</p>
+<p>如下代码中，同样提取了 timestamp 字段作为时间戳，并且以 5 秒的延迟时间创建了处理乱序流的水位线生成器。事实上，有序流的水位线生成器本质上和乱序流是一样的，相当于延迟设为 0 的乱序流水位线生成器。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> org.apache.flink.api.common.eventtime.WatermarkStrategy;</span><br><span class="line"><span class="keyword">import</span> org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;</span><br><span class="line"><span class="keyword">import</span> org.apache.flink.api.common.eventtime.SerializableTimestampAssigner; <span class="keyword">import</span> java.time.Duration;</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">WatermarkTest</span> </span>&#123;</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    StreamExecutionEnvironment env =  StreamExecutionEnvironment.getExecutionEnvironment();</span><br><span class="line">    env.setParallelism(<span class="number">1</span>);</span><br><span class="line">    env.addSource(<span class="keyword">new</span> ClickSource())</span><br><span class="line">    <span class="comment">// 插入水位线的逻辑</span></span><br><span class="line">    .assignTimestampsAndWatermarks(</span><br><span class="line">    <span class="comment">// 针对乱序流插入水位线，延迟时间设置为 5s</span></span><br><span class="line">    WatermarkStrategy</span><br><span class="line">    .&lt;Event&gt;forBoundedOutOfOrderness(Duration.ofSeconds(<span class="number">5</span>))</span><br><span class="line">    .withTimestampAssigner(<span class="keyword">new</span> SerializableTimestampAssigner&lt;Event&gt;() &#123;</span><br><span class="line">        <span class="comment">// 抽取时间戳的逻辑</span></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">long</span> <span class="title">extractTimestamp</span><span class="params">(Event element, <span class="keyword">long</span> recordTimestamp)</span> </span>&#123;</span><br><span class="line">        	<span class="keyword">return</span> element.timestamp;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;)</span><br><span class="line">    )</span><br><span class="line">    .print();</span><br><span class="line"></span><br><span class="line">env.execute();</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>需要注意的是，乱序流中生成的水位线真正的时间戳，其实是 <strong>当前最大时间戳 – 延迟时间 – 1</strong>，这里的单位是毫秒。</p>
+<p>为什么要减 1 毫秒呢？可以回想一下水位线的特点：时间戳为 t 的水位线，表示时间戳≤t 的数据全部到齐，不会再来了。</p>
+<p>如果考虑有序流，也就是延迟时间为 0 的情况，那么时间戳为 7 秒的数据到来时，之后其实是还有可能继续来 7 秒的数据的；所以生成的水位线不是 7 秒，而是 6 秒 999 毫秒，7 秒的数据还可以继续来。</p>
+<p>这一点可以在BoundedOutOfOrdernessWatermarks 的源码中明显地看到：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onPeriodicEmit</span><span class="params">(WatermarkOutput output)</span> </span>&#123;</span><br><span class="line">	output.emitWatermark(<span class="keyword">new</span> Watermark(maxTimestamp - outOfOrdernessMillis - <span class="number">1</span>));</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h4 id="自定义水位线生成器">自定义水位线生成器</h4>
+<p>WatermarkStrategy 中，时间戳分配器 TimestampAssigner 都是大同小异的，指定字段提取时间戳就可以了。</p>
+<p>而不同策略的关键就在于 WatermarkGenerator 的实现。整体说来，Flink有两种不同的生成水位线的方式：一种是周期性的（Periodic），另一种是断点式的（Punctuated）。</p>
+<p>WatermarkGenerator 接口中的两个方法onEvent()和 onPeriodicEmit()，前者是在每个事件到来时调用，而后者由框架周期性调用。周期性调用的方法中发出水位线，自然就是周期性生成水位线；而在事件触发的方法中发出水位线，自然就是断点式生成了。两种方式的不同就集中体现在这两个方法的实现上。</p>
+<p><strong>周期性水位线生成器（Periodic Generator）</strong></p>
+<p>周期性生成器一般是通过 onEvent()观察判断输入的事件，而在 onPeriodicEmit()里发出水位线。</p>
+<p>如下代码在 onPeriodicEmit()里调用 output.emitWatermark()，就可以发出水位线了；这个方法由系统框架周期性地调用，默认 200ms 一次。所以水位线的时间戳是依赖当前已有数据的最大时间戳的（这里的实现与内置生成器类似，也是减去延迟时间再减 1），但具体什么时候生成与数据无关。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> org.apache.flink.api.common.eventtime.*;</span><br><span class="line"><span class="keyword">import</span> org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 自定义水位线的产生</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CustomWatermarkTest</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line"></span><br><span class="line">        StreamExecutionEnvironment env =  StreamExecutionEnvironment.getExecutionEnvironment();</span><br><span class="line">        env.setParallelism(<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">        env</span><br><span class="line">        .addSource(<span class="keyword">new</span> ClickSource())</span><br><span class="line">        .assignTimestampsAndWatermarks(<span class="keyword">new</span> CustomWatermarkStrategy())</span><br><span class="line">        .print();</span><br><span class="line"></span><br><span class="line">        env.execute();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span>	<span class="keyword">static</span>	<span class="class"><span class="keyword">class</span>	<span class="title">CustomWatermarkStrategy</span>	<span class="keyword">implements</span> <span class="title">WatermarkStrategy</span>&lt;<span class="title">Event</span>&gt; </span>&#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span>	TimestampAssigner&lt;Event&gt; <span class="title">createTimestampAssigner</span><span class="params">(TimestampAssignerSupplier.Context context)</span> 		</span>&#123; </span><br><span class="line">            <span class="keyword">return</span> </span><br><span class="line">                <span class="keyword">new</span> SerializableTimestampAssigner&lt;Event&gt;() &#123;</span><br><span class="line">                    <span class="meta">@Override</span></span><br><span class="line">                    <span class="function"><span class="keyword">public</span> <span class="keyword">long</span> <span class="title">extractTimestamp</span><span class="params">(Event element, <span class="keyword">long</span> recordTimestamp)</span></span></span><br><span class="line"><span class="function">                    </span>&#123;</span><br><span class="line">                    <span class="keyword">return</span> element.timestamp; <span class="comment">// 告诉程序数据源里的时间戳是哪一个字段</span></span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span>	WatermarkGenerator&lt;Event&gt; <span class="title">createWatermarkGenerator</span><span class="params">(WatermarkGeneratorSupplier.Context context)</span> </span>&#123; </span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> CustomPeriodicGenerator();</span><br><span class="line">        &#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">CustomPeriodicGenerator</span> <span class="keyword">implements</span> <span class="title">WatermarkGenerator</span>&lt;<span class="title">Event</span>&gt; </span>&#123;</span><br><span class="line">        <span class="keyword">private</span> Long delayTime = <span class="number">5000L</span>; <span class="comment">// 延迟时间</span></span><br><span class="line">        <span class="keyword">private</span> Long maxTs = Long.MIN_VALUE + delayTime + <span class="number">1L</span>; <span class="comment">// 观察到的最大时间戳</span></span><br><span class="line">        </span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onEvent</span><span class="params">(Event event, <span class="keyword">long</span> eventTimestamp, WatermarkOutput output)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 每来一条数据就调用一次</span></span><br><span class="line">        	maxTs = Math.max(event.timestamp, maxTs); <span class="comment">// 更新最大时间戳</span></span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onPeriodicEmit</span><span class="params">(WatermarkOutput output)</span> </span>&#123;</span><br><span class="line">            <span class="comment">// 发射水位线，默认 200ms 调用一次</span></span><br><span class="line">            output.emitWatermark(<span class="keyword">new</span> Watermark(maxTs - delayTime - <span class="number">1L</span>));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>断点式水位线生成器（Punctuated Generator）</strong></p>
+<p>断点式生成器会不停地检测 onEvent()方法中的事件，当发现带有水位线信息的特殊事件时， 就立即发出水位线。一般来说，断点式生成器不会通过 onPeriodicEmit()发出水位线。</p>
+<p>如下代码在onEvent()方法中判断当前事件的 user 字段，只有遇到“Mary”这个特殊的值时，才调用output.emitWatermark()发出水位线。这个过程是完全依靠事件来触发的，所以水位线的生成一定在某个数据到来之后。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CustomPunctuatedGenerator</span> <span class="keyword">implements</span> <span class="title">WatermarkGenerator</span>&lt;<span class="title">Event</span>&gt; </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onEvent</span><span class="params">(Event r, <span class="keyword">long</span> eventTimestamp, WatermarkOutput output)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 只有在遇到特定的 itemId 时，才发出水位线</span></span><br><span class="line">        <span class="keyword">if</span> (r.user.equals(<span class="string">&quot;Mary&quot;</span>)) &#123;</span><br><span class="line">        	output.emitWatermark(<span class="keyword">new</span> Watermark(r.timestamp - <span class="number">1</span>));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onPeriodicEmit</span><span class="params">(WatermarkOutput output)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 不需要做任何事情，因为我们在 onEvent 方法中发射了水位线</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h4 id="在自定义数据源中发送水位线">在自定义数据源中发送水位线</h4>
+<p>在自定义数据源中发送了水位线之后，就不能再在后续的datastream对象中使用 assignTimestampsAndWatermarks 方法 来 生 成 水 位 线 了 。 在 自 定 义 数 据 源 中 生 成 水 位 线 和 在 程 序 中 使 用assignTimestampsAndWatermarks 方法生成水位线二者只能取其一。</p>
+<p>在自定义水位线中生成水位线相比 assignTimestampsAndWatermarks 方法更加灵活，可以任意的产生周期性的、非周期性的水位线，以及水位线的大小也完全由自定义。所以非常适合用来编写 Flink 的测试程序，测试 Flink 的各种各样的特性。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> org.apache.flink.streaming.api.environment.StreamExecutionEnvironment; </span><br><span class="line"><span class="keyword">import</span> org.apache.flink.streaming.api.functions.source.SourceFunction;</span><br><span class="line"><span class="keyword">import</span> org.apache.flink.streaming.api.watermark.Watermark;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.Calendar; <span class="keyword">import</span> java.util.Random;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">EmitWatermarkInSourceFunction</span> </span>&#123;</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();</span><br><span class="line">    </span><br><span class="line">    env.setParallelism(<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">    env.addSource(<span class="keyword">new</span> ClickSourceWithWatermark()).print();</span><br><span class="line"></span><br><span class="line">    env.execute();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 泛型是数据源中的类型</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">ClickSourceWithWatermark</span> <span class="keyword">implements</span> <span class="title">SourceFunction</span>&lt;<span class="title">Event</span>&gt;</span>&#123;</span><br><span class="line">    	<span class="keyword">private</span> <span class="keyword">boolean</span> running = <span class="keyword">true</span>;</span><br><span class="line">    </span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">(SourceContext&lt;Event&gt; sourceContext)</span> <span class="keyword">throws</span> Exception </span>&#123; </span><br><span class="line">            Random random = <span class="keyword">new</span> Random();</span><br><span class="line">        	String[] userArr = &#123;<span class="string">&quot;Mary&quot;</span>, <span class="string">&quot;Bob&quot;</span>, <span class="string">&quot;Alice&quot;</span>&#125;;</span><br><span class="line">        	String[] urlArr = &#123;<span class="string">&quot;./home&quot;</span>, <span class="string">&quot;./cart&quot;</span>, <span class="string">&quot;./prod?id=1&quot;</span>&#125;; </span><br><span class="line">            </span><br><span class="line">            <span class="keyword">while</span> (running) &#123;</span><br><span class="line">                </span><br><span class="line">                <span class="keyword">long</span> currTs = Calendar.getInstance().getTimeInMillis(); <span class="comment">// 毫秒时间戳</span></span><br><span class="line"></span><br><span class="line">                String username = userArr[random.nextInt(userArr.length)]; </span><br><span class="line">                String url	= urlArr[random.nextInt(urlArr.length)]; </span><br><span class="line">                Event event = <span class="keyword">new</span> Event(username, url, currTs);</span><br><span class="line"></span><br><span class="line">                <span class="comment">// 使用 collectWithTimestamp 方法将数据发送出去，并指明数据中的时间戳的字段</span></span><br><span class="line">                sourceContext.collectWithTimestamp(event, event.timestamp);</span><br><span class="line">                <span class="comment">// 发送水位线</span></span><br><span class="line">                sourceContext.emitWatermark(<span class="keyword">new</span> Watermark(event.timestamp - <span class="number">1L</span>)); </span><br><span class="line"></span><br><span class="line">                Thread.sleep(<span class="number">1000L</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">cancel</span><span class="params">()</span> </span>&#123; </span><br><span class="line">            running = <span class="keyword">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h3 id="水位线传递">水位线传递</h3>
+<p>水位线是数据流中插入的一个标记，用来表示事件时间的进展，它会随着数据一起在任务间传递。</p>
+<p>实际应用中往往上下游都有多个并行子任务，为了统一推进事件时间的进展，要求上游任务处理完水位线、时钟改变之后，要把当前的水位线再次发出，广播给所有的下游子任务。这样，后续任务就不需要依赖原始数据中的时间戳（经过转化处理后，数据可能已经改变了），也可以知道当前事件时间了。</p>
+<p>在“重分区”（redistributing）的传输模式下，一个任务有可能会收到来自不同分区上游子任务的数据。而不同分区的上游子任务时钟并不同步，所以同一时刻发给下游任务的水位线可能并不相同。</p>
+<p>由于水位线的本质含义是“当前时间之前的数据，都已经到齐了”。因此，当存在多个上游子任务发送来的水位线时，选择最小的那个来作为当前任务的水位线，并发送给下游任务。</p>
+<p>如下案例：</p>
+<p><img src="/2022/06/17/Flink1.12_%E6%97%B6%E9%97%B4%E4%B8%8E%E7%AA%97%E5%8F%A3/image-20220618171030786.png" alt="image-20220618171030786" style="zoom:67%;"></p>
+<p>如图所示，当前任务的上游，有四个并行子任务，所以会接收到来自四个分区的水位线；而下游有三个并行子任务，所以会向三个分区发出水位线。具体过程如下：</p>
+<ul>
+<li>上游并行子任务发来不同的水位线，当前任务会为每一个分区设置一个“分区水位线”（Partition Watermark），这是一个分区时钟；而当前任务自己的时钟，就是所有分区时钟里最小的那个。</li>
+<li>当有一个新的水位线（第一分区的 4）从上游传来时，当前任务会首先更新对应的分区时钟；然后再次判断所有分区时钟中的最小值，如果比之前大，说明事件时间有了进展，当前任务的时钟也就可以更新了。这里要注意，更新后的任务时钟，并不一定是新来的那个分区水位线，比如这里改变的是第一分区的时钟，但最小的分区时钟是第三分区的 3，于是当前任务时钟就推进到了 3。当时钟有进展时，当前任务就会将自己的时钟以水位线的形式，广播给下游所有子任务。</li>
+<li>再次收到新的水位线（第二分区的 7）后，执行同样的处理流程。首先将第二个分区时钟更新为 7，然后比较所有分区时钟；发现最小值没有变化，那么当前任务的时钟也不变，也不会向下游任务发出水位线。</li>
+<li>当又一次收到新的水位线（第三分区的 6）之后，第三个分区时钟更新为6，同时所有分区时钟最小值变成了第一分区的 4，所以当前任务的时钟推进到 4，并发出时间戳为 4 的水位线，广播到下游各个分区任务。</li>
+</ul>
+<p>水位线在上下游任务之间的传递，非常巧妙地避免了分布式系统中没有统一时钟的问题， 每个任务都以“处理完之前所有数据”为标准来确定自己的时钟，就可以保证窗口处理的结果总是正确的。对于有多条流合并之后进行处理的场景，水位线传递的规则是类似的。</p>
+<h3 id="水位线总结">水位线总结</h3>
+<p>水位线是一种特殊的事件，由程序员通过编程插入的数据流里面，然后跟随数据流向下游流动。</p>
+<p>水位线的默认计算公式：水位线 = 观察到的最大事件时间 – 最大延迟时间 – 1 毫秒。</p>
+<p>不同的算子看到的水位线的大小可能是不一样的。因为下游的算子可能并未接收到来自上游算子的水位线，导致下游算子的时钟要落后于上游算子的时钟。比如 map-&gt;reduce 这样的操作，如果在 map 中编写了非常耗时间的代码，将会阻塞水位线的向下传播，因为水位线也是数据流中的一个事件，位于水位线前面的数据如果没有处理完毕，那么水位线不可能弯道超车绕过前面的数据向下游传播，也就是说会被前面的数据阻塞。这样就会影响到下游算子的聚合计算，因为下游算子中无论由窗口聚合还是定时器的操作，都需要水位线才能触发执行。这也就告诉了我们，在编写 Flink 程序时，一定要谨慎的编写每一个算子的计算逻辑，尽量避免大量计算或者是大量的 IO 操作，这样才不会阻塞水位线的向下传递。</p>
+<p>在数据流开始之前，Flink 会插入一个大小是负无穷大（在 Java 中是-Long.MAX_VALUE） 的水位线，而在数据流结束时，Flink 会插入一个正无穷大(Long.MAX_VALUE)的水位线，保证所有的窗口闭合以及所有的定时器都被触发。</p>
+<p>对于批式数据集，Flink 也会将其作为流读入，也就是一条数据一条数据的读取。在这种情况下，Flink 对于离线数据集，只会插入两次水位线，也就是在最开始处插入负无穷大的水位线，在结束位置插入一个正无穷大的水位线。因为只需要插入两次水位线，就可以保证计算的正确，无需在数据流的中间插入水位线了。</p>
+<h3 id="窗口">窗口</h3>
+<p>以时间为单位的窗口，指的是一个左闭右开的区间。这个窗口将收集满足符合时间条件的数据，并对这些数据进行计算。</p>
+<p>在Flink中，当有满足时间条件的数据到来后，就会创建窗口。Flink 中窗口并不是静态准备好的，而是动态创建，当有落在这个窗口区间范围的数据达到时，才创建对应的窗口。</p>
+<blockquote>
+<p>例如，假设窗口的大小为[0,10)的区间。第一个数据时间戳为 2，判断之后创建第一个窗口[0, 10），并将 2 秒数据保存进去；</p>
+<p>后续数据依次到来，时间戳均在 [0, 10）范围内，所以全部保存进第一个窗口。</p>
+<p>11 秒数据到来，判断它不属于[0, 10）窗口，所以创建第二个窗口[10, 20），并将 11秒的数据保存进去。由于水位线设置延迟时间为 2 秒，所以现在的时钟是 9 秒，第一个窗口也没有到关闭时间。</p>
+</blockquote>
+<h4 id="窗口的分类">窗口的分类</h4>
+<p>时间窗口（Time Window）</p>
+<p>时间窗口以时间点来定义窗口的开始（start）和结束（end），所以截取出的就是某一时间段的数据。到达结束时间时，窗口不再收集数据，触发计算输出结果，并将窗口关闭销毁。</p>
+<p>Flink 中有一个专门的类来表示时间窗口，名称就叫作 TimeWindow。这个类只有两个私有属性：start 和 end，表示窗口的开始和结束的时间戳，单位为毫秒。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">long</span> start;</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">long</span> end;</span><br></pre></td></tr></table></figure>
+<p>可以调用公有的getStart()和 getEnd()方法直接获取这两个时间戳。另外，TimeWindow提供了一个 maxTimestamp()方法，用来获取窗口中能够包含数据的最大时间戳。窗口中的数据，最大允许的时间戳就是 end - 1，这也就代表了所定义的窗口时间范围都是左闭右开的区间[start，end)。：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">long</span> <span class="title">maxTimestamp</span><span class="params">()</span> </span>&#123; </span><br><span class="line">    <span class="keyword">return</span> end - <span class="number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>计数窗口（Count Window）</p>
+<p>计数窗口基于元素的个数来截取数据，到达固定的个数时就触发计算并关闭窗口。只需指定窗口大小，就可以把数据分配到对应的窗口中了。在 Flink 内部也并没有对应的类来表示计数窗口，底层是通过“全局窗口”（Global Window）来实现的。</p>
+<p>滚动窗口（Tumbling Windows）</p>
+<p>滚动窗口有固定的大小，是一种对数据进行“均匀切片”的划分方式。窗口之间没有重叠， 也不会有间隔，是“首尾相接”的状态。</p>
+<p>正是因为滚动窗口是“无缝衔接”，所以<strong>每个数据都会被分配到一个窗口，而且只会属于一个窗口</strong>。</p>
+<p>滚动窗口可以基于时间定义，也可以基于数据个数定义；<strong>需要的参数只有一个，就是窗口的大小（window size）</strong>。</p>
+<p>比如可以定义一个长度为 1 小时的滚动时间窗口，那么每个小时就会进行一次计算；或者定义一个长度为 10 的滚动计数窗口，就会每 10 个数进行一次计算。</p>
+<p>滑动窗口（Sliding Windows）</p>
+<p>与滚动窗口类似，滑动窗口的大小也是固定的。</p>
+<p>参数有两个：除去窗口大小（window size）之外，还有一个“滑动步长”（window slide），它其实就代表了窗口计算的频率。</p>
+<p>滑动的距离代表了下个窗口开始的时间间隔，而窗口大小是固定的，所以同样也是两个窗口结束时间的间隔；窗口在结束时间触发计算输出结果，那么滑动步长就代表了计算频率。例如，我们定义一个长度为 1 小时、滑动步长为 5 分钟的滑动窗口，那么就会统计 1 小时内的数据，每 5 分钟统计一次。同样，滑动窗口可以基于时间定义，也可以基于数据个数定义。</p>
+<p>当滑动步长小于窗口大小时，滑动窗口就会出现重叠，这时数据也可能会被同时分配到多个窗口中。而具体的个数，就由窗口大小和滑动步长的比值（size/slide）来决定。</p>
+<blockquote>
+<p>例如，滑动步长刚好是窗口大小的一半，那么每个数据都会被分配到 2 个窗口里。比如我们定义的窗口长度为 1 小时、滑动步长为 30 分钟，那么对于 8 点 55 分的数据，应该同时属于[8 点, 9 点)和[8 点半, 9 点半)两个窗口；而对于 8 点 10 分的数据，则同时属于[8点, 9 点)和[7 点半, 8 点半)两个窗口。</p>
+</blockquote>
+<p>会话窗口（Session Windows）</p>
+<p>会话窗口，就是数据来了之后就开启一个会话窗口，如果接下来还有数据陆续到来， 那么就一直保持会话；如果一段时间一直没收到数据，那就认为会话超时失效，窗口自动关闭。</p>
+<p>会话窗口只能基于时间来定义，而没有“会话计数窗口”的概念。这很好理解，“会话”终止的标志就是“隔一段时间没有数据来”，如果不依赖时间而改成个数，就成了“隔几个数据没有数据来”，这完全是自相矛盾的说法。</p>
+<p>对于会话窗口而言，最重要的参数就是这段时间的长度（size），它表示会话的超时时间，也就是两个会话窗口之间的最小距离。如果相邻两个数据到来的时间间隔（Gap）小于指定的大小（size），那说明还在保持会话，它们就属于同一个窗口；如果 gap 大于 size，那么新来的数据就应该属于新的会话窗口，而前一个窗口就应该关闭了。在具体实现上，可以设置静态固定的大小（size），也可以通过一个自定义的提取器（gap extractor）动态提取最小间隔 gap 的值。</p>
+<p>考虑到事件时间语义下的乱序流，这里又会有一些麻烦。相邻两个数据的时间间隔 gap 大于指定的 size，则认为它们属于两个会话窗口，前一个窗口就关闭；可在数据乱序的情况下，可能会有迟到数据，它的时间戳刚好是在之前的两个数据之间的。这样一来，之前我们判断的间隔中就不是“一直没有数据”，而缩小后的间隔有可能会比 size 还要小——这代表三个数据本来应该属于同一个会话窗口。</p>
+<p>所以在 Flink 底层，对会话窗口的处理会比较特殊：每来一个新的数据，都会创建一个新的会话窗口；然后判断已有窗口之间的距离，如果小于给定的 size，就对它们进行合并（merge） 操作。</p>
+<p>会话窗口的长度不固定，起始和结束时间也是不确定的，各个分区之间窗口没有任何关联。会话窗口之间一定是不会重叠的，而且会留有至少为 size 的间隔（session gap）。</p>
+<p>全局窗口（Global Windows）</p>
+<p>这种窗口全局有效，会把相同 key 的所有数据都分配到同一个窗口中；说直白一点，就跟没分窗口一样。</p>
+<p>无界流的数据永无止尽，所以这种窗口也没有结束的时候，默认是不会做触发计算的。如果希望它能对数据进行计算处理， 还需要自定义“触发器”（Trigger）。</p>
+<p>计数窗口（Count Window），底层就是用全局窗口实现的。</p>
+<h3 id="window-api">Window API</h3>
+<p>按键分区窗口（Keyed Windows）</p>
+<p>经过按键分区keyBy 操作后，相同 key 的数据会被发送到同一个并行子任务，而窗口操作会基于每个 key 进行单独的处理。所以可以认为，每个 key 上都定义了一组窗口，各自独立地进行统计计算。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">stream.keyBy(...)</span><br><span class="line">.window(...)</span><br></pre></td></tr></table></figure>
+<p>非按键分区（Non-Keyed Windows）</p>
+<p>如果没有进行 keyBy，那么原始的 DataStream 就不会分成多条逻辑流。这时窗口逻辑只能在一个任务（task）上执行，就相当于并行度变成了 1。所以在实际应用中一般不推荐使用这种方式。</p>
+<p>在代码中，直接基于 DataStream 调用.windowAll()定义窗口。需要注意的是，对于非按键分区的窗口操作，手动调大窗口算子的并行度也是无效的，windowAll 本身就是一个非并行的操作。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">stream.windowAll(...)</span><br></pre></td></tr></table></figure>
+<p>窗口操作主要有两个部分：窗口分配器（Window Assigners）和窗口函数（Window Functions）。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">stream.keyBy(&lt;key selector&gt;)</span><br><span class="line">.window(&lt;window assigner&gt;)</span><br><span class="line">.aggregate(&lt;window function&gt;)</span><br></pre></td></tr></table></figure>
+<p>.window()方法需要传入一个窗口分配器，它指明了窗口的类型；</p>
+<p>.aggregate() 方法传入一个窗口函数作为参数，它用来定义窗口具体的处理逻辑。窗口分配器有各种形式， 而窗口函数的调用方法也不只.aggregate()一种。</p>
+<h4 id="窗口分配器window-assigners">窗口分配器（Window Assigners）</h4>
+<p>定义窗口分配器（Window Assigners）是构建窗口算子的第一步，它的作用就是定义数据应该被“分配”到哪个窗口。窗口分配数据的规则，其实就对应着不同的窗口类型。所以可以说，<strong>窗口分配器其实就是在指定窗口的类型</strong>。</p>
+<p>窗口分配器最通用的定义方式，就是调用.window() 方法。这个方法需要传入一个WindowAssigner 作为参数，返回 WindowedStream。如果是非按键分区窗口，那么直接调用.windowAll()方法，同样传入一个WindowAssigner，返回的是 AllWindowedStream。</p>
+<p>窗口按照驱动类型可以分成时间窗口和计数窗口，而按照具体的分配规则，又有滚动窗口、滑动窗口、会话窗口、全局窗口四种。除去需要自定义的全局窗口外，其他常用的类型 Flink 中都给出了内置的分配器实现，可以方便地调用实现各种需求。</p>
+<h5 id="滚动时间窗口">滚动时间窗口</h5>
+<p>滚动处理时间窗口</p>
+<p>窗口分配器由类TumblingProcessingTimeWindows 提供，需要调用它的静态方法.of()。.of()方法需要传入一个 Time 类型的参数 size，表示滚动窗口的大小。另外，.of()还有一个重载方法，可以传入两个 Time 类型的参数：size 和 offset。第一个参数当然还是窗口大小，第二个参数则表示窗口起始点的偏移量。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">stream.keyBy(...)</span><br><span class="line">.window(TumblingProcessingTimeWindows.of(Time.seconds(<span class="number">5</span>)))</span><br><span class="line">.aggregate(...)</span><br><span class="line"></span><br><span class="line">.window(TumblingProcessingTimeWindows.of(Time.days(<span class="number">1</span>), Time.hours(-<span class="number">8</span>)))       </span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>滚动窗口其实只有一个 size 是不能唯一确定的。比如定义 1 天的滚动窗口，从每天的 0 点开始计时是可以的，统计的就是一个自然日的所有数据；而如果从每天的凌晨 2 点开始计时其实也完全没问题，只不过统计的数据变成了每天 2 点到第二天 2 点。这个起始点的选取，其实对窗口本身的类型没有影响；而为了方便应用，默认的起始点时间戳是窗口大小的整倍数。也就是说，如果定义 1 天的窗口，默认就从 0 点开始；如果定义 1 小时的窗口，默认就从整点开始。而如果非要不从这个默认值开始，那就可以通过设置偏移量offset 来调整。</p>
+<p>偏移量的功能主要在作用在时区转换上。标准时间戳其实就是1970 年 1 月 1 日 0 时 0 分 0 秒 0 毫秒开始计算的一个毫秒数，而这个时间是以 UTC 时间，也就是 0 时区（伦敦时间）为标准的。北京所在的时区是东八区，也就是 UTC+8，跟 UTC 有 8 小时的时差。定义 1 天滚动窗口时，如果用默认的起始点，那么得到就是伦敦时间每天 0点开启窗口，这时是北京时间早上 8 点。那怎样得到北京时间每天 0 点开启的滚动窗口呢？只要设置-8 小时的偏移量就可以了。</p>
+</blockquote>
+<p>滚动事件时间窗口</p>
+<p>窗口分配器由类TumblingEventTimeWindows 提供，用法与滚动处理事件窗口完全一致。</p>
+<p>.of()方法也可以传入第二个参数 offset，用于设置窗口起始点的偏移量。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">stream.keyBy(...)</span><br><span class="line">.window(TumblingEventTimeWindows.of(Time.seconds(<span class="number">5</span>)))</span><br><span class="line">.aggregate(...)</span><br></pre></td></tr></table></figure>
+<h5 id="滑动时间窗口">滑动时间窗口</h5>
+<p>滑动处理时间窗口</p>
+<p>窗口分配器由类 SlidingProcessingTimeWindows 提供，同样需要调用它的静态方法.of()。</p>
+<p>这里.of()方法需要传入两个 Time 类型的参数：size 和 slide，前者表示滑动窗口的大小， 后者表示滑动窗口的滑动步长。如下创建了一个长度为 10 秒、滑动步长为 5 秒的滑动窗口。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">stream.keyBy(...)</span><br><span class="line">.window(SlidingProcessingTimeWindows.of(Time.seconds(<span class="number">10</span>), Time.seconds(<span class="number">5</span>)))</span><br><span class="line">.aggregate(...)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>滑动窗口同样可以追加第三个参数，用于指定窗口起始点的偏移量，用法与滚动窗口完全一致。</p>
+<p>滑动事件时间窗口</p>
+<p>窗口分配器由类 SlidingEventTimeWindows 提供，用法与滑动处理事件窗口完全一致。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">stream.keyBy(...)</span><br><span class="line">.window(SlidingEventTimeWindows.of(Time.seconds(<span class="number">10</span>), Time.seconds(<span class="number">5</span>)))</span><br><span class="line">.aggregate(...)</span><br></pre></td></tr></table></figure>
+<h5 id="会话窗口">会话窗口</h5>
+<p>处理时间会话窗口</p>
+<p>窗口分配器由类 ProcessingTimeSessionWindows 提供，需要调用它的静态方法.withGap() 或者.withDynamicGap()。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">stream.keyBy(...)</span><br><span class="line">    .window(ProcessingTimeSessionWindows.withGap(Time.seconds(<span class="number">10</span>)))</span><br><span class="line">.aggregate(...)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>.withGap()方法需要传入一个 Time 类型的参数 size，表示会话的超时时间，也就是最小间隔 session gap。</p>
+<p>.withDynamicGap()方法需要传入一个 SessionWindowTimeGapExtractor 作为参数，用来定义 session gap 的动态提取逻辑。在这里提取了数据元素的第一个字段，用它的长度乘以 1000 作为会话超时的间隔。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">.window(ProcessingTimeSessionWindows.withDynamicGap(</span><br><span class="line">    <span class="keyword">new</span> SessionWindowTimeGapExtractor&lt;Tuple2&lt;String, Long&gt;&gt;() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">long</span> <span class="title">extract</span><span class="params">(Tuple2&lt;String, Long&gt; element)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 提取 session gap 值返回, 单位毫秒</span></span><br><span class="line">    <span class="keyword">return</span> element.f0.length() * <span class="number">1000</span>;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;))</span><br></pre></td></tr></table></figure>
+<p>事件时间会话窗口</p>
+<p>窗口分配器由类EventTimeSessionWindows 提供，用法与处理时间会话窗口完全一致。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">stream.keyBy(...)</span><br><span class="line">.window(EventTimeSessionWindows.withGap(Time.seconds(<span class="number">10</span>)))</span><br><span class="line">.aggregate(...)</span><br></pre></td></tr></table></figure>
+<h5 id="计数窗口">计数窗口</h5>
+<p>滚动计数窗口</p>
+<p>滚动计数窗口只需要传入一个长整型的参数 size，表示窗口的大小。</p>
+<p>如下定义了一个长度为 10 的滚动计数窗口，当窗口中元素数量达到 10 的时候，就会触发计算执行并关闭窗口。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">stream.keyBy(...)</span><br><span class="line">.countWindow(<span class="number">10</span>)</span><br></pre></td></tr></table></figure>
+<p>滑动计数窗口</p>
+<p>与滚动计数窗口类似，不过需要在.countWindow()调用时传入两个参数：size 和 slide，前者表示窗口大小，后者表示滑动步长。</p>
+<p>如下定义了一个长度为 10、滑动步长为 3 的滑动计数窗口。每个窗口统计 10 个数据，每隔 3 个数据就统计输出一次结果。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">stream.keyBy(...)</span><br><span class="line">.countWindow(<span class="number">10</span>，<span class="number">3</span>)</span><br></pre></td></tr></table></figure>
+<h5 id="全局窗口">全局窗口</h5>
+<p>全局窗口是计数窗口的底层实现，一般在需要自定义窗口时使用。它的定义同样是直接调用.window()，分配器由GlobalWindows 类提供。需要注意使用全局窗口，必须自行定义触发器才能实现窗口计算，否则起不到任何作用。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">stream.keyBy(...)</span><br><span class="line">.window(GlobalWindows.create());</span><br></pre></td></tr></table></figure>
+<h4 id="窗口函数window-functions">窗口函数（Window Functions）</h4>
+<p>窗口函数定义了窗口内的数据如何进行计算。</p>
+<p>经窗口分配器处理之后，数据流的类型是 WindowedStream。这个类型并不是 DataStream，所以并不能直接进行其他转换，而必须进一步调用窗口函数，对收集到的数据进行处理计算之后，才能最终再次得到 DataStream。</p>
+<h5 id="增量聚合函数incremental-aggregation-functions"><strong>增量聚合函数（incremental aggregation functions）</strong></h5>
+<p>如果我们等到所有数据都收集齐，在窗口到了结束时间要输出结果的一瞬间再去进行聚合，这相当于在用批处理的思路来做实时流处理。</p>
+<p>为了提高实时性，Flink中每来一条数据就立即进行计算，中间保持一个聚合状态就可以了；区别只是在于不立即输出结果，而是要等到窗口结束时间。等到窗口到了结束时间需要输出计算结果的时候，直接拿出之前聚合的状态直接输出，这大大提高了程序运行的效率和实时性。</p>
+<p>典型的增量聚合函数有两个：ReduceFunction 和AggregateFunction。</p>
+<p><strong>归约函数（ReduceFunction）</strong></p>
+<p>窗口的归约聚合就是将窗口中收集到的数据两两进行归约。<strong>当进行流处理时，首先保存一个状态；每来一个新的数据，就和之前的聚合状态做归约</strong>，这样就实现了增量式的聚合。</p>
+<p>窗口函数中也提供了 ReduceFunction：只要基于 WindowedStream 调用.reduce()方法，然后传入 ReduceFunction 作为参数，就可以指定以归约两个元素的方式去对窗口中数据进行聚合了。这里的 ReduceFunction 其实与简单聚合时用到的 ReduceFunction 是同一个函数类接口， 所以使用方式也是完全一样的。</p>
+<p>ReduceFunction 中需要重写一个 reduce 方法，它的两个参数代表输入的两个元素，而归约最终输出结果的数据类型，与输入的数据类型必须保持一致。也就是说，中间聚合的状态和输出的结果，都和输入的数据类型是一样的。</p>
+<p>案例</p>
+<p>如下代码中我们对每个用户的行为数据进行了开窗统计。与 word count 逻辑类似，首先将数据转换成(user, count)的二元组形式（类型为 Tuple2&lt;String, Long&gt;），每条数据对应的初始 count值都是 1；然后按照用户 id 分组，在处理时间下开滚动窗口，统计每 5 秒内的用户行为数量。对于窗口的计算，我们用 ReduceFunction 对 count 值做了增量聚合：窗口中会将当前的总 count 值保存成一个归约状态，每来一条数据，就会调用内部的 reduce 方法，将新数据中的 count 值叠加到状态上，并得到新的状态保存起来。等到了 5 秒窗口的结束时间，就把归约好的状态直接输出。这里需要注意，经过窗口聚合转换输出的数据，数据类型依然是二元组 Tuple2&lt;String, Long&gt;。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> org.apache.flink.api.common.eventtime.SerializableTimestampAssigner; </span><br><span class="line"><span class="keyword">import</span> org.apache.flink.api.common.eventtime.WatermarkStrategy;</span><br><span class="line"><span class="keyword">import</span> org.apache.flink.api.common.functions.MapFunction; </span><br><span class="line"><span class="keyword">import</span> org.apache.flink.api.common.functions.ReduceFunction; </span><br><span class="line"><span class="keyword">import</span> org.apache.flink.api.java.tuple.Tuple2;</span><br><span class="line"><span class="keyword">import</span> org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator; </span><br><span class="line"><span class="keyword">import</span> org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;</span><br><span class="line"><span class="keyword">import</span> org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindo ws;</span><br><span class="line"><span class="keyword">import</span> org.apache.flink.streaming.api.windowing.time.Time;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.time.Duration;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">WindowReduceExample</span> </span>&#123;</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123; </span><br><span class="line">    StreamExecutionEnvironment	env	= StreamExecutionEnvironment.getExecutionEnvironment(); 	</span><br><span class="line">    env.setParallelism(<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// 从自定义数据源读取数据，并提取时间戳、生成水位线</span></span><br><span class="line">	SingleOutputStreamOperator&lt;Event&gt;	stream	=	</span><br><span class="line">    env.addSource(<span class="keyword">new</span> ClickSource())</span><br><span class="line">	.assignTimestampsAndWatermarks(</span><br><span class="line">        WatermarkStrategy.&lt;Event&gt;forBoundedOutOfOrderness(Duration.ZERO).withTimestampAssigner(</span><br><span class="line">            <span class="keyword">new</span> SerializableTimestampAssigner&lt;Event&gt;()</span><br><span class="line">			&#123;</span><br><span class="line">                <span class="meta">@Override</span></span><br><span class="line">                <span class="function"><span class="keyword">public</span> <span class="keyword">long</span> <span class="title">extractTimestamp</span><span class="params">(Event element, <span class="keyword">long</span> recordTimestamp)</span></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function">                return element.timestamp</span>;</span><br><span class="line">                &#125;</span><br><span class="line">              &#125;)</span><br><span class="line">    	);	</span><br><span class="line">    </span><br><span class="line">    stream.map(<span class="keyword">new</span> MapFunction&lt;Event, Tuple2&lt;String, Long&gt;&gt;() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> Tuple2&lt;String, Long&gt; <span class="title">map</span><span class="params">(Event value)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="comment">// 将数据转换成二元组，方便计算</span></span><br><span class="line">        <span class="keyword">return</span> Tuple2.of(value.user, <span class="number">1L</span>);</span><br><span class="line">        &#125;</span><br><span class="line">	&#125;)</span><br><span class="line">	.keyBy(r -&gt; r.f0)</span><br><span class="line">	<span class="comment">// 设置滚动事件时间窗口</span></span><br><span class="line">	.window(TumblingEventTimeWindows.of(Time.seconds(<span class="number">5</span>)))</span><br><span class="line">	.reduce(</span><br><span class="line">        <span class="keyword">new</span> ReduceFunction&lt;Tuple2&lt;String, Long&gt;&gt;() &#123; </span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> Tuple2&lt;String, Long&gt; <span class="title">reduce</span><span class="params">(Tuple2&lt;String, Long&gt; value1, Tuple2&lt;String, Long&gt; value2)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">            <span class="comment">// 定义累加规则，窗口闭合时，向下游发送累加结果</span></span><br><span class="line">            <span class="keyword">return</span> Tuple2.of(value1.f0, value1.f1 + value2.f1);</span><br><span class="line">            &#125;</span><br><span class="line">		&#125;)</span><br><span class="line">     .print();</span><br><span class="line"></span><br><span class="line">	env.execute();</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p><strong>聚合函数（AggregateFunction）</strong></p>
+<p>ReduceFunction 的限制是聚合状态的类型、输出结果的类型都必须和输入数据类型一样。必须在聚合前，先将数据转换（map）成预期结果类型；而在有些情况下，还需要对状态进行进一步处理才能得到输出结果，这时它们的类型可能不同，使用 ReduceFunction 就会非常麻烦。</p>
+<p>例如，如果希望计算一组数据的平均值，需要保存两个状态量：数据的总和（sum），以及数据的个数（count），而最终输出结果是两者的商（sum/count）。如果用 ReduceFunction，那么应该先把数据转换成二元组(sum, count)的形式，然后进行归约聚合，最后再将元组的两个元素相除转换得到最后的平均值。本来应该只是一个任务，却需要map-reduce-map 三步操作，这显然不够高效。 于是自然可以想到，如果取消类型一致的限制，让输入数据、中间状态、输出结果三者类型都可以不同。</p>
+<p>Flink 的 Window API 中的 aggregate 就提供了这样的操作。直接基于 WindowedStream 调用.aggregate() 方法， 就可以定义更加灵活的窗口聚合操作。这个方法需要传入一个AggregateFunction 接口的实现类作为参数。AggregateFunction 在源码中的定义如下</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">AggregateFunction</span>&lt;<span class="title">IN</span>, <span class="title">ACC</span>, <span class="title">OUT</span>&gt; <span class="keyword">extends</span> <span class="title">Function</span>, <span class="title">Serializable</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="function">ACC <span class="title">createAccumulator</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function">ACC <span class="title">add</span><span class="params">(IN value, ACC accumulator)</span></span>;</span><br><span class="line">    <span class="function">OUT <span class="title">getResult</span><span class="params">(ACC accumulator)</span></span>;</span><br><span class="line">    <span class="function">ACC <span class="title">merge</span><span class="params">(ACC a, ACC b)</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>AggregateFunction 可以看作是 ReduceFunction 的通用版本，这里有三种类型：输入类型（IN）、累加器类型（ACC）和输出类型（OUT）。输入类型 IN 就是输入流中元素的数据类型；累加器类型 ACC 则是我们进行聚合的中间状态类型；而输出类型当然就是最终计算结果的类型了。</p>
+<p>接口中有四个方法：</p>
+<ul>
+<li>createAccumulator()：创建一个累加器，这就是为聚合创建了一个初始状态，每个聚合任务只会调用一次。</li>
+<li>add()：将输入的元素添加到累加器中。这就是基于聚合状态，对新来的数据进行进一步聚合的过程。方法传入两个参数：当前新到的数据 value，和当前的累加器accumulator；返回一个新的累加器值，也就是对聚合状态进行更新。每条数据到来之后都会调用这个方法。</li>
+<li>getResult()：从累加器中提取聚合的输出结果。也就是说，可以定义多个状态， 然后再基于这些聚合的状态计算出一个结果进行输出。比如计算平均值，就可以把 sum 和 count 作为状态放入累加器，而在调用这个方法时相除得到最终结果。这个方法只在窗口要输出结果时调用。</li>
+<li>merge()：合并两个累加器，并将合并后的状态作为一个累加器返回。这个方法只在需要合并窗口的场景下才会被调用；最常见的合并窗口（Merging Window）的场景就是会话窗口（Session Windows）。</li>
+</ul>
+<p>所以可以看到，AggregateFunction 的工作原理是：首先调用 createAccumulator()为任务初始化一个状态(累加器)；而后每来一个数据就调用一次 add()方法，对数据进行聚合，得到的结果保存在状态中；等到了窗口需要输出时，再调用 getResult()方法得到计算结果。</p>
+<p>很明显， 与 ReduceFunction 相同，AggregateFunction 也是增量式的聚合；而由于输入、中间状态、输出的类型可以不同，使得应用更加灵活方便。</p>
+<p>Flink 也为窗口的聚合提供了一系列预定义的简单聚合方法， 可以直接基于WindowedStream 调用。主要包括.sum()/max()/maxBy()/min()/minBy()，与 KeyedStream 的简单聚合非常相似。它们的底层，其实都是通过AggregateFunction 来实现的。</p>
+<p>增量聚合函数其实就是在用流处理的思路来处理有界数据集，核心是保持一个聚合状态，当数据到来时不停地更新状态。这就是 Flink 所谓的“有状态的流处理”，通过这种方式可以极大地提高程序运行的效率，所以在实际应用中最为常见。</p>
+<p>案例</p>
+<p>在电商网站中，PV（页面浏览量）和 UV（独立访客数）是非常重要的两个流量指标。一般来说，PV 统计的是所有的点击量；而对用户 id 进行去重之后，得到的就是 UV。所以有时我们会用 PV/UV 这个比值，来表示“人均重复访问量”，也就是平均每个用户会访问多少次页面，这在一定程度上代表了用户的粘度。</p>
+<p>如下案例创建了事件时间滑动窗口，统计 10 秒钟的“人均 PV”，每 2 秒统计一次。</p>
+<p>为了统计 UV，用一个 HashSet 保存所有出现过的用户 id，实现自动去重；而 PV 的统计则类似一个计数器，每来一个数据加一就可以了。所以这里的状态，定义为包含一个 HashSet 和一个 count 值的二元组（Tuple2&lt;HashSet<String>, Long&gt;），每来一条数据，就将 user 存入HashSet，同时 count 加 1。这里的 count 就是 PV，而 HashSet 中元素的个数（size）就是 UV；所以最终窗口的输出结果，就是它们的比值。这里没有涉及会话窗口，所以 merge()方法可以不做任何操作。</String></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> org.apache.flink.api.common.eventtime.SerializableTimestampAssigner; </span><br><span class="line"><span class="keyword">import</span> org.apache.flink.api.common.eventtime.WatermarkStrategy;</span><br><span class="line"><span class="keyword">import</span> org.apache.flink.api.common.functions.AggregateFunction;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.apache.flink.api.java.tuple.Tuple2;</span><br><span class="line"><span class="keyword">import</span> org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;</span><br><span class="line"><span class="keyword">import</span> org.apache.flink.streaming.api.environment.StreamExecutionEnvironment; </span><br><span class="line"><span class="keyword">import</span> org.apache.flink.streaming.api.windowing.assigners.SlidingEventTimeWindows; </span><br><span class="line"><span class="keyword">import</span> org.apache.flink.streaming.api.windowing.time.Time;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.HashSet;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">WindowAggregateFunctionExample</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123; </span><br><span class="line">    StreamExecutionEnvironment	env	= StreamExecutionEnvironment.getExecutionEnvironment(); 		</span><br><span class="line">    env.setParallelism(<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">	SingleOutputStreamOperator&lt;Event&gt;	stream	=	env.addSource(<span class="keyword">new</span> ClickSource())</span><br><span class="line">	.assignTimestampsAndWatermarks(WatermarkStrategy.&lt;Event&gt;forMonotonousTimestamps()</span><br><span class="line">	.withTimestampAssigner(<span class="keyword">new</span> SerializableTimestampAssigner&lt;Event&gt;()</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">long</span> <span class="title">extractTimestamp</span><span class="params">(Event element, <span class="keyword">long</span> recordTimestamp)</span></span></span><br><span class="line"><span class="function">        </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> element.timestamp;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;));</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 所有数据设置相同的 key，发送到同一个分区统计 PV 和 UV，再相除</span></span><br><span class="line">    stream.keyBy(data -&gt; <span class="keyword">true</span>)</span><br><span class="line">    .window(SlidingEventTimeWindows.of(Time.seconds(<span class="number">10</span>), Time.seconds(<span class="number">2</span>)))</span><br><span class="line">    .aggregate(<span class="keyword">new</span> AvgPv())</span><br><span class="line">    .print();</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">	env.execute();</span><br><span class="line">&#125;</span><br><span class="line">    </span><br><span class="line"><span class="keyword">public</span>	<span class="keyword">static</span>	<span class="class"><span class="keyword">class</span>	<span class="title">AvgPv</span>	<span class="keyword">implements</span>	<span class="title">AggregateFunction</span>&lt;<span class="title">Event</span>, <span class="title">Tuple2</span>&lt;<span class="title">HashSet</span>&lt;<span class="title">String</span>&gt;, <span class="title">Long</span>&gt;, <span class="title">Double</span>&gt; </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> Tuple2&lt;HashSet&lt;String&gt;, Long&gt; createAccumulator() &#123;</span><br><span class="line">        <span class="comment">// 创建累加器</span></span><br><span class="line">    	<span class="keyword">return</span> Tuple2.of(<span class="keyword">new</span> HashSet&lt;String&gt;(), <span class="number">0L</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span>	Tuple2&lt;HashSet&lt;String&gt;,	Long&gt;	add(Event value, Tuple2&lt;HashSet&lt;String&gt;, Long&gt; accumulator) &#123;</span><br><span class="line">        <span class="comment">// 属于本窗口的数据来一条累加一次，并返回累加器</span></span><br><span class="line">        accumulator.f0.add(value.user);</span><br><span class="line">        <span class="keyword">return</span> Tuple2.of(accumulator.f0, accumulator.f1 + <span class="number">1L</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Double <span class="title">getResult</span><span class="params">(Tuple2&lt;HashSet&lt;String&gt;, Long&gt; accumulator)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 窗口闭合时，增量聚合结束，将计算结果发送到下游</span></span><br><span class="line">    <span class="keyword">return</span> (<span class="keyword">double</span>) accumulator.f1 / accumulator.f0.size();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> Tuple2&lt;HashSet&lt;String&gt;, Long&gt; merge(Tuple2&lt;HashSet&lt;String&gt;, Long&gt; a, Tuple2&lt;HashSet&lt;String&gt;, Long&gt; b) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h5 id="全窗口函数full-window-functions"><strong>全窗口函数（full window functions）</strong></h5>
+<p>全窗口函数需要先收集窗口中的数据，并在内部缓存起来，等到窗口要输出结果的时候再取出数据进行计算，这是批处理的思想。</p>
+<p>在有些场景下，要做的计算必须基于全部的数据才有效，这时做增量聚合就没什么意义了；另外，输出的结果有可能要包含上下文中的一些信息（比如窗口的起始时间），这是增量聚合函数做不到的。所以，还需要有更丰富的窗口计算方式，这就可以用全窗口函数来实现。</p>
+<p>在 Flink 中，全窗口函数也有两种：WindowFunction 和 ProcessWindowFunction。</p>
+<p><strong>窗口函数（WindowFunction）</strong></p>
+<p>WindowFunction 字面上就是“窗口函数”，它其实是老版本的通用窗口函数接口。可以基于WindowedStream 调用.apply()方法，传入一个 WindowFunction 的实现类。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">stream</span><br><span class="line">.keyBy(&lt;key selector&gt;)</span><br><span class="line">.window(&lt;window assigner&gt;)</span><br><span class="line">.apply(<span class="keyword">new</span> MyWindowFunction());</span><br></pre></td></tr></table></figure>
+<p>这个类中可以获取到包含窗口所有数据的可迭代集合（ Iterable），还可以拿到窗口（Window）本身的信息。WindowFunction 接口在源码中实现如下：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">WindowFunction</span>&lt;<span class="title">IN</span>, <span class="title">OUT</span>, <span class="title">KEY</span>, <span class="title">W</span> <span class="keyword">extends</span> <span class="title">Window</span>&gt; <span class="keyword">extends</span> <span class="title">Function</span>, <span class="title">Serializable</span> </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">void</span> <span class="title">apply</span><span class="params">(KEY key, W window, Iterable&lt;IN&gt; input, Collector&lt;OUT&gt; out)</span> <span class="keyword">throws</span> Exception</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>当窗口到达结束时间需要触发计算时，就会调用这里的 apply 方法。可以从 input 集合中取出窗口收集的数据，结合 key 和 window 信息，通过收集器（Collector）输出结果。这里 Collector 的用法，与 FlatMapFunction 中相同。</p>
+<p>WindowFunction 能提供的上下文信息较少，也没有更高级的功能。事实上，它的作用可以被 ProcessWindowFunction 全覆盖，所以之后可能会逐渐弃用。一般在实际应用，直接使用 ProcessWindowFunction 就可以了。</p>
+<p><strong>处理窗口函数（ProcessWindowFunction）</strong></p>
+<p>ProcessWindowFunction 是Window API 中最底层的通用窗口函数接口。之所以说它“最底层”，是因为除了可以拿到窗口中的所有数据之外，ProcessWindowFunction 还可以获取到一个“上下文对象”（Context）。这个上下文对象非常强大，不仅能够获取窗口信息，还可以访问当前的时间和状态信息。这里的时间就包括了处理时间（processing time）和事件时间水位线（event time watermark）。这就使得 ProcessWindowFunction 更加灵活、功能更加丰富。事实上， ProcessWindowFunction 是 Flink 底层API处理函数（process function）中的一员。</p>
+<p>当 然， 这些好 处是以牺 牲性 能和资 源为代价 的。 作为一 个全窗口 函数 ， ProcessWindowFunction 同样需要将所有数据缓存下来、等到窗口触发计算时才使用。它其实就是一个增强版的WindowFunction。全窗口函数因为运行效率较低，很少直接单独使用，往往会和增量聚合函数结合在一起，共同实现窗口的处理计算。</p>
+<p>可以基于 WindowedStream 调用.process()方法，传入一个 ProcessWindowFunction 的实现类。</p>
+<p>案例</p>
+<p>下面是一个电商网站统计每小时 UV 的例子：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> org.apache.flink.api.common.eventtime.SerializableTimestampAssigner; </span><br><span class="line"><span class="keyword">import</span> org.apache.flink.api.common.eventtime.WatermarkStrategy;</span><br><span class="line"><span class="keyword">import</span> org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;</span><br><span class="line"><span class="keyword">import</span> org.apache.flink.streaming.api.environment.StreamExecutionEnvironment; </span><br><span class="line"><span class="keyword">import</span> org.apache.flink.streaming.api.functions.windowing.ProcessWindowFunction; </span><br><span class="line"><span class="keyword">import</span> org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows; </span><br><span class="line"><span class="keyword">import</span> org.apache.flink.streaming.api.windowing.time.Time;</span><br><span class="line"><span class="keyword">import</span> org.apache.flink.streaming.api.windowing.windows.TimeWindow; </span><br><span class="line"><span class="keyword">import</span> org.apache.flink.util.Collector;</span><br><span class="line"><span class="keyword">import</span> java.sql.Timestamp; <span class="keyword">import</span> java.util.HashSet;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">UvCountByWindowExample</span> </span>&#123;</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123; </span><br><span class="line">    StreamExecutionEnvironment	env	= StreamExecutionEnvironment.getExecutionEnvironment(); `env.setParallelism(<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">    SingleOutputStreamOperator&lt;Event&gt;	stream	=	env.addSource(<span class="keyword">new</span> ClickSource())</span><br><span class="line">    .assignTimestampsAndWatermarks(WatermarkStrategy.&lt;Event&gt;forBoundedOutOfOrderness(Duration.ZERO)</span><br><span class="line">    .withTimestampAssigner(<span class="keyword">new</span> SerializableTimestampAssigner&lt;Event&gt;() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">long</span> <span class="title">extractTimestamp</span><span class="params">(Event	element, <span class="keyword">long</span> recordTimestamp)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> element.timestamp;</span><br><span class="line">    &#125;</span><br><span class="line">    &#125;));</span><br><span class="line">    </span><br><span class="line">        <span class="comment">// 将数据全部发往同一分区，按窗口统计 UV </span></span><br><span class="line">    stream.keyBy(data -&gt; <span class="keyword">true</span>)</span><br><span class="line">    .window(TumblingEventTimeWindows.of(Time.seconds(<span class="number">10</span>)))</span><br><span class="line">    .process(<span class="keyword">new</span> UvCountByWindow())</span><br><span class="line">    .print();</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    env.execute();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 自定义窗口处理函数</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">UvCountByWindow</span> <span class="keyword">extends</span> <span class="title">ProcessWindowFunction</span>&lt;<span class="title">Event</span>, <span class="title">String</span>, <span class="title">Boolean</span>, <span class="title">TimeWindow</span>&gt;</span>&#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">process</span><span class="params">(Boolean aBoolean, Context context, Iterable&lt;Event&gt; elements, Collector&lt;String&gt; out)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="comment">//每一个窗口拥有一个HashSet    </span></span><br><span class="line">        HashSet&lt;String&gt; userSet = <span class="keyword">new</span> HashSet&lt;&gt;();</span><br><span class="line">            </span><br><span class="line">        <span class="comment">// 遍历所有数据，放到 Set 里去重</span></span><br><span class="line">        <span class="keyword">for</span> (Event event: elements)&#123; userSet.add(event.user);&#125;</span><br><span class="line">            </span><br><span class="line">        <span class="comment">// 结合窗口信息，包装输出内容</span></span><br><span class="line">        Long start = context.window().getStart(); </span><br><span class="line">        Long end = context.window().getEnd();</span><br><span class="line">        out.collect(<span class="string">&quot; 窗 口 : &quot;</span> + <span class="keyword">new</span> Timestamp(start) + <span class="string">&quot; ~ &quot;</span> + <span class="keyword">new</span> Timestamp(end) + <span class="string">&quot; 的独立访客数量是：&quot;</span> + userSet.size());</span><br><span class="line">     &#125;</span><br><span class="line"></span><br><span class="line">     &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//窗口：...~...的独立访客数量是：2</span></span><br><span class="line"><span class="comment">//窗口：...~...的独立访客数量是：3</span></span><br></pre></td></tr></table></figure>
+<h5 id="增量聚合和全窗口函数的结合"><strong>增量聚合和全窗口函数的结合</strong></h5>
+<p>增量聚合函数处理计算会更高效，计算在数据到来时即可发生。而全窗口函数的优势在于提供了更多的信息，可以认为是更加“通用”的窗口操作。它只负责收集数据、提供上下文相关信息，把所有的原材料都准备好，至于拿来做什么我们完全可以任意发挥。这就使得窗口计算更加灵活，功能更加强大。所以在实际应用中，可以把它们结合在一起使用。Flink 的Window API 就给我们实现了这样的用法。</p>
+<p>之前在调用 WindowedStream 的.reduce()和.aggregate()方法时，只是简单地直接传入了一个 ReduceFunction 或 AggregateFunction 进行增量聚合。除此之外，其实还可以传入第二个参数：一个全窗口函数，可以是WindowFunction 或者 ProcessWindowFunction。</p>
+<p>这样调用的处理机制是：<strong>基于第一个参数（增量聚合函数）来处理窗口数据，每来一个数据就做一次聚合；等到窗口需要触发计算时，则调用第二个参数（全窗口函数）的处理逻辑输出结果</strong>。需要注意的是，这里的全窗口函数就不再缓存所有数据了，而是直接将增量聚合函数的结果拿来当作了Iterable 类型的输入。一般情况下，这时的可迭代集合中就只有一个元素了。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// ReduceFunction 与 WindowFunction 结合</span></span><br><span class="line"><span class="keyword">public</span> &lt;R&gt; <span class="function">SingleOutputStreamOperator&lt;R&gt; <span class="title">reduce</span><span class="params">(ReduceFunction&lt;T&gt; reduceFunction, WindowFunction&lt;T, R, K, W&gt; function)</span></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"><span class="comment">// ReduceFunction 与 ProcessWindowFunction 结合</span></span></span><br><span class="line"><span class="function"><span class="keyword">public</span> &lt;R&gt; SingleOutputStreamOperator&lt;R&gt; <span class="title">reduce</span><span class="params">(ReduceFunction&lt;T&gt;	reduceFunction,	ProcessWindowFunction&lt;T,	R,	K,	W&gt; function)</span></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"><span class="comment">// AggregateFunction 与 WindowFunction 结合</span></span></span><br><span class="line"><span class="function"><span class="keyword">public</span> &lt;ACC, V, R&gt; SingleOutputStreamOperator&lt;R&gt; <span class="title">aggregate</span><span class="params">(AggregateFunction&lt;T, ACC, V&gt; aggFunction, WindowFunction&lt;V, R, K, W&gt; windowFunction)</span></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"><span class="comment">// AggregateFunction 与 ProcessWindowFunction 结合</span></span></span><br><span class="line"><span class="function"><span class="keyword">public</span> &lt;ACC, V, R&gt; SingleOutputStreamOperator&lt;R&gt; <span class="title">aggregate</span><span class="params">(AggregateFunction&lt;T, ACC, V&gt; aggFunction, ProcessWindowFunction&lt;V, R, K, W&gt; windowFunction)</span></span></span><br></pre></td></tr></table></figure>
+<p>案例</p>
+<p>在网站的各种统计指标中，一个很重要的统计指标就是热门的链接；想要得到热门的 url，前提是得到每个链接的“热门度”。一般情况下，可以用url 的浏览量（点击量）表示热门度。我们这里统计 10 秒钟的 url 浏览量，每 5 秒钟更新一次； 另外为了更加清晰地展示，还应该把窗口的起始结束时间一起输出。可以定义滑动窗口， 并结合增量聚合函数和全窗口函数来得到统计结果。</p>
+<p>代码中用一个 AggregateFunction 来实现增量聚合，每来一个数据就计数加一；得到的结果交给 ProcessWindowFunction，结合窗口信息包装成我们想要的 UrlViewCount，最终输出统计结果。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> org.apache.flink.api.common.eventtime.SerializableTimestampAssigner; </span><br><span class="line"><span class="keyword">import</span> org.apache.flink.api.common.eventtime.WatermarkStrategy;</span><br><span class="line"><span class="keyword">import</span> org.apache.flink.api.common.functions.AggregateFunction;</span><br><span class="line"><span class="keyword">import</span> org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator; </span><br><span class="line"><span class="keyword">import</span> org.apache.flink.streaming.api.environment.StreamExecutionEnvironment; </span><br><span class="line"><span class="keyword">import</span> org.apache.flink.streaming.api.functions.windowing.ProcessWindowFunction; </span><br><span class="line"><span class="keyword">import</span> org.apache.flink.streaming.api.windowing.assigners.SlidingEventTimeWindows; </span><br><span class="line"><span class="keyword">import</span> org.apache.flink.streaming.api.windowing.time.Time;</span><br><span class="line"><span class="keyword">import</span> org.apache.flink.streaming.api.windowing.windows.TimeWindow; <span class="keyword">import</span> org.apache.flink.util.Collector;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">UrlViewCountExample</span> </span>&#123;</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123; </span><br><span class="line">    StreamExecutionEnvironment	env	= StreamExecutionEnvironment.getExecutionEnvironment(); 		</span><br><span class="line">    env.setParallelism(<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">	SingleOutputStreamOperator&lt;Event&gt;	stream	=	env.addSource(<span class="keyword">new</span> ClickSource())</span><br><span class="line">	.assignTimestampsAndWatermarks(WatermarkStrategy.&lt;Event&gt;<span class="function">forMonot <span class="title">onousTimestamps</span><span class="params">()</span></span></span><br><span class="line"><span class="function">	.<span class="title">withTimestampAssigner</span><span class="params">(new SerializableTimestampAssigner&lt;Event&gt;()</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span>	<span class="keyword">long</span>	<span class="title">extractTimestamp</span><span class="params">(Event	element,	<span class="keyword">long</span> recordTimestamp)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> element.timestamp;</span><br><span class="line">    &#125;</span><br><span class="line">    &#125;));</span><br><span class="line"> </span><br><span class="line">    <span class="comment">// 需要按照 url 分组，开滑动窗口统计</span></span><br><span class="line">    stream.keyBy(data -&gt; data.url)</span><br><span class="line">    .window(SlidingEventTimeWindows.of(Time.seconds(<span class="number">10</span>), Time.seconds(<span class="number">5</span>)))</span><br><span class="line">    <span class="comment">// 同时传入增量聚合函数和全窗口函数</span></span><br><span class="line">    .aggregate(<span class="keyword">new</span> UrlViewCountAgg(), <span class="keyword">new</span> UrlViewCountResult())</span><br><span class="line">    .print();</span><br><span class="line"></span><br><span class="line">	env.execute();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 自定义增量聚合函数，来一条数据就加一</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">UrlViewCountAgg</span> <span class="keyword">implements</span> <span class="title">AggregateFunction</span>&lt;<span class="title">Event</span>, <span class="title">Long</span>, <span class="title">Long</span>&gt; </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Long <span class="title">createAccumulator</span><span class="params">()</span> </span>&#123; <span class="keyword">return</span> <span class="number">0L</span>;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Long <span class="title">add</span><span class="params">(Event value, Long accumulator)</span> </span>&#123; <span class="keyword">return</span> accumulator + <span class="number">1</span>;&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Long <span class="title">getResult</span><span class="params">(Long accumulator)</span> </span>&#123; <span class="keyword">return</span> accumulator;&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Long <span class="title">merge</span><span class="params">(Long a, Long b)</span> </span>&#123; <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// 自定义窗口处理函数，只需要包装窗口信息</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">UrlViewCountResult</span> <span class="keyword">extends</span> <span class="title">ProcessWindowFunction</span>&lt;<span class="title">Long</span>, <span class="title">UrlViewCount</span>, <span class="title">String</span>, <span class="title">TimeWindow</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">process</span><span class="params">(String url, Context context, Iterable&lt;Long&gt; elements, Collector&lt;UrlViewCount&gt; out)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    <span class="comment">// 结合窗口信息，包装输出内容</span></span><br><span class="line">    Long start = context.window().getStart(); </span><br><span class="line">    Long end = context.window().getEnd();</span><br><span class="line">    <span class="comment">// 迭代器中只有一个元素，就是增量聚合函数的计算结果</span></span><br><span class="line">    out.collect(<span class="keyword">new</span> UrlViewCount(url, elements.iterator().next(), start, end));</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//独定义了一个 POJO 类 UrlViewCount 来表示聚合输出结果的数据类型，包含了url、浏览量以及窗口的起始结束时间</span></span><br><span class="line"><span class="keyword">import</span> java.sql.Timestamp;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">UrlViewCount</span> </span>&#123; </span><br><span class="line">    <span class="keyword">public</span> String url; </span><br><span class="line">    <span class="keyword">public</span> Long count;</span><br><span class="line">	<span class="keyword">public</span> Long windowStart;</span><br><span class="line">	<span class="keyword">public</span> Long windowEnd;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">UrlViewCount</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">UrlViewCount</span><span class="params">(String url, Long count, Long windowStart, Long windowEnd)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">    	<span class="keyword">this</span>.url = url; </span><br><span class="line">        <span class="keyword">this</span>.count = count;</span><br><span class="line">    	<span class="keyword">this</span>.windowStart = windowStart; </span><br><span class="line">        <span class="keyword">this</span>.windowEnd = windowEnd;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">toString</span><span class="params">()</span> </span>&#123; </span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;UrlViewCount&#123;&quot;</span> +</span><br><span class="line">    	<span class="string">&quot;url=&#x27;&quot;</span> + url + <span class="string">&#x27;\&#x27;&#x27;</span> + <span class="string">&quot;, count=&quot;</span> + count +</span><br><span class="line">    	<span class="string">&quot;, windowStart=&quot;</span> + <span class="keyword">new</span> Timestamp(windowStart) + <span class="string">&quot;, windowEnd=&quot;</span> + <span class="keyword">new</span> Timestamp(windowEnd) + <span class="string">&#x27;&#125;&#x27;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="窗口与水位线结合"><strong>窗口与水位线结合</strong></h5>
+<p>设置的最大延迟时间是 5 秒，滚动窗口的大小是10s。</p>
+<p>当最后输入[Alice, ./prod?id=300, 15000]时，流中会周期性地（默认 200 毫秒）插入一个时间戳为 15000L – 5 * 1000L – 1L = 9999 毫秒的水位线，已经到达了窗口[0,10000)的结束时间，所以会触发窗口的闭合计算。而后面再输入一条[Alice, ./prod?id=200, 9000]时，将不会有任何结果；因为这是一条迟到数据，它所属于的窗口已经触发计算然后销毁了（窗口默认被销毁），所以无法再进入到窗口中，自然也就无法更新计算结果了。窗口中的迟到数据默认会被丢弃，这会导致计算结果不够准确。Flink 提供了其他有效处理迟到数据的手段。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> org.apache.flink.api.common.eventtime.SerializableTimestampAssigner; <span class="keyword">import</span> org.apache.flink.api.common.eventtime.WatermarkStrategy;</span><br><span class="line"><span class="keyword">import</span> org.apache.flink.api.common.functions.MapFunction;;</span><br><span class="line"><span class="keyword">import</span> org.apache.flink.streaming.api.environment.StreamExecutionEnvironment; <span class="keyword">import</span> org.apache.flink.streaming.api.functions.windowing.ProcessWindowFunction; <span class="keyword">import</span> org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows; <span class="keyword">import</span> org.apache.flink.streaming.api.windowing.time.Time;</span><br><span class="line"><span class="keyword">import</span> org.apache.flink.streaming.api.windowing.windows.TimeWindow; <span class="keyword">import</span> org.apache.flink.util.Collector;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.time.Duration;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">WatermarkTest</span> </span>&#123;</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123; </span><br><span class="line">    StreamExecutionEnvironment	env	= StreamExecutionEnvironment.getExecutionEnvironment(); </span><br><span class="line">    env.setParallelism(<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 将数据源改为 socket 文本流，并转换成 Event 类型</span></span><br><span class="line">    env</span><br><span class="line">    .socketTextStream(<span class="string">&quot;localhost&quot;</span>, <span class="number">7777</span>)</span><br><span class="line">    .map(<span class="keyword">new</span> MapFunction&lt;String, Event&gt;() &#123; </span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> Event <span class="title">map</span><span class="params">(String value)</span> <span class="keyword">throws</span> Exception </span>&#123; </span><br><span class="line">            String[] fields = value.split(<span class="string">&quot;,&quot;</span>);</span><br><span class="line">        	<span class="keyword">return</span>	<span class="keyword">new</span>	Event(fields[<span class="number">0</span>].trim(),	fields[<span class="number">1</span>].trim(), Long.valueOf(fields[<span class="number">2</span>].trim()));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;)</span><br><span class="line">    <span class="comment">// 插入水位线的逻辑</span></span><br><span class="line">    .assignTimestampsAndWatermarks(</span><br><span class="line">	<span class="comment">// 针对乱序流插入水位线，延迟时间设置为 5s</span></span><br><span class="line">		WatermarkStrategy.&lt;Event&gt;forBoundedOutOfOrderness(Duration.ofSeconds(<span class="number">5</span>))</span><br><span class="line">		.withTimestampAssigner(<span class="keyword">new</span> SerializableTimestampAssigner&lt;Event&gt;() &#123;</span><br><span class="line">            <span class="comment">// 抽取时间戳的逻辑</span></span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">long</span> <span class="title">extractTimestamp</span><span class="params">(Event element, <span class="keyword">long</span> recordTimestamp)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> element.timestamp;</span><br><span class="line">            &#125;</span><br><span class="line">		&#125;</span><br><span class="line">        )</span><br><span class="line">	)</span><br><span class="line">    <span class="comment">// 根据 user 分组，开窗统计</span></span><br><span class="line">    .keyBy(data -&gt; data.user)</span><br><span class="line">    .window(TumblingEventTimeWindows.of(Time.seconds(<span class="number">10</span>)))</span><br><span class="line">    .process(<span class="keyword">new</span> WatermarkTestResult())</span><br><span class="line">    .print();</span><br><span class="line"></span><br><span class="line">	env.execute();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 自定义处理窗口函数，输出当前的水位线和窗口信息</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">WatermarkTestResult</span> <span class="keyword">extends</span> <span class="title">ProcessWindowFunction</span>&lt;<span class="title">Event</span>, <span class="title">String</span>, <span class="title">String</span>, <span class="title">TimeWindow</span>&gt;</span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">process</span><span class="params">(String s, Context context, Iterable&lt;Event&gt; elements, Collector&lt;String&gt; out)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    Long start = context.window().getStart(); </span><br><span class="line">    Long end = context.window().getEnd();</span><br><span class="line">    Long currentWatermark = context.currentWatermark();</span><br><span class="line">    Long count = elements.spliterator().getExactSizeIfKnown(); </span><br><span class="line">    out.collect(<span class="string">&quot;窗口&quot;</span> + start + <span class="string">&quot; ~ &quot;</span> + end + <span class="string">&quot;中共有&quot;</span> + count + <span class="string">&quot;个元素，窗口闭合计算时，水位线处于：&quot;</span> + currentWatermark);</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//输入数据</span></span><br><span class="line">Alice,	./home, <span class="number">1000</span>	</span><br><span class="line">Alice,	./cart, <span class="number">2000</span>	</span><br><span class="line">Alice,	./prod?id=<span class="number">100</span>,	<span class="number">10000</span></span><br><span class="line">Alice,	./prod?id=<span class="number">200</span>,	<span class="number">8000</span></span><br><span class="line">Alice,	./prod?id=<span class="number">300</span>,	<span class="number">15000</span></span><br><span class="line"><span class="comment">//输出结果</span></span><br><span class="line">窗口 <span class="number">0</span> ~ <span class="number">10000</span> 中共有 <span class="number">3</span> 个元素，窗口闭合计算时，水位线处于：<span class="number">9999</span></span><br></pre></td></tr></table></figure>
+<h3 id="其他api">其他API</h3>
+<h3 id="参考资料">参考资料</h3>
 ]]></content>
+      <categories>
+        <category>Flink</category>
+        <category>Flink1.12</category>
+      </categories>
       <tags>
-        <tag>Testing</tag>
-        <tag>Another Tag</tag>
+        <tag>Flink</tag>
+        <tag>Flink1.12</tag>
       </tags>
   </entry>
 </search>

@@ -194,20 +194,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">113</span>
+          <span class="site-state-item-count">117</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-count">36</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">38</span>
+        <span class="site-state-item-count">41</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -241,6 +241,411 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/09/15/Hadoop_Shuffle%E4%B8%8ESparkShuffle/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BIOINSu">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BIOINSu">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/09/15/Hadoop_Shuffle%E4%B8%8ESparkShuffle/" class="post-title-link" itemprop="url">Hadoop Shuffle与Spark Shuffle</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-09-15 11:01:42" itemprop="dateCreated datePublished" datetime="2021-09-15T11:01:42+08:00">2021-09-15</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-09-16 10:40:50" itemprop="dateModified" datetime="2021-09-16T10:40:50+08:00">2021-09-16</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Hadoop/" itemprop="url" rel="index"><span itemprop="name">Hadoop</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <table>
+<colgroup>
+<col style="width: 3%">
+<col style="width: 48%">
+<col style="width: 48%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>Hadoop Shuffle</th>
+<th>Spark Shuffle</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>流程</td>
+<td>Hadoop的Shuffle操作发生在Map之后，Reduce之前。<br>将流程分为溢写（spill）、合并（merge）、拉取（copy）、排序（sort）、合并（合并）。</td>
+<td>Spark的Shuffle操作是发生在宽依赖之间。<br>Shuffle Write：形成磁盘文件和索引。<br>Shuffle Read：Reducer拉取数据。</td>
+</tr>
+<tr class="even">
+<td>排序</td>
+<td>在四个阶段均会发生数据排序。<br>目的是将Key相同的数据聚合在一起。</td>
+<td>Spark 1.2之后，Sort-Based Shuffle变为默认的Shuffle实现。<br>普通：和Hadoop类似；内存数据结构reduceByKey用Map，join用Array；Reducer从索引文件内读取自己应该拉取的范围。<br>bypass：按key哈希写入磁盘文件，最后将磁盘文件合并，但不排序。</td>
+</tr>
+<tr class="odd">
+<td>功能</td>
+<td>没有差别，目的都是将Key相同的数据拉取到同一个Reducer。</td>
+<td>没有差别，目的都是将Key相同的数据拉取到同一个Reducer。</td>
+</tr>
+</tbody>
+</table>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/09/15/Hadoop_Shuffle%E4%B8%8ESparkShuffle/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/09/15/%E6%95%B0%E6%8D%AE%E5%BA%93_SQL%E9%9D%A2%E8%AF%95%E9%A2%98/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BIOINSu">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BIOINSu">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/09/15/%E6%95%B0%E6%8D%AE%E5%BA%93_SQL%E9%9D%A2%E8%AF%95%E9%A2%98/" class="post-title-link" itemprop="url">SQL面试题</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-09-15 10:28:02" itemprop="dateCreated datePublished" datetime="2021-09-15T10:28:02+08:00">2021-09-15</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-09-23 21:37:58" itemprop="dateModified" datetime="2021-09-23T21:37:58+08:00">2021-09-23</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/" itemprop="url" rel="index"><span itemprop="name">数据库</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>SQL中连续登录问题和在线峰值问题等。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/09/15/%E6%95%B0%E6%8D%AE%E5%BA%93_SQL%E9%9D%A2%E8%AF%95%E9%A2%98/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/09/14/HDFS_%E5%AE%B9%E9%94%99/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BIOINSu">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BIOINSu">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/09/14/HDFS_%E5%AE%B9%E9%94%99/" class="post-title-link" itemprop="url">HDFS容错</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2021-09-14 16:33:20 / 修改时间：18:14:20" itemprop="dateCreated datePublished" datetime="2021-09-14T16:33:20+08:00">2021-09-14</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Hadoop/" itemprop="url" rel="index"><span itemprop="name">Hadoop</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <table>
+<colgroup>
+<col style="width: 16%">
+<col style="width: 83%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>概念</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>NameNode容错</td>
+<td>1、持久化的元数据（fsimage、edit log）进行备份到远程网络文件系统（NFS）<br>2、SecondaryNamenode中存有前一个时间点的fsimage的备份，结合NFS形成Namenode<br>3、搭建HDFS高可用模式，直接切换成StandbyNamenode</td>
+</tr>
+<tr class="even">
+<td>DataNode容错</td>
+<td>1、副本机制<br>2、心跳机制<br>3、安全模式<br>4、校验和</td>
+</tr>
+<tr class="odd">
+<td>HDFS写容错</td>
+<td>将出错的DataNode移除，剩余的继续传输，最后维持副本的数量。</td>
+</tr>
+<tr class="even">
+<td>HDFS读容错</td>
+<td>直接更换DataNode读数据。</td>
+</tr>
+</tbody>
+</table>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/09/14/HDFS_%E5%AE%B9%E9%94%99/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/09/14/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_LeetCode_%E6%95%B0%E7%BB%84/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BIOINSu">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BIOINSu">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/09/14/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_LeetCode_%E6%95%B0%E7%BB%84/" class="post-title-link" itemprop="url">LeetCode 数组</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-09-14 12:44:32" itemprop="dateCreated datePublished" datetime="2021-09-14T12:44:32+08:00">2021-09-14</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-09-23 22:12:15" itemprop="dateModified" datetime="2021-09-23T22:12:15+08:00">2021-09-23</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/" itemprop="url" rel="index"><span itemprop="name">数据结构与算法</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/LeetCode/" itemprop="url" rel="index"><span itemprop="name">LeetCode</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>LeetCode中与数组有关的题目。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/09/14/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_LeetCode_%E6%95%B0%E7%BB%84/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -741,10 +1146,16 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2021-09-12 17:08:07 / 修改时间：17:27:07" itemprop="dateCreated datePublished" datetime="2021-09-12T17:08:07+08:00">2021-09-12</time>
+      <time title="创建时间：2021-09-12 17:08:07" itemprop="dateCreated datePublished" datetime="2021-09-12T17:08:07+08:00">2021-09-12</time>
     </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2022-05-04 10:53:08" itemprop="dateModified" datetime="2022-05-04T10:53:08+08:00">2022-05-04</time>
+      </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
         <i class="far fa-folder"></i>
@@ -795,678 +1206,6 @@
             </div>
           <!--/noindex-->
         
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_Parquet/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="BIOINSu">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BIOINSu">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_Parquet/" class="post-title-link" itemprop="url">Parquet列式存储</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-09-12 09:48:04" itemprop="dateCreated datePublished" datetime="2021-09-12T09:48:04+08:00">2021-09-12</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-09-13 09:52:44" itemprop="dateModified" datetime="2021-09-13T09:52:44+08:00">2021-09-13</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/" itemprop="url" rel="index"><span itemprop="name">大数据</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <table>
-<colgroup>
-<col style="width: 22%">
-<col style="width: 77%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>概念</th>
-<th>解释</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Parquet</td>
-<td>是一种列式数据存储格式，和语言、平台无关，Spark的默认存储格式。</td>
-</tr>
-<tr class="even">
-<td>数据模型</td>
-<td>Schema是类似树形结构的约束，包括message、filed。<br>每个field中又包括repetition, type, name三种描述。</td>
-</tr>
-<tr class="odd">
-<td>物理存储</td>
-<td>将数据分为Row Group，里面包含所有的列Column Chunk，每个列可分为多个Page<br>最底层还有个footer存储了文件的元数据信息和统计信息</td>
-</tr>
-<tr class="even">
-<td>Striping/Assembly</td>
-<td>这个算法是专门设计的一种数据存储方式，<strong>用于将嵌套类型的数据序列化和反序列化</strong>。<br>对于嵌套数据类型，除了存储数据本身的值 value 之外还需要两个变量 Repetition Level(R)，Definition Level(D) 才能存储其完整的信息用于<strong>序列化和反序列化</strong>数据。</td>
-</tr>
-</tbody>
-</table>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_Parquet/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/09/12/Hadoop_%E6%8E%92%E5%BA%8F/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="BIOINSu">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BIOINSu">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/09/12/Hadoop_%E6%8E%92%E5%BA%8F/" class="post-title-link" itemprop="url">Hadoop中的排序</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-      
-
-      <time title="创建时间：2021-09-12 09:47:13 / 修改时间：15:06:43" itemprop="dateCreated datePublished" datetime="2021-09-12T09:47:13+08:00">2021-09-12</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/Hadoop/" itemprop="url" rel="index"><span itemprop="name">Hadoop</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <table>
-<colgroup>
-<col style="width: 23%">
-<col style="width: 76%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>概念</th>
-<th>解释</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Hadoop排序发生阶段</td>
-<td>Map<br>1、环形缓冲区到达阈值后先排序再溢写<br>2、溢写后不同分区的文件进行归并排序形成一个文件<br>Reduce<br>1、Reduce对每一个接收到的分区在内存中进行merge和排序<br>2、当溢写到磁盘的文件数量达到合并因子后进行归并排序<br>3、Reduce Task前分组排序</td>
-</tr>
-<tr class="even">
-<td>排序发生原因</td>
-<td>Map<br>减轻reduce端排序的压力。<br>Reduce<br>选择排序的方式将Key相同的数据分到一起，为之后的Reduce Task做准备。</td>
-</tr>
-<tr class="odd">
-<td>如何避免排序</td>
-<td>Hadoop2.x是可以关闭的，将Reduce Task设置为0，没有Reduce Task就不会发生排序。</td>
-</tr>
-</tbody>
-</table>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/09/12/Hadoop_%E6%8E%92%E5%BA%8F/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E8%A1%8C%E5%88%97%E5%AD%98%E5%82%A8%E6%AF%94%E8%BE%83/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="BIOINSu">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BIOINSu">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E8%A1%8C%E5%88%97%E5%AD%98%E5%82%A8%E6%AF%94%E8%BE%83/" class="post-title-link" itemprop="url">行列存储的比较</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-09-12 09:45:52" itemprop="dateCreated datePublished" datetime="2021-09-12T09:45:52+08:00">2021-09-12</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-09-26 15:51:26" itemprop="dateModified" datetime="2021-09-26T15:51:26+08:00">2021-09-26</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/" itemprop="url" rel="index"><span itemprop="name">大数据</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <table>
-<colgroup>
-<col style="width: 10%">
-<col style="width: 44%">
-<col style="width: 44%">
-</colgroup>
-<thead>
-<tr class="header">
-<th></th>
-<th>优点</th>
-<th>缺点</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>行存储（OLTP）</td>
-<td>同一行所属的多个字段被保存在一起，<br>当修改或插入一行数据时IO开销较低。</td>
-<td>获取特定列时本质上还是扫描了所有行，<br>再把特定列取出，存在不必要的IO开销。</td>
-</tr>
-<tr class="even">
-<td>列存储（OLAP）</td>
-<td>1、同一列的数据被保存在一起，能够满足<br>快速读取特定列的需求。（OLAP常用）<br>选取列时降低IO开销，随机读变顺序读。<br>2、列式存储容易实现数据压缩。</td>
-<td>1、插入、删除数据不方便。<br>2、被选择出来的列要重新组装。</td>
-</tr>
-</tbody>
-</table>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/09/12/%E5%A4%A7%E6%95%B0%E6%8D%AE_%E8%A1%8C%E5%88%97%E5%AD%98%E5%82%A8%E6%AF%94%E8%BE%83/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/09/12/Hbase_%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="BIOINSu">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BIOINSu">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/09/12/Hbase_%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86/" class="post-title-link" itemprop="url">Hbase基本原理</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-09-12 09:45:52" itemprop="dateCreated datePublished" datetime="2021-09-12T09:45:52+08:00">2021-09-12</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-09-13 20:55:31" itemprop="dateModified" datetime="2021-09-13T20:55:31+08:00">2021-09-13</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/Hbase/" itemprop="url" rel="index"><span itemprop="name">Hbase</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <a id="more"></a>
-<h3 id="hbase概述">Hbase概述</h3>
-<p>HBase是一个高可靠、高性能、面向列、可伸缩的分布式存储系统，利用HBase技术可在廉价的PC Server上搭建大规模结构化存储集群。</p>
-<p>HBase是Google BigTable的开源实现，与Google BigTable利用GFS作为其文件存储系统类似，HBase利用Hadoop HDFS作为其文件存储系统；</p>
-<p>Google运行MapReduce来处理BigTable中的海量数据，HBase同样利用Hadoop MapReduce来处理HBase中的海量数据；</p>
-<p>Google BigTable利用Chubby作为协同服务，HBase利用Zookeeper作为协同服务。</p>
-<h3 id="hbase架构">Hbase架构</h3>
-<p>物理上，Hbase 是由三种类型的 server 组成的的<strong>主从式</strong>（master-slave）架构：</p>
-<ul>
-<li><strong>Region Server</strong> 负责处理数据的读写请求，客户端请求数据时直接和 Region Server 交互。</li>
-<li><strong>HBase Master</strong> 负责 Region 的分配，DDL（创建，删除 table）等操作。</li>
-<li><strong>Zookeeper</strong>，。</li>
-</ul>
-<p><img src="/2021/09/12/Hbase_%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86/image-20210913110350488.png" alt="image-20210913110350488" style="zoom: 67%;"></p>
-<p>底层的存储都是基于 Hadoop HDFS 的：</p>
-<ul>
-<li>Hadoop <strong>DataNode</strong> 负责存储 Region Server 所管理的数据。所有的 HBase 数据都存储在 HDFS 文件中。Region Server 和 HDFS DataNode 往往是分布在一起的，这样 Region Server 就能够实现<strong>数据本地化</strong>（data locality，即将数据放在离需要者尽可能近的地方）。HBase 的数据在写的时候是本地的，但是当 region 被迁移的时候，数据就可能不再满足本地性了，直到完成 <strong>compaction</strong>，才能又恢复到本地。</li>
-<li>Hadoop <strong>NameNode</strong> 维护了所有 HDFS 物理 data block 的元信息。</li>
-</ul>
-<p>更为完整的架构图为：</p>
-<p><img src="/2021/09/12/Hbase_%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86/image-20210913110740696.png" alt="image-20210913110740696" style="zoom:80%;"></p>
-<h4 id="hbase-hmaster">HBase HMaster</h4>
-<p>HMaster在HBase中被称为“主服务器”。 这是一个轻量级的进程，用于在Hadoop集群中分配Region Server以实现负载平衡。 它管理表上的DDL操作。 HMaster监视Region Server。 当客户想要更改结构或想要更改元数据时，所有这些操作都由HMaster完成。 为了确保高可用，一般都会使用两个HMaster。</p>
-<p>HMaster的功能包括：</p>
-<ul>
-<li>负责处理Region的分配和DDL操作(创建、删除表)。</li>
-<li>协调RegionServer
-<ul>
-<li>在启动时分配Region，或者在恢复和负载均衡时重新分配Region</li>
-<li>监视集群中的所有Region Server实例（通过与zookeeper进行Heartbeat来监听Region Server在ZooKeeper中的状态，并不直接和Region Server相连）</li>
-</ul></li>
-<li>管理功能
-<ul>
-<li>创建、删除和更新表的接口</li>
-</ul></li>
-</ul>
-<p><img src="/2021/09/12/Hbase_%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86/image-20210913113317081.png" alt="image-20210913113317081" style="zoom: 80%;"></p>
-<h4 id="zookeeper">ZooKeeper</h4>
-<p>Zookeepper是一个分布式的无中心的元数据存储服务。HBase使用ZooKeeper作为分布式协调服务来维护集群中的服务器状态。ZooKeeper监听哪些Region Server是可用的，并提供Region Server故障的通知。ZooKeeper使用信息一致性来保证共同的共享状态。注意为了达成一致性，至少应该有3到5台机器。</p>
-<p>ZooKeeper的功能包括：</p>
-<ul>
-<li>存放整个HBase集群的元数据以及集群的状态信息(avalible/alive)。</li>
-<li>实现HMaster主从节点的failover，并在HRegionServer宕机的时候通知HMaster。</li>
-</ul>
-<p><img src="/2021/09/12/Hbase_%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86/image-20210913124658317.png" alt="image-20210913124658317" style="zoom: 67%;"></p>
-<h4 id="hbase-region-server">HBase Region Server</h4>
-<p>一个HRegionServer可以存放1000个HRegion(出自BigTable)；HBase使用RowKey将表水平切割成多个HRegion，从HMaster的角度，每个HRegion都纪录了它的StartKey和EndKey（第一个HRegion的StartKey为空，最后一个HRegion的EndKey为空），由于RowKey是排序的，因而Client可以通过HMaster快速的定位每个RowKey在哪个HRegion中。</p>
-<p>底层Table数据存储于HDFS中，而HRegion所处理的数据尽量和数据所在的DataNode在一起，实现数据的本地化；数据本地化并不是总能实现，比如在HRegion移动(如因Split)时，需要等下一次Compact才能继续回到本地化。</p>
-<p>Region Server的一些功能包括：-</p>
-<ul>
-<li>存放和管理本地HRegion（包括拆分）。</li>
-<li>读写HDFS，管理Table中的数据。</li>
-<li>Client直接通过HRegionServer读写数据</li>
-</ul>
-<p><img src="/2021/09/12/Hbase_%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86/image-20210913130038608.png" alt="image-20210913130038608" style="zoom:67%;"></p>
-<h3 id="hbase-region-server详细构造">HBase Region Server详细构造</h3>
-<p>HRegionServer一般和DataNode在同一台机器上运行，实现数据的本地性。HRegionServer包含WAL(HLog)、BlockCache和多个HRegion，HRegion又由HStore、MemStore和HFile组成。</p>
-<ul>
-<li>HRegionServer
-<ul>
-<li>WAL(Hlog，一个，HDFS中)</li>
-<li>BlockCache</li>
-<li>HRegion(最多1000个，表的横切，rowkey不会重叠)
-<ul>
-<li>HStore（列族，HRegion的列切， 多个）
-<ul>
-<li>MemStore(写完Hlog后，刚生成的数据)</li>
-<li>HFile(多个，具体的数据，排序，HDFS中)</li>
-</ul></li>
-</ul></li>
-</ul></li>
-</ul>
-<p><img src="/2021/09/12/Hbase_%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86/image-20210913150552594.png" alt="image-20210913150552594" style="zoom: 67%;"></p>
-<h4 id="wal">WAL</h4>
-<p>WAL(Write Ahead Log, HLog) 预写日志，是HRegionServer上的一个文件，所有写操作都会先保证将数据写入这个Log文件(每个HRegionServer只有一个)后，才会真正更新MemStore，最后写入HFile中。这样即使HRegionServer宕机，我们依然可以从HLog中恢复数据。</p>
-<p>由于HDFS只允许同一时刻对一个文件只能一个客户端写入，所以对HLog只能单线程写入。这样很明显会影响性能，所以再HBase1.0以后的版本，<strong>多个WAL并行写</strong>(MultiWAL)，该实现采用HDFS的多个管道写，以单个HRegion为单位。</p>
-<h4 id="blockcache">BlockCache</h4>
-<p>读缓存，在内存中存储了最常访问的数据，是 LRU（Least Recently Used）缓存。BlockCache为HRegionServer内存大小的20%。</p>
-<p>Hbase中有两种BlockCache：</p>
-<ul>
-<li><p>on-heap LruBlockCache：LruBlockCache受到java gc的影响，不稳定</p></li>
-<li><p>BucketCache(通常是off-heap)：一般采用这种方式，自己管理内存，更加稳定</p></li>
-</ul>
-<h4 id="hregion">HRegion</h4>
-<p>HRegion是一个表的一部分，相当于横着切分了一张表。</p>
-<p>HRegion由多个Store(HStore)构成，每个HStore对应了一个Table在这个HRegion中的一个Column Family，即每个Column Family就是一个集中的存储单元，因而最好将具有相近IO特性的Column存储在一个Column Family，以实现高效读取(数据局部性原理，可以提高缓存的命中率)。</p>
-<p>HStore是HBase中存储的核心，它实现了读写HDFS功能，<strong>一个HStore由一个MemStore 和0个或多个HFile组成</strong>。</p>
-<ul>
-<li>MemStore：所有数据的写在完成WAL日志写后，会 写入MemStore中，由MemStore根据一定的算法将数据Flush到底层HDFS文件中(HFile)，通常每个HRegion中的每个 Column Family有一个自己的MemStore。</li>
-<li>HFile：在HFile中的数据是按RowKey、Column Family、Column排序，对相同的Cell(即这三个值都一样)，则按timestamp倒序排列</li>
-</ul>
-<h5 id="memstore">MemStore</h5>
-<p>MemStore是一个In Memory Sorted Buffer（在内存中排序的缓冲区），在每个HStore中都有一个MemStore，即它是一个HRegion的一个Column Family对应一个实例。</p>
-<p>它的排列顺序以RowKey、Column Family、Column的顺序以及Timestamp的倒序（越新的数据越靠前），如下所示：</p>
-<p><img src="/2021/09/12/Hbase_%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86/image-20210913152648183.png" alt="image-20210913152648183" style="zoom: 67%;"></p>
-<p>每一次Put/Delete请求都是先写入到MemStore中，当MemStore满后会Flush成一个新的HFile，即一个HStore(Column Family)可以有0个或多个StoreFile(HFile)。</p>
-<p>有以下三种情况可以触发MemStore的Flush动作，需要注意的是MemStore的最小Flush单元是整个HRegion中所有的MemStore而不是单个MemStore。据说这是Column Family有个数限制的其中一个原因，估计是因为太多的Column Family一起Flush会引起性能问题</p>
-<ul>
-<li><p>MemStore超过128M，此时当前的HRegion中<strong>所有的MemStore会Flush到HDFS中</strong>。</p></li>
-<li><p>HRegionServer上所有MemStore的大小超过了机器上默认40％的内存使用量。此时当前HRegionServer中所有HRegion中的MemStore都会Flush到HDFS中，<strong>Flush顺序是MemStore大小的倒序，直到低于某个阈值</strong>，默认38%</p></li>
-<li><p>WAL过大，当前HRegionServer中所有HRegion中的MemStore都会Flush到HDFS中，Flush使用时间顺序，<strong>最早的MemStore先Flush直到WAL的数量少于某个阈值</strong>。</p></li>
-</ul>
-<p>在MemStore Flush过程中，还会在尾部追加一些Meta数据，其中就包括Flush时最大的WAL Sequence值，以告诉HBase这个StoreFile写入的最新数据的序列，那么在Recover时就直到从哪里开始。</p>
-<h5 id="hfile">HFile</h5>
-<p>HFile是MemStore在HDFS上的实体，所以写一个HFile是顺序写，速度很快。由于已经在MemStore中排好序了，所以每个HFile内部同样是有序的。</p>
-<p><img src="/2021/09/12/Hbase_%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86/image-20210913155326063.png" alt="image-20210913155326063" style="zoom:67%;"></p>
-<h3 id="hbase物理存储hfile格式">Hbase物理存储（HFile格式）</h3>
-<p>HFile一共经历了三个版本，主要以V2版本为主。</p>
-<p><strong>v1</strong></p>
-<p><img src="/2021/09/12/Hbase_%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86/image-20210913155808039.png" alt="image-20210913155808039" style="zoom:67%;"></p>
-<p><img src="/2021/09/12/Hbase_%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86/image-20210913155820823.png" alt="image-20210913155820823" style="zoom: 50%;"></p>
-<p><strong>数据存放在Data块中</strong>，Data块的大小可以用户指定，大的Data块适合scan，小的Data块适合随机查找。</p>
-<p>HFile里面的每个KeyValue对就是一个简单的<strong>byte数组</strong>。这个byte数组里面包含了很多项，可以看出包括Key的长度、Value的长度，Key的部分包括Row Key、Column Family、Column Qualifier、TimeStamp等等。</p>
-<p>记录了索引信息的Index块（Block Index）需要被一次性读取进入内存中。</p>
-<p><strong>v2</strong></p>
-<p>解决了V1版本内存占用，特别是Bloom File和Block Index过大的问题。它的解决方案是把Bloom File和Block Index打散放入Data，每次查询不用加载全部信息。</p>
-<p>HFile V2是一个多层的类B+树索引，采用这种设计，可以实现查找不需要扫描读取整个文件。因此HFile本质上可以分为：</p>
-<ul>
-<li>扫描区：包含了数据、索引、布隆过滤器，顺序扫描HFile时所有的数据块将会被读取。
-<ul>
-<li>Data Block：就是存储的一行行数据，本质上就是byte数组，包括Row Key、Column Family、Column Qualifier、TimeStamp等。</li>
-<li>叶子节点索引：就是B+树叶子节点的索引</li>
-<li>布隆过滤器</li>
-</ul></li>
-<li>非扫描区：包含一些元数据块和索引，HFile顺序扫描的时候数据不会被读取。
-<ul>
-<li>中间节点索引：就是B+树非叶子节点的索引</li>
-</ul></li>
-<li>打开时加载区：包含一些元数据和索引，在HBase的Region Server启动时，需要加载到内存中。
-<ul>
-<li>根节点索引：就是B+树根节点的索引</li>
-</ul></li>
-</ul>
-<p>Data Block中的Cell都是升序排列，每个Block都有它自己的Leaf-Index，每个Block的最后一个Key被放入Intermediate-Index中，Root-Index指向Intermediate-Index。Bloom过滤器用于快速定位没有在DataBlock中的数据。</p>
-<figure>
-<img src="/2021/09/12/Hbase_%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86/image-20210913161309091.png" alt="image-20210913161309091"><figcaption aria-hidden="true">image-20210913161309091</figcaption>
-</figure>
-<p><strong>v3</strong></p>
-<p>v3和v2没有太大变化，只是加了一个Tag字段。</p>
-<h3 id="hbase三级索引">Hbase三级索引</h3>
-<p>Hbase获取数据，需要经过三级索引，才能真正读取到数据。也就是需要通过索引找到究竟去哪个Region Server中的Region读取数据。</p>
-<p>HBase有两个特殊的表，ROOT表(唯一)和META表，存储Region的分布情况以及每个Region的详细信息。。</p>
-<ul>
-<li>ROOT表的位置保存在ZooKeeper中，它存储了META表的RegionInfo信息（也就是Meta表在哪个Region里面）。</li>
-<li>META表存储了用户创建Table的RegionInfo信息（也就是用户创建的表在哪个Region里面），META表可以被切分成多个HRegion。</li>
-</ul>
-<figure>
-<img src="/2021/09/12/Hbase_%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86/image-20210913163359995.png" alt="image-20210913163359995"><figcaption aria-hidden="true">image-20210913163359995</figcaption>
-</figure>
-<p>因此，访问数据涉及到的索引表和流程为：</p>
-<p>1、从ZooKeeper读取ROOT表位置。</p>
-<p>2、HRegionServer中根据请求的Root表和RowKey读取META表位置。</p>
-<p>3、最后从该HRegionServer中读取META表的内容而获取此次请求需要访问的HRegion所在的位置。</p>
-<p>4、读取内容。</p>
-<p>因此，需要3次读取才能获取目标HRegion的位置，然后第4次请求才能获取真正的数据。所以，一般客户端有ROOT表位置和内容的缓存。</p>
-<p><strong>BigTable要选择三级索引结构的原因</strong></p>
-<p>就是能够对足够多的HRegion进行索引。</p>
-<p>BigTable论文里面提到，一般每个HRegion大小为128M，每行META数据1KB。所以，三级索引可以索引<span class="math inline">\(2^{34}\)</span>个HRegion，可以索引很大很大的数据了。但是如果只有二级索引，就只能索引16TB，在大数据情况下这是完全不够。</p>
-<h4 id="root表">Root表</h4>
-<p><img src="/2021/09/12/Hbase_%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86/image-20210913183028902.png" alt="image-20210913183028902" style="zoom:67%;"></p>
-<p>表结构和Meta表完全相同，并且ROOT只会有一个Region，这个Region也是被存在HBase内部。</p>
-<h4 id="meta表">Meta表</h4>
-<p><img src="/2021/09/12/Hbase_%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86/image-20210913165646478.png" alt="image-20210913165646478" style="zoom:67%;"></p>
-<p>RowKey由三部分组成：TableName, StartKey 和 TimeStamp。RowKey存储的内容我们又称之为Region的Name。将组成RowKey的三个部分用逗号连接就构成了整个RowKey，这里TimeStamp使用十进制的数字字符串来表示的。</p>
-<blockquote>
-<p>用来存放Region的文件夹的名字是RegionName的Hash值，因为RegionName可能包含某些非法字符。RegionName会包含非法字符的原因是因为StartKey是被允许包含任何值的。</p>
-</blockquote>
-<p>一个RowKey的例子为：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Table1,RK10000,<span class="number">12345678</span>  </span><br></pre></td></tr></table></figure>
-<p>表中的列族Column Family是info，info里面包含三个Column：regioninfo, server, serverstartcode。</p>
-<ul>
-<li>regioninfo就是Region的详细信息，包括StartKey, EndKey 以及每个Family的信息等等。</li>
-<li>server存储的就是管理这个Region的RegionServer的地址。</li>
-</ul>
-<p>所以当Region被拆分、合并或者重新分配的时候，都需要来修改Meta表的内容。</p>
-<h3 id="hbase读写流程">Hbase读写流程</h3>
-<h4 id="hbase读数据">Hbase读数据</h4>
-<p>整体的读数据流程为：</p>
-<p>1、Client访问Zookeeper，获取Root表所在的RegionServer。</p>
-<p>2、访问对应的RegionServer，获取Meta表中的RegionServer，并在对应的RegionServer处获取对应的表存储的RegionServer。</p>
-<p>3、访问表所在的RegionServer进行数据的读取。</p>
-<p>4、查找对应的Region，在Region中寻找列族，先找BlockCache，找不到去Memstore中寻找，再找不到就进行HFile的遍历</p>
-<p>5、找到数据之后会先缓存到BlockCache中，再将结果返回。BlockCache逐渐满了之后，会采用LRU的淘汰策略。</p>
-<p><img src="/2021/09/12/Hbase_%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86/image-20210913200350146.png" alt="image-20210913200350146" style="zoom:67%;"></p>
-<p>一个存在的问题是，相同Cell（RowKey/ColumnFamily/Column相同）并不保证在一起，甚至删除一个Cell也只是写入一个新的Cell，它含有Delete标记，而不一定将一个Cell真正删除了。因此，需要按照一定的顺序来读取数据使得读取到的数据保持一致性。</p>
-<p>相同的cell可能存在3个不同的位置，Block Cache，MemStore，HFile中。</p>
-<p>1、从Block Cache中读取</p>
-<p>2、从MemStore中读取</p>
-<p>3、从多个HFile中读取，用Bloom Filter筛掉明显不存在所需数据的HFile，Index用于快速定位HFile中的数据块。</p>
-<h4 id="hbase写数据">Hbase写数据</h4>
-<p>1、客户端发起一个Put请求时，首先它从hbase:meta表中查出该Put数据最终需要去的HRegionServer。然后客户端将Put请求发送给相应的HRegionServer，在HRegionServer中它首先会将该Put操作写入WAL日志文件中。</p>
-<p>2、写完WAL日志文件后，HRegionServer根据Put中的TableName和RowKey找到对应的HRegion，并根据Column Family找到对应的HStore，并将Put写入到该HStore的MemStore中。写入成功，返回给客户端。</p>
-<p>3、当MemStore积累一定量的数据后，flush成HFile到HDFS上。</p>
-<p><img src="/2021/09/12/Hbase_%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86/image-20210913200540718.png" alt="image-20210913200540718" style="zoom:50%;"></p>
-<p><img src="/2021/09/12/Hbase_%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86/image-20210913200556470.png" alt="image-20210913200556470" style="zoom: 50%;"></p>
-<h3 id="hbase为什么快">Hbase为什么快</h3>
-<p>1、写数据先写WAL再Memstore，最后才刷到磁盘。不需要每次有数据更新就必须将数据写入到磁盘中，写入时候将随机写入转换成顺序写，数据写入速度也很稳定。</p>
-<p>2、读取时先读缓存；数据按RowKey排序；HFile文件为磁盘顺序读取做了优化，按页存储；列式存储。</p>
-<p>https://www.cnblogs.com/guoyu1/p/13934002.html</p>
-<h3 id="hfile合并">HFile合并</h3>
-<p>HFile过多，在数据读取的时候，会产生性能问题。所以一段时间后，HFile会进行合并。HBase中Compaction分为两种：Minor Compaction和Major Compaction。</p>
-<ul>
-<li><p>Minor Compaction：是指选取一些小的、相邻的HFile将他们合并成一个更大的StoreFile，在这个过程中不会处理已经Deleted或Expired的Cell。(BigTable中将memtable的数据flush的一个HFile/SSTable称为一次Minor Compaction)</p>
-<p><img src="/2021/09/12/Hbase_%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86/image-20210913201625829.png" alt="image-20210913201625829" style="zoom:50%;"></p>
-<blockquote>
-<p>为什么HFile的大小会不一样？</p>
-<p>由前面Memstore可知，刷盘的时候会将当前的HRegion中所有的HStore对应的MemStore会Flush到HDFS中</p>
-</blockquote></li>
-<li><p>Major Compaction：是指将所有同一个Region下的HFile合并成一个HFile，可以手动触发或者自动触发，但是会引起性能问题，一般安排在周末。</p>
-<p><img src="/2021/09/12/Hbase_%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86/image-20210913201708143.png" alt="image-20210913201708143" style="zoom: 60%;"></p></li>
-</ul>
-<h3 id="hregion分裂">HRegion分裂</h3>
-<p><img src="/2021/09/12/Hbase_%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86/image-20210913202120978.png" alt="image-20210913202120978" style="zoom:67%;"></p>
-<p>最初，一个Table只有一个HRegion，随着数据写入增加，如果一个HRegion到达一定的大小，就需要Split成两个HRegion，除了负载均衡的考虑还有查询效率的考虑。</p>
-<p>这个大小由hbase.hregion.max.filesize指定，默认为10GB。</p>
-<p>当split时（split时停止服务），两个新的HRegion会在同一个HRegionServer中创建，它们各自包含父HRegion一半的数据，当Split完成后，父HRegion会下线，而新的两个子HRegion会向HMaster注册上线，处于负载均衡的考虑，这两个新的HRegion可能会被HMaster分配到其他的HRegionServer中。</p>
-<figure>
-<img src="/2021/09/12/Hbase_%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86/image-20210913202139213.png" alt="image-20210913202139213"><figcaption aria-hidden="true">image-20210913202139213</figcaption>
-</figure>
-<p>具体的分裂流程为：</p>
-<ol type="1">
-<li>RegionServer在本地决定分割HRegion，并准备分割。第一步，汇报给zookeeper。</li>
-<li>master获取zookeeper中的状态。</li>
-<li>RegionServer在HDFS的父目录区域目录下创建一个名为“.splits”的子目录。</li>
-<li>RegionServer关闭父HRegion，强制刷新缓存，并将该区域标记为本地数据结构中的脱机状态。此时，来到父区域的客户端请求将抛出NotServingRegionException异常。客户端将重试一些备用值。</li>
-<li>RegionServer在.splits目录下创建Region目录，为子区域A和B创建必要的数据结构。然后，它分割存储文件，因为它在父区域中为每个存储文件创建两个引用文件。那些引用文件将指向父Region文件。</li>
-<li>RegionServer在HDFS中创建实际的区域目录，并移动每个子Region的引用文件。</li>
-<li>RegionServer向META表发送请求。将父HRegion设置为.META中的脱机状态，并添加关于子HRegion的信息。在这时，在META中不会为女儿分配单独的条目。客户端会看到父区域是分割的，如果他们扫描.META，但不知道子HRegion，直到他们出现在.META。</li>
-<li>RegionServer并行open子HRegion接受写入。</li>
-<li>RegionServer将女儿A和B添加到.META。以及它所在地区的信息。此后，客户可以发现新的地区，并向新的地区发出请求，之前的缓存失效。</li>
-<li>HRegion Server向zookeeper汇报split结束的消息，master进行负载均衡。</li>
-<li>拆分后，meta表和HDFS仍将包含对父HRegion的引用。当子HRegion进行Compaction时，这些引用信息会被删除。Master也会定期检查子HRegion，如果没有父HRegion中的信息，父HRegion将被删除。</li>
-</ol>
-<h3 id="负载均衡">负载均衡</h3>
-<p>出于负载均衡的考虑，HMaster可能会将RegionServer中的若干Region重新分配的其他的HRegionServer中。</p>
-<p>这可能会导致之前这个Region产生HFile在其他节点上，已经和这个Region当前所在的机器不同，下一次Major Compaction则会将数据从远端的节点移动到本地节点。</p>
-<p>负载均衡对系统性能影响很大，实际一般关闭，每周开启一次。</p>
-<p><img src="/2021/09/12/Hbase_%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86/image-20210913202956143.png" alt="image-20210913202956143" style="zoom:67%;"></p>
-<h3 id="容错">容错</h3>
-<ol type="1">
-<li>zookeeper感知，通知HMaster</li>
-<li>重新分配HRegion到其他节点</li>
-<li>为每个HRegion拆分WAL，将拆分出的WAL文件写入对应的目的HRegionServer的WAL目录中，并并写入对应的DataNode中</li>
-<li>回放WAL，重建MemStore</li>
-</ol>
-<p><img src="/2021/09/12/Hbase_%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86/image-20210913203057517.png" alt="image-20210913203057517" style="zoom:67%;"></p>
-<h3 id="hbase一致性">HBase一致性</h3>
-<p>HBase是强一致性，它表现在当如下情况出现的时候HRegion不可用：</p>
-<ol type="1">
-<li>HRegion 分裂时相关HRegion不可用</li>
-<li>HRegion 合并时相关HRegion不可用</li>
-<li>HRegionServer Recovery（依靠zookeeper进行主备切换）时相关HRegion不可用</li>
-</ol>
-<h3 id="参考资料">参考资料</h3>
-<p>https://www.cnblogs.com/biterror/p/6909923.html</p>
-<p>http://www.lerith.com/architecture/apache-hbase/</p>
-<p>https://segmentfault.com/a/1190000019959411</p>
-<p>https://blog.csdn.net/wangyiyungw/article/details/80265015</p>
-<p>https://blog.csdn.net/ldds_520/article/details/51674315 (Root表和Meta表的详细构造)</p>
-
       
     </div>
 

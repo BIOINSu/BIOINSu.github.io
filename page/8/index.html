@@ -194,20 +194,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">113</span>
+          <span class="site-state-item-count">117</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-count">36</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">38</span>
+        <span class="site-state-item-count">41</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -241,6 +241,451 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/08/01/Java_ComparableAndComparator/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BIOINSu">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BIOINSu">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/08/01/Java_ComparableAndComparator/" class="post-title-link" itemprop="url">Java中Comparable和Comparator</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2021-08-01 09:07:53 / 修改时间：10:07:22" itemprop="dateCreated datePublished" datetime="2021-08-01T09:07:53+08:00">2021-08-01</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Java/Java%E5%9F%BA%E7%A1%80/" itemprop="url" rel="index"><span itemprop="name">Java基础</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>Java中Comparable和Comparator两个<strong>接口</strong>的比较。</p>
+<table>
+<colgroup>
+<col style="width: 9%">
+<col style="width: 45%">
+<col style="width: 45%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>Comparable</th>
+<th>Comparator</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>作用</td>
+<td>可以让实现它的类的对象进行比较大小</td>
+<td>在类对象的外部制定排序规则，然后作为排序策略参数传递给某些类的对象的构造函数，实现比较大小</td>
+</tr>
+<tr class="even">
+<td>位置</td>
+<td>java.lang 包</td>
+<td>java.util 包</td>
+</tr>
+<tr class="odd">
+<td>接口中的方法</td>
+<td>只有一个方法 compareTo()</td>
+<td>JDK 8 以前只有两个方法compare()和equals()，8以后增加多个方法</td>
+</tr>
+<tr class="even">
+<td>使用</td>
+<td>public class Test implements Comparable{} 并重写其中的compareTo()方法</td>
+<td>数组工具类和集合工具类中提供的工具方法sort方法都给出了含有Comparator接口的重载方法。</td>
+</tr>
+<tr class="odd">
+<td>排序规则</td>
+<td>compareTo 方法的返回值有三种情况：e1.compareTo(e2) &gt; 0 即 e1 &gt; e2<br>e1.compareTo(e2) = 0 即 e1 = e2<br>e1.compareTo(e2) &lt; 0 即 e1 &lt; e2</td>
+<td>compare函数返回正数就交换传入参数的位置，否则（负数或0）就不交换两者的位置。</td>
+</tr>
+</tbody>
+</table>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/08/01/Java_ComparableAndComparator/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/29/Kafka_%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%A2%98/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BIOINSu">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BIOINSu">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/07/29/Kafka_%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%A2%98/" class="post-title-link" itemprop="url">Kafka常见面试题</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-07-29 07:18:40" itemprop="dateCreated datePublished" datetime="2021-07-29T07:18:40+08:00">2021-07-29</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-09-12 09:22:22" itemprop="dateModified" datetime="2021-09-12T09:22:22+08:00">2021-09-12</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Kafka/" itemprop="url" rel="index"><span itemprop="name">Kafka</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h4 id="总结">总结</h4>
+<table>
+<colgroup>
+<col style="width: 23%">
+<col style="width: 76%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>问题</th>
+<th>解答</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>为什么用</td>
+<td>缓冲、解耦、冗余、健壮与异步</td>
+</tr>
+<tr class="even">
+<td>可靠性</td>
+<td>partition向producer发送ack</td>
+</tr>
+<tr class="odd">
+<td>ack机制</td>
+<td>接收没写入、leader落盘、全部落盘</td>
+</tr>
+<tr class="even">
+<td>Exactly Once</td>
+<td>At Least Once（数据重复） + 幂等性（仅持久化一条） = Exactly Once（数据不重复且不丢失）；对&lt; PID, Partition, SeqNumber&gt;主键做缓存</td>
+</tr>
+<tr class="odd">
+<td>速度快的原因</td>
+<td>磁盘顺序写入、parition中数据分段以及段内索引、内存操作直接映射到物理硬盘</td>
+</tr>
+<tr class="even">
+<td>副本同步策略</td>
+<td>全部follower完成同步，才发送ack，需要的副本数较少（n+1）</td>
+</tr>
+<tr class="odd">
+<td>ISR</td>
+<td>意为和leader保持同步的follower集合，未定期发送ack者被踢出去</td>
+</tr>
+<tr class="even">
+<td>故障处理</td>
+<td>HW之前的数据才会对Consumer可见，所以出现故障的时候，Consumer从HW处继续消费消息</td>
+</tr>
+<tr class="odd">
+<td>读写分离</td>
+<td>延时敏感应用，数据一致性问题和延迟问题（经过磁盘）</td>
+</tr>
+<tr class="even">
+<td>消费者分区分配策略</td>
+<td>range（分区/线程）RoundRobinAssignor（排序加轮询）StickyAssignor（分区数最多差1，与上次分配相同）</td>
+</tr>
+</tbody>
+</table>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/07/29/Kafka_%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%A2%98/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/29/%E5%A4%A7%E6%95%B0%E6%8D%AEZookeeper%20-%20%E5%89%AF%E6%9C%AC/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BIOINSu">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BIOINSu">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/07/29/%E5%A4%A7%E6%95%B0%E6%8D%AEZookeeper%20-%20%E5%89%AF%E6%9C%AC/" class="post-title-link" itemprop="url">Zookeeper</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-07-29 07:17:40" itemprop="dateCreated datePublished" datetime="2021-07-29T07:17:40+08:00">2021-07-29</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-04-19 17:08:13" itemprop="dateModified" datetime="2021-04-19T17:08:13+08:00">2021-04-19</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/" itemprop="url" rel="index"><span itemprop="name">大数据</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/Zookeeper/" itemprop="url" rel="index"><span itemprop="name">Zookeeper</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>Zookeeper（分布式协调服务）帮助Hadoop解决的问题</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/07/29/%E5%A4%A7%E6%95%B0%E6%8D%AEZookeeper%20-%20%E5%89%AF%E6%9C%AC/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/25/%E7%AC%94%E8%AF%95_0725%E6%8B%BC%E5%A4%9A%E5%A4%9A/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BIOINSu">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BIOINSu">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/07/25/%E7%AC%94%E8%AF%95_0725%E6%8B%BC%E5%A4%9A%E5%A4%9A/" class="post-title-link" itemprop="url">0725 拼多多笔试</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-07-25 22:04:00" itemprop="dateCreated datePublished" datetime="2021-07-25T22:04:00+08:00">2021-07-25</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-07-29 07:15:16" itemprop="dateModified" datetime="2021-07-29T07:15:16+08:00">2021-07-29</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%AC%94%E8%AF%95/" itemprop="url" rel="index"><span itemprop="name">笔试</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="一">一</h2>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/07/25/%E7%AC%94%E8%AF%95_0725%E6%8B%BC%E5%A4%9A%E5%A4%9A/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -846,352 +1291,6 @@
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2021/07/11/%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93_%E6%95%B0%E4%BB%93%E5%88%86%E5%B1%82/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/05/13/Flink06_WindowAndTime/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="BIOINSu">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BIOINSu">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/05/13/Flink06_WindowAndTime/" class="post-title-link" itemprop="url">06 Flink四大基石：窗口与时间</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-05-13 18:14:04" itemprop="dateCreated datePublished" datetime="2021-05-13T18:14:04+08:00">2021-05-13</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-09-05 19:41:56" itemprop="dateModified" datetime="2021-09-05T19:41:56+08:00">2021-09-05</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/Flink/" itemprop="url" rel="index"><span itemprop="name">Flink</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h3 id="window">Window</h3>
-<p>窗口 Window 是Flink中用来收集一定范围内数据的一种方式。</p>
-<p>滑动窗口，指的是把源源不断的数据看成是已经存在的，然后通过滑动设定好的窗口来对每个窗口内的数据进行计算。滑动窗口有两个属性，一个是窗口大小，一个是滑动间隔。</p>
-<p><img src="/2021/05/13/Flink06_WindowAndTime/image-20210513182928464.png" style="zoom:67%;"></p>
-<p>当 滑动窗口大小 = 滑动间隔时，所有的数据都能参与计算，且窗口内的数据不重复，此时称这样的窗口为滚动窗口。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/05/13/Flink06_WindowAndTime/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/05/09/Flink05_DataStreamAPI/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="BIOINSu">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BIOINSu">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/05/09/Flink05_DataStreamAPI/" class="post-title-link" itemprop="url">05 Flink DataStream</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-05-09 11:52:17" itemprop="dateCreated datePublished" datetime="2021-05-09T11:52:17+08:00">2021-05-09</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-05-11 09:18:58" itemprop="dateModified" datetime="2021-05-11T09:18:58+08:00">2021-05-11</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/Flink/" itemprop="url" rel="index"><span itemprop="name">Flink</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>Flink中对无界数据进行计算（流处理）。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/05/09/Flink05_DataStreamAPI/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/05/09/Flink04_DatasetAPI/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="BIOINSu">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BIOINSu">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/05/09/Flink04_DatasetAPI/" class="post-title-link" itemprop="url">04 Flink Dataset</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-      
-
-      <time title="创建时间：2021-05-09 10:11:40 / 修改时间：10:30:05" itemprop="dateCreated datePublished" datetime="2021-05-09T10:11:40+08:00">2021-05-09</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/Flink/" itemprop="url" rel="index"><span itemprop="name">Flink</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>Flink中对有界数据进行计算（批处理）。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/05/09/Flink04_DatasetAPI/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/05/05/Flink02_%E6%9E%B6%E6%9E%84%E4%BD%93%E7%B3%BB/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="BIOINSu">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BIOINSu">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/05/05/Flink02_%E6%9E%B6%E6%9E%84%E4%BD%93%E7%B3%BB/" class="post-title-link" itemprop="url">02 Flink架构体系</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-05-05 19:48:38" itemprop="dateCreated datePublished" datetime="2021-05-05T19:48:38+08:00">2021-05-05</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-08-14 10:40:34" itemprop="dateModified" datetime="2021-08-14T10:40:34+08:00">2021-08-14</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/Flink/" itemprop="url" rel="index"><span itemprop="name">Flink</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>介绍Flink的架构组件，编程模型（支持的API类型），任务的提交流程，程序的流程，并行度以及槽。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/05/05/Flink02_%E6%9E%B6%E6%9E%84%E4%BD%93%E7%B3%BB/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>

@@ -194,20 +194,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">113</span>
+          <span class="site-state-item-count">117</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-count">36</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">38</span>
+        <span class="site-state-item-count">41</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -241,6 +241,563 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/04/24/MySQL_%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90_02%E6%85%A2%E6%9F%A5%E8%AF%A2%E6%97%A5%E5%BF%97%E4%B8%8Eprofile/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BIOINSu">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BIOINSu">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2022/04/24/MySQL_%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90_02%E6%85%A2%E6%9F%A5%E8%AF%A2%E6%97%A5%E5%BF%97%E4%B8%8Eprofile/" class="post-title-link" itemprop="url">MySQL 性能分析：慢查询日志与Profile</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2022-04-24 16:14:49 / 修改时间：16:50:19" itemprop="dateCreated datePublished" datetime="2022-04-24T16:14:49+08:00">2022-04-24</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/" itemprop="url" rel="index"><span itemprop="name">数据库</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/MySQL/" itemprop="url" rel="index"><span itemprop="name">MySQL</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <a id="more"></a>
+<h3 id="慢查询日志">慢查询日志</h3>
+<h4 id="开启慢查询日志">开启慢查询日志</h4>
+<ol type="1">
+<li>开启slow_query_log</li>
+</ol>
+<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql &gt; set global slow_query_log&#x3D;&#39;ON&#39;;</span><br></pre></td></tr></table></figure> 然后再来查看下慢查询日志是否开启，以及慢查询日志文件的位置：</p>
+<p><img src="/2022/04/24/MySQL_%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90_02%E6%85%A2%E6%9F%A5%E8%AF%A2%E6%97%A5%E5%BF%97%E4%B8%8Eprofile/image-20220424161722259.png" alt="image-20220424161722259" style="zoom:67%;"></p>
+<p>能看到这时慢查询分析已经开启，同时文件保存在 /var/lib/mysql/atguigu02-slow.log 文件中。</p>
+<ol start="2" type="1">
+<li>修改long_query_time阈值</li>
+</ol>
+<p>接下来我们来看下慢查询的时间阈值设置，使用如下命令：</p>
+<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql &gt; show variables like &#39;%long_query_time%&#39;;</span><br></pre></td></tr></table></figure> <img src="/2022/04/24/MySQL_%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90_02%E6%85%A2%E6%9F%A5%E8%AF%A2%E6%97%A5%E5%BF%97%E4%B8%8Eprofile/image-20220424161811720.png" alt="image-20220424161811720" style="zoom:67%;"></p>
+<p>这里如果想把时间缩短，比如设置为 1 秒，可以这样设置：</p>
+<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">#设置global的方式对当前session的long_query_time是无效的。对新连接的客户端有效。</span><br><span class="line">mysql &gt; set global long_query_time &#x3D; 1;</span><br><span class="line"></span><br><span class="line">#因此需要继续执行</span><br><span class="line">mysql&gt; set long_query_time&#x3D;1;</span><br></pre></td></tr></table></figure></p>
+<p><img src="/2022/04/24/MySQL_%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90_02%E6%85%A2%E6%9F%A5%E8%AF%A2%E6%97%A5%E5%BF%97%E4%B8%8Eprofile/image-20220424162312370.png" alt="image-20220424162312370" style="zoom:67%;"></p>
+<h4 id="查看慢查询数目">查看慢查询数目</h4>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SHOW GLOBAL STATUS LIKE &#39;%Slow_queries%&#39;;</span><br><span class="line">show status like &#39;slow_queries&#39;;</span><br></pre></td></tr></table></figure>
+<p><img src="/2022/04/24/MySQL_%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90_02%E6%85%A2%E6%9F%A5%E8%AF%A2%E6%97%A5%E5%BF%97%E4%B8%8Eprofile/image-20220424162118281.png" alt="image-20220424162118281" style="zoom: 80%;"></p>
+<h4 id="慢查询日志分析工具mysqldumpslow">慢查询日志分析工具：mysqldumpslow</h4>
+<p>MySQL提供了日志分析工具mysqldumpslow 。查看mysqldumpslow的帮助信息：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysqldumpslow --help</span><br></pre></td></tr></table></figure>
+<p><img src="/2022/04/24/MySQL_%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90_02%E6%85%A2%E6%9F%A5%E8%AF%A2%E6%97%A5%E5%BF%97%E4%B8%8Eprofile/image-20220424163338975.png" alt="image-20220424163338975" style="zoom:67%;"></p>
+<p>常用参数如下：</p>
+<ul>
+<li><p>a: 不将数字抽象成N，字符串抽象成S</p></li>
+<li><p>s: 是表示按照何种方式排序： c: 访问次数 l: 锁定时间 r: 返回记录 t: <strong>查询时间</strong> al:平均锁定时间 ar:平均返回记录数 at:平均查询时间 （默认方式） ac:平均查询次数</p></li>
+<li><p>t: 即为返回前面多少条的数据；</p></li>
+<li><p>g: 后边搭配一个正则匹配模式，大小写不敏感的；</p></li>
+</ul>
+<p>按照查询时间排序，查看前五条 SQL 语句，这样写即可：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@bogon ~]# mysqldumpslow -s t -t 5 &#x2F;var&#x2F;lib&#x2F;mysql&#x2F;atguigu01-slow.log</span><br><span class="line"></span><br><span class="line">Reading mysql slow query log from &#x2F;var&#x2F;lib&#x2F;mysql&#x2F;atguigu01-slow.log</span><br><span class="line"></span><br><span class="line">Count: 1 Time&#x3D;2.39s (2s) Lock&#x3D;0.00s (0s) Rows&#x3D;13.0 (13), root[root]@localhost</span><br><span class="line">SELECT * FROM student WHERE name &#x3D; &#39;S&#39;</span><br><span class="line"></span><br><span class="line">Count: 1 Time&#x3D;2.09s (2s) Lock&#x3D;0.00s (0s) Rows&#x3D;2.0 (2), root[root]@localhost</span><br><span class="line">SELECT * FROM student WHERE stuno &#x3D; N</span><br><span class="line"></span><br><span class="line">Died at &#x2F;usr&#x2F;bin&#x2F;mysqldumpslow line 162, &lt;&gt; chunk 2.</span><br></pre></td></tr></table></figure>
+<p>其他命令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">#得到返回记录集最多的10个SQL</span><br><span class="line">mysqldumpslow -s r -t 10 &#x2F;var&#x2F;lib&#x2F;mysql&#x2F;atguigu-slow.log</span><br><span class="line"></span><br><span class="line">#得到访问次数最多的10个SQL</span><br><span class="line">mysqldumpslow -s c -t 10 &#x2F;var&#x2F;lib&#x2F;mysql&#x2F;atguigu-slow.log</span><br><span class="line"></span><br><span class="line">#得到按照时间排序的前10条里面含有左连接的查询语句</span><br><span class="line">mysqldumpslow -s t -t 10 -g &quot;left join&quot; &#x2F;var&#x2F;lib&#x2F;mysql&#x2F;atguigu-slow.log</span><br><span class="line"></span><br><span class="line">#另外建议在使用这些命令时结合 | 和more 使用 ，否则有可能出现爆屏情况</span><br><span class="line">mysqldumpslow -s r -t 10 &#x2F;var&#x2F;lib&#x2F;mysql&#x2F;atguigu-slow.log | more</span><br></pre></td></tr></table></figure>
+<h4 id="关闭慢查询日志">关闭慢查询日志</h4>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">#方式一：通过配置文件永久性修改，设置为OFF或者注释掉或者删除掉</span><br><span class="line">slow_query_log&#x3D;OFF</span><br><span class="line"></span><br><span class="line">#方式二：在会话窗口中设置</span><br><span class="line">SET GLOBAL slow_query_log&#x3D;off;</span><br></pre></td></tr></table></figure>
+<p>重启MySQL服务：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl restart mysqld</span><br></pre></td></tr></table></figure>
+<h4 id="删除慢查询日志">删除慢查询日志</h4>
+<p><img src="/2022/04/24/MySQL_%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90_02%E6%85%A2%E6%9F%A5%E8%AF%A2%E6%97%A5%E5%BF%97%E4%B8%8Eprofile/image-20220424164242445.png" alt="image-20220424164242445" style="zoom:67%;"></p>
+<p>注意使用slow表示仅重置慢查询日志。</p>
+<h3 id="profile">Profile</h3>
+<p><img src="/2022/04/24/MySQL_%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90_02%E6%85%A2%E6%9F%A5%E8%AF%A2%E6%97%A5%E5%BF%97%E4%B8%8Eprofile/image-20220424164456815.png" alt="image-20220424164456815" style="zoom:67%;"></p>
+<p>查询Profile的开启状态：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql &gt; show variables like &#39;profiling&#39;;</span><br></pre></td></tr></table></figure>
+<p><img src="/2022/04/24/MySQL_%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90_02%E6%85%A2%E6%9F%A5%E8%AF%A2%E6%97%A5%E5%BF%97%E4%B8%8Eprofile/image-20220424164611847.png" alt="image-20220424164611847" style="zoom:67%;"></p>
+<p>设置 profiling='ON’ 来开启 show profile：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql &gt; set profiling &#x3D; &#39;ON&#39;;</span><br></pre></td></tr></table></figure>
+<p><img src="/2022/04/24/MySQL_%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90_02%E6%85%A2%E6%9F%A5%E8%AF%A2%E6%97%A5%E5%BF%97%E4%B8%8Eprofile/image-20220424164645677.png" alt="image-20220424164645677" style="zoom:67%;"></p>
+<p>查看当前会话都有哪些query的profiles，使用下面这条命令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql &gt; show profiles;</span><br></pre></td></tr></table></figure>
+<p><img src="/2022/04/24/MySQL_%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90_02%E6%85%A2%E6%9F%A5%E8%AF%A2%E6%97%A5%E5%BF%97%E4%B8%8Eprofile/image-20220424164749090.png" alt="image-20220424164749090" style="zoom:67%;"></p>
+<p>查看执行查询语句的开销：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; show profile cpu,block io for query 2;</span><br></pre></td></tr></table></figure>
+<p><img src="/2022/04/24/MySQL_%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90_02%E6%85%A2%E6%9F%A5%E8%AF%A2%E6%97%A5%E5%BF%97%E4%B8%8Eprofile/image-20220424164842271.png" alt="image-20220424164842271" style="zoom:67%;"></p>
+<p>show profile的常用查询参数： ① ALL：显示所有的开销信息。 ② BLOCK IO：显示块IO开销。 ③ CONTEXT SWITCHES：上下文切换开 销。 ④ CPU：显示CPU开销信息。 ⑤ IPC：显示发送和接收开销信息。 ⑥ MEMORY：显示内存开销信 息。 ⑦ PAGE FAULTS：显示页面错误开销信息。 ⑧ SOURCE：显示和Source_function，Source_file， Source_line相关的开销信息。 ⑨ SWAPS：显示交换次数开销信息。</p>
+<p><img src="/2022/04/24/MySQL_%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90_02%E6%85%A2%E6%9F%A5%E8%AF%A2%E6%97%A5%E5%BF%97%E4%B8%8Eprofile/image-20220424164957909.png" alt="image-20220424164957909" style="zoom:67%;"></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/04/24/MySQL_%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90_01%E7%B3%BB%E7%BB%9F%E6%80%A7%E8%83%BD%E5%8F%82%E6%95%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BIOINSu">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BIOINSu">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2022/04/24/MySQL_%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90_01%E7%B3%BB%E7%BB%9F%E6%80%A7%E8%83%BD%E5%8F%82%E6%95%B0/" class="post-title-link" itemprop="url">MySQL 性能分析：系统性能参数</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2022-04-24 15:06:18 / 修改时间：15:42:13" itemprop="dateCreated datePublished" datetime="2022-04-24T15:06:18+08:00">2022-04-24</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/" itemprop="url" rel="index"><span itemprop="name">数据库</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/MySQL/" itemprop="url" rel="index"><span itemprop="name">MySQL</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <a id="more"></a>
+<h3 id="数据库服务器的优化步骤">数据库服务器的优化步骤</h3>
+<figure>
+<img src="/2022/04/24/MySQL_%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90_01%E7%B3%BB%E7%BB%9F%E6%80%A7%E8%83%BD%E5%8F%82%E6%95%B0/image-20220424152838731.png" alt="image-20220424152838731"><figcaption aria-hidden="true">image-20220424152838731</figcaption>
+</figure>
+<p><img src="/2022/04/24/MySQL_%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90_01%E7%B3%BB%E7%BB%9F%E6%80%A7%E8%83%BD%E5%8F%82%E6%95%B0/image-20220424153021823.png" alt="image-20220424153021823" style="zoom:67%;"></p>
+<p><img src="/2022/04/24/MySQL_%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90_01%E7%B3%BB%E7%BB%9F%E6%80%A7%E8%83%BD%E5%8F%82%E6%95%B0/image-20220424153123746.png" alt="image-20220424153123746" style="zoom:67%;"></p>
+<h3 id="查看系统性能参数">查看系统性能参数</h3>
+<p>在MySQL中，可以使用SHOW STATUS 语句查询一些MySQL数据库服务器的性能参数、执行频率。</p>
+<p>SHOW STATUS语句语法如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SHOW [GLOBAL|SESSION] STATUS LIKE &#39;参数&#39;;</span><br></pre></td></tr></table></figure>
+<p>一些常用的性能参数如下：</p>
+<p>•　Connections：连接MySQL服务器的次数。</p>
+<p>•　Uptime：MySQL服务器的上线时间。</p>
+<p>•　Slow_queries：慢查询的次数。</p>
+<p>•　Innodb_rows_read：Select查询返回的行数</p>
+<p>•　Innodb_rows_inserted：执行INSERT操作插入的行数</p>
+<p>•　Innodb_rows_updated：执行UPDATE操作更新的行数</p>
+<p>•　Innodb_rows_deleted：执行DELETE操作删除的行数</p>
+<p>•　Com_select：查询操作的次数。</p>
+<p>•　Com_insert：插入操作的次数。对于批量插入的 INSERT 操作，只累加一次。</p>
+<p>•　Com_update：更新操作的次数。</p>
+<p>•　Com_delete：删除操作的次数。</p>
+<h3 id="统计sql的查询成本">统计SQL的查询成本</h3>
+<p>SQL的查询成本指的是需要查询多少个数据页才能查询到符合条件的数据：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">SELECT student_id, class_id, NAME, create_time FROM student_info</span><br><span class="line">WHERE id BETWEEN 900001 AND 900100;</span><br><span class="line"></span><br><span class="line">mysql&gt; SHOW STATUS LIKE &#39;last_query_cost&#39;;</span><br><span class="line">+-----------------+-----------+</span><br><span class="line">| Variable_name | Value |</span><br><span class="line">+-----------------+-----------+</span><br><span class="line">| Last_query_cost | 21.134453 |</span><br><span class="line">+-----------------+-----------+</span><br></pre></td></tr></table></figure>
+<p>可以看到需要查找22个页面才能获取完整数据。</p>
+<p>数据页的数量是原先的 20 倍，但是查询的效率并没有明显的变化，实际上这两个 SQL 查询的时间基本上一样，就是因为采用了顺序读取的方式将页面一次性加载到缓冲池中，然后再进行查找。<strong>虽然页数量（last_query_cost）增加了不少，但是通过缓冲池的机制，并没有增加多少查询时间。</strong></p>
+<p><img src="/2022/04/24/MySQL_%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90_01%E7%B3%BB%E7%BB%9F%E6%80%A7%E8%83%BD%E5%8F%82%E6%95%B0/image-20220424154133541.png" alt="image-20220424154133541" style="zoom:67%;"></p>
+<p>经常使用的数据放在缓冲池中，同时通过批量读取减少查询时间。</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/04/22/MySQL_%E7%B4%A2%E5%BC%95_03%E7%B4%A2%E5%BC%95%E7%9A%84%E9%80%82%E7%94%A8%E6%83%85%E5%86%B5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BIOINSu">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BIOINSu">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2022/04/22/MySQL_%E7%B4%A2%E5%BC%95_03%E7%B4%A2%E5%BC%95%E7%9A%84%E9%80%82%E7%94%A8%E6%83%85%E5%86%B5/" class="post-title-link" itemprop="url">MySQL 索引的分类与创建</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-04-22 21:27:29" itemprop="dateCreated datePublished" datetime="2022-04-22T21:27:29+08:00">2022-04-22</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2022-04-24 14:25:31" itemprop="dateModified" datetime="2022-04-24T14:25:31+08:00">2022-04-24</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/" itemprop="url" rel="index"><span itemprop="name">数据库</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/MySQL/" itemprop="url" rel="index"><span itemprop="name">MySQL</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h3 id="适合使用索引的情况">适合使用索引的情况</h3>
+<table>
+<colgroup>
+<col style="width: 46%">
+<col style="width: 53%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>概念</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>字段的值有唯一性的限制</td>
+<td>此时应该添加唯一性约束或唯一索引，二者取其一即可。<br>业务上具有唯一特性的字段，即使是组合字段，也必须建成唯一索引。<br>不要认为唯一索引影响了 insert 速度，这个速度损耗可以忽略，但提高查找速度是明显的。</td>
+</tr>
+<tr class="even">
+<td>频繁作为 WHERE 查询条件的字段</td>
+<td>创建普通索引就可以大幅提升数据查询的效率。</td>
+</tr>
+<tr class="odd">
+<td>经常 GROUP BY 和 ORDER BY 的列</td>
+<td>注意，SQL执行的时候是先执行GROUP BY后执行ORDER BY。因此，添加索引时注意顺序。<br>可以先添加由GROUP BY字段在前，ORDER BY字段在后的<strong>联合索引</strong>，能大幅提升查询性能。</td>
+</tr>
+<tr class="even">
+<td>UPDATE、DELETE 的 WHERE 条件列</td>
+<td>对数据按照某个条件进行查询后再进行 UPDATE 或 DELETE 的操作，如果对 WHERE 字段创建了索引，就能大幅提升效率。<br>原理是因为我们需要先根据 WHERE 条件列检索出来这条记录，然后再对它进行更新或删除。<br>如果进行更新的时候，更新的字段是非索引字段，提升的效率会更明显，这是因为<strong>非索引字段更新不需要对索引进行维护</strong>。</td>
+</tr>
+<tr class="odd">
+<td>DISTINCT 字段需要创建索引</td>
+<td>数据已经排序，去重的时候会很方便，因为相同的数据会聚集在一起。</td>
+</tr>
+<tr class="even">
+<td>多表 JOIN 连接操作时，对on以及where之后的字段创建索引</td>
+<td>对 WHERE 条件创建索引，因为 WHERE 才是对数据条件的过滤。如果在数据量非常大的情况下，过滤数据更高效。<br>对ON后用于连接的字段创建索引，并且该字段在多张表中的类型必须一致。因为不一致的话会使用函数进行隐式转换，索引上使用函数会导致索引失效。</td>
+</tr>
+<tr class="odd">
+<td>使用列的类型小的创建索引</td>
+<td>有TINYINT就不要用INT，占据空间更小。</td>
+</tr>
+<tr class="even">
+<td>使用字符串前缀创建索引</td>
+<td>select count(distinct left(列名, 索引长度))/count(*)<br>计算区分度，选择一定的前缀创建索引即可。既保持高效查询，又避免占据太多空间，同时一个页上放的数据也更多。<br>Alibaba指南：在 varchar 字段上建立索引时，必须指定索引长度，没必要对全字段建立索引，根据实际文本区分度决定索引长度。长度为 20 的索引，区分度会高达90% 以上。</td>
+</tr>
+<tr class="odd">
+<td>区分度高(散列性高)的列适合作为索引</td>
+<td><img src="/2022/04/22/MySQL_%E7%B4%A2%E5%BC%95_03%E7%B4%A2%E5%BC%95%E7%9A%84%E9%80%82%E7%94%A8%E6%83%85%E5%86%B5/image-20220424142336597.png" alt="image-20220424142336597"></td>
+</tr>
+<tr class="even">
+<td>使用最频繁的列放到联合索引的左侧</td>
+<td>这样也可以较少的建立一些索引。同时，由于"最左前缀原则"，可以增加联合索引的使用率。</td>
+</tr>
+<tr class="odd">
+<td>在多个字段都要创建索引的情况下，联合索引优于单值索引</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2022/04/22/MySQL_%E7%B4%A2%E5%BC%95_03%E7%B4%A2%E5%BC%95%E7%9A%84%E9%80%82%E7%94%A8%E6%83%85%E5%86%B5/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/04/20/MySQL_%E7%B4%A2%E5%BC%95_02%E7%B4%A2%E5%BC%95%E7%9A%84%E5%88%86%E7%B1%BB%E4%B8%8E%E5%88%9B%E5%BB%BA/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BIOINSu">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BIOINSu">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2022/04/20/MySQL_%E7%B4%A2%E5%BC%95_02%E7%B4%A2%E5%BC%95%E7%9A%84%E5%88%86%E7%B1%BB%E4%B8%8E%E5%88%9B%E5%BB%BA/" class="post-title-link" itemprop="url">MySQL 索引的分类与创建</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-04-20 21:20:24" itemprop="dateCreated datePublished" datetime="2022-04-20T21:20:24+08:00">2022-04-20</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2022-04-21 22:14:56" itemprop="dateModified" datetime="2022-04-21T22:14:56+08:00">2022-04-21</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/" itemprop="url" rel="index"><span itemprop="name">数据库</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/MySQL/" itemprop="url" rel="index"><span itemprop="name">MySQL</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <a id="more"></a>
+<h3 id="索引的分类">索引的分类</h3>
+<h4 id="按照功能划分">按照功能划分</h4>
+<p>从功能逻辑上说，索引主要有 4 种，分别是普通索引、唯一索引、主键索引、全文索引。</p>
+<p><img src="/2022/04/20/MySQL_%E7%B4%A2%E5%BC%95_02%E7%B4%A2%E5%BC%95%E7%9A%84%E5%88%86%E7%B1%BB%E4%B8%8E%E5%88%9B%E5%BB%BA/image-20220420212210772.png" alt="image-20220420212210772" style="zoom:67%;"></p>
+<p><img src="/2022/04/20/MySQL_%E7%B4%A2%E5%BC%95_02%E7%B4%A2%E5%BC%95%E7%9A%84%E5%88%86%E7%B1%BB%E4%B8%8E%E5%88%9B%E5%BB%BA/image-20220420212318954.png" alt="image-20220420212318954" style="zoom:67%;"></p>
+<p>因为数据存储在文件中只能按照一种顺序进行存储，因此最多只能有一个主键索引，数据文件按照主键来进行组织。</p>
+<p><img src="/2022/04/20/MySQL_%E7%B4%A2%E5%BC%95_02%E7%B4%A2%E5%BC%95%E7%9A%84%E5%88%86%E7%B1%BB%E4%B8%8E%E5%88%9B%E5%BB%BA/image-20220420213141724.png" alt="image-20220420213141724" style="zoom:67%;"></p>
+<p><img src="/2022/04/20/MySQL_%E7%B4%A2%E5%BC%95_02%E7%B4%A2%E5%BC%95%E7%9A%84%E5%88%86%E7%B1%BB%E4%B8%8E%E5%88%9B%E5%BB%BA/image-20220420213235627.png" alt="image-20220420213235627" style="zoom:67%;"></p>
+<h4 id="按照物理实现方式划分">按照物理实现方式划分</h4>
+<p>聚簇索引和非聚簇索引。</p>
+<h4 id="按照作用字段个数进行划分">按照作用字段个数进行划分</h4>
+<p>按照作用字段个数进行划分，分成单列索引和联合索引。</p>
+<p><img src="/2022/04/20/MySQL_%E7%B4%A2%E5%BC%95_02%E7%B4%A2%E5%BC%95%E7%9A%84%E5%88%86%E7%B1%BB%E4%B8%8E%E5%88%9B%E5%BB%BA/image-20220420212754947.png" alt="image-20220420212754947" style="zoom:67%;"></p>
+<p><img src="/2022/04/20/MySQL_%E7%B4%A2%E5%BC%95_02%E7%B4%A2%E5%BC%95%E7%9A%84%E5%88%86%E7%B1%BB%E4%B8%8E%E5%88%9B%E5%BB%BA/image-20220420212834657.png" alt="image-20220420212834657" style="zoom:67%;"></p>
+<h4 id="数据库引擎支持的索引">数据库引擎支持的索引</h4>
+<p><img src="/2022/04/20/MySQL_%E7%B4%A2%E5%BC%95_02%E7%B4%A2%E5%BC%95%E7%9A%84%E5%88%86%E7%B1%BB%E4%B8%8E%E5%88%9B%E5%BB%BA/image-20220420213321502.png" alt="image-20220420213321502" style="zoom:67%;"></p>
+<h3 id="索引的创建">索引的创建</h3>
+<h4 id="创建表时创建">创建表时创建</h4>
+<h5 id="隐式创建">隐式创建</h5>
+<p>在添加主键约束、唯一性约束、外键约束时，索引会被自动创建。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE dept(</span><br><span class="line">dept_id INT PRIMARY KEY AUTO_INCREMENT, #主键约束，创建主键索引</span><br><span class="line">dept_name VARCHAR(20)</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line">CREATE TABLE emp(</span><br><span class="line">emp_id INT PRIMARY KEY AUTO_INCREMENT, #主键约束，创建主键索引</span><br><span class="line">emp_name VARCHAR(20) UNIQUE, #唯一性约束，创建唯一性索引</span><br><span class="line">dept_id INT,</span><br><span class="line">CONSTRAINT emp_dept_id_fk FOREIGN KEY(dept_id) REFERENCES dept(dept_id) #外键约束，创建外键索引</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+<h5 id="显式创建">显式创建</h5>
+<p>显式创建索引的语法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE table_name [col_name data_type]</span><br><span class="line">[UNIQUE | FULLTEXT | SPATIAL] [INDEX | KEY] [index_name] (col_name [length]) [ASC |</span><br><span class="line">DESC]</span><br></pre></td></tr></table></figure>
+<ul>
+<li><p>UNIQUE 、FULLTEXT 和SPATIAL 为可选参数，分别表示唯一索引、全文索引和空间索引；</p></li>
+<li><p>INDEX 与KEY 为同义词，两者的作用相同，用来指定创建索引；</p></li>
+<li><p>index_name 指定索引的名称，为可选参数，如果不指定，那么MySQL默认col_name为索引名；</p></li>
+<li><p>col_name 为需要创建索引的字段列，该列必须从数据表中定义的多个列中选择；</p></li>
+<li><p>length 为可选参数，表示索引的长度，只有字符串类型的字段才能指定索引长度；</p></li>
+<li><p>ASC 或DESC 指定升序或者降序的索引值存储。</p></li>
+</ul>
+<h5 id="普通索引">普通索引</h5>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE book(</span><br><span class="line">    book_id INT ,</span><br><span class="line">    book_name VARCHAR(100),</span><br><span class="line">    authors VARCHAR(100),</span><br><span class="line">    info VARCHAR(100) ,</span><br><span class="line">    comment VARCHAR(100),</span><br><span class="line">    year_publication YEAR,</span><br><span class="line">    INDEX(year_publication)</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+<h5 id="唯一索引">唯一索引</h5>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE test1(</span><br><span class="line">    id INT NOT NULL,</span><br><span class="line">    name varchar(30) NOT NULL,</span><br><span class="line">    UNIQUE INDEX uk_idx_id(id)</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+<p>该语句执行完毕之后，可以在MySQL客户端中使用SHOW CREATE TABLE查看表结构：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SHOW INDEX FROM test1 \G</span><br></pre></td></tr></table></figure>
+<h5 id="主键索引">主键索引</h5>
+<p>设定为主键后数据库会自动建立索引，innodb为聚簇索引</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE student (</span><br><span class="line">    id INT(10) UNSIGNED AUTO_INCREMENT ,</span><br><span class="line">    student_no VARCHAR(200),</span><br><span class="line">    student_name VARCHAR(200),</span><br><span class="line">    PRIMARY KEY(id)</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+<p>删除主键索引：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ALTER TABLE student</span><br><span class="line">drop PRIMARY KEY ;</span><br></pre></td></tr></table></figure>
+<p>修改主键索引：必须先删除掉(drop)原索引，再新建(add)索引。</p>
+<h5 id="联合索引">联合索引</h5>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE test3(</span><br><span class="line">    id INT(11) NOT NULL,</span><br><span class="line">    name CHAR(30) NOT NULL,</span><br><span class="line">    age INT(11) NOT NULL,</span><br><span class="line">    info VARCHAR(255),</span><br><span class="line">    INDEX multi_idx(id,name,age)</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+<h5 id="全文索引">全文索引</h5>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"># 在MySQL5.7及之后版本中可以不指定最后的ENGINE了，因为在此版本中InnoDB支持全文索引。</span><br><span class="line">CREATE TABLE &#96;papers&#96; (</span><br><span class="line">    &#96;id&#96; int(10) unsigned NOT NULL AUTO_INCREMENT,</span><br><span class="line">    &#96;title&#96; varchar(200) DEFAULT NULL,</span><br><span class="line">    &#96;content&#96; text,</span><br><span class="line">    PRIMARY KEY (&#96;id&#96;),</span><br><span class="line">    FULLTEXT KEY &#96;title&#96; (&#96;title&#96;,&#96;content&#96;)</span><br><span class="line">) ENGINE&#x3D;MyISAM DEFAULT CHARSET&#x3D;utf8;</span><br><span class="line"></span><br><span class="line"># 不同于like方式的的查询：</span><br><span class="line">SELECT * FROM papers WHERE content LIKE ‘%查询字符串%’;</span><br><span class="line"></span><br><span class="line"># 全文索引用match+against方式查询：</span><br><span class="line">SELECT * FROM papers WHERE MATCH(title,content) AGAINST (‘查询字符串’);</span><br><span class="line"></span><br><span class="line"># 全文索引比 like + % 快 N 倍，但是可能存在精度问题；</span><br><span class="line"># 如果需要全文索引的是大量数据，建议先添加数据，再创建索引。</span><br></pre></td></tr></table></figure>
+<h5 id="空间索引">空间索引</h5>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># 空间索引创建中，要求空间类型的字段必须为非空。</span><br><span class="line">CREATE TABLE test5(</span><br><span class="line">    geo GEOMETRY NOT NULL,</span><br><span class="line">    SPATIAL INDEX spa_idx_geo(geo)</span><br><span class="line">) ENGINE&#x3D;MyISAM;</span><br></pre></td></tr></table></figure>
+<h4 id="创建表后创建">创建表后创建</h4>
+<p>在已经存在的表中创建索引可以使用ALTER TABLE语句或者CREATE INDEX语句。</p>
+<ul>
+<li><p>使用ALTER TABLE语句创建索引 ALTER TABLE语句创建索引的基本语法如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ALTER TABLE table_name </span><br><span class="line">ADD [UNIQUE | FULLTEXT | SPATIAL] [INDEX | KEY] [index_name] (col_name[length],...) </span><br><span class="line">[ASC | DESC]</span><br></pre></td></tr></table></figure></li>
+<li><p>使用CREATE INDEX创建索引 CREATE INDEX语句可以在已经存在的表上添加索引，在MySQL中，CREATE INDEX被映射到一个ALTER TABLE语句上，基本语法结构为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">CREATE [UNIQUE | FULLTEXT | SPATIAL] INDEX index_name</span><br><span class="line">ON table_name (col_name[length],...) </span><br><span class="line">[ASC | DESC]</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="索引的删除">索引的删除</h3>
+<p>删除表中的列时，如果要删除的列为索引的组成部分，则该列也会从索引中删除。</p>
+<p>如果组成索引的所有列都被删除，则整个索引将被删除。</p>
+<ul>
+<li><p>使用ALTER TABLE删除索引 ALTER TABLE删除索引的基本语法格式如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ALTER TABLE table_name DROP INDEX index_name;</span><br></pre></td></tr></table></figure></li>
+<li><p>使用DROP INDEX语句删除索引 DROP INDEX删除索引的基本语法格式如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DROP INDEX index_name ON table_name;</span><br></pre></td></tr></table></figure>
+<p><img src="/2022/04/20/MySQL_%E7%B4%A2%E5%BC%95_02%E7%B4%A2%E5%BC%95%E7%9A%84%E5%88%86%E7%B1%BB%E4%B8%8E%E5%88%9B%E5%BB%BA/image-20220421211245537.png" alt="image-20220421211245537" style="zoom:67%;"></p></li>
+</ul>
+<p><img src="/2022/04/20/MySQL_%E7%B4%A2%E5%BC%95_02%E7%B4%A2%E5%BC%95%E7%9A%84%E5%88%86%E7%B1%BB%E4%B8%8E%E5%88%9B%E5%BB%BA/image-20220421211343477.png" alt="image-20220421211343477" style="zoom:67%;"></p>
+<h3 id="mysql-8.0新特性">MySQL 8.0新特性</h3>
+<h4 id="降序索引">降序索引</h4>
+<p>MySQL 8.0之前，DESC是无法起作用的，所有的索引依然按照升序排列。</p>
+<p>MySQL 8.0之后，支持DESC降序排列索引。</p>
+<p>降序索引只对查询中<strong>特定的排序顺序</strong>（例如ORDER BY column DESC）有效，如果使用不当，反而查询效率更低。</p>
+<h4 id="隐藏索引">隐藏索引</h4>
+<p>在MySQL 5.7版本及之前，只能通过显式的方式删除索引。</p>
+<p>从MySQL 8.x开始支持隐藏索引（invisible indexes） ，<strong>将待删除的索引设置为隐藏索引后，普通查询和查询优化器都不再使用这个索引进行数据的查找</strong>（即使使用force index（强制使用索引），优化器也不会使用该索引）。</p>
+<p>确认将索引设置为隐藏索引后系统不受任何响应，就可以彻底删除索引。这种通过先将索引设置为隐藏索引，再删除索引的方式就是软删除。</p>
+<p>注意 当索引被隐藏时，它的内容仍然是和正常索引一样实时更新的。如果一个索引需要长期被隐藏，那么可以将其删除，因为索引的存在会影响插入、更新和删除的性能。</p>
+<p><strong>通过设置隐藏索引的可见性可以查看索引对调优的帮助。</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"># 创建表时直接创建：在MySQL中创建隐藏索引通过SQL语句INVISIBLE来实现</span><br><span class="line">CREATE TABLE tablename(</span><br><span class="line">    propname1 type1[CONSTRAINT1],</span><br><span class="line">    propname2 type2[CONSTRAINT2],</span><br><span class="line">    ……</span><br><span class="line">    propnamen typen,</span><br><span class="line">    INDEX [indexname](propname1 [(length)]) INVISIBLE</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"># 在已经存在的表上创建</span><br><span class="line">CREATE INDEX indexname</span><br><span class="line">ON tablename(propname[(length)]) INVISIBLE;</span><br><span class="line"></span><br><span class="line">ALTER TABLE tablename</span><br><span class="line">ADD INDEX indexname (propname [(length)]) INVISIBLE;</span><br><span class="line"></span><br><span class="line"># 切换索引可见状态</span><br><span class="line">ALTER TABLE tablename ALTER INDEX index_name INVISIBLE; #切换成隐藏索引</span><br><span class="line">ALTER TABLE tablename ALTER INDEX index_name VISIBLE; #切换成非隐藏索引</span><br><span class="line"></span><br><span class="line"># 使隐藏索引对查询优化器可见</span><br><span class="line">#在MySQL 8.x版本中，为索引提供了一种新的测试方式，可以通过查询优化器的一个开关（use_invisible_indexes）来打开某个设置，使隐藏索引对查询优化器可见。</span><br><span class="line">#如果use_invisible_indexes设置为off(默认)，优化器会忽略隐藏索引。如果设置为on，即使隐藏索引不可见，优化器在生成执行计划时仍会考虑使用隐藏索引。</span><br><span class="line"></span><br><span class="line">#在MySQL命令行执行如下命令查看查询优化器的开关设置。</span><br><span class="line">mysql&gt; select @@optimizer_switch \G</span><br><span class="line">#在输出的结果信息中找到如下属性配置，此属性配置值为off，说明隐藏索引默认对查询优化器不可见</span><br><span class="line">use_invisible_indexes&#x3D;off</span><br><span class="line"># 使隐藏索引对查询优化器可见，需要在MySQL命令行执行如下命令</span><br><span class="line">mysql&gt; set session optimizer_switch&#x3D;&quot;use_invisible_indexes&#x3D;on&quot;;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h3 id="参考资料">参考资料</h3>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1369,459 +1926,6 @@
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2022/03/19/MySQL_%E4%BA%8B%E5%8A%A1%E6%97%A5%E5%BF%97/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/03/18/MySQL_%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="BIOINSu">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BIOINSu">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2022/03/18/MySQL_%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB/" class="post-title-link" itemprop="url">MySQL事务隔离级别</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2022-03-18 19:55:01" itemprop="dateCreated datePublished" datetime="2022-03-18T19:55:01+08:00">2022-03-18</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2022-03-23 14:57:58" itemprop="dateModified" datetime="2022-03-23T14:57:58+08:00">2022-03-23</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/" itemprop="url" rel="index"><span itemprop="name">数据库</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/MySQL/" itemprop="url" rel="index"><span itemprop="name">MySQL</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <table>
-<thead>
-<tr class="header">
-<th>概念</th>
-<th>解释</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td></td>
-<td></td>
-</tr>
-<tr class="even">
-<td></td>
-<td></td>
-</tr>
-<tr class="odd">
-<td></td>
-<td></td>
-</tr>
-</tbody>
-</table>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2022/03/18/MySQL_%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/03/17/MySQL_%E4%BA%8B%E5%8A%A1/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="BIOINSu">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BIOINSu">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2022/03/17/MySQL_%E4%BA%8B%E5%8A%A1/" class="post-title-link" itemprop="url">MySQL事务</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-      
-
-      <time title="创建时间：2022-03-17 19:32:37 / 修改时间：20:52:07" itemprop="dateCreated datePublished" datetime="2022-03-17T19:32:37+08:00">2022-03-17</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/" itemprop="url" rel="index"><span itemprop="name">数据库</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/MySQL/" itemprop="url" rel="index"><span itemprop="name">MySQL</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <table>
-<thead>
-<tr class="header">
-<th>概念</th>
-<th>解释</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td></td>
-<td></td>
-</tr>
-<tr class="even">
-<td></td>
-<td></td>
-</tr>
-<tr class="odd">
-<td></td>
-<td></td>
-</tr>
-</tbody>
-</table>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2022/03/17/MySQL_%E4%BA%8B%E5%8A%A1/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/03/17/CSAPP_01_%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="BIOINSu">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BIOINSu">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2022/03/17/CSAPP_01_%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/" class="post-title-link" itemprop="url">CSAPP 01 计算机系统概述</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2022-03-17 10:38:12" itemprop="dateCreated datePublished" datetime="2022-03-17T10:38:12+08:00">2022-03-17</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2022-03-19 11:22:26" itemprop="dateModified" datetime="2022-03-19T11:22:26+08:00">2022-03-19</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" itemprop="url" rel="index"><span itemprop="name">操作系统</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/CSAPP/" itemprop="url" rel="index"><span itemprop="name">CSAPP</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <table>
-<thead>
-<tr class="header">
-<th>概念</th>
-<th>解释</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>程序生命周期</td>
-<td>创建、编译、运行、退出</td>
-</tr>
-<tr class="even">
-<td>编译过程</td>
-<td>预处理（头文件插入）、编译（词法分析等）、汇编（汇编转机器指令）、链接（插入库函数）</td>
-</tr>
-<tr class="odd">
-<td>编译过程使用场景</td>
-<td>优化程序性能、解决链接错误、安全漏洞</td>
-</tr>
-<tr class="even">
-<td>硬件组成</td>
-<td>CPU（PC、Reg、ALU）、内存、总线、IO设备</td>
-</tr>
-<tr class="odd">
-<td>存储设备</td>
-<td>寄存器、L1、L2、L3、内存、硬盘、远程服务器（由内而外，越来越慢）</td>
-</tr>
-<tr class="even">
-<td>程序执行流程</td>
-<td>1.命令读入寄存器 2.程序从磁盘加载入内存 3.CPU从内存读数据计算 4.数据从内存到寄存器再到IO设备</td>
-</tr>
-<tr class="odd">
-<td>操作系统</td>
-<td>在计算机硬件和应用程序之间提供通用服务的系统软件。</td>
-</tr>
-<tr class="even">
-<td></td>
-<td></td>
-</tr>
-</tbody>
-</table>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2022/03/17/CSAPP_01_%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/03/16/CSAPP_00_%E7%BB%AA%E8%AE%BA/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="BIOINSu">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BIOINSu">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2022/03/16/CSAPP_00_%E7%BB%AA%E8%AE%BA/" class="post-title-link" itemprop="url">CSAPP 00 绪论</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2022-03-16 21:19:33" itemprop="dateCreated datePublished" datetime="2022-03-16T21:19:33+08:00">2022-03-16</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2022-03-17 10:40:16" itemprop="dateModified" datetime="2022-03-17T10:40:16+08:00">2022-03-17</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" itemprop="url" rel="index"><span itemprop="name">操作系统</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/CSAPP/" itemprop="url" rel="index"><span itemprop="name">CSAPP</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>CSAPP，其全称为《Computer System : A Programer Perspective》，即程序员视角下的计算机系统。</p>
-<p>大约涵盖计算机组成 + 操作系统 + 汇编 + C语言 + Linux系统编程。</p>
-<p>主要内容包括：</p>
-<ul>
-<li>信息表示（如何使用二进制表示整型、浮点数等）</li>
-<li>C 和汇编语言的学习（通过汇编语言更深入地理解C语言是什么）</li>
-<li>计算机体系结构（存储层次结构、局部性原理、处理器体系结构）</li>
-<li>编译链接（C语言如何从文本变成可执行文件、静态链接、动态链接）</li>
-<li>操作系统的使用（异常控制流、虚拟内存、多个系统调用介绍）</li>
-<li>网络及并发编程（并发的基本概念、网络相关的系统调用的介绍）。</li>
-</ul>
-<p>学习该课程的目的主要是再回顾一下计算机的整个体系，巩固计算机基础知识，在工作上用途不是特别大，但是仍然需要了解。</p>
-<p>因此，学习方式主要以B站up主<a target="_blank" rel="noopener" href="https://space.bilibili.com/354767108?from=search&amp;seid=5169803745574715384&amp;spm_id_from=333.337.0.0">九曲阑干</a>的视频为主，辅以其他的资料。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2022/03/16/CSAPP_00_%E7%BB%AA%E8%AE%BA/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
